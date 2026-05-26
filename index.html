@@ -12,7 +12,29 @@
         label { font-weight: bold; display: block; margin-top: 10px; }
         input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
         input[readonly] { background-color: #e9ecef; }
-        #canvas-firma { border: 2px dashed #34495e; background: #fff; border-radius: 4px; margin-top: 5px; cursor: crosshair; touch-action: none; }
+        
+        /* 🛠️ OPTIMIZACIÓN RESPONSIVA PARA EL CONTENEDOR DE LA FIRMA */
+        .contenedor-canvas-firma {
+            width: 100%;
+            margin-top: 5px;
+            position: relative;
+            background: #fff;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        #canvas-firma { 
+            border: 2px dashed #34495e; 
+            background: #fff; 
+            border-radius: 4px; 
+            cursor: crosshair; 
+            touch-action: none; 
+            display: block;
+            width: 100% !important; /* Fuerza al cuadro a adaptarse al ancho del celular */
+            height: 200px !important; /* Mantiene una altura cómoda en móviles */
+            box-sizing: border-box;
+        }
+
         button { width: 100%; background: #27ae60; color: white; padding: 12px; border: none; border-radius: 4px; font-size: 16px; margin-top: 15px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
         button:hover { background: #219150; }
         .btn-clear { background: #e74c3c; margin-top: 5px; padding: 5px; font-size: 12px; }
@@ -80,7 +102,9 @@
         </div>
 
         <label>Firma del Cliente:</label>
-        <canvas id="canvas-firma" width="460" height="200"></canvas>
+        <div class="contenedor-canvas-firma">
+            <canvas id="canvas-firma"></canvas>
+        </div>
         <button type="button" class="btn-clear" onclick="limpiarFirma()">Borrar Firma</button>
 
         <input type="hidden" id="firmaBase64" name="firmaBase64">
@@ -119,6 +143,9 @@
             document.getElementById('semanastol').value = cacheEcosistema.config.semanastol;
             
             document.getElementById('loadMsg').style.display = 'none';
+            
+            // Forzar calibración del lienzo al cargar la página
+            resizeCanvas();
         } catch (err) {
             document.getElementById('loadMsg').innerText = "❌ Error de sincronización con CelYa.";
             console.error(err);
@@ -146,14 +173,39 @@
     const ctx = canvas.getContext('2d'); 
     let dibujando = false;
 
+    // 🛠️ AJUSTE TÉCNICO VITAL: Función para ajustar la escala interna del canvas según el tamaño real en pantalla
+    function resizeCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        // Evita recalibrar a 0 si el elemento no se ha cargado bien
+        if (rect.width > 0) {
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+    }
+    // Escucha si el celular gira o cambia de tamaño para mantener las dimensiones perfectas
+    window.addEventListener('resize', resizeCanvas);
+
+    // 🛠️ CORRECCIÓN DE COORDENADAS: Calcula la posición exacta basándose en la escala real del bounding box
     function obtenerPosicion(e) { 
         const rect = canvas.getBoundingClientRect(); 
         const clientX = e.touches ? e.touches[0].clientX : e.clientX; 
         const clientY = e.touches ? e.touches[0].clientY : e.clientY; 
-        return { x: clientX - rect.left, y: clientY - rect.top }; 
+        
+        // Multiplicamos por la resolución interna dividida entre el tamaño visual en pantalla
+        return { 
+            x: (clientX - rect.left) * (canvas.width / rect.width), 
+            y: (clientY - rect.top) * (canvas.height / rect.height) 
+        }; 
     }
     
-    canvas.addEventListener('mousedown', (e) => { dibujando = true; ctx.beginPath(); const p = obtenerPosicion(e); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener('mousedown', (e) => { 
+        if (canvas.width === 0 || canvas.height === 0) resizeCanvas(); // Doble seguro por si no cargó a tiempo
+        dibujando = true; 
+        ctx.beginPath(); 
+        const p = obtenerPosicion(e); 
+        ctx.moveTo(p.x, p.y); 
+    });
+    
     canvas.addEventListener('mousemove', (e) => { 
         if(!dibujando) return; 
         e.preventDefault(); 
@@ -166,7 +218,14 @@
     });
     canvas.addEventListener('mouseup', () => dibujando = false);
     
-    canvas.addEventListener('touchstart', (e) => { dibujando = true; ctx.beginPath(); const p = obtenerPosicion(e); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener('touchstart', (e) => { 
+        if (canvas.width === 0 || canvas.height === 0) resizeCanvas();
+        dibujando = true; 
+        ctx.beginPath(); 
+        const p = obtenerPosicion(e); 
+        ctx.moveTo(p.x, p.y); 
+    });
+    
     canvas.addEventListener('touchmove', (e) => { 
         if(!dibujando) return; 
         e.preventDefault(); 
@@ -242,6 +301,15 @@
         if (domCompleto === "") { mostrarErrorEnBoton("La Dirección es obligatoria"); return; }
         if (!ineDelanteraB64 || ineDelanteraB64 === "") { mostrarErrorEnBoton("Falta capturar la foto de la INE Frontal"); return; }
         if (!ineTraseraB64 || ineTraseraB64 === "") { mostrarErrorEnBoton("Falta capturar la foto de la INE Reverso"); return; }
+
+        // Validación básica de si el lienzo está en blanco antes de enviar
+        const lienzoVacio = document.createElement('canvas');
+        lienzoVacio.width = canvas.width;
+        lienzoVacio.height = canvas.height;
+        if (canvas.toDataURL() === lienzoVacio.toDataURL()) {
+            mostrarErrorEnBoton("Por favor, pídale al cliente que firme el contrato.");
+            return;
+        }
 
         btn.innerText = "⏳ Guardando Contrato y Subiendo INEs...";
         btn.style.background = "#d35400"; 
