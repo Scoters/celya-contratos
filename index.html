@@ -20,9 +20,10 @@
             background: #fff;
             border: 2px dashed #95a5a6;
             border-radius: 6px;
-            cursor: crosshair;
+            box-sizing: border-box;
         }
-        canvas { display: block; width: 100%; height: 180px; }
+        /* El canvas ocupa el 100% del contenedor por CSS, pero su tamaño nativo se escala por JavaScript */
+        canvas { display: block; width: 100% !important; height: 180px !important; cursor: crosshair; background: #fafafa; border-radius: 4px; }
         
         .botones-firma { display: flex; gap: 10px; margin-top: 8px; }
         .btn-limpiar { background-color: #7f8c8d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
@@ -40,6 +41,21 @@
 <div class="container">
     <h2>📱 Registro de Contrato CelYa</h2>
     <form id="contratoForm">
+        <label>Nombre del Cliente:</label>
+        <input type="text" name="cliente" required placeholder="Ej. Juan Pérez">
+
+        <label>Teléfono Celular:</label>
+        <input type="tel" name="telefono" required placeholder="10 dígitos">
+
+        <label>Fecha de Nacimiento:</label>
+        <input type="date" name="fechaNacimiento" required>
+
+        <label>Dirección Completa:</label>
+        <textarea name="direccion" rows="2" required placeholder="Calle, Número, Colonia, Municipio"></textarea>
+
+        <label>Teléfono de Aval / Referencia:</label>
+        <input type="tel" name="telefonoAval" required placeholder="10 dígitos">
+
         <label>Seleccionar Celular de Inventario:</label>
         <select id="selectDispositivo" name="imei" required>
             <option value="">⏳ Cargando equipos disponibles...</option>
@@ -64,21 +80,6 @@
         <input type="text" id="totalFinanciadoDisplay" name="totalFinanciado" readonly>
         
         <input type="hidden" id="totalLetraHidden" name="totalLetra">
-
-        <label>Nombre del Cliente:</label>
-        <input type="text" name="cliente" required placeholder="Ej. Juan Pérez">
-
-        <label>Teléfono Celular:</label>
-        <input type="tel" name="telefono" required placeholder="10 dígitos">
-
-        <label>Fecha de Nacimiento:</label>
-        <input type="date" name="fechaNacimiento" required>
-
-        <label>Dirección Completa:</label>
-        <textarea name="direccion" rows="2" required placeholder="Calle, Número, Colonia, Municipio"></textarea>
-
-        <label>Teléfono de Aval / Referencia:</label>
-        <input type="tel" name="telefonoAval" required placeholder="10 dígitos">
 
         <label>🪪 INE Frontal (Fotografía):</label>
         <input type="file" id="ineDelanteraInput" accept="image/*" required>
@@ -115,26 +116,35 @@
     const ctx = canvas.getContext('2d');
     let dibujando = false;
 
+    // 🚀 LÓGICA DE ALTA DEFINICIÓN (HD): Escala los píxeles internos según la densidad de la pantalla del celular
     function redimensionarCanvas() {
         const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-        ctx.lineWidth = 3;
-        ctx.lineCap = "round";
-        ctx.strokeStyle = "#2c3e50";
+        if (rect.width > 0) {
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = rect.width * ratio;
+            canvas.height = 180 * ratio; // Mantiene la proporción interna fija
+            ctx.scale(ratio, ratio);     // Normaliza las coordenadas del pincel
+            
+            // Re-establecemos los estilos de trazo tras alterar las dimensiones nativas del canvas
+            ctx.lineWidth = 3;
+            ctx.lineCap = "round";
+            ctx.strokeStyle = "#2c3e50";
+        }
     }
 
-    window.addEventListener('resize', redimensionarCanvas);
-
+    // Traduce las posiciones relativas para que el pincel pinte justo debajo del dedo/mouse sin desfases en HD
     function obtenerPosicionMouse(e) {
         const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         return {
-            x: (e.clientX || e.touches[0].clientX) - rect.left,
-            y: (e.clientY || e.touches[0].clientY) - rect.top
+            x: clientX - rect.left,
+            y: clientY - rect.top
         };
     }
 
     function arrancarDibujo(e) {
+        if (canvas.width === 0 || canvas.height === 0) redimensionarCanvas();
         dibujando = true;
         const pos = obtenerPosicionMouse(e);
         ctx.beginPath();
@@ -194,11 +204,11 @@
     procesarArchivoABase64(document.getElementById('ineDelanteraInput'), 'previewDelantera', (b64) => { ineDelanteraB64 = b64; });
     procesarArchivoABase64(document.getElementById('ineTraseraInput'), 'previewTrasera', (b64) => { ineTraseraB64 = b64; });
 
-    // 🔒 CARGA INICIAL AUTENTICADA POR PARAMETRO URL
     window.onload = async function() {
         redimensionarCanvas();
+        window.addEventListener('resize', redimensionarCanvas);
+        
         try {
-            // Se inyecta la autenticación obligatoria via token en la consulta GET
             const urlAutenticada = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}`;
             const res = await fetch(urlAutenticada);
             const data = await res.json();
@@ -270,7 +280,6 @@
             const formularioElemento = document.getElementById('contratoForm');
             const sheetData = new URLSearchParams(new FormData(formularioElemento));
             
-            // 🔒 AGREGAR VERIFICACIÓN TOKEN EN LA PETICIÓN POST
             sheetData.append('token', CONFIG.API_TOKEN);
             sheetData.append('firmaBase64', canvas.toDataURL());
             sheetData.append('ineDelanteraBase64', ineDelanteraB64);
