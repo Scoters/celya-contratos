@@ -86,44 +86,52 @@
 </div>
 
 <script>
-    // Guardamos los datos mapeados de los clientes de forma local tras la carga remota
     let listaClientesLocales = [];
 
-    // 1. CARGA INICIAL: Traer Configuración e Inyectar Clientes Activos en el Select descriptivo
-    window.onload = async function() {
+    // Carga síncrona idéntica a la lógica exitosa de index.html 🚀
+    async function cargarDatosDashboard() {
         try {
-            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL);
-            const data = await res.json();
-            
-            // Inyectar datos en el formulario de configuración global
-            document.getElementById('interes').value = data.config.interes;
-            document.getElementById('horastol').value = data.config.horastol;
-            document.getElementById('semanastol').value = data.config.semanastol;
-            
-            // Respaldar y procesar la lista de clientes activos
-            listaClientesLocales = data.clientesActivos || [];
-            const select = document.getElementById('selectCliente');
-            select.innerHTML = '<option value="">-- Elige Cliente - Modelo (IMEI) --</option>';
-            
-            listaClientesLocales.forEach((item, index) => {
-                let opt = document.createElement('option');
-                opt.value = index; // Usamos el índice para recuperar el objeto completo después
-                opt.textContent = item.etiquetaCompleta; // Nombre - Modelo (IMEI)
-                select.appendChild(opt);
-            });
-            
-            document.getElementById('statusMsg').style.display = 'none';
-        } catch (err) {
-            document.getElementById('statusMsg').innerText = "❌ Error al sincronizar con Google Sheets.";
-            console.error(err);
-        }
-    };
+            const respuesta = await fetch(CONFIG.GOOGLE_SCRIPT_URL);
+            const datos = await respuesta.json();
 
-    // 2. CONTROLADOR EVENTO: Guardar Registro de Pago Oficial
+            // Inyectar Configuración
+            document.getElementById('interes').value = datos.config.interes;
+            document.getElementById('horastol').value = datos.config.horastol;
+            document.getElementById('semanastol').value = datos.config.semanastol;
+
+            // Inyectar Clientes en el Desplegable
+            listaClientesLocales = datos.clientesActivos || [];
+            const selectElemento = document.getElementById('selectCliente');
+            selectElemento.innerHTML = '<option value="">-- Elige Cliente - Modelo (IMEI) --</option>';
+
+            if (listaClientesLocales.length === 0) {
+                selectElemento.innerHTML = '<option value="">⚠️ No se encontraron clientes en Sheets</option>';
+            } else {
+                listaClientesLocales.forEach((item, index) => {
+                    let opcion = document.createElement('option');
+                    opcion.value = index;
+                    opcion.textContent = item.etiquetaCompleta;
+                    selectElemento.appendChild(opcion);
+                });
+            }
+
+            document.getElementById('statusMsg').style.display = 'none';
+        } catch (error) {
+            document.getElementById('statusMsg').innerText = "❌ Error al sincronizar con Google Sheets.";
+            console.error("Fallo de carga:", error);
+        }
+    }
+
+    // Ejecutar la inicialización directo al procesar el script (Igual que index.html)
+    cargarDatosDashboard();
+
+    // Guardar Registro de Pago
     document.getElementById('pagoForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const btn = document.getElementById('btnGuardarPago');
         const selectIdx = document.getElementById('selectCliente').value;
+        
+        if(selectIdx === "") return alert("Por favor, selecciona un cliente válido.");
         const clienteSeleccionado = listaClientesLocales[selectIdx];
 
         btn.innerText = "⏳ Registrando abono en Sheets...";
@@ -134,7 +142,7 @@
             const formData = new URLSearchParams();
             formData.append('action', 'registrarPago');
             formData.append('imei', clienteSeleccionado.imei);
-            formData.append('nombreCliente', clienteSeleccionado.cliente); // Enviamos el nombre directo desglosado
+            formData.append('nombreCliente', clienteSeleccionado.cliente);
             formData.append('monto', document.getElementById('montoPago').value);
             formData.append('metodo', document.getElementById('metodoPago').value);
             formData.append('semana', document.getElementById('semanaPago').value);
@@ -155,10 +163,12 @@
             } else {
                 btn.innerText = "⚠️ Error en base de datos";
                 btn.style.background = "#c0392b";
+                btn.disabled = false;
             }
         } catch (err) {
             btn.innerText = "❌ Error de conexión";
             btn.style.background = "#c0392b";
+            btn.disabled = false;
         } finally {
             setTimeout(() => {
                 btn.innerText = "💵 Aplicar y Guardar Pago";
@@ -168,7 +178,7 @@
         }
     });
 
-    // 3. CONTROLADOR EVENTO: Guardar Parámetros de Configuración Global
+    // Guardar Configuración Global
     document.getElementById('configForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const btn = document.getElementById('btnGuardarConfig');
