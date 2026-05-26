@@ -11,143 +11,192 @@
         h2 { text-align: center; color: #2c3e50; margin-bottom: 5px; }
         h3 { color: #2c3e50; border-bottom: 2px solid #e67e22; padding-bottom: 5px; margin-top: 25px; font-size: 18px; }
         label { font-weight: bold; display: block; margin-top: 15px; color: #34495e; font-size: 14px; }
-        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 15px; }
-        input[readonly] { background-color: #e9ecef; color: #495057; }
-        button { width: 100%; background: #e67e22; color: white; padding: 14px; border: none; border-radius: 4px; font-size: 16px; margin-top: 25px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
-        button:hover { background: #d35400; }
+        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; background: #f9f9f9; }
+        input[readonly] { background-color: #e9ecef; color: #555; font-weight: bold; cursor: not-allowed; }
+        
+        button { width: 100%; color: white; border: none; padding: 14px; margin-top: 20px; font-size: 15px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
         .btn-pago { background: #8e44ad; }
-        .btn-pago:hover { background: #71338c; }
-        .subtitulo { text-align: center; color: #7f8c8d; font-size: 14px; margin-bottom: 20px; }
-        .loading-dash { color: #2980b9; font-weight: bold; text-align: center; margin-bottom: 15px; }
+        .btn-pago:hover { background: #732d91; }
+        .btn-config { background: #e67e22; }
+        .btn-config:hover { background: #d35400; }
+        button:disabled { background: #7f8c8d !important; cursor: not-allowed; }
+        
+        .subtitulo { text-align: center; font-size: 13px; color: #7f8c8d; margin-top: 0; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .grid-config { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>CelYa! - Dashboard</h2>
-    <div class="subtitulo">Consola de Control de Intereses y Cobros Recurrentes</div>
-    
-    <div id="statusCarga" class="loading-dash">⏳ Leyendo parámetros en la nube de Google Sheets...</div>
+    <h2>💜 CelYa! Ecosistema</h2>
+    <p class="subtitulo">Módulo de Cobranza y Administración Global</p>
 
-    <h3>⚙️ Configuración Global de Créditos</h3>
-    <form id="configForm">
-        <label>Porcentaje de Interés Moratorio Semanal (%):</label>
-        <input type="number" id="interes" required min="0" max="100" step="1">
-
-        <label>Horas de Tolerancia para Pago:</label>
-        <input type="number" id="horastol" required min="0" max="168" step="1">
-
-        <label>Semanas de Tolerancia Máxima antes de Bloqueo:</label>
-        <input type="number" id="semanastol" required min="0" max="12" step="1">
-
-        <button type="submit" id="btnConfig">💾 Guardar Configuración Global</button>
-    </form>
-
-    <h3>💰 Registrar Abono / Pago Semanal</h3>
-    <form id="pagoForm" onsubmit="event.preventDefault(); procesarRegistroDePago();">
-        <label>Seleccionar Cliente Activo (IMEI):</label>
-        <select id="selectorCliente" onchange="calcularCobroAutomatico()" required>
-            <option value="">-- Selecciona un cliente del sistema --</option>
+    <h3>💵 Recepción y Abono de Semanas</h3>
+    <form id="pagoForm">
+        <label>Buscar Cliente Activo por ID / IMEI:</label>
+        <select id="selectCliente" required>
+            <option value="">⏳ Cargando catálogo de deudores...</option>
         </select>
 
-        <input type="hidden" id="hiddenImei" name="imei">
-        <input type="hidden" id="hiddenNombre" name="nombreCliente">
+        <label>Nombre Completo Registrado:</label>
+        <input type="text" id="nombreCliente" readonly placeholder="No seleccionado">
 
-        <label>Monto a Abonar ($):</label>
-        <input type="text" id="montoPago" readonly required placeholder="Selecciona un cliente para ver su cuota">
+        <label>IMEI del Equipo Vinculado:</label>
+        <input type="text" id="imeiCliente" readonly placeholder="No seleccionado">
+
+        <label>Plan de Plazo:</label>
+        <input type="text" id="planCliente" readonly placeholder="Ej. 52 semanas">
+
+        <label>Monto de Pago Recibido ($):</label>
+        <input type="number" id="montoPago" step="0.01" required placeholder="Ej. 350.00">
 
         <label>Método de Pago:</label>
         <select id="metodoPago" required>
-            <option value="Efectivo">Efectivo</option>
-            <option value="Transferencia">Transferencia Bancaria</option>
-            <option value="Depósito">Depósito OXXO / Ventanilla</option>
+            <option value="Efectivo" selected>💵 Efectivo Físico</option>
+            <option value="Transferencia">📱 Transferencia Electrónica</option>
+            <option value="Depósito">🏦 Depósito Bancario</option>
         </select>
 
-        <label>Semana Correspondiente (Número de Abono):</label>
-        <input type="number" id="semanaPago" placeholder="Ej: 3" min="1" max="52" required>
+        <label>Número / Identificador de Semana Cobrada:</label>
+        <input type="text" id="semanaPago" required placeholder="Ej. Semana 1, Semana 4 y 5">
 
-        <label>Número de Recibo / Folio:</label>
-        <input type="text" id="folioPago" placeholder="Ej: F-9921" required>
+        <label>Folio / Comprobante de Operación:</label>
+        <input type="text" id="folioPago" placeholder="Ej. Folio Interno, Clave de Rastreo SPEI">
 
-        <label>Notas Adicionales / Comentarios:</label>
-        <textarea id="notasPago" placeholder="Opcional..." rows="2"></textarea>
+        <label>Comentarios / Notas Adicionales:</label>
+        <textarea id="notasPago" rows="2" placeholder="Notas internas sobre abonos atrasados, liquidaciones o acuerdos con aval..."></textarea>
 
-        <button type="submit" id="btnPago" class="btn-pago">💜 Aplicar y Guardar Pago</button>
+        <button type="button" class="btn-pago" id="btnGuardarPago" onclick="ejecutarTransaccionPago()">💜 Aplicar y Guardar Pago</button>
+    </form>
+
+    <h3>⚙️ Parámetros Globales del Negocio</h3>
+    <form id="configForm">
+        <div class="grid-config">
+            <div>
+                <label>Interés Moratorio (%):</label>
+                <input type="number" id="interes" required>
+            </div>
+            <div>
+                <label>Horas de Tolerancia:</label>
+                <input type="number" id="horastol" required>
+            </div>
+        </div>
+        <label>Semanas de Tolerancia antes de Bloqueo:</label>
+        <input type="number" id="semanastol" required>
+
+        <button type="button" class="btn-config" id="btnGuardarConfig">💾 Guardar Configuración Global</button>
     </form>
 </div>
 
 <script>
-    let cacheClientesActivos = [];
-    let cacheInventario = [];
+    let dbClientesActivos = [];
 
-    // LÓGICA INTELIGENTE DE DETERMINACIÓN DE CUOTA SEMANAL 🚀
-    function calcularCobroAutomatico() {
-        const indice = document.getElementById('selectorCliente').value;
-        const campoMonto = document.getElementById('montoPago');
-
-        if(indice === "") {
-            document.getElementById('hiddenImei').value = "";
-            document.getElementById('hiddenNombre').value = "";
-            campoMonto.value = "";
-            return;
-        }
-
-        const datosCliente = cacheClientesActivos[indice];
-        document.getElementById('hiddenImei').value = datosCliente.imei;
-        document.getElementById('hiddenNombre').value = datosCliente.cliente;
-
-        // Buscamos el equipo en el inventario usando el IMEI del cliente
-        const equipo = cacheInventario.find(prod => prod.imei === datosCliente.imei);
-
-        if (equipo) {
-            // Mapeo exacto corregido: 26 -> planRapido (Columna D), 52 -> planComodo (Columna E)
-            if (datosCliente.plan === "26") {
-                campoMonto.value = equipo.planRapido;
-            } else {
-                campoMonto.value = equipo.planComodo;
-            }
-            campoMonto.setAttribute('readonly', true);
-        } else {
-            // Si el equipo ya no está en Inventario (vendido), habilitamos edición manual por contingencia
-            campoMonto.removeAttribute('readonly');
-            campoMonto.value = "";
-            campoMonto.placeholder = "Monto manual (Equipo fuera de Inventario)";
-        }
-    }
-
+    // 🔒 CONSULTA GET INICIAL AUTENTICADA POR TOKEN
     window.onload = async function() {
         try {
-            const respuesta = await fetch(CONFIG.GOOGLE_SCRIPT_URL);
-            const dataEcosistema = await respuesta.json();
-            
-            document.getElementById('interes').value = dataEcosistema.config.interes;
-            document.getElementById('horastol').value = dataEcosistema.config.horastol;
-            document.getElementById('semanastol').value = dataEcosistema.config.semanastol;
-            
-            cacheClientesActivos = dataEcosistema.clientesActivos || [];
-            cacheInventario = dataEcosistema.inventario || [];
-            
-            const selectElement = document.getElementById('selectorCliente');
-            cacheClientesActivos.forEach((item, index) => {
-                const opt = document.createElement('option');
-                opt.value = index;
-                opt.text = item.etiquetaCompleta;
-                selectElement.appendChild(opt);
+            const urlAutenticada = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}`;
+            const respuesta = await fetch(urlAutenticada);
+            const datos = await respuesta.json();
+
+            if(datos.error) {
+                alert("Error de Seguridad en Panel Administrativo: " + datos.error);
+                return;
+            }
+
+            // Inyectar datos de configuración global
+            document.getElementById('interes').value = datos.config.interes;
+            document.getElementById('horastol').value = datos.config.horastol;
+            document.getElementById('semanastol').value = datos.config.semanastol;
+
+            // Inyectar catálogo de deudores activos en el buscador dinámico
+            dbClientesActivos = datos.clientesActivos;
+            const select = document.getElementById('selectCliente');
+            select.innerHTML = '<option value="">-- Elige un Cliente --</option>';
+
+            dbClientesActivos.forEach(c => {
+                let opt = document.createElement('option');
+                opt.value = c.imei; 
+                opt.innerText = c.etiquetaCompleta;
+                select.appendChild(opt);
             });
 
-            document.getElementById('statusCarga').style.display = 'none';
-        } catch (error) {
-            document.getElementById('statusCarga').innerText = "❌ Error de comunicación con las credenciales de Google.";
-            console.error(error);
+        } catch (err) {
+            document.getElementById('selectCliente').innerHTML = '<option value="">❌ Error al mapear clientes activos</option>';
         }
     };
 
-    // EVENTO GUARDAR CONFIGURACIÓN GLOBAL
-    document.getElementById('configForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const btn = document.getElementById('btnConfig');
-        const colorOriginal = btn.style.background || "#e67e22";
-        
+    document.getElementById('selectCliente').addEventListener('change', function() {
+        const itemSeleccionado = dbClientesActivos.find(c => c.imei === this.value);
+        if(!itemSeleccionado) {
+            document.getElementById('nombreCliente').value = "";
+            document.getElementById('imeiCliente').value = "";
+            document.getElementById('planCliente').value = "";
+            return;
+        }
+        document.getElementById('nombreCliente').value = itemSeleccionado.cliente;
+        document.getElementById('imeiCliente').value = itemSeleccionado.imei;
+        document.getElementById('planCliente').value = `Plan de ${itemSeleccionado.plan} semanas`;
+    });
+
+    // 🔒 POST: REGISTRO DE PAGOS CON NUEVA VERIFICACIÓN DE SEGURIDAD
+    async function ejecutarTransaccionPago() {
+        const btn = document.getElementById('btnGuardarPago');
+        if(!document.getElementById('pagoForm').checkValidity()) {
+            alert("Completa todos los campos del abono antes de guardar.");
+            return;
+        }
+
+        const colorOriginal = btn.style.background;
+        btn.innerText = "⏳ Archivando pago en base de datos...";
+        btn.style.background = "#34495e";
+        btn.disabled = true;
+
+        try {
+            const params = new URLSearchParams();
+            params.append('action', 'registrarPago');
+            
+            // Inyectamos token secreto para pasar la aduana del script.gs
+            params.append('token', CONFIG.API_TOKEN); 
+            
+            params.append('imei', document.getElementById('imeiCliente').value);
+            params.append('nombreCliente', document.getElementById('nombreCliente').value);
+            params.append('monto', document.getElementById('montoPago').value);
+            params.append('metodo', document.getElementById('metodoPago').value);
+            params.append('semana', document.getElementById('semanaPago').value);
+            params.append('folio', document.getElementById('folioPago').value);
+            params.append('notas', document.getElementById('notasPago').value);
+
+            const respuesta = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                body: params.toString(),
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            });
+            const resultado = await respuesta.json();
+
+            if (resultado.result === "success") {
+                btn.innerText = "✅ ¡Pago Registrado Exitosamente!";
+                btn.style.background = "#27ae60";
+                document.getElementById('pagoForm').reset();
+                setTimeout(() => { location.reload(); }, 3000);
+            } else {
+                btn.innerText = "⚠️ Error: " + resultado.error;
+                btn.style.background = "#c0392b";
+                btn.disabled = false;
+            }
+        } catch (err) {
+            btn.innerText = "❌ Error de conexión de red";
+            btn.style.background = "#c0392b";
+            btn.disabled = false;
+            setTimeout(() => {
+                btn.innerText = "💜 Aplicar y Guardar Pago";
+                btn.style.background = colorOriginal;
+            }, 3500);
+        }
+    }
+
+    // 🔒 POST: MODIFICAR PARÁMETROS GLOBALES CON NUEVA VERIFICACIÓN DE SEGURIDAD
+    document.getElementById('btnGuardarConfig').addEventListener('click', async function() {
+        const btn = document.getElementById('btnGuardarConfig');
         btn.innerText = "⏳ Aplicando cambios globales...";
         btn.style.background = "#34495e";
         btn.disabled = true;
@@ -155,6 +204,10 @@
         try {
             const formData = new URLSearchParams();
             formData.append('action', 'updateConfig');
+            
+            // Inyectamos token secreto para pasar la aduana del script.gs
+            formData.append('token', CONFIG.API_TOKEN); 
+            
             formData.append('interes', document.getElementById('interes').value);
             formData.append('horastol', document.getElementById('horastol').value);
             formData.append('semanastol', document.getElementById('semanastol').value);
@@ -174,66 +227,16 @@
                 btn.style.background = "#c0392b";
             }
         } catch (err) {
-            btn.innerText = "❌ Error de red";
+            btn.innerText = "❌ Error de conexión de red";
             btn.style.background = "#c0392b";
         } finally {
             setTimeout(() => {
                 btn.innerText = "💾 Guardar Configuración Global";
-                btn.style.background = colorOriginal;
+                btn.style.background = "#e67e22";
                 btn.disabled = false;
             }, 3500);
         }
     });
-
-    // EVENTO PARA REGISTRAR PAGO
-    async function procesarRegistroDePago() {
-        const btn = document.getElementById('btnPago');
-        const colorOriginal = btn.style.background || "#8e44ad";
-
-        btn.innerText = "⏳ Archivando Abono en Base de Datos...";
-        btn.style.background = "#34495e";
-        btn.disabled = true;
-
-        try {
-            const params = new URLSearchParams();
-            params.append('action', 'registrarPago');
-            params.append('imei', document.getElementById('hiddenImei').value);
-            params.append('nombreCliente', document.getElementById('hiddenNombre').value);
-            params.append('monto', document.getElementById('montoPago').value);
-            params.append('metodo', document.getElementById('metodoPago').value);
-            params.append('semana', document.getElementById('semanaPago').value);
-            params.append('folio', document.getElementById('folioPago').value);
-            params.append('notas', document.getElementById('notasPago').value);
-
-            const respuesta = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                body: params.toString(),
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-            });
-            const resultado = await respuesta.json();
-
-            if (resultado.result === "success") {
-                btn.innerText = "✅ ¡Pago Registrado Exitosamente!";
-                btn.style.background = "#27ae60";
-                document.getElementById('pagoForm').reset();
-                setTimeout(() => {
-                    location.reload();
-                }, 3000);
-            } else {
-                btn.innerText = "⚠️ Error: " + resultado.error;
-                btn.style.background = "#c0392b";
-                btn.disabled = false;
-            }
-        } catch (err) {
-            btn.innerText = "❌ Error de conexión de red";
-            btn.style.background = "#c0392b";
-            btn.disabled = false;
-            setTimeout(() => {
-                btn.innerText = "💜 Aplicar y Guardar Pago";
-                btn.style.background = colorOriginal;
-            }, 3500);
-        }
-    }
 </script>
 </body>
 </html>
