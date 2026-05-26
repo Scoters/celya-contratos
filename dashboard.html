@@ -52,19 +52,19 @@
 
         <label>Método de Pago:</label>
         <select id="metodoPago" required>
-            <option value="Efectivo" selected>💵 Efectivo Físico</option>
-            <option value="Transferencia">📱 Transferencia Electrónica</option>
+            <option value="Transferencia" selected>📱 Transferencia Electrónica</option>
+            <option value="Efectivo">💵 Efectivo Físico</option>
             <option value="Depósito">🏦 Depósito Bancario</option>
         </select>
 
         <label>Número / Identificador de Semana Cobrada:</label>
-        <input type="text" id="semanaPago" required placeholder="Ej. Semana 1, Semana 4 y 5">
+        <input type="text" id="semanaPago" required placeholder="Ej. Semana 1">
 
         <label>Folio / Comprobante de Operación:</label>
-        <input type="text" id="folioPago" placeholder="Ej. Folio Interno, Clave de Rastreo SPEI">
+        <input type="text" id="folioPago" placeholder="Ej. Clave de Rastreo SPEI">
 
         <label>Comentarios / Notas Adicionales:</label>
-        <textarea id="notasPago" rows="2" placeholder="Notas internas sobre abonos atrasados, liquidaciones o acuerdos con aval..."></textarea>
+        <textarea id="notasPago" rows="2" placeholder="Notas internas..."></textarea>
 
         <button type="button" class="btn-pago" id="btnGuardarPago" onclick="ejecutarTransaccionPago()">💜 Aplicar y Guardar Pago</button>
     </form>
@@ -90,7 +90,8 @@
 
 <script>
     let dbClientesActivos = [];
-    let dbInventarioEquipos = []; // Almacén global para cruzar la información de precios
+    let dbInventarioEquipos = []; 
+    let dbHistorialPagos = []; // Almacén global para analizar consecutivos de semanas pagadas
 
     // 🔒 CONSULTA GET INICIAL AUTENTICADA POR TOKEN
     window.onload = async function() {
@@ -104,14 +105,13 @@
                 return;
             }
 
-            // Parámetros de configuración global
             document.getElementById('interes').value = datos.config.interes;
             document.getElementById('horastol').value = datos.config.horastol;
             document.getElementById('semanastol').value = datos.config.semanastol;
 
-            // Guardamos ambos catálogos en caché local
             dbClientesActivos = datos.clientesActivos || [];
             dbInventarioEquipos = datos.inventario || [];
+            dbHistorialPagos = datos.historialPagos || []; // Guardamos los pagos en caché local
             
             const select = document.getElementById('selectCliente');
             select.innerHTML = '<option value="">-- Elige un Cliente --</option>';
@@ -124,14 +124,15 @@
             });
 
         } catch (err) {
-            document.getElementById('selectCliente').innerHTML = '<option value="">❌ Error al mapear clientes activos</option>';
+            document.getElementById('selectCliente').innerHTML = '<option value="">❌ Error al mapear deudores</option>';
         }
     };
 
-    // 🚀 LÓGICA DE PRE-LLENADO INTELIGENTE Y RECOLECCIÓN DE CUOTA
+    // 🚀 LÓGICA DE AUTOMATIZACIÓN DE MONTOS Y CONSECUTIVO DE SEMANAS
     function calcularCobroAutomatico() {
         const imeiSeleccionado = document.getElementById('selectCliente').value;
         const campoMonto = document.getElementById('montoPago');
+        const campoSemana = document.getElementById('semanaPago');
         
         const cliente = dbClientesActivos.find(c => c.imei === imeiSeleccionado);
         if(!cliente) {
@@ -139,31 +140,49 @@
             document.getElementById('imeiCliente').value = "";
             document.getElementById('planCliente').value = "";
             campoMonto.value = "";
+            campoSemana.value = "";
             return;
         }
 
-        // Pintamos metadatos informativos del deudor
         document.getElementById('nombreCliente').value = cliente.cliente;
         document.getElementById('imeiCliente').value = cliente.imei;
         document.getElementById('planCliente').value = `Plan de ${cliente.plan} semanas`;
 
-        // Cruzamos la referencia buscando el celular en la base de inventario
+        // 1. COTIZACIÓN AUTOMÁTICA DEL PRECIO SEGÚN PLAN
         const equipo = dbInventarioEquipos.find(e => e.imei === cliente.imei);
-        
         if (equipo) {
             let cuotaTexto = (cliente.plan === "26") ? equipo.planRapido : equipo.planComodo;
-            
-            // Sanitizamos el string de dinero para extraer el número flotante limpio requerido por el input numérico
             let cuotaLimpia = parseFloat(cuotaTexto.replace(/[\$,]/g, "").trim());
-            
             campoMonto.value = isNaN(cuotaLimpia) ? "" : cuotaLimpia;
-            campoMonto.setAttribute('readonly', true); // Bloqueamos para evitar manipulación humana
+            campoMonto.setAttribute('readonly', true);
         } else {
-            // Si el teléfono ya no está en el catálogo del inventario (ej. vendido), liberamos por contingencia
             campoMonto.removeAttribute('readonly');
             campoMonto.value = "";
             campoMonto.placeholder = "Monto manual (Equipo fuera de Inventario)";
         }
+
+        // 2. 🧮 CÁLCULO INTELIGENTE DEL SIGUIENTE NÚMERO DE SEMANA CORRESPONDIENTE
+        // Filtramos todos los pagos previos registrados que le pertenezcan a este IMEI
+        const pagosDelCliente = dbHistorialPagos.filter(p => p.imei === imeiSeleccionado);
+        
+        let ultimaSemanaDetectada = 0;
+
+        pagosDelCliente.forEach(p => {
+            // Buscamos cualquier número dentro del texto guardado en la celda
+            const coincidencias = p.semanaTexto.match(/\d+/g);
+            if (coincidencias) {
+                // Si hay varios números en la celda (ej: "Semana 3 y 4"), tomamos el más alto
+                const numerosComoInt = coincidencias.map(Number);
+                const maxCelda = Math.max(...numerosComoInt);
+                if (maxCelda > ultimaSemanaDetectada) {
+                    ultimaSemanaDetectada = maxCelda;
+                }
+            }
+        });
+
+        // La siguiente semana que le toca pagar es la última encontrada + 1
+        const siguienteSemana = ultimaSemanaDetectada + 1;
+        campoSemana.value = `Semana ${siguienteSemana}`;
     }
 
     // 🔒 POST: REGISTRO DE PAGOS
