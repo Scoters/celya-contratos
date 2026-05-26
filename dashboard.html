@@ -7,22 +7,70 @@
     <script src="config.js"></script>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; background-color: #2c3e50; color: #333; }
-        .container { max-width: 500px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin: 40px auto; }
-        h2 { text-align: center; color: #2c3e50; margin-bottom: 25px; }
-        label { font-weight: bold; display: block; margin-top: 15px; color: #34495e; }
-        input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        .container { max-width: 550px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin: 20px auto; }
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 5px; }
+        h3 { color: #2c3e50; border-bottom: 2px solid #e67e22; padding-bottom: 5px; margin-top: 25px; font-size: 18px; }
+        label { font-weight: bold; display: block; margin-top: 15px; color: #34495e; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; font-family: Arial, sans-serif; }
+        textarea { resize: vertical; height: 80px; }
+        .row { display: flex; gap: 15px; }
+        .row .col { flex: 1; }
         button { width: 100%; background: #e67e22; color: white; padding: 14px; border: none; border-radius: 4px; font-size: 16px; margin-top: 25px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
         button:hover { background: #d35400; }
+        .btn-pago { background: #27ae60; }
+        .btn-pago:hover { background: #219152; }
         .status { text-align: center; font-weight: bold; margin-top: 15px; color: #7f8c8d; }
+        hr { border: 0; height: 1px; background: #ccc; margin: 40px 0 20px 0; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>⚙️ CelYa! Panel Admin<br><span style="font-size: 14px; color: #7f8c8d; font-weight: normal;">Configuración Global de Contratos</span></h2>
-    
-    <div id="statusMsg" class="status">⏳ Leyendo configuración actual desde Sheets...</div>
+    <h2>⚙️ CelYa! Panel Admin</h2>
+    <div id="statusMsg" class="status">⏳ Conectando con el servidor de Sheets...</div>
 
+    <h3>💸 Registrar Abono Semanal</h3>
+    <form id="pagoForm">
+        <label>Seleccionar Cliente y Equipo:</label>
+        <select id="selectCliente" required>
+            <option value="">Cargando clientes activos...</option>
+        </select>
+
+        <div class="row">
+            <div class="col">
+                <label>Monto a Abonar ($):</label>
+                <input type="number" id="montoPago" step="0.01" placeholder="0.00" required>
+            </div>
+            <div class="col">
+                <label>Método de Pago:</label>
+                <select id="metodoPago" required>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Depósito">Depósito</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label>Semana Corresp.:</label>
+                <input type="text" id="semanaPago" placeholder="Ej: Sem 3 o 4" required>
+            </div>
+            <div class="col">
+                <label>Recibo / Folio:</label>
+                <input type="text" id="folioPago" placeholder="Opcional">
+            </div>
+        </div>
+
+        <label>Notas o Comentarios del Pago:</label>
+        <textarea id="notasPago" placeholder="Detalles del abono..."></textarea>
+
+        <button type="submit" id="btnGuardarPago" class="btn-pago">💵 Aplicar y Guardar Pago</button>
+    </form>
+
+    <hr>
+
+    <h3>🔧 Configuración Global de Contratos</h3>
     <form id="configForm">
         <label>Porcentaje de Interés Moratorio (%):</label>
         <input type="number" id="interes" name="interes" required>
@@ -33,36 +81,99 @@
         <label>Semanas Máximas de Tolerancia (Atraso):</label>
         <input type="number" id="semanastol" name="semanastol" required>
 
-        <button type="submit" id="btnGuardar">💾 Guardar Configuración Global</button>
+        <button type="submit" id="btnGuardarConfig">💾 Guardar Configuración Global</button>
     </form>
 </div>
 
 <script>
-    // 1. Cargar las variables actuales del Sheets al abrir la página
+    // Guardamos los datos mapeados de los clientes de forma local tras la carga remota
+    let listaClientesLocales = [];
+
+    // 1. CARGA INICIAL: Traer Configuración e Inyectar Clientes Activos en el Select descriptivo
     window.onload = async function() {
         try {
             const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL);
             const data = await res.json();
             
-            // Inyectamos los valores actuales recuperados del servidor en los inputs
+            // Inyectar datos en el formulario de configuración global
             document.getElementById('interes').value = data.config.interes;
             document.getElementById('horastol').value = data.config.horastol;
             document.getElementById('semanastol').value = data.config.semanastol;
             
+            // Respaldar y procesar la lista de clientes activos
+            listaClientesLocales = data.clientesActivos || [];
+            const select = document.getElementById('selectCliente');
+            select.innerHTML = '<option value="">-- Elige Cliente - Modelo (IMEI) --</option>';
+            
+            listaClientesLocales.forEach((item, index) => {
+                let opt = document.createElement('option');
+                opt.value = index; // Usamos el índice para recuperar el objeto completo después
+                opt.textContent = item.etiquetaCompleta; // Nombre - Modelo (IMEI)
+                select.appendChild(opt);
+            });
+            
             document.getElementById('statusMsg').style.display = 'none';
         } catch (err) {
-            document.getElementById('statusMsg').innerText = "❌ Error al cargar datos remotos.";
+            document.getElementById('statusMsg').innerText = "❌ Error al sincronizar con Google Sheets.";
             console.error(err);
         }
     };
 
-    // 2. Guardar los cambios hacia el Sheets directo en el botón (sin alertas molestas)
+    // 2. CONTROLADOR EVENTO: Guardar Registro de Pago Oficial
+    document.getElementById('pagoForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnGuardarPago');
+        const selectIdx = document.getElementById('selectCliente').value;
+        const clienteSeleccionado = listaClientesLocales[selectIdx];
+
+        btn.innerText = "⏳ Registrando abono en Sheets...";
+        btn.style.background = "#34495e";
+        btn.disabled = true;
+
+        try {
+            const formData = new URLSearchParams();
+            formData.append('action', 'registrarPago');
+            formData.append('imei', clienteSeleccionado.imei);
+            formData.append('nombreCliente', clienteSeleccionado.cliente); // Enviamos el nombre directo desglosado
+            formData.append('monto', document.getElementById('montoPago').value);
+            formData.append('metodo', document.getElementById('metodoPago').value);
+            formData.append('semana', document.getElementById('semanaPago').value);
+            formData.append('folio', document.getElementById('folioPago').value || "");
+            formData.append('notas', document.getElementById('notasPago').value || "");
+
+            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                body: formData.toString(),
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            });
+            const data = await res.json();
+
+            if (data.result === 'success') {
+                btn.innerText = "✅ ¡Pago Registrado Exitosamente!";
+                btn.style.background = "#27ae60";
+                document.getElementById('pagoForm').reset();
+            } else {
+                btn.innerText = "⚠️ Error en base de datos";
+                btn.style.background = "#c0392b";
+            }
+        } catch (err) {
+            btn.innerText = "❌ Error de conexión";
+            btn.style.background = "#c0392b";
+        } finally {
+            setTimeout(() => {
+                btn.innerText = "💵 Aplicar y Guardar Pago";
+                btn.style.background = "#27ae60";
+                btn.disabled = false;
+            }, 3500);
+        }
+    });
+
+    // 3. CONTROLADOR EVENTO: Guardar Parámetros de Configuración Global
     document.getElementById('configForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        const btn = document.getElementById('btnGuardar');
-        const colorOriginal = "#e67e22";
+        const btn = document.getElementById('btnGuardarConfig');
         
-        btn.innerText = "⏳ Aplicando cambios en el servidor...";
+        btn.innerText = "⏳ Aplicando cambios globales...";
         btn.style.background = "#34495e";
         btn.disabled = true;
 
@@ -93,9 +204,9 @@
         } finally {
             setTimeout(() => {
                 btn.innerText = "💾 Guardar Configuración Global";
-                btn.style.background = colorOriginal;
+                btn.style.background = "#e67e22";
                 btn.disabled = false;
-            }, 4000);
+            }, 3500);
         }
     });
 </script>
