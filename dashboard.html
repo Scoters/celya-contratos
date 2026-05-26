@@ -34,7 +34,7 @@
     <h3>💵 Recepción y Abono de Semanas</h3>
     <form id="pagoForm">
         <label>Buscar Cliente Activo por ID / IMEI:</label>
-        <select id="selectCliente" required>
+        <select id="selectCliente" onchange="calcularCobroAutomatico()" required>
             <option value="">⏳ Cargando catálogo de deudores...</option>
         </select>
 
@@ -48,7 +48,7 @@
         <input type="text" id="planCliente" readonly placeholder="Ej. 52 semanas">
 
         <label>Monto de Pago Recibido ($):</label>
-        <input type="number" id="montoPago" step="0.01" required placeholder="Ej. 350.00">
+        <input type="number" id="montoPago" step="0.01" readonly required placeholder="Selecciona un cliente para cotizar cuota">
 
         <label>Método de Pago:</label>
         <select id="metodoPago" required>
@@ -90,6 +90,7 @@
 
 <script>
     let dbClientesActivos = [];
+    let dbInventarioEquipos = []; // Almacén global para cruzar la información de precios
 
     // 🔒 CONSULTA GET INICIAL AUTENTICADA POR TOKEN
     window.onload = async function() {
@@ -103,13 +104,15 @@
                 return;
             }
 
-            // Inyectar datos de configuración global
+            // Parámetros de configuración global
             document.getElementById('interes').value = datos.config.interes;
             document.getElementById('horastol').value = datos.config.horastol;
             document.getElementById('semanastol').value = datos.config.semanastol;
 
-            // Inyectar catálogo de deudores activos en el buscador dinámico
-            dbClientesActivos = datos.clientesActivos;
+            // Guardamos ambos catálogos en caché local
+            dbClientesActivos = datos.clientesActivos || [];
+            dbInventarioEquipos = datos.inventario || [];
+            
             const select = document.getElementById('selectCliente');
             select.innerHTML = '<option value="">-- Elige un Cliente --</option>';
 
@@ -125,20 +128,45 @@
         }
     };
 
-    document.getElementById('selectCliente').addEventListener('change', function() {
-        const itemSeleccionado = dbClientesActivos.find(c => c.imei === this.value);
-        if(!itemSeleccionado) {
+    // 🚀 LÓGICA DE PRE-LLENADO INTELIGENTE Y RECOLECCIÓN DE CUOTA
+    function calcularCobroAutomatico() {
+        const imeiSeleccionado = document.getElementById('selectCliente').value;
+        const campoMonto = document.getElementById('montoPago');
+        
+        const cliente = dbClientesActivos.find(c => c.imei === imeiSeleccionado);
+        if(!cliente) {
             document.getElementById('nombreCliente').value = "";
             document.getElementById('imeiCliente').value = "";
             document.getElementById('planCliente').value = "";
+            campoMonto.value = "";
             return;
         }
-        document.getElementById('nombreCliente').value = itemSeleccionado.cliente;
-        document.getElementById('imeiCliente').value = itemSeleccionado.imei;
-        document.getElementById('planCliente').value = `Plan de ${itemSeleccionado.plan} semanas`;
-    });
 
-    // 🔒 POST: REGISTRO DE PAGOS CON NUEVA VERIFICACIÓN DE SEGURIDAD
+        // Pintamos metadatos informativos del deudor
+        document.getElementById('nombreCliente').value = cliente.cliente;
+        document.getElementById('imeiCliente').value = cliente.imei;
+        document.getElementById('planCliente').value = `Plan de ${cliente.plan} semanas`;
+
+        // Cruzamos la referencia buscando el celular en la base de inventario
+        const equipo = dbInventarioEquipos.find(e => e.imei === cliente.imei);
+        
+        if (equipo) {
+            let cuotaTexto = (cliente.plan === "26") ? equipo.planRapido : equipo.planComodo;
+            
+            // Sanitizamos el string de dinero para extraer el número flotante limpio requerido por el input numérico
+            let cuotaLimpia = parseFloat(cuotaTexto.replace(/[\$,]/g, "").trim());
+            
+            campoMonto.value = isNaN(cuotaLimpia) ? "" : cuotaLimpia;
+            campoMonto.setAttribute('readonly', true); // Bloqueamos para evitar manipulación humana
+        } else {
+            // Si el teléfono ya no está en el catálogo del inventario (ej. vendido), liberamos por contingencia
+            campoMonto.removeAttribute('readonly');
+            campoMonto.value = "";
+            campoMonto.placeholder = "Monto manual (Equipo fuera de Inventario)";
+        }
+    }
+
+    // 🔒 POST: REGISTRO DE PAGOS
     async function ejecutarTransaccionPago() {
         const btn = document.getElementById('btnGuardarPago');
         if(!document.getElementById('pagoForm').checkValidity()) {
@@ -154,8 +182,6 @@
         try {
             const params = new URLSearchParams();
             params.append('action', 'registrarPago');
-            
-            // Inyectamos token secreto para pasar la aduana del script.gs
             params.append('token', CONFIG.API_TOKEN); 
             
             params.append('imei', document.getElementById('imeiCliente').value);
@@ -194,7 +220,7 @@
         }
     }
 
-    // 🔒 POST: MODIFICAR PARÁMETROS GLOBALES CON NUEVA VERIFICACIÓN DE SEGURIDAD
+    // 🔒 POST: MODIFICAR PARÁMETROS GLOBALES
     document.getElementById('btnGuardarConfig').addEventListener('click', async function() {
         const btn = document.getElementById('btnGuardarConfig');
         btn.innerText = "⏳ Aplicando cambios globales...";
@@ -204,10 +230,7 @@
         try {
             const formData = new URLSearchParams();
             formData.append('action', 'updateConfig');
-            
-            // Inyectamos token secreto para pasar la aduana del script.gs
             formData.append('token', CONFIG.API_TOKEN); 
-            
             formData.append('interes', document.getElementById('interes').value);
             formData.append('horastol', document.getElementById('horastol').value);
             formData.append('semanastol', document.getElementById('semanastol').value);
