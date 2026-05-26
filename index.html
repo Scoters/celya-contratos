@@ -49,23 +49,23 @@
     <h2>CelYa - Nuevo Contrato</h2>
     <div id="loadMsg" class="loading-inv">⏳ Sincronizando Equipos e Inventario CelYa...</div>
     
-    <form id="contratoForm" novalidate>
+    <form id="contratoForm" onsubmit="event.preventDefault(); procesarFormularioManual();">
         <label>Seleccionar IMEI del Teléfono:</label>
-        <select id="selectorImei" onchange="autoRellenarEquipo()">
+        <select id="selectorImei" onchange="autoRellenarEquipo()" required>
             <option value="">-- Elige el IMEI del celular --</option>
         </select>
 
         <label>Modelo / Marca:</label>
-        <input type="text" id="modelo" name="modelo" readonly>
+        <input type="text" id="modelo" name="modelo" readonly required>
 
         <label>Monto del Enganche ($):</label>
-        <input type="text" id="monto" name="monto" readonly>
+        <input type="text" id="monto" name="monto" readonly required>
 
         <label>Cuota Semanal ($):</label>
-        <input type="text" id="cuota" name="cuota" readonly>
+        <input type="text" id="cuota" name="cuota" readonly required>
 
         <label>Plazo del Crédito:</label>
-        <select id="plazoSemanas" name="plazoSemanas">
+        <select id="plazoSemanas" name="plazoSemanas" required>
             <option value="">-- Elige el plazo --</option>
             <option value="26">Plan Rápido (6 Meses / 26 Semanas)</option>
             <option value="52">Plan Cómodo (12 Meses / 52 Semanas)</option>
@@ -74,19 +74,19 @@
         <hr style="margin-top:20px;">
 
         <label>Nombre Completo del Cliente:</label>
-        <input type="text" id="cliente" name="cliente">
+        <input type="text" id="cliente" name="cliente" required>
 
         <label>Teléfono Celular Principal:</label>
-        <input type="tel" id="telefono" name="telefono" maxlength="10">
+        <input type="tel" id="telefono" name="telefono" maxlength="10" required>
 
         <label>Fecha de Nacimiento:</label>
-        <input type="date" id="fechaNacimiento" name="fechaNacimiento">
+        <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
 
         <label>Dirección Completa de Domicilio:</label>
-        <textarea id="direccion" name="direccion" rows="3"></textarea>
+        <textarea id="direccion" name="direccion" rows="3" required></textarea>
 
         <label>Teléfono de Aval / Referencia:</label>
-        <input type="tel" id="telefonoAval" name="telefonoAval" maxlength="10">
+        <input type="tel" id="telefonoAval" name="telefonoAval" maxlength="10" required>
 
         <div class="photo-container">
             <label>📷 Foto INE Frontal:</label>
@@ -116,7 +116,9 @@
         <input type="hidden" id="semanastol" name="semanastol">
         <input type="hidden" id="totalFinanciado" name="totalFinanciado">
         <input type="hidden" id="totalLetra" name="totalLetra">
-    </form> <button type="button" id="btnEnviar" onclick="procesarFormularioManual()">Generar Contrato y Archivar</button>
+
+        <button type="submit" id="btnEnviar">Generar Contrato y Archivar</button>
+    </form> 
 </div>
 
 <script>
@@ -171,6 +173,7 @@
     const ctx = canvas.getContext('2d'); 
     let dibujando = false;
 
+    // Calibración HD de firma responsiva
     function resizeCanvas() {
         const rect = canvas.getBoundingClientRect();
         if (rect.width > 0) {
@@ -269,13 +272,6 @@
     async function procesarFormularioManual() {
         const btn = document.getElementById('btnEnviar');
         const colorOriginal = btn.style.background || "#27ae60";
-        
-        const nombreCliente = document.getElementById('cliente').value.trim();
-        const telCelular = document.getElementById('telefono').value.trim();
-        const fNacimiento = document.getElementById('fechaNacimiento').value;
-        const domCompleto = document.getElementById('direccion').value.trim();
-        const imeiSeleccionado = document.getElementById('selectorImei').value;
-        const plazoSeleccionado = document.getElementById('plazoSemanas').value;
 
         const mostrarErrorEnBoton = (mensaje) => {
             btn.innerText = "⚠️ " + mensaje;
@@ -288,12 +284,7 @@
             }, 3500);
         };
 
-        if (imeiSeleccionado === "") { mostrarErrorEnBoton("Selecciona un IMEI del inventario"); return; }
-        if (plazoSeleccionado === "") { mostrarErrorEnBoton("Selecciona el plazo del crédito"); return; }
-        if (nombreCliente === "") { mostrarErrorEnBoton("El Nombre del Cliente es obligatorio"); return; }
-        if (telCelular.length < 10) { mostrarErrorEnBoton("El Teléfono debe tener 10 dígitos"); return; }
-        if (!fNacimiento) { mostrarErrorEnBoton("La Fecha de Nacimiento es obligatoria"); return; }
-        if (domCompleto === "") { mostrarErrorEnBoton("La Dirección es obligatoria"); return; }
+        // El navegador ya valida los campos de texto, aquí validamos únicamente los archivos y la firma
         if (!ineDelanteraB64 || ineDelanteraB64 === "") { mostrarErrorEnBoton("Falta capturar la foto de la INE Frontal"); return; }
         if (!ineTraseraB64 || ineTraseraB64 === "") { mostrarErrorEnBoton("Falta capturar la foto de la INE Reverso"); return; }
 
