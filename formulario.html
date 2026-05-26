@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Contrato - CelYa</title>
+    
+    <script src="config.js"></script>
+
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
+        .container { max-width: 500px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin: 0 auto; }
+        h2 { text-align: center; color: #2c3e50; }
+        label { font-weight: bold; display: block; margin-top: 10px; }
+        input, textarea { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        input[readonly] { background-color: #e9ecef; }
+        #canvas-firma { border: 2px dashed #34495e; background: #fff; border-radius: 4px; margin-top: 5px; cursor: crosshair; user-select: none; touch-action: none; }
+        button { width: 100%; background: #27ae60; color: white; padding: 12px; border: none; border-radius: 4px; font-size: 16px; margin-top: 15px; cursor: pointer; }
+        button:hover { background: #219150; }
+        .btn-clear { background: #e74c3c; margin-top: 5px; padding: 5px; font-size: 12px; }
+        .btn-clear:hover { background: #c0392b; }
+        .photo-container { margin: 15px 0; }
+        .preview { max-width: 100%; margin-top: 8px; border: 2px solid #ddd; border-radius: 6px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>CelYa - Nuevo Contrato</h2>
+    <form id="contratoForm">
+        <label>IMEI del Equipo:</label>
+        <input type="text" id="imei" name="imei" readonly>
+
+        <label>Modelo / Marca:</label>
+        <input type="text" id="modelo" name="modelo" readonly>
+
+        <label>Monto del Enganche ($):</label>
+        <input type="text" id="monto" name="monto" readonly>
+
+        <label>Cuota Semanal ($):</label>
+        <input type="text" id="cuota" name="cuota" readonly>
+
+        <hr style="margin-top:20px;">
+
+        <label>Nombre Completo del Cliente:</label>
+        <input type="text" id="cliente" name="cliente" required>
+
+        <label>Teléfono Celular Principal (10 dígitos):</label>
+        <input type="tel" id="telefono" name="telefono" maxlength="10" required>
+
+        <label>Fecha de Nacimiento del Cliente:</label>
+        <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+
+        <label>Dirección Completa de Domicilio:</label>
+        <textarea id="direccion" name="direccion" rows="3" required></textarea>
+
+        <label>Teléfono de Aval o Referencia Familiar:</label>
+        <input type="tel" id="telefonoAval" name="telefonoAval" maxlength="10">
+
+        <div class="photo-container">
+            <label>📷 Foto INE Delantera (Frontal):</label>
+            <input type="file" id="ineDelantera" accept="image/*" capture="camera" required>
+            <div id="previewDelantera"></div>
+        </div>
+
+        <div class="photo-container">
+            <label>📷 Foto INE Trasera:</label>
+            <input type="file" id="ineTrasera" accept="image/*" capture="camera" required>
+            <div id="previewTrasera"></div>
+        </div>
+
+        <label>Firma del Cliente (Dibuje aquí):</label>
+        <canvas id="canvas-firma" width="460" height="200"></canvas>
+        <button type="button" class="btn-clear" onclick="limpiarFirma()">Borrar Firma</button>
+
+        <input type="hidden" id="firmaBase64" name="firmaBase64">
+
+        <button type="submit" id="btnEnviar">Generar Contrato y Archivar</button>
+    </form>
+</div>
+
+<script>
+    // 1. Capturar variables de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    document.getElementById('imei').value = urlParams.get('imei') || '';
+    document.getElementById('modelo').value = urlParams.get('modelo') || '';
+    document.getElementById('monto').value = urlParams.get('monto') || '';
+    document.getElementById('cuota').value = urlParams.get('cuota') || '';
+
+    // 2. Control del Canvas de la Firma
+    const canvas = document.getElementById('canvas-firma');
+    const ctx = canvas.getContext('2d');
+    let dibujando = false;
+
+    function obtenerPosicion(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+    function iniciarDibujo(e) { dibujando = true; pautarDibujo(e); }
+    function terminarDibujo() { dibujando = false; ctx.beginPath(); }
+    function pautarDibujo(e) {
+        if (!dibujando) return;
+        e.preventDefault();
+        const pos = obtenerPosicion(e);
+        ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = '#000000';
+        ctx.lineTo(pos.x, pos.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
+    }
+    canvas.addEventListener('mousedown', iniciarDibujo);
+    canvas.addEventListener('mousemove', pautarDibujo);
+    canvas.addEventListener('mouseup', terminarDibujo);
+    canvas.addEventListener('touchstart', iniciarDibujo);
+    canvas.addEventListener('touchmove', pautarDibujo);
+    canvas.addEventListener('touchend', terminarDibujo);
+    function limpiarFirma() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+    // Guardaremos los archivos ya optimizados/comprimidos aquí
+    let fotoDelanteraBlob = null;
+    let fotoTraseraBlob = null;
+
+   // 3. Función Mágica para previsualizar y OPTIMIZAR la imagen para máxima nitidez
+    function procesarYComprimirImagen(input, previewId, tipo) {
+        const preview = document.getElementById(previewId);
+        preview.innerHTML = '';
+        
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                
+                img.onload = function() {
+                    // Aumentamos el tamaño a 2048 para que las letras chicas sean legibles
+                    const maxAncho = 2048; 
+                    let ancho = img.width;
+                    let alto = img.height;
+                    
+                    if (ancho > maxAncho) {
+                        alto = Math.round((alto * maxAncho) / ancho);
+                        ancho = maxAncho;
+                    }
+                    
+                    const canvasOculto = document.createElement('canvas');
+                    canvasOculto.width = ancho;
+                    canvasOculto.height = alto;
+                    const ctxOculto = canvasOculto.getContext('2d');
+                    ctxOculto.drawImage(img, 0, 0, ancho, alto);
+                    
+                    // Subimos la calidad al 95% (0.95) para máxima definición
+                    const altaCalidadDataURL = canvasOculto.toDataURL('image/jpeg', 0.95);
+                    
+                    // Mostrar previsualización nítida en la pantalla
+                    const imgPreview = document.createElement('img');
+                    imgPreview.src = altaCalidadDataURL;
+                    imgPreview.className = 'preview';
+                    preview.appendChild(imgPreview);
+                    
+                    // Convertir a archivo real (Blob) con alta fidelidad para Telegram
+                    canvasOculto.toBlob(function(blob) {
+                        if (tipo === 'delantera') fotoDelanteraBlob = blob;
+                        if (tipo === 'trasera') fotoTraseraBlob = blob;
+                    }, 'image/jpeg', 0.95);
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    document.getElementById('ineDelantera').addEventListener('change', function() { procesarYComprimirImagen(this, 'previewDelantera', 'delantera'); });
+    document.getElementById('ineTrasera').addEventListener('change', function() { procesarYComprimirImagen(this, 'previewTrasera', 'trasera'); });
+
+    // 4. Función de envío directo a la API de Telegram
+    async function enviarATelegram(blobFile, textoMensaje, nombreArchivo) {
+        const TELEGRAM_TOKEN = CONFIG.TELEGRAM_TOKEN; 
+        const CHAT_ID = CONFIG.CHAT_ID;
+
+        const formData = new FormData();
+        formData.append('chat_id', CHAT_ID);
+        formData.append('photo', blobFile, nombreArchivo);
+        formData.append('caption', textoMensaje);
+
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
+            method: 'POST',
+            body: formData
+        });
+    }
+
+    // 5. Envío en paralelo (Telegram + Google Sheets)
+    document.getElementById('contratoForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnEnviar');
+        btn.innerText = "Optimizando y subiendo datos...";
+        btn.disabled = true;
+
+        const imei = document.getElementById('imei').value;
+        const modelo = document.getElementById('modelo').value;
+        const cliente = document.getElementById('cliente').value.trim();
+
+        // Creamos la base del mensaje limpia
+        const datosCliente = `👤 Cliente: ${cliente}\n📱 Modelo: ${modelo}\n🆔 IMEI: ${imei}`;
+
+        try {
+            // A. Subir las imágenes optimizadas a Telegram con el título correcto arriba
+            if (fotoDelanteraBlob) {
+                const mensajeDelantera = `🪪 INE PARTE DELANTERA\n\n${datosCliente}`;
+                await enviarATelegram(fotoDelanteraBlob, mensajeDelantera, `${cliente}_INE_Delantera.jpg`);
+            }
+            if (fotoTraseraBlob) {
+                const mensajeTrasera = `🪪 INE REVERSO\n\n${datosCliente}`;
+                await enviarATelegram(fotoTraseraBlob, mensajeTrasera, `${cliente}_INE_Trasera.jpg`);
+            }
+
+            // B. Enviar los datos ligeros de texto y la firma al Sheets
+            document.getElementById('firmaBase64').value = canvas.toDataURL('image/png');
+            const sheetData = new URLSearchParams(new FormData(this));
+            
+            const URL_GOOGLE_SCRIPT = CONFIG.GOOGLE_SCRIPT_URL;
+
+            const res = await fetch(URL_GOOGLE_SCRIPT, { 
+                method: 'POST', 
+                body: sheetData.toString(),
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            });
+            const data = await res.json();
+
+            if (data.result === 'success') {
+                alert('✅ ¡Éxito total! Datos registrados en Sheets e INEs archivadas en tu Telegram.');
+                document.getElementById('contratoForm').reset();
+                limpiarFirma();
+                document.getElementById('previewDelantera').innerHTML = '';
+                document.getElementById('previewTrasera').innerHTML = '';
+                fotoDelanteraBlob = null;
+                fotoTraseraBlob = null;
+            } else {
+                alert('⚠️ Error en Google Sheets: ' + data.error);
+            }
+
+        } catch (err) {
+            console.error(err);
+            alert('❌ Hubo un problema al procesar el envío. Revisa tu conexión de internet.');
+        } finally {
+            btn.innerText = "Generar Contrato y Archivar";
+            btn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>
