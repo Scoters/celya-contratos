@@ -48,7 +48,7 @@
         <input type="text" id="planCliente" readonly placeholder="Ej. 52 semanas">
 
         <label>Monto de Pago Recibido ($):</label>
-        <input type="number" id="montoPago" step="0.01" readonly required placeholder="Selecciona un cliente para cotizar cuota">
+        <input type="number" id="montoPago" step="0.01" required placeholder="Ingresa o edita el monto recibido">
 
         <label>Método de Pago:</label>
         <select id="metodoPago" required>
@@ -91,9 +91,8 @@
 <script>
     let dbClientesActivos = [];
     let dbInventarioEquipos = []; 
-    let dbHistorialPagos = []; // Almacén global para analizar consecutivos de semanas pagadas
+    let dbHistorialPagos = [];
 
-    // 🔒 CONSULTA GET INICIAL AUTENTICADA POR TOKEN
     window.onload = async function() {
         try {
             const urlAutenticada = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}`;
@@ -101,7 +100,7 @@
             const datos = await respuesta.json();
 
             if(datos.error) {
-                alert("Error de Seguridad en Panel Administrativo: " + datos.error);
+                alert("Error de Panel: " + datos.error);
                 return;
             }
 
@@ -111,7 +110,7 @@
 
             dbClientesActivos = datos.clientesActivos || [];
             dbInventarioEquipos = datos.inventario || [];
-            dbHistorialPagos = datos.historialPagos || []; // Guardamos los pagos en caché local
+            dbHistorialPagos = datos.historialPagos || []; 
             
             const select = document.getElementById('selectCliente');
             select.innerHTML = '<option value="">-- Elige un Cliente --</option>';
@@ -128,7 +127,6 @@
         }
     };
 
-    // 🚀 LÓGICA DE AUTOMATIZACIÓN DE MONTOS Y CONSECUTIVO DE SEMANAS
     function calcularCobroAutomatico() {
         const imeiSeleccionado = document.getElementById('selectCliente').value;
         const campoMonto = document.getElementById('montoPago');
@@ -148,30 +146,23 @@
         document.getElementById('imeiCliente').value = cliente.imei;
         document.getElementById('planCliente').value = `Plan de ${cliente.plan} semanas`;
 
-        // 1. COTIZACIÓN AUTOMÁTICA DEL PRECIO SEGÚN PLAN
+        // Coloca el precio regular sugerido, pero permite modificarlo al no tener 'readonly'
         const equipo = dbInventarioEquipos.find(e => e.imei === cliente.imei);
         if (equipo) {
             let cuotaTexto = (cliente.plan === "26") ? equipo.planRapido : equipo.planComodo;
             let cuotaLimpia = parseFloat(cuotaTexto.replace(/[\$,]/g, "").trim());
             campoMonto.value = isNaN(cuotaLimpia) ? "" : cuotaLimpia;
-            campoMonto.setAttribute('readonly', true);
         } else {
-            campoMonto.removeAttribute('readonly');
             campoMonto.value = "";
-            campoMonto.placeholder = "Monto manual (Equipo fuera de Inventario)";
         }
 
-        // 2. 🧮 CÁLCULO INTELIGENTE DEL SIGUIENTE NÚMERO DE SEMANA CORRESPONDIENTE
-        // Filtramos todos los pagos previos registrados que le pertenezcan a este IMEI
+        // 🧮 ANALIZAR HISTORIAL DE PAGOS DE ESTE CLIENTE ESPECÍFICO
         const pagosDelCliente = dbHistorialPagos.filter(p => p.imei === imeiSeleccionado);
-        
         let ultimaSemanaDetectada = 0;
 
         pagosDelCliente.forEach(p => {
-            // Buscamos cualquier número dentro del texto guardado en la celda
             const coincidencias = p.semanaTexto.match(/\d+/g);
             if (coincidencias) {
-                // Si hay varios números en la celda (ej: "Semana 3 y 4"), tomamos el más alto
                 const numerosComoInt = coincidencias.map(Number);
                 const maxCelda = Math.max(...numerosComoInt);
                 if (maxCelda > ultimaSemanaDetectada) {
@@ -180,12 +171,10 @@
             }
         });
 
-        // La siguiente semana que le toca pagar es la última encontrada + 1
         const siguienteSemana = ultimaSemanaDetectada + 1;
         campoSemana.value = `Semana ${siguienteSemana}`;
     }
 
-    // 🔒 POST: REGISTRO DE PAGOS
     async function ejecutarTransaccionPago() {
         const btn = document.getElementById('btnGuardarPago');
         if(!document.getElementById('pagoForm').checkValidity()) {
@@ -194,7 +183,7 @@
         }
 
         const colorOriginal = btn.style.background;
-        btn.innerText = "⏳ Archivando pago en base de datos...";
+        btn.innerText = "⏳ Archivando pago...";
         btn.style.background = "#34495e";
         btn.disabled = true;
 
@@ -202,7 +191,6 @@
             const params = new URLSearchParams();
             params.append('action', 'registrarPago');
             params.append('token', CONFIG.API_TOKEN); 
-            
             params.append('imei', document.getElementById('imeiCliente').value);
             params.append('nombreCliente', document.getElementById('nombreCliente').value);
             params.append('monto', document.getElementById('montoPago').value);
@@ -219,17 +207,17 @@
             const resultado = await respuesta.json();
 
             if (resultado.result === "success") {
-                btn.innerText = "✅ ¡Pago Registrado Exitosamente!";
+                btn.innerText = "✅ ¡Pago Registrado!";
                 btn.style.background = "#27ae60";
                 document.getElementById('pagoForm').reset();
-                setTimeout(() => { location.reload(); }, 3000);
+                setTimeout(() => { location.reload(); }, 2500);
             } else {
                 btn.innerText = "⚠️ Error: " + resultado.error;
                 btn.style.background = "#c0392b";
                 btn.disabled = false;
             }
         } catch (err) {
-            btn.innerText = "❌ Error de conexión de red";
+            btn.innerText = "❌ Error de red";
             btn.style.background = "#c0392b";
             btn.disabled = false;
             setTimeout(() => {
@@ -239,10 +227,9 @@
         }
     }
 
-    // 🔒 POST: MODIFICAR PARÁMETROS GLOBALES
     document.getElementById('btnGuardarConfig').addEventListener('click', async function() {
         const btn = document.getElementById('btnGuardarConfig');
-        btn.innerText = "⏳ Aplicando cambios globales...";
+        btn.innerText = "⏳ Guardando...";
         btn.style.background = "#34495e";
         btn.disabled = true;
 
@@ -262,14 +249,14 @@
             const data = await res.json();
 
             if (data.result === 'success') {
-                btn.innerText = "✅ ¡Configuración Guardada!";
+                btn.innerText = "✅ ¡Guardado!";
                 btn.style.background = "#27ae60";
             } else {
-                btn.innerText = "⚠️ Error al guardar";
+                btn.innerText = "⚠️ Error";
                 btn.style.background = "#c0392b";
             }
         } catch (err) {
-            btn.innerText = "❌ Error de conexión de red";
+            btn.innerText = "❌ Error de red";
             btn.style.background = "#c0392b";
         } finally {
             setTimeout(() => {

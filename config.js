@@ -1,4 +1,4 @@
 const CONFIG = {
-  GOOGLE_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxBYn9bYEicowptM4V7bFc0oYhTnGhmq3aH3NDpdPntKqNTm9Y2YM8xND0cbkB9cBNe/exec",
+  GOOGLE_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyorYDYpaTWc-qWmfv3pqUKST-pldampwASG3XuKqnxmE-shklfwaZDfh1brd6IK7g/exec",
   API_TOKEN: "celya_k9x2m_s7q4p"
 };
