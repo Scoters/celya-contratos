@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CelYa! - Generador de Enlaces</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
+        .container { max-width: 600px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.1); margin: 0 auto; }
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .full-width { grid-column: span 2; }
+        label { font-weight: bold; display: block; margin-top: 5px; }
+        input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        button { width: 100%; background: #2980b9; color: white; padding: 12px; border: none; border-radius: 4px; font-size: 16px; margin-top: 20px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #2471a3; }
+        .result-box { margin-top: 25px; padding: 15px; background: #eef2f5; border-left: 5px solid #2980b9; border-radius: 4px; display: none; }
+        .url-text { background: white; padding: 10px; border: 1px solid #ddd; border-radius: 4px; word-break: break-all; font-family: monospace; font-size: 13px; margin: 10px 0; max-height: 80px; overflow-y: auto; }
+        .btn-copy { background: #27ae60; margin-top: 5px; padding: 8px; font-size: 14px; }
+        .btn-copy:hover { background: #219150; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📊 CelYa! Dashboard<br><span style="font-size: 14px; color: #7f8c8d; font-weight: normal;">Generador de Enlaces para Choferes</span></h2>
+    
+    <div class="grid">
+        <div class="full-width">
+            <label>IMEI del Equipo (15 dígitos):</label>
+            <input type="text" id="imei" placeholder="Ej. 123456789012345" maxlength="15">
+        </div>
+
+        <div class="full-width">
+            <label>Modelo / Marca:</label>
+            <input type="text" id="modelo" placeholder="Ej. Moto G24 Power">
+        </div>
+
+        <div>
+            <label>Monto Enganche ($):</label>
+            <input type="number" id="monto" placeholder="Ej. 1500">
+        </div>
+
+        <div>
+            <label>Cuota Semanal ($):</label>
+            <input type="number" id="cuota" placeholder="Ej. 250">
+        </div>
+
+        <div>
+            <label>Porcentaje Interés (%):</label>
+            <input type="number" id="interes" value="6">
+        </div>
+
+        <div>
+            <label>Horas Tolerancia:</label>
+            <input type="number" id="horastol" value="24">
+        </div>
+
+        <div class="full-width">
+            <label>Semanas Tolerancia:</label>
+            <input type="number" id="semanastol" value="3">
+        </div>
+    </div>
+
+    <button onclick="generarLink()">🚀 Generar Enlace de Venta</button>
+
+    <div id="resultBox" class="result-box">
+        <label style="color: #2c3e50;">🔗 Enlace listo para el chofer:</label>
+        <div id="urlGenerated" class="url-text"></div>
+        <button class="btn-copy" onclick="copiarLink()">📋 Copiar Enlace</button>
+    </div>
+</div>
+
+<script>
+    function generarLink() {
+        const imei = document.getElementById('imei').value.trim();
+        const modelo = document.getElementById('modelo').value.trim();
+        const monto = document.getElementById('monto').value.trim();
+        const cuota = document.getElementById('cuota').value.trim();
+        const interes = document.getElementById('interes').value.trim();
+        const horastol = document.getElementById('horastol').value.trim();
+        const semanastol = document.getElementById('semanastol').value.trim();
+
+        if(!imei || !modelo || !monto || !cuota) {
+            alert("⚠️ Por favor, llena el IMEI, Modelo, Enganche y Cuota Semanal.");
+            return;
+        }
+
+        // Codificar el modelo para que los espacios no rompan la URL
+        const modeloCodificado = encodeURIComponent(modelo);
+
+        // Construir la URL apuntando a tu index.html principal
+        const baseUrl = "https://scoters.github.io/celya-contratos/";
+        const finalUrl = `${baseUrl}?imei=${imei}&modelo=${modeloCodificado}&monto=${monto}&cuota=${cuota}&interes=${interes}&horastol=${horastol}&semanastol=${semanastol}`;
+
+        // Mostrar caja de resultado
+        document.getElementById('urlGenerated').innerText = finalUrl;
+        document.getElementById('resultBox').style.display = 'block';
+    }
+
+    function copiarLink() {
+        const urlText = document.getElementById('urlGenerated').innerText;
+        navigator.clipboard.writeText(urlText).then(() => {
+            alert("📋 ¡Enlace copiado al portapapeles! Ya puedes pegarlo en WhatsApp.");
+        }).catch(err => {
+            console.error('Error al copiar: ', err);
+        });
+    }
+</script>
+</body>
+</html>
