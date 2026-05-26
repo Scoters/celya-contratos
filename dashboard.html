@@ -94,7 +94,7 @@
         <input type="hidden" id="totalFinanciado" name="totalFinanciado">
         <input type="hidden" id="totalLetra" name="totalLetra">
 
-        <button type="submit" id="btnEnviar">Generar Contrato y Archivar</button>
+        <button type="button" id="btnEnviar" onclick="procesarFormularioManual()">Generar Contrato y Archivar</button>
     </form>
 </div>
 
@@ -218,9 +218,8 @@
     document.getElementById('ineDelantera').addEventListener('change', function() { procesarImagen(this, 'delantera'); });
     document.getElementById('ineTrasera').addEventListener('change', function() { procesarImagen(this, 'trasera'); });
 
-    // 4. Envío del formulario con validaciones directamente en el botón en español
-    document.getElementById('contratoForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
+    // 4. Envío del formulario administrado de forma 100% manual en español
+    async function procesarFormularioManual() {
         const btn = document.getElementById('btnEnviar');
         const colorOriginal = btn.style.background || "#27ae60";
         
@@ -244,6 +243,7 @@
             }, 3500);
         };
 
+        // 🛡️ Evaluación estricta de campos vacíos en español
         if (imeiSeleccionado === "") { mostrarErrorEnBoton("Selecciona un IMEI del inventario"); return; }
         if (plazoSeleccionado === "") { mostrarErrorEnBoton("Selecciona el plazo del crédito"); return; }
         if (nombreCliente === "") { mostrarErrorEnBoton("El Nombre del Cliente es obligatorio"); return; }
@@ -253,7 +253,7 @@
         if (!ineDelanteraB64 || ineDelanteraB64 === "") { mostrarErrorEnBoton("Falta capturar la foto de la INE Frontal"); return; }
         if (!ineTraseraB64 || ineTraseraB64 === "") { mostrarErrorEnBoton("Falta capturar la foto de la INE Reverso"); return; }
 
-        // Si pasa todos los candados, enviamos el formulario
+        // Si pasa todos los candados con éxito, procesamos el guardado
         btn.innerText = "⏳ Guardando Contrato y Subiendo INEs...";
         btn.style.background = "#d35400"; 
         btn.disabled = true;
@@ -263,7 +263,9 @@
             document.getElementById('ineDelanteraBase64').value = ineDelanteraB64;
             document.getElementById('ineTraseraBase64').value = ineTraseraB64;
 
-            const sheetData = new URLSearchParams(new FormData(this));
+            const formularioElemento = document.getElementById('contratoForm');
+            const sheetData = new URLSearchParams(new FormData(formularioElemento));
+            
             const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, { 
                 method: 'POST', 
                 body: sheetData.toString(), 
@@ -275,7 +277,7 @@
                 btn.innerText = "✅ ¡Contrato Guardado con Éxito!";
                 btn.style.background = "#27ae60"; 
                 
-                document.getElementById('contratoForm').reset(); 
+                formularioElemento.reset(); 
                 limpiarFirma();
                 document.getElementById('previewDelantera').innerHTML = ''; 
                 document.getElementById('previewTrasera').innerHTML = '';
@@ -297,7 +299,7 @@
             btn.style.background = "#c0392b"; 
             btn.disabled = false; 
         }
-    });
+    }
 </script>
 </body>
 </html>
