@@ -74,20 +74,22 @@
         <button type="button" class="btn-clear" onclick="limpiarFirma()">Borrar Firma</button>
 
         <input type="hidden" id="firmaBase64" name="firmaBase64">
+        <input type="hidden" id="ineDelanteraBase64" name="ineDelanteraBase64">
+        <input type="hidden" id="ineTraseraBase64" name="ineTraseraBase64">
 
         <button type="submit" id="btnEnviar">Generar Contrato y Archivar</button>
     </form>
 </div>
 
 <script>
-    // 1. Capturar variables de la URL
+    // 1. Capturar variables de WhatsApp en la URL
     const urlParams = new URLSearchParams(window.location.search);
     document.getElementById('imei').value = urlParams.get('imei') || '';
     document.getElementById('modelo').value = urlParams.get('modelo') || '';
     document.getElementById('monto').value = urlParams.get('monto') || '';
     document.getElementById('cuota').value = urlParams.get('cuota') || '';
 
-    // 2. Control del Canvas de la Firma
+    // 2. Lógica del Canvas para la Firma
     const canvas = document.getElementById('canvas-firma');
     const ctx = canvas.getContext('2d');
     let dibujando = false;
@@ -115,11 +117,11 @@
     canvas.addEventListener('touchend', terminarDibujo);
     function limpiarFirma() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
-    // Guardaremos los archivos ya optimizados/comprimidos aquí
-    let fotoDelanteraBlob = null;
-    let fotoTraseraBlob = null;
+    // Variables globales para guardar las fotos en Base64
+    let ineDelanteraB64 = "";
+    let ineTraseraB64 = "";
 
-   // 3. Función Mágica para previsualizar y OPTIMIZAR la imagen para máxima nitidez
+    // 3. Procesar, optimizar en Full HD y guardar fotos en Base64
     function procesarYComprimirImagen(input, previewId, tipo) {
         const preview = document.getElementById(previewId);
         preview.innerHTML = '';
@@ -133,8 +135,7 @@
                 img.src = e.target.result;
                 
                 img.onload = function() {
-                    // Aumentamos el tamaño a 2048 para que las letras chicas sean legibles
-                    const maxAncho = 2048; 
+                    const maxAncho = 2048; // Alta definición legible para INE
                     let ancho = img.width;
                     let alto = img.height;
                     
@@ -149,74 +150,42 @@
                     const ctxOculto = canvasOculto.getContext('2d');
                     ctxOculto.drawImage(img, 0, 0, ancho, alto);
                     
-                    // Subimos la calidad al 95% (0.95) para máxima definición
                     const altaCalidadDataURL = canvasOculto.toDataURL('image/jpeg', 0.95);
                     
-                    // Mostrar previsualización nítida en la pantalla
                     const imgPreview = document.createElement('img');
                     imgPreview.src = altaCalidadDataURL;
                     imgPreview.className = 'preview';
                     preview.appendChild(imgPreview);
                     
-                    // Convertir a archivo real (Blob) con alta fidelidad para Telegram
-                    canvasOculto.toBlob(function(blob) {
-                        if (tipo === 'delantera') fotoDelanteraBlob = blob;
-                        if (tipo === 'trasera') fotoTraseraBlob = blob;
-                    }, 'image/jpeg', 0.95);
+                    if (tipo === 'delantera') ineDelanteraB64 = altaCalidadDataURL;
+                    if (tipo === 'trasera') ineTraseraB64 = altaCalidadDataURL;
                 };
             };
             reader.readAsDataURL(file);
         }
     }
 
-    document.getElementById('ineDelantera').addEventListener('change', function() { procesarYComprimirImagen(this, 'previewDelantera', 'delantera'); });
-    document.getElementById('ineTrasera').addEventListener('change', function() { procesarYComprimirImagen(this, 'previewTrasera', 'trasera'); });
+    document.getElementById('ineDelantera').addEventListener('change', function() { 
+        procesarYComprimirImagen(this, 'previewDelantera', 'delantera'); 
+    });
+    document.getElementById('ineTrasera').addEventListener('change', function() { 
+        procesarYComprimirImagen(this, 'previewTrasera', 'trasera'); 
+    });
 
-    // 4. Función de envío directo a la API de Telegram
-    async function enviarATelegram(blobFile, textoMensaje, nombreArchivo) {
-        const TELEGRAM_TOKEN = CONFIG.TELEGRAM_TOKEN; 
-        const CHAT_ID = CONFIG.CHAT_ID;
-
-        const formData = new FormData();
-        formData.append('chat_id', CHAT_ID);
-        formData.append('photo', blobFile, nombreArchivo);
-        formData.append('caption', textoMensaje);
-
-        await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
-            method: 'POST',
-            body: formData
-        });
-    }
-
-    // 5. Envío en paralelo (Telegram + Google Sheets)
+    // 4. Envío unificado al Google Apps Script
     document.getElementById('contratoForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const btn = document.getElementById('btnEnviar');
-        btn.innerText = "Optimizando y subiendo datos...";
+        btn.innerText = "Procesando y protegiendo envío...";
         btn.disabled = true;
 
-        const imei = document.getElementById('imei').value;
-        const modelo = document.getElementById('modelo').value;
-        const cliente = document.getElementById('cliente').value.trim();
-
-        // Creamos la base del mensaje limpia
-        const datosCliente = `👤 Cliente: ${cliente}\n📱 Modelo: ${modelo}\n🆔 IMEI: ${imei}`;
-
         try {
-            // A. Subir las imágenes optimizadas a Telegram con el título correcto arriba
-            if (fotoDelanteraBlob) {
-                const mensajeDelantera = `🪪 INE PARTE DELANTERA\n\n${datosCliente}`;
-                await enviarATelegram(fotoDelanteraBlob, mensajeDelantera, `${cliente}_INE_Delantera.jpg`);
-            }
-            if (fotoTraseraBlob) {
-                const mensajeTrasera = `🪪 INE REVERSO\n\n${datosCliente}`;
-                await enviarATelegram(fotoTraseraBlob, mensajeTrasera, `${cliente}_INE_Trasera.jpg`);
-            }
-
-            // B. Enviar los datos ligeros de texto y la firma al Sheets
+            // Pasamos los valores de las fotos y firma a los campos del formulario
             document.getElementById('firmaBase64').value = canvas.toDataURL('image/png');
+            document.getElementById('ineDelanteraBase64').value = ineDelanteraB64;
+            document.getElementById('ineTraseraBase64').value = ineTraseraB64;
+
             const sheetData = new URLSearchParams(new FormData(this));
-            
             const URL_GOOGLE_SCRIPT = CONFIG.GOOGLE_SCRIPT_URL;
 
             const res = await fetch(URL_GOOGLE_SCRIPT, { 
@@ -227,13 +196,13 @@
             const data = await res.json();
 
             if (data.result === 'success') {
-                alert('✅ ¡Éxito total! Datos registrados en Sheets e INEs archivadas en tu Telegram.');
+                alert('✅ ¡Éxito total! Contrato registrado en Sheets e INEs archivadas en tu Telegram de forma segura.');
                 document.getElementById('contratoForm').reset();
                 limpiarFirma();
                 document.getElementById('previewDelantera').innerHTML = '';
                 document.getElementById('previewTrasera').innerHTML = '';
-                fotoDelanteraBlob = null;
-                fotoTraseraBlob = null;
+                ineDelanteraB64 = "";
+                ineTraseraB64 = "";
             } else {
                 alert('⚠️ Error en Google Sheets: ' + data.error);
             }
