@@ -3,222 +3,359 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CelYa! - Panel de Control Administrativo</title>
+    <title>Registro de Contrato - CelYa</title>
     <script src="config.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background-color: #2c3e50; color: #333; }
-        .container { max-width: 550px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin: 20px auto; }
-        h2 { text-align: center; color: #2c3e50; margin-bottom: 5px; }
-        h3 { color: #2c3e50; border-bottom: 2px solid #e67e22; padding-bottom: 5px; margin-top: 25px; font-size: 18px; }
-        label { font-weight: bold; display: block; margin-top: 15px; color: #34495e; font-size: 14px; }
-        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; font-family: Arial, sans-serif; }
-        textarea { resize: vertical; height: 80px; }
-        .row { display: flex; gap: 15px; }
-        .row .col { flex: 1; }
-        button { width: 100%; background: #e67e22; color: white; padding: 14px; border: none; border-radius: 4px; font-size: 16px; margin-top: 25px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
-        button:hover { background: #d35400; }
-        .btn-pago { background: #27ae60; }
-        .btn-pago:hover { background: #219152; }
-        .status { text-align: center; font-weight: bold; margin-top: 15px; color: #7f8c8d; }
-        hr { border: 0; height: 1px; background: #ccc; margin: 40px 0 20px 0; }
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
+        .container { max-width: 500px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin: 0 auto; }
+        h2 { text-align: center; color: #2c3e50; }
+        label { font-weight: bold; display: block; margin-top: 10px; }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        input[readonly] { background-color: #e9ecef; }
+        
+        .contenedor-canvas-firma {
+            width: 100%;
+            margin-top: 5px;
+            position: relative;
+            background: #fff;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        #canvas-firma { 
+            border: 2px dashed #34495e; 
+            background: #fff; 
+            border-radius: 4px; 
+            cursor: crosshair; 
+            touch-action: none; 
+            display: block;
+            width: 100% !important; 
+            height: 200px !important; 
+            box-sizing: border-box;
+        }
+
+        button { width: 100%; background: #27ae60; color: white; padding: 12px; border: none; border-radius: 4px; font-size: 16px; margin-top: 15px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
+        button:hover { background: #219150; }
+        .btn-clear { background: #e74c3c; margin-top: 5px; padding: 5px; font-size: 12px; }
+        .btn-clear:hover { background: #c0392b; }
+        .photo-container { margin: 15px 0; }
+        .preview { max-width: 100%; margin-top: 8px; border: 2px solid #ddd; border-radius: 6px; }
+        .loading-inv { color: #e67e22; font-weight: bold; text-align: center; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>⚙️ CelYa! Panel Admin</h2>
-    <div id="statusMsg" class="status">⏳ Conectando con el servidor de Sheets...</div>
-
-    <h3>💸 Registrar Abono Semanal</h3>
-    <form id="pagoForm">
-        <label>Seleccionar Cliente y Equipo:</label>
-        <select id="selectCliente" required>
-            <option value="">Cargando clientes activos...</option>
+    <h2>CelYa - Nuevo Contrato</h2>
+    <div id="loadMsg" class="loading-inv">⏳ Sincronizando Equipos e Inventario CelYa...</div>
+    
+    <form id="contratoForm" onsubmit="event.preventDefault(); procesarFormularioManual();">
+        <label>Seleccionar IMEI del Teléfono:</label>
+        <select id="selectorImei" onchange="autoRellenarEquipo()" required>
+            <option value="">-- Elige el IMEI del celular --</option>
         </select>
 
-        <div class="row">
-            <div class="col">
-                <label>Monto a Abonar ($):</label>
-                <input type="number" id="montoPago" step="0.01" placeholder="0.00" required>
-            </div>
-            <div class="col">
-                <label>Método de Pago:</label>
-                <select id="metodoPago" required>
-                    <option value="Efectivo">Efectivo</option>
-                    <option value="Transferencia">Transferencia</option>
-                    <option value="Depósito">Depósito</option>
-                </select>
-            </div>
+        <label>Modelo / Marca:</label>
+        <input type="text" id="modelo" name="modelo" readonly required>
+
+        <label>Monto del Enganche ($):</label>
+        <input type="text" id="monto" name="monto" readonly required>
+
+        <label>Cuota Semanal ($):</label>
+        <input type="text" id="cuota" name="cuota" readonly required>
+
+        <label>Plazo del Crédito:</label>
+        <select id="plazoSemanas" name="plazoSemanas" onchange="actualizarCuotaPorPlazo()" required>
+            <option value="">-- Elige el plazo --</option>
+            <option value="26">Plan Rápido (6 Meses / 26 Semanas)</option>
+            <option value="52">Plan Cómodo (12 Meses / 52 Semanas)</option>
+        </select>
+
+        <hr style="margin-top:20px;">
+
+        <label>Nombre Completo del Cliente:</label>
+        <input type="text" id="cliente" name="cliente" required>
+
+        <label>Teléfono Celular Principal:</label>
+        <input type="tel" id="telefono" name="telefono" maxlength="10" required>
+
+        <label>Fecha de Nacimiento:</label>
+        <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+
+        <label>Dirección Completa de Domicilio:</label>
+        <textarea id="direccion" name="direccion" rows="3" required></textarea>
+
+        <label>Teléfono de Aval / Referencia:</label>
+        <input type="tel" id="telefonoAval" name="telefonoAval" maxlength="10" required>
+
+        <div class="photo-container">
+            <label>📷 Foto INE Frontal:</label>
+            <input type="file" id="ineDelantera" accept="image/*" capture="camera">
+            <div id="previewDelantera"></div>
         </div>
 
-        <div class="row">
-            <div class="col">
-                <label>Semana Corresp.:</label>
-                <input type="text" id="semanaPago" placeholder="Ej: Sem 3 o 4" required>
-            </div>
-            <div class="col">
-                <label>Recibo / Folio:</label>
-                <input type="text" id="folioPago" placeholder="Opcional">
-            </div>
+        <div class="photo-container">
+            <label>📷 Foto INE Reverso:</label>
+            <input type="file" id="ineTrasera" accept="image/*" capture="camera">
+            <div id="previewTrasera"></div>
         </div>
 
-        <label>Notas o Comentarios del Pago:</label>
-        <textarea id="notasPago" placeholder="Detalles del abono..."></textarea>
+        <label>Firma del Cliente:</label>
+        <div class="contenedor-canvas-firma">
+            <canvas id="canvas-firma"></canvas>
+        </div>
+        <button type="button" class="btn-clear" onclick="limpiarFirma()">Borrar Firma</button>
 
-        <button type="submit" id="btnGuardarPago" class="btn-pago">💵 Aplicar y Guardar Pago</button>
-    </form>
+        <input type="hidden" id="firmaBase64" name="firmaBase64">
+        <input type="hidden" id="ineDelanteraBase64" name="ineDelanteraBase64">
+        <input type="hidden" id="ineTraseraBase64" name="ineTraseraBase64">
+        <input type="hidden" id="imei" name="imei">
+        
+        <input type="hidden" id="interes" name="interes">
+        <input type="hidden" id="horastol" name="horastol">
+        <input type="hidden" id="semanastol" name="semanastol">
+        <input type="hidden" id="totalFinanciado" name="totalFinanciado">
+        <input type="hidden" id="totalLetra" name="totalLetra">
 
-    <hr>
-
-    <h3>🔧 Configuración Global de Contratos</h3>
-    <form id="configForm">
-        <label>Porcentaje de Interés Moratorio (%):</label>
-        <input type="number" id="interes" name="interes" required>
-
-        <label>Horas de Tolerancia para Pago:</label>
-        <input type="number" id="horastol" name="horastol" required>
-
-        <label>Semanas Máximas de Tolerancia (Atraso):</label>
-        <input type="number" id="semanastol" name="semanastol" required>
-
-        <button type="submit" id="btnGuardarConfig">💾 Guardar Configuración Global</button>
-    </form>
+        <button type="submit" id="btnEnviar">Generar Contrato y Archivar</button>
+    </form> 
 </div>
 
 <script>
-    let listaClientesLocales = [];
+    let cacheEcosistema = {};
+    let ineDelanteraB64 = ""; 
+    let ineTraseraB64 = "";
 
-    // Carga síncrona idéntica a la lógica exitosa de index.html 🚀
-    async function cargarDatosDashboard() {
+    window.onload = async function() {
         try {
-            const respuesta = await fetch(CONFIG.GOOGLE_SCRIPT_URL);
-            const datos = await respuesta.json();
+            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL);
+            cacheEcosistema = await res.json();
+            
+            const selector = document.getElementById('selectorImei');
+            cacheEcosistema.inventario.forEach((equipo, index) => {
+                const opt = document.createElement('option');
+                opt.value = index;
+                opt.text = `${equipo.imei} (${equipo.modelo})`;
+                selector.appendChild(opt);
+            });
 
-            // Inyectar Configuración
-            document.getElementById('interes').value = datos.config.interes;
-            document.getElementById('horastol').value = datos.config.horastol;
-            document.getElementById('semanastol').value = datos.config.semanastol;
+            document.getElementById('interes').value = cacheEcosistema.config.interes;
+            document.getElementById('horastol').value = cacheEcosistema.config.horastol;
+            document.getElementById('semanastol').value = cacheEcosistema.config.semanastol;
+            
+            document.getElementById('loadMsg').style.display = 'none';
+            
+            resizeCanvas();
+        } catch (err) {
+            document.getElementById('loadMsg').innerText = "❌ Error de sincronización con CelYa.";
+            console.error(err);
+        }
+    };
 
-            // Inyectar Clientes en el Desplegable
-            listaClientesLocales = datos.clientesActivos || [];
-            const selectElemento = document.getElementById('selectCliente');
-            selectElemento.innerHTML = '<option value="">-- Elige Cliente - Modelo (IMEI) --</option>';
+    function autoRellenarEquipo() {
+        const idx = document.getElementById('selectorImei').value;
+        if(idx === "") {
+            document.getElementById('modelo').value = ''; document.getElementById('monto').value = '';
+            document.getElementById('cuota').value = ''; document.getElementById('imei').value = '';
+            document.getElementById('totalFinanciado').value = ''; document.getElementById('totalLetra').value = '';
+            return;
+        }
+        const equipo = cacheEcosistema.inventario[idx];
+        document.getElementById('imei').value = equipo.imei;
+        document.getElementById('modelo').value = equipo.modelo;
+        document.getElementById('monto').value = equipo.enganche;
+        document.getElementById('totalFinanciado').value = equipo.totalFinanciado;
+        document.getElementById('totalLetra').value = equipo.totalLetra;
 
-            if (listaClientesLocales.length === 0) {
-                selectElemento.innerHTML = '<option value="">⚠️ No se encontraron clientes en Sheets</option>';
-            } else {
-                listaClientesLocales.forEach((item, index) => {
-                    let opcion = document.createElement('option');
-                    opcion.value = index;
-                    opcion.textContent = item.etiquetaCompleta;
-                    selectElemento.appendChild(opcion);
-                });
-            }
+        // Si ya hay un plazo seleccionado antes de elegir el IMEI, calcula la cuota de una vez
+        actualizarCuotaPorPlazo();
+    }
 
-            document.getElementById('statusMsg').style.display = 'none';
-        } catch (error) {
-            document.getElementById('statusMsg').innerText = "❌ Error al sincronizar con Google Sheets.";
-            console.error("Fallo de carga:", error);
+    // LÓGICA DE DETECCIÓN DINÁMICA DE CUOTAS 🚀
+    function actualizarCuotaPorPlazo() {
+        const idx = document.getElementById('selectorImei').value;
+        const plazo = document.getElementById('plazoSemanas').value;
+        const campoCuota = document.getElementById('cuota');
+
+        if (idx === "" || plazo === "") {
+            campoCuota.value = '';
+            return;
+        }
+
+        const equipo = cacheEcosistema.inventario[idx];
+        
+        // Plazo 26 lee columna D (cuota), Plazo 52 lee columna E (totalLetra) desde tu Inventario Sheets
+        if (plazo === "26") {
+            campoCuota.value = equipo.cuota;
+        } else if (plazo === "52") {
+            campoCuota.value = equipo.totalLetra;
         }
     }
 
-    // Ejecutar la inicialización directo al procesar el script (Igual que index.html)
-    cargarDatosDashboard();
+    const canvas = document.getElementById('canvas-firma'); 
+    const ctx = canvas.getContext('2d'); 
+    let dibujando = false;
 
-    // Guardar Registro de Pago
-    document.getElementById('pagoForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const btn = document.getElementById('btnGuardarPago');
-        const selectIdx = document.getElementById('selectCliente').value;
-        
-        if(selectIdx === "") return alert("Por favor, selecciona un cliente válido.");
-        const clienteSeleccionado = listaClientesLocales[selectIdx];
+    function resizeCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width > 0) {
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = rect.width * ratio;
+            canvas.height = rect.height * ratio;
+            ctx.scale(ratio, ratio);
+        }
+    }
+    window.addEventListener('resize', resizeCanvas);
 
-        btn.innerText = "⏳ Registrando abono en Sheets...";
-        btn.style.background = "#34495e";
+    function obtenerPosicion(e) { 
+        const rect = canvas.getBoundingClientRect(); 
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX; 
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY; 
+        return { x: clientX - rect.left, y: clientY - rect.top }; 
+    }
+    
+    canvas.addEventListener('mousedown', (e) => { 
+        if (canvas.width === 0 || canvas.height === 0) resizeCanvas();
+        dibujando = true; 
+        ctx.beginPath(); 
+        const p = obtenerPosicion(e); 
+        ctx.moveTo(p.x, p.y); 
+    });
+    
+    canvas.addEventListener('mousemove', (e) => { 
+        if(!dibujando) return; 
+        e.preventDefault(); 
+        const p = obtenerPosicion(e); 
+        ctx.lineWidth = 2.5; 
+        ctx.lineCap = 'round'; 
+        ctx.strokeStyle = '#000000'; 
+        ctx.lineTo(p.x, p.y); 
+        ctx.stroke(); 
+    });
+    canvas.addEventListener('mouseup', () => dibujando = false);
+    
+    canvas.addEventListener('touchstart', (e) => { 
+        if (canvas.width === 0 || canvas.height === 0) resizeCanvas();
+        dibujando = true; 
+        ctx.beginPath(); 
+        const p = obtenerPosicion(e); 
+        ctx.moveTo(p.x, p.y); 
+    });
+    
+    canvas.addEventListener('touchmove', (e) => { 
+        if(!dibujando) return; 
+        e.preventDefault(); 
+        const p = obtenerPosicion(e); 
+        ctx.lineWidth = 2.5; 
+        ctx.lineCap = 'round'; 
+        ctx.strokeStyle = '#000000'; 
+        ctx.lineTo(p.x, p.y); 
+        ctx.stroke(); 
+    });
+    canvas.addEventListener('touchend', () => dibujando = false);
+    
+    function limpiarFirma() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+    function procesarImagen(input, tipo) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image(); 
+                img.src = e.target.result;
+                img.onload = function() {
+                    const canvasO = document.createElement('canvas'); 
+                    canvasO.width = img.width > 2048 ? 2048 : img.width; 
+                    canvasO.height = Math.round((img.height * canvasO.width) / img.width);
+                    canvasO.getContext('2d').drawImage(img, 0, 0, canvasO.width, canvasO.height);
+                    const b64 = canvasO.toDataURL('image/jpeg', 0.90);
+                    
+                    const pImg = document.createElement('img'); 
+                    pImg.src = b64; 
+                    pImg.className = "preview";
+                    
+                    const div = document.getElementById(tipo === 'delantera' ? 'previewDelantera' : 'previewTrasera'); 
+                    div.innerHTML = ''; 
+                    div.appendChild(pImg);
+                    
+                    if (tipo === 'delantera') ineDelanteraB64 = b64; else ineTraseraB64 = b64;
+                };
+            }; 
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    document.getElementById('ineDelantera').addEventListener('change', function() { procesarImagen(this, 'delantera'); });
+    document.getElementById('ineTrasera').addEventListener('change', function() { procesarImagen(this, 'trasera'); });
+
+    async function procesarFormularioManual() {
+        const btn = document.getElementById('btnEnviar');
+        const colorOriginal = btn.style.background || "#27ae60";
+
+        const mostrarErrorEnBoton = (mensaje) => {
+            btn.innerText = "⚠️ " + mensaje;
+            btn.style.background = "#c0392b"; 
+            btn.disabled = true;
+            setTimeout(() => {
+                btn.innerText = "Generar Contrato y Archivar";
+                btn.style.background = colorOriginal;
+                btn.disabled = false;
+            }, 3500);
+        };
+
+        if (!ineDelanteraB64 || ineDelanteraB64 === "") { mostrarErrorEnBoton("Falta capturar la foto de la INE Frontal"); return; }
+        if (!ineTraseraB64 || ineTraseraB64 === "") { mostrarErrorEnBoton("Falta capturar la foto de la INE Reverso"); return; }
+
+        const lienzoVacio = document.createElement('canvas');
+        lienzoVacio.width = canvas.width;
+        lienzoVacio.height = canvas.height;
+        if (canvas.toDataURL() === lienzoVacio.toDataURL()) {
+            mostrarErrorEnBoton("Por favor, pídale al cliente que firme el contrato.");
+            return;
+        }
+
+        btn.innerText = "⏳ Guardando Contrato y Subiendo INEs...";
+        btn.style.background = "#d35400"; 
         btn.disabled = true;
 
         try {
-            const formData = new URLSearchParams();
-            formData.append('action', 'registrarPago');
-            formData.append('imei', clienteSeleccionado.imei);
-            formData.append('nombreCliente', clienteSeleccionado.cliente);
-            formData.append('monto', document.getElementById('montoPago').value);
-            formData.append('metodo', document.getElementById('metodoPago').value);
-            formData.append('semana', document.getElementById('semanaPago').value);
-            formData.append('folio', document.getElementById('folioPago').value || "");
-            formData.append('notas', document.getElementById('notasPago').value || "");
+            document.getElementById('firmaBase64').value = canvas.toDataURL('image/png');
+            document.getElementById('ineDelanteraBase64').value = ineDelanteraB64;
+            document.getElementById('ineTraseraBase64').value = ineTraseraB64;
 
-            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                body: formData.toString(),
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            const formularioElemento = document.getElementById('contratoForm');
+            const sheetData = new URLSearchParams(new FormData(formularioElemento));
+            
+            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, { 
+                method: 'POST', 
+                body: sheetData.toString(), 
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' } 
             });
             const data = await res.json();
 
             if (data.result === 'success') {
-                btn.innerText = "✅ ¡Pago Registrado Exitosamente!";
-                btn.style.background = "#27ae60";
-                document.getElementById('pagoForm').reset();
-            } else {
-                btn.innerText = "⚠️ Error en base de datos";
-                btn.style.background = "#c0392b";
-                btn.disabled = false;
+                btn.innerText = "✅ ¡Contrato Guardado con Éxito!";
+                btn.style.background = "#27ae60"; 
+                formularioElemento.reset(); 
+                limpiarFirma();
+                document.getElementById('previewDelantera').innerHTML = ''; 
+                document.getElementById('previewTrasera').innerHTML = '';
+                ineDelanteraB64 = ""; ineTraseraB64 = "";
+                setTimeout(() => { 
+                    btn.innerText = "Generar Contrato y Archivar"; 
+                    btn.style.background = colorOriginal; 
+                    btn.disabled = false; 
+                    location.reload(); 
+                }, 4000);
+            } else { 
+                btn.innerText = "⚠️ Error: " + data.error; 
+                btn.style.background = "#c0392b"; 
+                btn.disabled = false; 
             }
-        } catch (err) {
-            btn.innerText = "❌ Error de conexión";
-            btn.style.background = "#c0392b";
-            btn.disabled = false;
-        } finally {
-            setTimeout(() => {
-                btn.innerText = "💵 Aplicar y Guardar Pago";
-                btn.style.background = "#27ae60";
-                btn.disabled = false;
-            }, 3500);
+        } catch (err) { 
+            btn.innerText = "❌ Error de conexión, reintente."; 
+            btn.style.background = "#c0392b"; 
+            btn.disabled = false; 
         }
-    });
-
-    // Guardar Configuración Global
-    document.getElementById('configForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const btn = document.getElementById('btnGuardarConfig');
-        
-        btn.innerText = "⏳ Aplicando cambios globales...";
-        btn.style.background = "#34495e";
-        btn.disabled = true;
-
-        try {
-            const formData = new URLSearchParams();
-            formData.append('action', 'updateConfig');
-            formData.append('interes', document.getElementById('interes').value);
-            formData.append('horastol', document.getElementById('horastol').value);
-            formData.append('semanastol', document.getElementById('semanastol').value);
-
-            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                body: formData.toString(),
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-            });
-            const data = await res.json();
-
-            if (data.result === 'success') {
-                btn.innerText = "✅ ¡Configuración Guardada!";
-                btn.style.background = "#27ae60";
-            } else {
-                btn.innerText = "⚠️ Error al guardar";
-                btn.style.background = "#c0392b";
-            }
-        } catch (err) {
-            btn.innerText = "❌ Error de conexión de red";
-            btn.style.background = "#c0392b";
-        } finally {
-            setTimeout(() => {
-                btn.innerText = "💾 Guardar Configuración Global";
-                btn.style.background = "#e67e22";
-                btn.disabled = false;
-            }, 3500);
-        }
-    });
+    }
 </script>
 </body>
 </html>
