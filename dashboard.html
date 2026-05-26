@@ -16,16 +16,17 @@
         input[readonly] { background-color: #e9ecef; }
         button { width: 100%; background: #2980b9; color: white; padding: 12px; border: none; border-radius: 4px; font-size: 16px; margin-top: 20px; cursor: pointer; font-weight: bold; }
         button:hover { background: #2471a3; }
-        .result-box { margin-top: 25px; padding: 15px; background: #eef2f5; border-left: 5px solid #2980b9; border-radius: 4px; display: none; }
-        .url-text { background: white; padding: 10px; border: 1px solid #ddd; border-radius: 4px; word-break: break-all; font-family: monospace; font-size: 13px; margin: 10px 0; max-height: 80px; overflow-y: auto; }
+        .result-box { margin-top: 25px; padding: 15px; background: #eef2f5; border-left: 5px solid #27ae60; border-radius: 4px; display: none; }
+        .url-text { background: white; padding: 10px; border: 1px solid #ddd; border-radius: 4px; word-break: break-all; font-family: monospace; font-size: 14px; margin: 10px 0; font-weight: bold; color: #27ae60; }
         .btn-copy { background: #27ae60; margin-top: 5px; padding: 8px; font-size: 14px; }
+        .btn-copy:hover { background: #219150; }
         .status-load { color: #e67e22; font-weight: bold; text-align: center; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>📊 CelYa! Dashboard v2<br><span style="font-size: 14px; color: #7f8c8d; font-weight: normal;">Sincronizado con Inventario Real</span></h2>
+    <h2>📊 CelYa! Dashboard v2.5<br><span style="font-size: 14px; color: #7f8c8d; font-weight: normal;">Con Acortador de Enlaces Automático</span></h2>
     
     <div id="loadingStatus" class="status-load">⏳ Cargando inventario desde Google Sheets...</div>
 
@@ -64,7 +65,7 @@
 
         <div class="full-width">
             <label>Plan de Financiamiento (Plazo):</label>
-            <select id="planPlazo" onchange="calcularSemanas()">
+            <select id="planPlazo">
                 <option value="26">Plan Rápido (6 Meses / 26 Semanas)</option>
                 <option value="52">Plan Cómodo (12 Meses / 52 Semanas)</option>
             </select>
@@ -86,19 +87,19 @@
         </div>
     </div>
 
-    <button onclick="generarLink()">🚀 Generar Enlace de Venta</button>
+    <button id="btnGenerar" onclick="generarLink()">🚀 Generar Enlace Corto</button>
 
     <div id="resultBox" class="result-box">
-        <label style="color: #2c3e50;">🔗 Enlace listo para el chofer:</label>
+        <label style="color: #2c3e50; font-weight: bold;">🔗 Enlace acortado listo para mandar por WhatsApp:</label>
         <div id="urlGenerated" class="url-text"></div>
-        <button class="btn-copy" onclick="copiarLink()">📋 Copiar Enlace</button>
+        <button class="btn-copy" onclick="copiarLink()">📋 Copiar Enlace Corto</button>
     </div>
 </div>
 
 <script>
     let cacheInventario = [];
 
-    // Llamada automática al abrir para jalar la base de datos de Google por medio de GET
+    // Llamada automática al abrir para jalar el inventario
     window.onload = async function() {
         try {
             const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL);
@@ -137,9 +138,13 @@
         document.getElementById('totalLetra').value = equipo.totalLetra;
     }
 
-    function generarLink() {
+    async function generarLink() {
         const idx = document.getElementById('selectorInventario').value;
         if(idx === "") { alert("⚠️ Por favor selecciona un equipo del inventario."); return; }
+
+        const btn = document.getElementById('btnGenerar');
+        btn.innerText = "⏳ Generando y acortando enlace...";
+        btn.disabled = true;
 
         const equipo = cacheInventario[idx];
         const interes = document.getElementById('interes').value.trim();
@@ -152,17 +157,36 @@
 
         const baseUrl = "https://scoters.github.io/celya-contratos/";
         
-        // Adjuntamos absolutamente todos los parámetros para capturarlos en Autocrat
-        const finalUrl = `${baseUrl}?imei=${equipo.imei}&modelo=${modeloCodificado}&monto=${equipo.enganche}&cuota=${equipo.cuota}&interes=${interes}&horastol=${horastol}&semanastol=${semanastol}&plazoSemanas=${plazoSemanas}&totalFinanciado=${equipo.totalFinanciado}&totalLetra=${letraCodificada}`;
+        // 1. Construir la URL larga original
+        const urlLarga = `${baseUrl}?imei=${equipo.imei}&modelo=${modeloCodificado}&monto=${equipo.enganche}&cuota=${equipo.cuota}&interes=${interes}&horastol=${horastol}&semanastol=${semanastol}&plazoSemanas=${plazoSemanas}&totalFinanciado=${equipo.totalFinanciado}&totalLetra=${letraCodificada}`;
 
-        document.getElementById('urlGenerated').innerText = finalUrl;
-        document.getElementById('resultBox').style.display = 'block';
+        try {
+            // 2. Llamar en caliente a la API pública y gratuita de TinyURL para encoger el link
+            const respuestaTiny = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(urlLarga)}`);
+            
+            if (!respuestaTiny.ok) throw new Error("Error en respuesta del acortador");
+            
+            const urlCortada = await respuestaTiny.text();
+
+            // 3. Mostrar enlace corto en la interfaz
+            document.getElementById('urlGenerated').innerText = urlCortada;
+            document.getElementById('resultBox').style.display = 'block';
+
+        } catch (error) {
+            console.error("No se pudo acortar automáticamente:", error);
+            alert("⚠️ El acortador falló, pero te dejamos el link largo para que no detengas tu operación.");
+            document.getElementById('urlGenerated').innerText = urlLarga;
+            document.getElementById('resultBox').style.display = 'block';
+        } finally {
+            btn.innerText = "🚀 Generar Enlace Corto";
+            btn.disabled = false;
+        }
     }
 
     function copiarLink() {
         const urlText = document.getElementById('urlGenerated').innerText;
         navigator.clipboard.writeText(urlText).then(() => {
-            alert("📋 ¡Enlace de venta copiado!");
+            alert("📋 ¡Enlace copiado al portapapeles! Ya puedes pegarlo directamente en el chat de WhatsApp.");
         });
     }
 </script>
