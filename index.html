@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Contrato - CelYa</title>
-    
     <script src="config.js"></script>
-
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
         .container { max-width: 500px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin: 0 auto; }
@@ -76,18 +74,27 @@
         <input type="hidden" id="firmaBase64" name="firmaBase64">
         <input type="hidden" id="ineDelanteraBase64" name="ineDelanteraBase64">
         <input type="hidden" id="ineTraseraBase64" name="ineTraseraBase64">
+        
+        <input type="hidden" id="interes" name="interes">
+        <input type="hidden" id="horastol" name="horastol">
+        <input type="hidden" id="semanastol" name="semanastol">
 
         <button type="submit" id="btnEnviar">Generar Contrato y Archivar</button>
     </form>
 </div>
 
 <script>
-    // 1. Capturar variables de WhatsApp en la URL
+    // 1. Capturar TODAS las variables de la URL (Tanto visibles como ocultas)
     const urlParams = new URLSearchParams(window.location.search);
     document.getElementById('imei').value = urlParams.get('imei') || '';
     document.getElementById('modelo').value = urlParams.get('modelo') || '';
     document.getElementById('monto').value = urlParams.get('monto') || '';
     document.getElementById('cuota').value = urlParams.get('cuota') || '';
+    
+    // Captura oculta para Autocrat
+    document.getElementById('interes').value = urlParams.get('interes') || '';
+    document.getElementById('horastol').value = urlParams.get('horastol') || '';
+    document.getElementById('semanastol').value = urlParams.get('semanastol') || '';
 
     // 2. Lógica del Canvas para la Firma
     const canvas = document.getElementById('canvas-firma');
@@ -117,46 +124,31 @@
     canvas.addEventListener('touchend', terminarDibujo);
     function limpiarFirma() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
-    // Variables globales para guardar las fotos en Base64
     let ineDelanteraB64 = "";
     let ineTraseraB64 = "";
 
-    // 3. Procesar, optimizar en Full HD y guardar fotos en Base64
+    // 3. Procesar e igualar fotos a HD legible
     function procesarYComprimirImagen(input, previewId, tipo) {
         const preview = document.getElementById(previewId);
         preview.innerHTML = '';
-        
         if (input.files && input.files[0]) {
             const file = input.files[0];
             const reader = new FileReader();
-            
             reader.onload = function(e) {
                 const img = new Image();
                 img.src = e.target.result;
-                
                 img.onload = function() {
-                    const maxAncho = 2048; // Alta definición legible para INE
-                    let ancho = img.width;
-                    let alto = img.height;
-                    
-                    if (ancho > maxAncho) {
-                        alto = Math.round((alto * maxAncho) / ancho);
-                        ancho = maxAncho;
-                    }
-                    
+                    const maxAncho = 2048;
+                    let ancho = img.width; let alto = img.height;
+                    if (ancho > maxAncho) { alto = Math.round((alto * maxAncho) / ancho); ancho = maxAncho; }
                     const canvasOculto = document.createElement('canvas');
-                    canvasOculto.width = ancho;
-                    canvasOculto.height = alto;
+                    canvasOculto.width = ancho; canvasOculto.height = alto;
                     const ctxOculto = canvasOculto.getContext('2d');
                     ctxOculto.drawImage(img, 0, 0, ancho, alto);
-                    
                     const altaCalidadDataURL = canvasOculto.toDataURL('image/jpeg', 0.95);
-                    
                     const imgPreview = document.createElement('img');
-                    imgPreview.src = altaCalidadDataURL;
-                    imgPreview.className = 'preview';
+                    imgPreview.src = altaCalidadDataURL; imgPreview.className = 'preview';
                     preview.appendChild(imgPreview);
-                    
                     if (tipo === 'delantera') ineDelanteraB64 = altaCalidadDataURL;
                     if (tipo === 'trasera') ineTraseraB64 = altaCalidadDataURL;
                 };
@@ -165,14 +157,10 @@
         }
     }
 
-    document.getElementById('ineDelantera').addEventListener('change', function() { 
-        procesarYComprimirImagen(this, 'previewDelantera', 'delantera'); 
-    });
-    document.getElementById('ineTrasera').addEventListener('change', function() { 
-        procesarYComprimirImagen(this, 'previewTrasera', 'trasera'); 
-    });
+    document.getElementById('ineDelantera').addEventListener('change', function() { procesarYComprimirImagen(this, 'previewDelantera', 'delantera'); });
+    document.getElementById('ineTrasera').addEventListener('change', function() { procesarYComprimirImagen(this, 'previewTrasera', 'trasera'); });
 
-    // 4. Envío unificado al Google Apps Script
+    // 4. Envío de paquete unificado
     document.getElementById('contratoForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const btn = document.getElementById('btnEnviar');
@@ -180,7 +168,6 @@
         btn.disabled = true;
 
         try {
-            // Pasamos los valores de las fotos y firma a los campos del formulario
             document.getElementById('firmaBase64').value = canvas.toDataURL('image/png');
             document.getElementById('ineDelanteraBase64').value = ineDelanteraB64;
             document.getElementById('ineTraseraBase64').value = ineTraseraB64;
@@ -196,20 +183,18 @@
             const data = await res.json();
 
             if (data.result === 'success') {
-                alert('✅ ¡Éxito total! Contrato registrado en Sheets e INEs archivadas en tu Telegram de forma segura.');
+                alert('✅ ¡Éxito total! Datos registrados en Sheets e INEs archivadas en tu Telegram.');
                 document.getElementById('contratoForm').reset();
                 limpiarFirma();
                 document.getElementById('previewDelantera').innerHTML = '';
                 document.getElementById('previewTrasera').innerHTML = '';
-                ineDelanteraB64 = "";
-                ineTraseraB64 = "";
+                ineDelanteraB64 = ""; ineTraseraB64 = "";
             } else {
                 alert('⚠️ Error en Google Sheets: ' + data.error);
             }
-
         } catch (err) {
             console.error(err);
-            alert('❌ Hubo un problema al procesar el envío. Revisa tu conexión de internet.');
+            alert('❌ Hubo un problema al procesar el envío.');
         } finally {
             btn.innerText = "Generar Contrato y Archivar";
             btn.disabled = false;
