@@ -40,21 +40,6 @@
 <div class="container">
     <h2>📱 Registro de Contrato CelYa</h2>
     <form id="contratoForm">
-        <label>Nombre del Cliente:</label>
-        <input type="text" name="cliente" required placeholder="Ej. Juan Pérez">
-
-        <label>Teléfono Celular:</label>
-        <input type="tel" name="telefono" required placeholder="10 dígitos">
-
-        <label>Fecha de Nacimiento:</label>
-        <input type="date" name="fechaNacimiento" required>
-
-        <label>Dirección Completa:</label>
-        <textarea name="direccion" rows="2" required placeholder="Calle, Número, Colonia, Municipio"></textarea>
-
-        <label>Teléfono de Aval / Referencia:</label>
-        <input type="tel" name="telefonoAval" required placeholder="10 dígitos">
-
         <label>Seleccionar Celular de Inventario:</label>
         <select id="selectDispositivo" name="imei" required>
             <option value="">⏳ Cargando equipos disponibles...</option>
@@ -79,6 +64,21 @@
         <input type="text" id="totalFinanciadoDisplay" name="totalFinanciado" readonly>
         
         <input type="hidden" id="totalLetraHidden" name="totalLetra">
+
+        <label>Nombre del Cliente:</label>
+        <input type="text" name="cliente" required placeholder="Ej. Juan Pérez">
+
+        <label>Teléfono Celular:</label>
+        <input type="tel" name="telefono" required placeholder="10 dígitos">
+
+        <label>Fecha de Nacimiento:</label>
+        <input type="date" name="fechaNacimiento" required>
+
+        <label>Dirección Completa:</label>
+        <textarea name="direccion" rows="2" required placeholder="Calle, Número, Colonia, Municipio"></textarea>
+
+        <label>Teléfono de Aval / Referencia:</label>
+        <input type="tel" name="telefonoAval" required placeholder="10 dígitos">
 
         <label>🪪 INE Frontal (Fotografía):</label>
         <input type="file" id="ineDelanteraInput" accept="image/*" required>
