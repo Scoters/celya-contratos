@@ -1,271 +1,365 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CelYa! - Panel de Control Administrativo</title>
     <script src="config.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background-color: #2c3e50; color: #333; }
-        .container { max-width: 550px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin: 20px auto; }
-        h2 { text-align: center; color: #2c3e50; margin-bottom: 5px; }
-        h3 { color: #2c3e50; border-bottom: 2px solid #e67e22; padding-bottom: 5px; margin-top: 25px; font-size: 18px; }
-        label { font-weight: bold; display: block; margin-top: 15px; color: #34495e; font-size: 14px; }
-        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; background: #f9f9f9; }
-        input[readonly] { background-color: #e9ecef; color: #555; font-weight: bold; cursor: not-allowed; }
-        
-        button { width: 100%; color: white; border: none; padding: 14px; margin-top: 20px; font-size: 15px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
-        .btn-pago { background: #8e44ad; }
-        .btn-pago:hover { background: #732d91; }
-        .btn-config { background: #e67e22; }
-        .btn-config:hover { background: #d35400; }
-        button:disabled { background: #7f8c8d !important; cursor: not-allowed; }
-        
-        .subtitulo { text-align: center; font-size: 13px; color: #7f8c8d; margin-top: 0; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
-        .grid-config { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: #333;
+        }
+
+        .container {
+            max-width: 550px;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin: 20px auto;
+        }
+
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #e67e22;
+            padding-bottom: 5px;
+            margin-top: 25px;
+            font-size: 18px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+            color: #34495e;
+            font-size: 14px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+            background: #f9f9f9;
+        }
+
+        input[readonly] {
+            background-color: #e9ecef;
+            color: #555;
+            font-weight: bold;
+            cursor: not-allowed;
+        }
+
+        button {
+            width: 100%;
+            color: white;
+            border: none;
+            padding: 14px;
+            margin-top: 20px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-pago {
+            background: #8e44ad;
+        }
+
+        .btn-pago:hover {
+            background: #732d91;
+        }
+
+        .btn-config {
+            background: #e67e22;
+        }
+
+        .btn-config:hover {
+            background: #d35400;
+        }
+
+        button:disabled {
+            background: #7f8c8d !important;
+            cursor: not-allowed;
+        }
+
+        .subtitulo {
+            text-align: center;
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .grid-config {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h2>💜 CelYa! Ecosistema</h2>
-    <p class="subtitulo">Módulo de Cobranza y Administración Global</p>
+    <div class="container">
+        <h2>💜 CelYa! Ecosistema</h2>
+        <p class="subtitulo">Módulo de Cobranza y Administración Global</p>
 
-    <h3>💵 Recepción y Abono de Semanas</h3>
-    <form id="pagoForm">
-        <label>Buscar Cliente Activo por ID / IMEI:</label>
-        <select id="selectCliente" onchange="calcularCobroAutomatico()" required>
-            <option value="">⏳ Cargando catálogo de deudores...</option>
-        </select>
+        <h3>💵 Recepción y Abono de Semanas</h3>
+        <form id="pagoForm">
+            <label>Buscar Cliente Activo por ID / IMEI:</label>
+            <select id="selectCliente" onchange="calcularCobroAutomatico()" required>
+                <option value="">⏳ Cargando catálogo de deudores...</option>
+            </select>
 
-        <label>Nombre Completo Registrado:</label>
-        <input type="text" id="nombreCliente" readonly placeholder="No seleccionado">
+            <label>Nombre Completo Registrado:</label>
+            <input type="text" id="nombreCliente" readonly placeholder="No seleccionado">
 
-        <label>IMEI del Equipo Vinculado:</label>
-        <input type="text" id="imeiCliente" readonly placeholder="No seleccionado">
+            <label>IMEI del Equipo Vinculado:</label>
+            <input type="text" id="imeiCliente" readonly placeholder="No seleccionado">
 
-        <label>Plan de Plazo:</label>
-        <input type="text" id="planCliente" readonly placeholder="Ej. 52 semanas">
+            <label>Plan de Plazo:</label>
+            <input type="text" id="planCliente" readonly placeholder="Ej. 52 semanas">
 
-        <label>Monto de Pago Recibido ($):</label>
-        <input type="number" id="montoPago" step="0.01" required placeholder="Ingresa o edita el monto recibido">
+            <label>Monto de Pago Recibido ($):</label>
+            <input type="number" id="montoPago" step="0.01" required placeholder="Ingresa o edita el monto recibido">
 
-        <label>Método de Pago:</label>
-        <select id="metodoPago" required>
-            <option value="Transferencia" selected>📱 Transferencia Electrónica</option>
-            <option value="Efectivo">💵 Efectivo Físico</option>
-            <option value="Depósito">🏦 Depósito Bancario</option>
-        </select>
+            <label>Método de Pago:</label>
+            <select id="metodoPago" required>
+                <option value="Transferencia">📱 Transferencia Electrónica</option>
+                <option value="Efectivo">💵 Efectivo Físico</option>
+                <option value="Depósito" selected>🏦 Depósito Bancario</option>
+            </select>
 
-        <label>Número / Identificador de Semana Cobrada:</label>
-        <input type="text" id="semanaPago" required placeholder="Ej. Semana 1">
+            <label>Número / Identificador de Semana Cobrada:</label>
+            <input type="text" id="semanaPago" required placeholder="Ej. Semana 1">
 
-        <label>Folio / Comprobante de Operación:</label>
-        <input type="text" id="folioPago" placeholder="Ej. Clave de Rastreo SPEI">
+            <label>Folio / Comprobante de Operación:</label>
+            <input type="text" id="folioPago" placeholder="Ej. Clave de Rastreo SPEI">
 
-        <label>Comentarios / Notas Adicionales:</label>
-        <textarea id="notasPago" rows="2" placeholder="Notas internas..."></textarea>
+            <label>Comentarios / Notas Adicionales:</label>
+            <textarea id="notasPago" rows="2" placeholder="Notas internas..."></textarea>
 
-        <button type="button" class="btn-pago" id="btnGuardarPago" onclick="ejecutarTransaccionPago()">💜 Aplicar y Guardar Pago</button>
-    </form>
+            <button type="button" class="btn-pago" id="btnGuardarPago" onclick="ejecutarTransaccionPago()">💜 Aplicar y
+                Guardar Pago</button>
+        </form>
 
-    <h3>⚙️ Parámetros Globales del Negocio</h3>
-    <form id="configForm">
-        <div class="grid-config">
-            <div>
-                <label>Interés Moratorio (%):</label>
-                <input type="number" id="interes" required>
+        <h3>⚙️ Parámetros Globales del Negocio</h3>
+        <form id="configForm">
+            <div class="grid-config">
+                <div>
+                    <label>Interés Moratorio (%):</label>
+                    <input type="number" id="interes" required>
+                </div>
+                <div>
+                    <label>Horas de Tolerancia:</label>
+                    <input type="number" id="horastol" required>
+                </div>
             </div>
-            <div>
-                <label>Horas de Tolerancia:</label>
-                <input type="number" id="horastol" required>
-            </div>
-        </div>
-        <label>Semanas de Tolerancia antes de Bloqueo:</label>
-        <input type="number" id="semanastol" required>
+            <label>Semanas de Tolerancia antes de Bloqueo:</label>
+            <input type="number" id="semanastol" required>
 
-        <button type="button" class="btn-config" id="btnGuardarConfig">💾 Guardar Configuración Global</button>
-    </form>
-</div>
+            <button type="button" class="btn-config" id="btnGuardarConfig">💾 Guardar Configuración Global</button>
+        </form>
+    </div>
 
-<script>
-    let dbClientesActivos = [];
-    let dbInventarioEquipos = []; 
-    let dbHistorialPagos = [];
+    <script>
+        let dbClientesActivos = [];
+        let dbInventarioEquipos = [];
+        let dbHistorialPagos = [];
 
-    window.onload = async function() {
-        try {
-            const urlAutenticada = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}`;
-            const respuesta = await fetch(urlAutenticada);
-            const datos = await respuesta.json();
+        window.onload = async function () {
+            try {
+                const urlAutenticada = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}`;
+                const respuesta = await fetch(urlAutenticada);
+                const datos = await respuesta.json();
 
-            if(datos.error) {
-                alert("Error de Panel: " + datos.error);
+                if (datos.error) {
+                    alert("Error de Panel: " + datos.error);
+                    return;
+                }
+
+                document.getElementById('interes').value = datos.config.interes;
+                document.getElementById('horastol').value = datos.config.horastol;
+                document.getElementById('semanastol').value = datos.config.semanastol;
+
+                dbClientesActivos = datos.clientesActivos || [];
+                dbInventarioEquipos = datos.inventario || [];
+                dbHistorialPagos = datos.historialPagos || [];
+
+                const select = document.getElementById('selectCliente');
+                select.innerHTML = '<option value="">-- Elige un Cliente --</option>';
+
+                dbClientesActivos.forEach(c => {
+                    let opt = document.createElement('option');
+                    opt.value = c.imei;
+                    opt.innerText = c.etiquetaCompleta;
+                    select.appendChild(opt);
+                });
+
+            } catch (err) {
+                document.getElementById('selectCliente').innerHTML = '<option value="">❌ Error al mapear deudores</option>';
+            }
+        };
+
+        function calcularCobroAutomatico() {
+            const imeiSeleccionado = document.getElementById('selectCliente').value;
+            const campoMonto = document.getElementById('montoPago');
+            const campoSemana = document.getElementById('semanaPago');
+
+            const cliente = dbClientesActivos.find(c => c.imei === imeiSeleccionado);
+            if (!cliente) {
+                document.getElementById('nombreCliente').value = "";
+                document.getElementById('imeiCliente').value = "";
+                document.getElementById('planCliente').value = "";
+                campoMonto.value = "";
+                campoSemana.value = "";
                 return;
             }
 
-            document.getElementById('interes').value = datos.config.interes;
-            document.getElementById('horastol').value = datos.config.horastol;
-            document.getElementById('semanastol').value = datos.config.semanastol;
+            document.getElementById('nombreCliente').value = cliente.cliente;
+            document.getElementById('imeiCliente').value = cliente.imei;
+            document.getElementById('planCliente').value = `Plan de ${cliente.plan} semanas`;
 
-            dbClientesActivos = datos.clientesActivos || [];
-            dbInventarioEquipos = datos.inventario || [];
-            dbHistorialPagos = datos.historialPagos || []; 
-            
-            const select = document.getElementById('selectCliente');
-            select.innerHTML = '<option value="">-- Elige un Cliente --</option>';
+            // Coloca el precio regular sugerido, pero permite modificarlo al no tener 'readonly'
+            const equipo = dbInventarioEquipos.find(e => e.imei === cliente.imei);
+            if (equipo) {
+                let cuotaTexto = (cliente.plan === "26") ? equipo.planRapido : equipo.planComodo;
+                let cuotaLimpia = parseFloat(cuotaTexto.replace(/[\$,]/g, "").trim());
+                campoMonto.value = isNaN(cuotaLimpia) ? "" : cuotaLimpia;
+            } else {
+                campoMonto.value = "";
+            }
 
-            dbClientesActivos.forEach(c => {
-                let opt = document.createElement('option');
-                opt.value = c.imei; 
-                opt.innerText = c.etiquetaCompleta;
-                select.appendChild(opt);
+            // 🧮 ANALIZAR HISTORIAL DE PAGOS DE ESTE CLIENTE ESPECÍFICO
+            const pagosDelCliente = dbHistorialPagos.filter(p => p.imei === imeiSeleccionado);
+            let ultimaSemanaDetectada = 0;
+
+            pagosDelCliente.forEach(p => {
+                const coincidencias = p.semanaTexto.match(/\d+/g);
+                if (coincidencias) {
+                    const numerosComoInt = coincidencias.map(Number);
+                    const maxCelda = Math.max(...numerosComoInt);
+                    if (maxCelda > ultimaSemanaDetectada) {
+                        ultimaSemanaDetectada = maxCelda;
+                    }
+                }
             });
 
-        } catch (err) {
-            document.getElementById('selectCliente').innerHTML = '<option value="">❌ Error al mapear deudores</option>';
-        }
-    };
-
-    function calcularCobroAutomatico() {
-        const imeiSeleccionado = document.getElementById('selectCliente').value;
-        const campoMonto = document.getElementById('montoPago');
-        const campoSemana = document.getElementById('semanaPago');
-        
-        const cliente = dbClientesActivos.find(c => c.imei === imeiSeleccionado);
-        if(!cliente) {
-            document.getElementById('nombreCliente').value = "";
-            document.getElementById('imeiCliente').value = "";
-            document.getElementById('planCliente').value = "";
-            campoMonto.value = "";
-            campoSemana.value = "";
-            return;
+            const siguienteSemana = ultimaSemanaDetectada + 1;
+            campoSemana.value = `Semana ${siguienteSemana}`;
         }
 
-        document.getElementById('nombreCliente').value = cliente.cliente;
-        document.getElementById('imeiCliente').value = cliente.imei;
-        document.getElementById('planCliente').value = `Plan de ${cliente.plan} semanas`;
+        async function ejecutarTransaccionPago() {
+            const btn = document.getElementById('btnGuardarPago');
+            if (!document.getElementById('pagoForm').checkValidity()) {
+                alert("Completa todos los campos del abono antes de guardar.");
+                return;
+            }
 
-        // Coloca el precio regular sugerido, pero permite modificarlo al no tener 'readonly'
-        const equipo = dbInventarioEquipos.find(e => e.imei === cliente.imei);
-        if (equipo) {
-            let cuotaTexto = (cliente.plan === "26") ? equipo.planRapido : equipo.planComodo;
-            let cuotaLimpia = parseFloat(cuotaTexto.replace(/[\$,]/g, "").trim());
-            campoMonto.value = isNaN(cuotaLimpia) ? "" : cuotaLimpia;
-        } else {
-            campoMonto.value = "";
-        }
+            const colorOriginal = btn.style.background;
+            btn.innerText = "⏳ Archivando pago...";
+            btn.style.background = "#34495e";
+            btn.disabled = true;
 
-        // 🧮 ANALIZAR HISTORIAL DE PAGOS DE ESTE CLIENTE ESPECÍFICO
-        const pagosDelCliente = dbHistorialPagos.filter(p => p.imei === imeiSeleccionado);
-        let ultimaSemanaDetectada = 0;
+            try {
+                const params = new URLSearchParams();
+                params.append('action', 'registrarPago');
+                params.append('token', CONFIG.API_TOKEN);
+                params.append('imei', document.getElementById('imeiCliente').value);
+                params.append('nombreCliente', document.getElementById('nombreCliente').value);
+                params.append('monto', document.getElementById('montoPago').value);
+                params.append('metodo', document.getElementById('metodoPago').value);
+                params.append('semana', document.getElementById('semanaPago').value);
+                params.append('folio', document.getElementById('folioPago').value);
+                params.append('notas', document.getElementById('notasPago').value);
 
-        pagosDelCliente.forEach(p => {
-            const coincidencias = p.semanaTexto.match(/\d+/g);
-            if (coincidencias) {
-                const numerosComoInt = coincidencias.map(Number);
-                const maxCelda = Math.max(...numerosComoInt);
-                if (maxCelda > ultimaSemanaDetectada) {
-                    ultimaSemanaDetectada = maxCelda;
+                const respuesta = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: params.toString(),
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                const resultado = await respuesta.json();
+
+                if (resultado.result === "success") {
+                    btn.innerText = "✅ ¡Pago Registrado!";
+                    btn.style.background = "#27ae60";
+                    document.getElementById('pagoForm').reset();
+                    setTimeout(() => { location.reload(); }, 2500);
+                } else {
+                    btn.innerText = "⚠️ Error: " + resultado.error;
+                    btn.style.background = "#c0392b";
+                    btn.disabled = false;
                 }
+            } catch (err) {
+                btn.innerText = "❌ Error de red";
+                btn.style.background = "#c0392b";
+                btn.disabled = false;
+                setTimeout(() => {
+                    btn.innerText = "💜 Aplicar y Guardar Pago";
+                    btn.style.background = colorOriginal;
+                }, 3500);
+            }
+        }
+
+        document.getElementById('btnGuardarConfig').addEventListener('click', async function () {
+            const btn = document.getElementById('btnGuardarConfig');
+            btn.innerText = "⏳ Guardando...";
+            btn.style.background = "#34495e";
+            btn.disabled = true;
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('action', 'updateConfig');
+                formData.append('token', CONFIG.API_TOKEN);
+                formData.append('interes', document.getElementById('interes').value);
+                formData.append('horastol', document.getElementById('horastol').value);
+                formData.append('semanastol', document.getElementById('semanastol').value);
+
+                const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData.toString(),
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                const data = await res.json();
+
+                if (data.result === 'success') {
+                    btn.innerText = "✅ ¡Guardado!";
+                    btn.style.background = "#27ae60";
+                } else {
+                    btn.innerText = "⚠️ Error";
+                    btn.style.background = "#c0392b";
+                }
+            } catch (err) {
+                btn.innerText = "❌ Error de red";
+                btn.style.background = "#c0392b";
+            } finally {
+                setTimeout(() => {
+                    btn.innerText = "💾 Guardar Configuración Global";
+                    btn.style.background = "#e67e22";
+                    btn.disabled = false;
+                }, 3500);
             }
         });
-
-        const siguienteSemana = ultimaSemanaDetectada + 1;
-        campoSemana.value = `Semana ${siguienteSemana}`;
-    }
-
-    async function ejecutarTransaccionPago() {
-        const btn = document.getElementById('btnGuardarPago');
-        if(!document.getElementById('pagoForm').checkValidity()) {
-            alert("Completa todos los campos del abono antes de guardar.");
-            return;
-        }
-
-        const colorOriginal = btn.style.background;
-        btn.innerText = "⏳ Archivando pago...";
-        btn.style.background = "#34495e";
-        btn.disabled = true;
-
-        try {
-            const params = new URLSearchParams();
-            params.append('action', 'registrarPago');
-            params.append('token', CONFIG.API_TOKEN); 
-            params.append('imei', document.getElementById('imeiCliente').value);
-            params.append('nombreCliente', document.getElementById('nombreCliente').value);
-            params.append('monto', document.getElementById('montoPago').value);
-            params.append('metodo', document.getElementById('metodoPago').value);
-            params.append('semana', document.getElementById('semanaPago').value);
-            params.append('folio', document.getElementById('folioPago').value);
-            params.append('notas', document.getElementById('notasPago').value);
-
-            const respuesta = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                body: params.toString(),
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-            });
-            const resultado = await respuesta.json();
-
-            if (resultado.result === "success") {
-                btn.innerText = "✅ ¡Pago Registrado!";
-                btn.style.background = "#27ae60";
-                document.getElementById('pagoForm').reset();
-                setTimeout(() => { location.reload(); }, 2500);
-            } else {
-                btn.innerText = "⚠️ Error: " + resultado.error;
-                btn.style.background = "#c0392b";
-                btn.disabled = false;
-            }
-        } catch (err) {
-            btn.innerText = "❌ Error de red";
-            btn.style.background = "#c0392b";
-            btn.disabled = false;
-            setTimeout(() => {
-                btn.innerText = "💜 Aplicar y Guardar Pago";
-                btn.style.background = colorOriginal;
-            }, 3500);
-        }
-    }
-
-    document.getElementById('btnGuardarConfig').addEventListener('click', async function() {
-        const btn = document.getElementById('btnGuardarConfig');
-        btn.innerText = "⏳ Guardando...";
-        btn.style.background = "#34495e";
-        btn.disabled = true;
-
-        try {
-            const formData = new URLSearchParams();
-            formData.append('action', 'updateConfig');
-            formData.append('token', CONFIG.API_TOKEN); 
-            formData.append('interes', document.getElementById('interes').value);
-            formData.append('horastol', document.getElementById('horastol').value);
-            formData.append('semanastol', document.getElementById('semanastol').value);
-
-            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                body: formData.toString(),
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-            });
-            const data = await res.json();
-
-            if (data.result === 'success') {
-                btn.innerText = "✅ ¡Guardado!";
-                btn.style.background = "#27ae60";
-            } else {
-                btn.innerText = "⚠️ Error";
-                btn.style.background = "#c0392b";
-            }
-        } catch (err) {
-            btn.innerText = "❌ Error de red";
-            btn.style.background = "#c0392b";
-        } finally {
-            setTimeout(() => {
-                btn.innerText = "💾 Guardar Configuración Global";
-                btn.style.background = "#e67e22";
-                btn.disabled = false;
-            }, 3500);
-        }
-    });
-</script>
+    </script>
 </body>
+
 </html>
