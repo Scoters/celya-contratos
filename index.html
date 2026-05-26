@@ -1,18 +1,55 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Contrato - CelYa</title>
     <script src="config.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
-        .container { max-width: 500px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin: 0 auto; }
-        h2 { text-align: center; color: #2c3e50; }
-        label { font-weight: bold; display: block; margin-top: 10px; }
-        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
-        input[readonly] { background-color: #e9ecef; }
-        
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+
+        .container {
+            max-width: 500px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+        }
+
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        input[readonly] {
+            background-color: #e9ecef;
+        }
+
         .contenedor-canvas-firma {
             width: 100%;
             margin-top: 5px;
@@ -22,307 +59,373 @@
             border-radius: 6px;
             box-sizing: border-box;
         }
+
         /* El canvas ocupa el 100% del contenedor por CSS, pero su tamaño nativo se escala por JavaScript */
-        canvas { display: block; width: 100% !important; height: 180px !important; cursor: crosshair; background: #fafafa; border-radius: 4px; }
-        
-        .botones-firma { display: flex; gap: 10px; margin-top: 8px; }
-        .btn-limpiar { background-color: #7f8c8d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-        .btn-limpiar:hover { background-color: #95a5a6; }
-        
-        button[type="submit"] { width: 100%; background: #e67e22; color: white; border: none; padding: 12px; margin-top: 20px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.3s; }
-        button[type="submit"]:hover { background: #d35400; }
-        button:disabled { background: #bdc3c7 !important; cursor: not-allowed; }
-        
-        .preview-imagen { margin-top: 8px; max-width: 100%; max-height: 150px; border-radius: 4px; border: 1px solid #ddd; display: block; }
-        .texto-carga { font-size: 12px; color: #7f8c8d; margin-top: 4px; display: block; }
+        canvas {
+            display: block;
+            width: 100% !important;
+            height: 180px !important;
+            cursor: crosshair;
+            background: #fafafa;
+            border-radius: 4px;
+        }
+
+        .botones-firma {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .btn-limpiar {
+            background-color: #7f8c8d;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-limpiar:hover {
+            background-color: #95a5a6;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            background: #e67e22;
+            color: white;
+            border: none;
+            padding: 12px;
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background: #d35400;
+        }
+
+        button:disabled {
+            background: #bdc3c7 !important;
+            cursor: not-allowed;
+        }
+
+        .preview-imagen {
+            margin-top: 8px;
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            display: block;
+        }
+
+        .texto-carga {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .foto-seccion {
+            background: #f9f9f9;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
     </style>
 </head>
+
 <body>
-<div class="container">
-    <h2>📱 Registro de Contrato CelYa</h2>
-    <form id="contratoForm">
-        <label>Nombre del Cliente:</label>
-        <input type="text" name="cliente" required placeholder="Ej. Juan Pérez">
+    <div class="container">
+        <h2>📱 Registro de Contrato CelYa</h2>
+        <form id="contratoForm">
+            <label>Nombre del Cliente:</label>
+            <input type="text" name="cliente" required placeholder="Ej. Juan Pérez">
 
-        <label>Teléfono Celular:</label>
-        <input type="tel" name="telefono" required placeholder="10 dígitos">
+            <label>Teléfono Celular:</label>
+            <input type="tel" name="telefono" required placeholder="10 dígitos">
 
-        <label>Fecha de Nacimiento:</label>
-        <input type="date" name="fechaNacimiento" required>
+            <label>Fecha de Nacimiento:</label>
+            <input type="date" name="fechaNacimiento" required>
 
-        <label>Dirección Completa:</label>
-        <textarea name="direccion" rows="2" required placeholder="Calle, Número, Colonia, Municipio"></textarea>
+            <label>Dirección Completa:</label>
+            <textarea name="direccion" rows="2" required placeholder="Calle, Número, Colonia, Municipio"></textarea>
 
-        <label>Teléfono de Aval / Referencia:</label>
-        <input type="tel" name="telefonoAval" required placeholder="10 dígitos">
+            <label>Teléfono de Aval / Referencia:</label>
+            <input type="tel" name="telefonoAval" required placeholder="10 dígitos">
 
-        <label>Seleccionar Celular de Inventario:</label>
-        <select id="selectDispositivo" name="imei" required>
-            <option value="">⏳ Cargando equipos disponibles...</option>
-        </select>
+            <label>Seleccionar Celular de Inventario:</label>
+            <select id="selectDispositivo" name="imei" required>
+                <option value="">⏳ Cargando equipos disponibles...</option>
+            </select>
 
-        <label>Modelo Seleccionado:</label>
-        <input type="text" id="modeloDisplay" name="modelo" readonly>
+            <label>Modelo Seleccionado:</label>
+            <input type="text" id="modeloDisplay" name="modelo" readonly>
 
-        <label>Monto de Enganche Pago ($):</label>
-        <input type="text" id="engancheDisplay" readonly>
+            <label>Monto de Enganche Pago ($):</label>
+            <input type="text" id="engancheDisplay" readonly>
 
-        <label>Plazo de Financiamiento:</label>
-        <select id="selectPlazo" name="plazoSemanas" required>
-            <option value="26">Plan Rápido (26 Semanas)</option>
-            <option value="52" selected>Plan Cómodo (52 Semanas)</option>
-        </select>
+            <label>Plazo de Financiamiento:</label>
+            <select id="selectPlazo" name="plazoSemanas" required>
+                <option value="26">Plan Rápido (26 Semanas)</option>
+                <option value="52" selected>Plan Cómodo (52 Semanas)</option>
+            </select>
 
-        <label>Pago Semanal Calculado ($):</label>
-        <input type="text" id="cuotaDisplay" name="cuota" readonly>
+            <label>Pago Semanal Calculado ($):</label>
+            <input type="text" id="cuotaDisplay" name="cuota" readonly>
 
-        <label>Monto Financiado Total ($):</label>
-        <input type="text" id="totalFinanciadoDisplay" name="totalFinanciado" readonly>
-        
-        <input type="hidden" id="totalLetraHidden" name="totalLetra">
+            <label>Monto Financiado Total ($):</label>
+            <input type="text" id="totalFinanciadoDisplay" name="totalFinanciado" readonly>
 
-        <label>🪪 INE Frontal (Fotografía):</label>
-        <input type="file" id="ineDelanteraInput" accept="image/*" required>
-        <span class="texto-carga">Sube o captura la parte delantera de la identificación</span>
-        <div id="previewDelantera"></div>
+            <input type="hidden" id="totalLetraHidden" name="totalLetra">
 
-        <label>🪪 INE Reverso (Fotografía):</label>
-        <input type="file" id="ineTraseraInput" accept="image/*" required>
-        <span class="texto-carga">Sube o captura la parte trasera de la identificación</span>
-        <div id="previewTrasera"></div>
+            <div class="foto-seccion">
+                <label>📸 Fotografía de INE (Frente):</label>
+                <input type="file" id="ineDelanteraInput" accept="image/*" capture="camera" onchange="procesarFoto(this, 'previewDelantera', 'delantera')">
+                <span class="texto-carga">Sube o captura la parte delantera de la identificación</span>
+                <div id="previewDelantera" class="preview-imagen"></div>
+            </div>
 
-        <label>✍️ Firma Digital del Cliente:</label>
-        <div class="contenedor-canvas-firma">
-            <canvas id="canvasFirma"></canvas>
-        </div>
-        <div class="botones-firma">
-            <button type="button" class="btn-limpiar" onclick="limpiarFirma()">🧹 Borrar Firma y Reintentar</button>
-        </div>
+            <div class="foto-seccion">
+                <label>📸 Fotografía de INE (Reverso):</label>
+                <input type="file" id="ineTraseraInput" accept="image/*" capture="camera" onchange="procesarFoto(this, 'previewTrasera', 'trasera')">
+                <span class="texto-carga">Sube o captura la parte trasera de la identificación</span>
+                <div id="previewTrasera" class="preview-imagen"></div>
+            </div>
 
-        <input type="hidden" id="interesGlobal" name="interes">
-        <input type="hidden" id="horastolGlobal" name="horastol">
-        <input type="hidden" id="semanastolGlobal" name="semanastol">
+            <label>✍️ Firma Digital del Cliente:</label>
+            <div class="contenedor-canvas-firma">
+                <canvas id="canvasFirma"></canvas>
+            </div>
+            <div class="botones-firma">
+                <button type="button" class="btn-limpiar" onclick="limpiarFirma()">🧹 Borrar Firma y Reintentar</button>
+            </div>
 
-        <button type="submit" id="btnEnviar">Generar Contrato y Archivar</button>
-    </form>
-</div>
+            <input type="hidden" id="interesGlobal" name="interes">
+            <input type="hidden" id="horastolGlobal" name="horastol">
+            <input type="hidden" id="semanastolGlobal" name="semanastol">
 
-<script>
-    let cacheInventario = [];
-    let ineDelanteraB64 = "";
-    let ineTraseraB64 = "";
+            <button type="submit" id="btnEnviar">Generar Contrato y Archivar</button>
+        </form>
+    </div>
 
-    const canvas = document.getElementById('canvasFirma');
-    const ctx = canvas.getContext('2d');
-    let dibujando = false;
+    <script>
+        let cacheInventario = [];
+        let ineDelanteraB64 = "";
+        let ineTraseraB64 = "";
 
-    // 🚀 LÓGICA DE ALTA DEFINICIÓN (HD): Escala los píxeles internos según la densidad de la pantalla del celular
-    function redimensionarCanvas() {
-        const rect = canvas.getBoundingClientRect();
-        if (rect.width > 0) {
-            const ratio = window.devicePixelRatio || 1;
-            canvas.width = rect.width * ratio;
-            canvas.height = 180 * ratio; // Mantiene la proporción interna fija
-            ctx.scale(ratio, ratio);     // Normaliza las coordenadas del pincel
-            
-            // Re-establecemos los estilos de trazo tras alterar las dimensiones nativas del canvas
-            ctx.lineWidth = 3;
-            ctx.lineCap = "round";
-            ctx.strokeStyle = "#2c3e50";
+        const canvas = document.getElementById('canvasFirma');
+        const ctx = canvas.getContext('2d');
+        let dibujando = false;
+
+        // 🚀 LÓGICA DE ALTA DEFINICIÓN (HD): Escala los píxeles internos según la densidad de la pantalla del celular
+        function redimensionarCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            if (rect.width > 0) {
+                const ratio = window.devicePixelRatio || 1;
+                canvas.width = rect.width * ratio;
+                canvas.height = 180 * ratio; // Mantiene la proporción interna fija
+                ctx.scale(ratio, ratio);     // Normaliza las coordenadas del pincel
+
+                // Re-establecemos los estilos de trazo tras alterar las dimensiones nativas del canvas
+                ctx.lineWidth = 3;
+                ctx.lineCap = "round";
+                ctx.strokeStyle = "#2c3e50";
+            }
         }
-    }
 
-    // Traduce las posiciones relativas para que el pincel pinte justo debajo del dedo/mouse sin desfases en HD
-    function obtenerPosicionMouse(e) {
-        const rect = canvas.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        return {
-            x: clientX - rect.left,
-            y: clientY - rect.top
-        };
-    }
+        // Traduce las posiciones relativas para que el pincel pinte justo debajo del dedo/mouse sin desfases en HD
+        function obtenerPosicionMouse(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
 
-    function arrancarDibujo(e) {
-        if (canvas.width === 0 || canvas.height === 0) redimensionarCanvas();
-        dibujando = true;
-        const pos = obtenerPosicionMouse(e);
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
-        if(e.cancelable) e.preventDefault();
-    }
+        function arrancarDibujo(e) {
+            if (canvas.width === 0 || canvas.height === 0) redimensionarCanvas();
+            dibujando = true;
+            const pos = obtenerPosicionMouse(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+            if (e.cancelable) e.preventDefault();
+        }
 
-    function dibujar(e) {
-        if (!dibujando) return;
-        const pos = obtenerPosicionMouse(e);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-        if(e.cancelable) e.preventDefault();
-    }
+        function dibujar(e) {
+            if (!dibujando) return;
+            const pos = obtenerPosicionMouse(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            if (e.cancelable) e.preventDefault();
+        }
 
-    function pararDibujo() { dibujando = false; }
+        function pararDibujo() { dibujando = false; }
 
-    canvas.addEventListener('mousedown', arrancarDibujo);
-    canvas.addEventListener('mousemove', dibujar);
-    canvas.addEventListener('mouseup', pararDibujo);
-    canvas.addEventListener('mouseleave', pararDibujo);
+        canvas.addEventListener('mousedown', arrancarDibujo);
+        canvas.addEventListener('mousemove', dibujar);
+        canvas.addEventListener('mouseup', pararDibujo);
+        canvas.addEventListener('mouseleave', pararDibujo);
 
-    canvas.addEventListener('touchstart', arrancarDibujo, {passive: false});
-    canvas.addEventListener('touchmove', dibujar, {passive: false});
-    canvas.addEventListener('touchend', pararDibujo);
+        canvas.addEventListener('touchstart', arrancarDibujo, { passive: false });
+        canvas.addEventListener('touchmove', dibujar, { passive: false });
+        canvas.addEventListener('touchend', pararDibujo);
 
-    function limpiarFirma() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
+        function limpiarFirma() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
 
-    function procesarArchivoABase64(fileInput, previewId, callback) {
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
+        function procesarFoto(input, previewId, tipo) {
+            const file = input.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(evt) {
+            reader.onload = function (evt) {
                 let img = new Image();
-                img.onload = function() {
+                img.onload = function () {
                     let canvasMin = document.createElement('canvas');
                     let ctxMin = canvasMin.getContext('2d');
                     let maxDim = 900;
                     let w = img.width, h = img.height;
-                    if (w > h && w > maxDim) { h *= maxDim/w; w = maxDim; }
-                    else if (h > maxDim) { w *= maxDim/h; h = maxDim; }
+                    if (w > h && w > maxDim) { h *= maxDim / w; w = maxDim; }
+                    else if (h > maxDim) { w *= maxDim / h; h = maxDim; }
                     canvasMin.width = w; canvasMin.height = h;
                     ctxMin.drawImage(img, 0, 0, w, h);
                     let compressData = canvasMin.toDataURL('image/jpeg', 0.7);
                     document.getElementById(previewId).innerHTML = `<img src="${compressData}" class="preview-imagen">`;
-                    callback(compressData);
+                    if (tipo === 'delantera') ineDelanteraB64 = compressData;
+                    if (tipo === 'trasera') ineTraseraB64 = compressData;
                 };
                 img.src = evt.target.result;
             };
             reader.readAsDataURL(file);
-        });
-    }
+        }
 
-    procesarArchivoABase64(document.getElementById('ineDelanteraInput'), 'previewDelantera', (b64) => { ineDelanteraB64 = b64; });
-    procesarArchivoABase64(document.getElementById('ineTraseraInput'), 'previewTrasera', (b64) => { ineTraseraB64 = b64; });
+        window.onload = async function () {
+            redimensionarCanvas();
+            window.addEventListener('resize', redimensionarCanvas);
 
-    window.onload = async function() {
-        redimensionarCanvas();
-        window.addEventListener('resize', redimensionarCanvas);
-        
-        try {
-            const urlAutenticada = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}`;
-            const res = await fetch(urlAutenticada);
-            const data = await res.json();
-            
-            if (data.error) {
-                alert("Error de Seguridad en Servidor: " + data.error);
+            try {
+                const urlAutenticada = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}`;
+                const res = await fetch(urlAutenticada);
+                const data = await res.json();
+
+                if (data.error) {
+                    alert("Error de Seguridad en Servidor: " + data.error);
+                    return;
+                }
+
+                document.getElementById('interesGlobal').value = data.config.interes;
+                document.getElementById('horastolGlobal').value = data.config.horastol;
+                document.getElementById('semanastolGlobal').value = data.config.semanastol;
+
+                cacheInventario = data.inventario;
+                const select = document.getElementById('selectDispositivo');
+                select.innerHTML = '<option value="">-- Seleccione un IMEI --</option>';
+
+                cacheInventario.forEach(eq => {
+                    let opt = document.createElement('option');
+                    opt.value = eq.imei;
+                    opt.innerText = `${eq.modelo} (${eq.imei})`;
+                    select.appendChild(opt);
+                });
+
+            } catch (err) {
+                document.getElementById('selectDispositivo').innerHTML = '<option value="">❌ Error al conectar con inventario</option>';
+            }
+        };
+
+        document.getElementById('selectDispositivo').addEventListener('change', actualizarFormularioPrecios);
+        document.getElementById('selectPlazo').addEventListener('change', actualizarFormularioPrecios);
+
+        function actualizarFormularioPrecios() {
+            const imeiSelected = document.getElementById('selectDispositivo').value;
+            const plazo = document.getElementById('selectPlazo').value;
+            const equipo = cacheInventario.find(e => e.imei === imeiSelected);
+
+            if (!equipo) {
+                document.getElementById('modeloDisplay').value = "";
+                document.getElementById('engancheDisplay').value = "";
+                document.getElementById('cuotaDisplay').value = "";
+                document.getElementById('totalFinanciadoDisplay').value = "";
+                document.getElementById('totalLetraHidden').value = "";
                 return;
             }
 
-            document.getElementById('interesGlobal').value = data.config.interes;
-            document.getElementById('horastolGlobal').value = data.config.horastol;
-            document.getElementById('semanastolGlobal').value = data.config.semanastol;
+            document.getElementById('modeloDisplay').value = equipo.modelo;
+            document.getElementById('engancheDisplay').value = equipo.enganche;
+            document.getElementById('totalFinanciadoDisplay').value = equipo.totalFinanciado;
+            document.getElementById('totalLetraHidden').value = equipo.totalLetra;
 
-            cacheInventario = data.inventario;
-            const select = document.getElementById('selectDispositivo');
-            select.innerHTML = '<option value="">-- Seleccione un IMEI --</option>';
-
-            cacheInventario.forEach(eq => {
-                let opt = document.createElement('option');
-                opt.value = eq.imei;
-                opt.innerText = `${eq.modelo} (${eq.imei})`;
-                select.appendChild(opt);
-            });
-
-        } catch (err) {
-            document.getElementById('selectDispositivo').innerHTML = '<option value="">❌ Error al conectar con inventario</option>';
-        }
-    };
-
-    document.getElementById('selectDispositivo').addEventListener('change', actualizarFormularioPrecios);
-    document.getElementById('selectPlazo').addEventListener('change', actualizarFormularioPrecios);
-
-    function actualizarFormularioPrecios() {
-        const imeiSelected = document.getElementById('selectDispositivo').value;
-        const plazo = document.getElementById('selectPlazo').value;
-        const equipo = cacheInventario.find(e => e.imei === imeiSelected);
-
-        if (!equipo) {
-            document.getElementById('modeloDisplay').value = "";
-            document.getElementById('engancheDisplay').value = "";
-            document.getElementById('cuotaDisplay').value = "";
-            document.getElementById('totalFinanciadoDisplay').value = "";
-            document.getElementById('totalLetraHidden').value = "";
-            return;
-        }
-
-        document.getElementById('modeloDisplay').value = equipo.modelo;
-        document.getElementById('engancheDisplay').value = equipo.enganche;
-        document.getElementById('totalFinanciadoDisplay').value = equipo.totalFinanciado;
-        document.getElementById('totalLetraHidden').value = equipo.totalLetra;
-
-        if (plazo === "26") {
-            document.getElementById('cuotaDisplay').value = equipo.planRapido;
-        } else {
-            document.getElementById('cuotaDisplay').value = equipo.planComodo;
-        }
-    }
-
-    document.getElementById('contratoForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const btn = document.getElementById('btnEnviar');
-        const colorOriginal = btn.style.background;
-
-        btn.innerText = "⏳ Subiendo expediente y firmas...";
-        btn.style.background = "#34495e";
-        btn.disabled = true;
-
-        try {
-            const formularioElemento = document.getElementById('contratoForm');
-            const sheetData = new URLSearchParams(new FormData(formularioElemento));
-            
-            sheetData.append('token', CONFIG.API_TOKEN);
-            sheetData.append('firmaBase64', canvas.toDataURL());
-            sheetData.append('ineDelanteraBase64', ineDelanteraB64);
-            sheetData.append('ineTraseraBase64', ineTraseraB64);
-            
-            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, { 
-                method: 'POST', 
-                body: sheetData.toString(), 
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' } 
-            });
-            const data = await res.json();
-
-            if (data.result === 'success') {
-                btn.innerText = "✅ ¡Contrato Guardado con Éxito!";
-                btn.style.background = "#27ae60"; 
-                
-                formularioElemento.reset(); 
-                limpiarFirma();
-                document.getElementById('previewDelantera').innerHTML = ''; 
-                document.getElementById('previewTrasera').innerHTML = '';
-                ineDelanteraB64 = ""; ineTraseraB64 = "";
-                
-                setTimeout(() => { 
-                    btn.innerText = "Generar Contrato y Archivar"; 
-                    btn.style.background = colorOriginal; 
-                    btn.disabled = false; 
-                    location.reload(); 
-                }, 4000);
-            } else { 
-                btn.innerText = "⚠️ Error: " + data.error;
-                btn.style.background = "#c0392b"; 
-                btn.disabled = false; 
+            if (plazo === "26") {
+                document.getElementById('cuotaDisplay').value = equipo.planRapido;
+            } else {
+                document.getElementById('cuotaDisplay').value = equipo.planComodo;
             }
-        } catch (err) { 
-            btn.innerText = "❌ Error de conexión, reintente."; 
-            btn.style.background = "#c0392b"; 
-            btn.disabled = false;
-            setTimeout(() => {
-                btn.innerText = "Generar Contrato y Archivar";
-                btn.style.background = colorOriginal;
-            }, 3500);
         }
-    });
-</script>
+
+        document.getElementById('contratoForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnEnviar');
+            const colorOriginal = btn.style.background;
+
+            btn.innerText = "⏳ Subiendo expediente y firmas...";
+            btn.style.background = "#34495e";
+            btn.disabled = true;
+
+            try {
+                const formularioElemento = document.getElementById('contratoForm');
+                const sheetData = new URLSearchParams(new FormData(formularioElemento));
+
+                sheetData.append('token', CONFIG.API_TOKEN);
+                sheetData.append('firmaBase64', canvas.toDataURL());
+                sheetData.append('ineDelanteraBase64', ineDelanteraB64);
+                sheetData.append('ineTraseraBase64', ineTraseraB64);
+
+                const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: sheetData.toString(),
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                const data = await res.json();
+
+                if (data.result === 'success') {
+                    btn.innerText = "✅ ¡Contrato Guardado con Éxito!";
+                    btn.style.background = "#27ae60";
+
+                    formularioElemento.reset();
+                    limpiarFirma();
+                    document.getElementById('previewDelantera').innerHTML = '';
+                    document.getElementById('previewTrasera').innerHTML = '';
+                    ineDelanteraB64 = ""; ineTraseraB64 = "";
+
+                    setTimeout(() => {
+                        btn.innerText = "Generar Contrato y Archivar";
+                        btn.style.background = colorOriginal;
+                        btn.disabled = false;
+                        location.reload();
+                    }, 4000);
+                } else {
+                    btn.innerText = "⚠️ Error: " + data.error;
+                    btn.style.background = "#c0392b";
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                btn.innerText = "❌ Error de conexión, reintente.";
+                btn.style.background = "#c0392b";
+                btn.disabled = false;
+                setTimeout(() => {
+                    btn.innerText = "Generar Contrato y Archivar";
+                    btn.style.background = colorOriginal;
+                }, 3500);
+            }
+        });
+    </script>
 </body>
+
 </html>
