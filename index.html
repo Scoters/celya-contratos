@@ -13,7 +13,6 @@
         input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
         input[readonly] { background-color: #e9ecef; }
         
-        /* 🛠️ OPTIMIZACIÓN RESPONSIVA PARA EL CONTENEDOR DE LA FIRMA */
         .contenedor-canvas-firma {
             width: 100%;
             margin-top: 5px;
@@ -30,8 +29,8 @@
             cursor: crosshair; 
             touch-action: none; 
             display: block;
-            width: 100% !important; /* Fuerza al cuadro a adaptarse al ancho del celular */
-            height: 200px !important; /* Mantiene una altura cómoda en móviles */
+            width: 100% !important; 
+            height: 200px !important; 
             box-sizing: border-box;
         }
 
@@ -144,7 +143,6 @@
             
             document.getElementById('loadMsg').style.display = 'none';
             
-            // Forzar calibración del lienzo al cargar la página
             resizeCanvas();
         } catch (err) {
             document.getElementById('loadMsg').innerText = "❌ Error de sincronización con CelYa.";
@@ -173,25 +171,23 @@
     const ctx = canvas.getContext('2d'); 
     let dibujando = false;
 
-    // 🛠️ AJUSTE TÉCNICO VITAL: Función para ajustar la escala interna del canvas según el tamaño real en pantalla
+    // 🛠️ AJUSTE DE ALTA DEFINICIÓN: Escala la resolución interna para máxima nitidez en pantallas móviles
     function resizeCanvas() {
         const rect = canvas.getBoundingClientRect();
-        // Evita recalibrar a 0 si el elemento no se ha cargado bien
         if (rect.width > 0) {
-            canvas.width = rect.width;
-            canvas.height = rect.height;
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = rect.width * ratio;
+            canvas.height = rect.height * ratio;
+            ctx.scale(ratio, ratio);
         }
     }
-    // Escucha si el celular gira o cambia de tamaño para mantener las dimensiones perfectas
     window.addEventListener('resize', resizeCanvas);
 
-    // 🛠️ CORRECCIÓN DE COORDENADAS: Calcula la posición exacta basándose en la escala real del bounding box
     function obtenerPosicion(e) { 
         const rect = canvas.getBoundingClientRect(); 
         const clientX = e.touches ? e.touches[0].clientX : e.clientX; 
         const clientY = e.touches ? e.touches[0].clientY : e.clientY; 
         
-        // Multiplicamos por la resolución interna dividida entre el tamaño visual en pantalla
         return { 
             x: (clientX - rect.left) * (canvas.width / rect.width), 
             y: (clientY - rect.top) * (canvas.height / rect.height) 
@@ -199,7 +195,7 @@
     }
     
     canvas.addEventListener('mousedown', (e) => { 
-        if (canvas.width === 0 || canvas.height === 0) resizeCanvas(); // Doble seguro por si no cargó a tiempo
+        if (canvas.width === 0 || canvas.height === 0) resizeCanvas();
         dibujando = true; 
         ctx.beginPath(); 
         const p = obtenerPosicion(e); 
@@ -210,7 +206,7 @@
         if(!dibujando) return; 
         e.preventDefault(); 
         const p = obtenerPosicion(e); 
-        ctx.lineWidth = 3; 
+        ctx.lineWidth = 2; /* Grosor ideal estilizado para HD */
         ctx.lineCap = 'round'; 
         ctx.strokeStyle = '#000000'; 
         ctx.lineTo(p.x, p.y); 
@@ -230,7 +226,7 @@
         if(!dibujando) return; 
         e.preventDefault(); 
         const p = obtenerPosicion(e); 
-        ctx.lineWidth = 3; 
+        ctx.lineWidth = 2; /* Grosor ideal para el dedo en móviles */
         ctx.lineCap = 'round'; 
         ctx.strokeStyle = '#000000'; 
         ctx.lineTo(p.x, p.y); 
@@ -302,7 +298,6 @@
         if (!ineDelanteraB64 || ineDelanteraB64 === "") { mostrarErrorEnBoton("Falta capturar la foto de la INE Frontal"); return; }
         if (!ineTraseraB64 || ineTraseraB64 === "") { mostrarErrorEnBoton("Falta capturar la foto de la INE Reverso"); return; }
 
-        // Validación básica de si el lienzo está en blanco antes de enviar
         const lienzoVacio = document.createElement('canvas');
         lienzoVacio.width = canvas.width;
         lienzoVacio.height = canvas.height;
