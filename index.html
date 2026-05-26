@@ -144,7 +144,6 @@
             document.getElementById('semanastol').value = cacheEcosistema.config.semanastol;
             
             document.getElementById('loadMsg').style.display = 'none';
-            
             resizeCanvas();
         } catch (err) {
             document.getElementById('loadMsg').innerText = "❌ Error de sincronización con CelYa.";
@@ -163,14 +162,17 @@
         const equipo = cacheEcosistema.inventario[idx];
         document.getElementById('imei').value = equipo.imei;
         document.getElementById('modelo').value = equipo.modelo;
-        document.getElementById('monto').value = equipo.enganche;
-        document.getElementById('totalFinanciado').value = equipo.totalFinanciado;
-        document.getElementById('totalLetra').value = equipo.totalLetra;
+        
+        // Sanatizamos de forma segura para prevenir roturas si el dato no es string Puro 🚀
+        const limpiarValor = (val) => val ? String(val).trim() : "";
+        
+        document.getElementById('monto').value = limpiarValor(equipo.enganche);
+        document.getElementById('totalFinanciado').value = limpiarValor(equipo.totalFinanciado);
+        document.getElementById('totalLetra').value = limpiarValor(equipo.totalLetra);
 
         actualizarCuotaPorPlazo();
     }
 
-    // LÓGICA DE DETECCIÓN DINÁMICA DE CUOTAS 🚀
     function actualizarCuotaPorPlazo() {
         const idx = document.getElementById('selectorImei').value;
         const plazo = document.getElementById('plazoSemanas').value;
@@ -182,8 +184,6 @@
         }
 
         const equipo = cacheEcosistema.inventario[idx];
-        
-        // Si elige 26 semanas jala .cuota (Columna D), si elige 52 semanas jala .totalFinanciado (Columna E)
         if (plazo === "26") {
             campoCuota.value = equipo.cuota;
         } else if (plazo === "52") {

@@ -11,177 +11,118 @@
         h2 { text-align: center; color: #2c3e50; margin-bottom: 5px; }
         h3 { color: #2c3e50; border-bottom: 2px solid #e67e22; padding-bottom: 5px; margin-top: 25px; font-size: 18px; }
         label { font-weight: bold; display: block; margin-top: 15px; color: #34495e; font-size: 14px; }
-        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; font-family: Arial, sans-serif; }
-        textarea { resize: vertical; height: 80px; }
-        .row { display: flex; gap: 15px; }
-        .row .col { flex: 1; }
+        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 15px; }
         button { width: 100%; background: #e67e22; color: white; padding: 14px; border: none; border-radius: 4px; font-size: 16px; margin-top: 25px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
         button:hover { background: #d35400; }
-        .btn-pago { background: #27ae60; }
-        .btn-pago:hover { background: #219152; }
-        .status { text-align: center; font-weight: bold; margin-top: 15px; color: #7f8c8d; }
-        hr { border: 0; height: 1px; background: #ccc; margin: 40px 0 20px 0; }
+        .btn-pago { background: #8e44ad; }
+        .btn-pago:hover { background: #71338c; }
+        .subtitulo { text-align: center; color: #7f8c8d; font-size: 14px; margin-bottom: 20px; }
+        .loading-dash { color: #2980b9; font-weight: bold; text-align: center; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>⚙️ CelYa! Panel Admin</h2>
-    <div id="statusMsg" class="status">⏳ Conectando con el servidor de Sheets...</div>
+    <h2>CelYa! - Dashboard</h2>
+    <div class="subtitulo">Consola de Control de Intereses y Cobros Recurrentes</div>
+    
+    <div id="statusCarga" class="loading-dash">⏳ Leyendo parámetros en la nube de Google Sheets...</div>
 
-    <h3>💸 Registrar Abono Semanal</h3>
-    <form id="pagoForm">
-        <label>Seleccionar Cliente y Equipo:</label>
-        <select id="selectCliente" required>
-            <option value="">Cargando clientes activos...</option>
-        </select>
-
-        <div class="row">
-            <div class="col">
-                <label>Monto a Abonar ($):</label>
-                <input type="number" id="montoPago" step="0.01" placeholder="0.00" required>
-            </div>
-            <div class="col">
-                <label>Método de Pago:</label>
-                <select id="metodoPago" required>
-                    <option value="Efectivo">Efectivo</option>
-                    <option value="Transferencia">Transferencia</option>
-                    <option value="Depósito">Depósito</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col">
-                <label>Semana Corresp.:</label>
-                <input type="text" id="semanaPago" placeholder="Ej: Sem 3 o 4" required>
-            </div>
-            <div class="col">
-                <label>Recibo / Folio:</label>
-                <input type="text" id="folioPago" placeholder="Opcional">
-            </div>
-        </div>
-
-        <label>Notas o Comentarios del Pago:</label>
-        <textarea id="notasPago" placeholder="Detalles del abono..."></textarea>
-
-        <button type="submit" id="btnGuardarPago" class="btn-pago">💵 Aplicar y Guardar Pago</button>
-    </form>
-
-    <hr>
-
-    <h3>🔧 Configuración Global de Contratos</h3>
+    <h3>⚙️ Configuración Global de Créditos</h3>
     <form id="configForm">
-        <label>Porcentaje de Interés Moratorio (%):</label>
-        <input type="number" id="interes" name="interes" required>
+        <label>Porcentaje de Interés Moratorio Semanal (%):</label>
+        <input type="number" id="interes" required min="0" max="100" step="1">
 
         <label>Horas de Tolerancia para Pago:</label>
-        <input type="number" id="horastol" name="horastol" required>
+        <input type="number" id="horastol" required min="0" max="168" step="1">
 
-        <label>Semanas Máximas de Tolerancia (Atraso):</label>
-        <input type="number" id="semanastol" name="semanastol" required>
+        <label>Semanas de Tolerancia Máxima antes de Bloqueo:</label>
+        <input type="number" id="semanastol" required min="0" max="12" step="1">
 
-        <button type="submit" id="btnGuardarConfig">💾 Guardar Configuración Global</button>
+        <button type="submit" id="btnConfig">💾 Guardar Configuración Global</button>
+    </form>
+
+    <h3>💰 Registrar Abono / Pago Semanal</h3>
+    <form id="pagoForm" onsubmit="event.preventDefault(); procesarRegistroDePago();">
+        <label>Seleccionar Cliente Activo (IMEI):</label>
+        <select id="selectorCliente" onchange="autoRellenarNombreCliente()" required>
+            <option value="">-- Selecciona un cliente del sistema --</option>
+        </select>
+
+        <input type="hidden" id="hiddenImei" name="imei">
+        <input type="hidden" id="hiddenNombre" name="nombreCliente">
+
+        <label>Monto a Abonar ($):</label>
+        <input type="text" id="montoPago" placeholder="Ej: 350" required>
+
+        <label>Método de Pago:</label>
+        <select id="metodoPago" required>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Transferencia">Transferencia Bancaria</option>
+            <option value="Depósito">Depósito OXXO / Ventanilla</option>
+        </select>
+
+        <label>Semana Correspondiente (Número de Abono):</label>
+        <input type="number" id="semanaPago" placeholder="Ej: 3" min="1" max="52" required>
+
+        <label>Número de Recibo / Folio:</label>
+        <input type="text" id="folioPago" placeholder="Ej: F-9921" required>
+
+        <label>Notas Adicionales / Comentarios:</label>
+        <textarea id="notasPago" placeholder="Opcional..." rows="2"></textarea>
+
+        <button type="submit" id="btnPago" class="btn-pago">💜 Aplicar y Guardar Pago</button>
     </form>
 </div>
 
 <script>
-    let listaClientesLocales = [];
+    let cacheClientesActivos = [];
 
-    // Carga síncrona idéntica a la lógica exitosa de index.html 🚀
-    async function cargarDatosDashboard() {
+    window.onload = async function() {
         try {
             const respuesta = await fetch(CONFIG.GOOGLE_SCRIPT_URL);
-            const datos = await respuesta.json();
+            const dataEcosistema = await respuesta.json();
+            
+            // Cargar datos en los inputs de configuración
+            document.getElementById('interes').value = dataEcosistema.config.interes;
+            document.getElementById('horastol').value = dataEcosistema.config.horastol;
+            document.getElementById('semanastol').value = dataEcosistema.config.semanastol;
+            
+            // Cargar select dinámico de clientes activos en calle
+            cacheClientesActivos = dataEcosistema.clientesActivos || [];
+            const selectElement = document.getElementById('selectorCliente');
+            
+            cacheClientesActivos.forEach((item, index) => {
+                const opt = document.createElement('option');
+                opt.value = index;
+                opt.text = item.etiquetaCompleta;
+                selectElement.appendChild(opt);
+            });
 
-            // Inyectar Configuración
-            document.getElementById('interes').value = datos.config.interes;
-            document.getElementById('horastol').value = datos.config.horastol;
-            document.getElementById('semanastol').value = datos.config.semanastol;
-
-            // Inyectar Clientes en el Desplegable
-            listaClientesLocales = datos.clientesActivos || [];
-            const selectElemento = document.getElementById('selectCliente');
-            selectElemento.innerHTML = '<option value="">-- Elige Cliente - Modelo (IMEI) --</option>';
-
-            if (listaClientesLocales.length === 0) {
-                selectElemento.innerHTML = '<option value="">⚠️ No se encontraron clientes en Sheets</option>';
-            } else {
-                listaClientesLocales.forEach((item, index) => {
-                    let opcion = document.createElement('option');
-                    opcion.value = index;
-                    opcion.textContent = item.etiquetaCompleta;
-                    selectElemento.appendChild(opcion);
-                });
-            }
-
-            document.getElementById('statusMsg').style.display = 'none';
+            document.getElementById('statusCarga').style.display = 'none';
         } catch (error) {
-            document.getElementById('statusMsg').innerText = "❌ Error al sincronizar con Google Sheets.";
-            console.error("Fallo de carga:", error);
+            document.getElementById('statusCarga').innerText = "❌ Error de comunicación con las credenciales de Google.";
+            console.error(error);
         }
+    };
+
+    function autoRellenarNombreCliente() {
+        const indice = document.getElementById('selectorCliente').value;
+        if(indice === "") {
+            document.getElementById('hiddenImei').value = "";
+            document.getElementById('hiddenNombre').value = "";
+            return;
+        }
+        const datosCliente = cacheClientesActivos[indice];
+        document.getElementById('hiddenImei').value = datosCliente.imei;
+        document.getElementById('hiddenNombre').value = datosCliente.cliente;
     }
 
-    // Ejecutar la inicialización directo al procesar el script (Igual que index.html)
-    cargarDatosDashboard();
-
-    // Guardar Registro de Pago
-    document.getElementById('pagoForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const btn = document.getElementById('btnGuardarPago');
-        const selectIdx = document.getElementById('selectCliente').value;
-        
-        if(selectIdx === "") return alert("Por favor, selecciona un cliente válido.");
-        const clienteSeleccionado = listaClientesLocales[selectIdx];
-
-        btn.innerText = "⏳ Registrando abono en Sheets...";
-        btn.style.background = "#34495e";
-        btn.disabled = true;
-
-        try {
-            const formData = new URLSearchParams();
-            formData.append('action', 'registrarPago');
-            formData.append('imei', clienteSeleccionado.imei);
-            formData.append('nombreCliente', clienteSeleccionado.cliente);
-            formData.append('monto', document.getElementById('montoPago').value);
-            formData.append('metodo', document.getElementById('metodoPago').value);
-            formData.append('semana', document.getElementById('semanaPago').value);
-            formData.append('folio', document.getElementById('folioPago').value || "");
-            formData.append('notas', document.getElementById('notasPago').value || "");
-
-            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                body: formData.toString(),
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-            });
-            const data = await res.json();
-
-            if (data.result === 'success') {
-                btn.innerText = "✅ ¡Pago Registrado Exitosamente!";
-                btn.style.background = "#27ae60";
-                document.getElementById('pagoForm').reset();
-            } else {
-                btn.innerText = "⚠️ Error en base de datos";
-                btn.style.background = "#c0392b";
-                btn.disabled = false;
-            }
-        } catch (err) {
-            btn.innerText = "❌ Error de conexión";
-            btn.style.background = "#c0392b";
-            btn.disabled = false;
-        } finally {
-            setTimeout(() => {
-                btn.innerText = "💵 Aplicar y Guardar Pago";
-                btn.style.background = "#27ae60";
-                btn.disabled = false;
-            }, 3500);
-        }
-    });
-
-    // Guardar Configuración Global
+    // EVENTO GUARDAR CONFIGURACIÓN GLOBAL
     document.getElementById('configForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        const btn = document.getElementById('btnGuardarConfig');
+        const btn = document.getElementById('btnConfig');
+        const colorOriginal = btn.style.background || "#e67e22";
         
         btn.innerText = "⏳ Aplicando cambios globales...";
         btn.style.background = "#34495e";
@@ -209,16 +150,66 @@
                 btn.style.background = "#c0392b";
             }
         } catch (err) {
-            btn.innerText = "❌ Error de conexión de red";
+            btn.innerText = "❌ Error de red";
             btn.style.background = "#c0392b";
         } finally {
             setTimeout(() => {
                 btn.innerText = "💾 Guardar Configuración Global";
-                btn.style.background = "#e67e22";
+                btn.style.background = colorOriginal;
                 btn.disabled = false;
             }, 3500);
         }
     });
+
+    // EVENTO VINCULADO PARA REGISTRAR PAGO NUEVO EN LA COLUMNA 🚀
+    async function procesarRegistroDePago() {
+        const btn = document.getElementById('btnPago');
+        const colorOriginal = btn.style.background || "#8e44ad";
+
+        btn.innerText = "⏳ Archivando Abono en Base de Datos...";
+        btn.style.background = "#34495e";
+        btn.disabled = true;
+
+        try {
+            const params = new URLSearchParams();
+            params.append('action', 'registrarPago');
+            params.append('imei', document.getElementById('hiddenImei').value);
+            params.append('nombreCliente', document.getElementById('hiddenNombre').value);
+            params.append('monto', document.getElementById('montoPago').value);
+            params.append('metodo', document.getElementById('metodoPago').value);
+            params.append('semana', document.getElementById('semanaPago').value);
+            params.append('folio', document.getElementById('folioPago').value);
+            params.append('notas', document.getElementById('notasPago').value);
+
+            const respuesta = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                body: params.toString(),
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            });
+            const resultado = await respuesta.json();
+
+            if (resultado.result === "success") {
+                btn.innerText = "✅ ¡Pago Registrado Exitosamente!";
+                btn.style.background = "#27ae60";
+                document.getElementById('pagoForm').reset();
+                setTimeout(() => {
+                    location.reload();
+                }, 3000);
+            } else {
+                btn.innerText = "⚠️ Error: " + resultado.error;
+                btn.style.background = "#c0392b";
+                btn.disabled = false;
+            }
+        } catch (err) {
+            btn.innerText = "❌ Error de conexión de red";
+            btn.style.background = "#c0392b";
+            btn.disabled = false;
+            setTimeout(() => {
+                btn.innerText = "💜 Aplicar y Guardar Pago";
+                btn.style.background = colorOriginal;
+            }, 3500);
+        }
+    }
 </script>
 </body>
 </html>
