@@ -13,7 +13,7 @@
         input, textarea { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         input[readonly] { background-color: #e9ecef; }
         #canvas-firma { border: 2px dashed #34495e; background: #fff; border-radius: 4px; margin-top: 5px; cursor: crosshair; user-select: none; touch-action: none; }
-        button { width: 100%; background: #27ae60; color: white; padding: 12px; border: none; border-radius: 4px; font-size: 16px; margin-top: 15px; cursor: pointer; }
+        button { width: 100%; background: #27ae60; color: white; padding: 12px; border: none; border-radius: 4px; font-size: 16px; margin-top: 15px; cursor: pointer; transition: background 0.3s; }
         button:hover { background: #219150; }
         .btn-clear { background: #e74c3c; margin-top: 5px; padding: 5px; font-size: 12px; }
         .btn-clear:hover { background: #c0392b; }
@@ -100,7 +100,6 @@
     document.getElementById('totalFinanciado').value = urlParams.get('totalFinanciado') || '';
     document.getElementById('totalLetra').value = urlParams.get('totalLetra') || '';
 
-    // Lógica básica Canvas Firma
     const canvas = document.getElementById('canvas-firma'); const ctx = canvas.getContext('2d'); let dibujando = false;
     function obtenerPosicion(e) { const rect = canvas.getBoundingClientRect(); const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY; return { x: clientX - rect.left, y: clientY - rect.top }; }
     function iniciarDibujo(e) { dibujando = true; pautarDibujo(e); } function terminarDibujo() { dibujando = false; ctx.beginPath(); }
@@ -132,18 +131,48 @@
     document.getElementById('ineTrasera').addEventListener('change', function() { procesarYComprimirImagen(this, 'previewTrasera', 'trasera'); });
 
     document.getElementById('contratoForm').addEventListener('submit', async function(e) {
-        e.preventDefault(); const btn = document.getElementById('btnEnviar'); btn.innerText = "Procesando..."; btn.disabled = true;
+        e.preventDefault();
+        const btn = document.getElementById('btnEnviar');
+        const colorOriginal = btn.style.background;
+        
+        btn.innerText = "⏳ Procesando y archivando...";
+        btn.style.background = "#d35400"; 
+        btn.disabled = true;
+
         try {
             document.getElementById('firmaBase64').value = canvas.toDataURL('image/png');
-            document.getElementById('ineDelanteraBase64').value = ineDelanteraB64; document.getElementById('ineTraseraBase64').value = ineTraseraB64;
+            document.getElementById('ineDelanteraBase64').value = ineDelanteraB64;
+            document.getElementById('ineTraseraBase64').value = ineTraseraB64;
+
             const sheetData = new URLSearchParams(new FormData(this));
             const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, { method: 'POST', body: sheetData.toString(), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
             const data = await res.json();
+
             if (data.result === 'success') {
-                alert('✅ ¡Éxito total! Contrato registrado.'); document.getElementById('contratoForm').reset(); limpiarFirma();
-                document.getElementById('previewDelantera').innerHTML = ''; document.getElementById('previewTrasera').innerHTML = '';
-            } else { alert('⚠️ Error: ' + data.error); }
-        } catch (err) { alert('❌ Error de conexión.'); } finally { btn.innerText = "Generar Contrato"; btn.disabled = false; }
+                btn.innerText = "✅ ¡Contrato Guardado con Éxito!";
+                btn.style.background = "#27ae60"; 
+
+                document.getElementById('contratoForm').reset();
+                limpiarFirma();
+                document.getElementById('previewDelantera').innerHTML = '';
+                document.getElementById('previewTrasera').innerHTML = '';
+                ineDelanteraB64 = ""; ineTraseraB64 = "";
+
+                setTimeout(() => {
+                    btn.innerText = "Generar Contrato y Archivar";
+                    btn.style.background = colorOriginal;
+                    btn.disabled = false;
+                }, 5000);
+            } else {
+                btn.innerText = "⚠️ Error: " + data.error;
+                btn.style.background = "#c0392b";
+                btn.disabled = false;
+            }
+        } catch (err) {
+            btn.innerText = "❌ Error de Red, reintente.";
+            btn.style.background = "#c0392b";
+            btn.disabled = false;
+        }
     });
 </script>
 </body>

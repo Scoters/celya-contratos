@@ -14,7 +14,7 @@
         label { font-weight: bold; display: block; margin-top: 5px; }
         input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
         input[readonly] { background-color: #e9ecef; }
-        button { width: 100%; background: #2980b9; color: white; padding: 12px; border: none; border-radius: 4px; font-size: 16px; margin-top: 20px; cursor: pointer; font-weight: bold; }
+        button { width: 100%; background: #2980b9; color: white; padding: 12px; border: none; border-radius: 4px; font-size: 16px; margin-top: 20px; cursor: pointer; font-weight: bold; transition: background 0.3s, content 0.3s; }
         button:hover { background: #2471a3; }
         .result-box { margin-top: 25px; padding: 15px; background: #eef2f5; border-left: 5px solid #27ae60; border-radius: 4px; display: none; }
         .url-text { background: white; padding: 10px; border: 1px solid #ddd; border-radius: 4px; word-break: break-all; font-family: monospace; font-size: 14px; margin: 10px 0; font-weight: bold; color: #27ae60; }
@@ -26,7 +26,7 @@
 <body>
 
 <div class="container">
-    <h2>📊 CelYa! Dashboard v2.5<br><span style="font-size: 14px; color: #7f8c8d; font-weight: normal;">Con Acortador de Enlaces Automático</span></h2>
+    <h2>📊 CelYa! Dashboard v2.6<br><span style="font-size: 14px; color: #7f8c8d; font-weight: normal;">Sincronizado con Inventario Real</span></h2>
     
     <div id="loadingStatus" class="status-load">⏳ Cargando inventario desde Google Sheets...</div>
 
@@ -92,14 +92,13 @@
     <div id="resultBox" class="result-box">
         <label style="color: #2c3e50; font-weight: bold;">🔗 Enlace acortado listo para mandar por WhatsApp:</label>
         <div id="urlGenerated" class="url-text"></div>
-        <button class="btn-copy" onclick="copiarLink()">📋 Copiar Enlace Corto</button>
+        <button id="btnCopiar" class="btn-copy" onclick="copiarLink()">📋 Copiar Enlace Corto</button>
     </div>
 </div>
 
 <script>
     let cacheInventario = [];
 
-    // Llamada automática al abrir para jalar el inventario
     window.onload = async function() {
         try {
             const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL);
@@ -140,7 +139,13 @@
 
     async function generarLink() {
         const idx = document.getElementById('selectorInventario').value;
-        if(idx === "") { alert("⚠️ Por favor selecciona un equipo del inventario."); return; }
+        if(idx === "") { 
+            const btnGen = document.getElementById('btnGenerar');
+            btnGen.innerText = "⚠️ Selecciona un equipo primero";
+            btnGen.style.background = "#e67e22";
+            setTimeout(() => { btnGen.innerText = "🚀 Generar Enlace Corto"; btnGen.style.background = "#2980b9"; }, 3000);
+            return; 
+        }
 
         const btn = document.getElementById('btnGenerar');
         btn.innerText = "⏳ Generando y acortando enlace...";
@@ -156,25 +161,21 @@
         const letraCodificada = encodeURIComponent(equipo.totalLetra);
 
         const baseUrl = "https://scoters.github.io/celya-contratos/";
-        
-        // 1. Construir la URL larga original
         const urlLarga = `${baseUrl}?imei=${equipo.imei}&modelo=${modeloCodificado}&monto=${equipo.enganche}&cuota=${equipo.cuota}&interes=${interes}&horastol=${horastol}&semanastol=${semanastol}&plazoSemanas=${plazoSemanas}&totalFinanciado=${equipo.totalFinanciado}&totalLetra=${letraCodificada}`;
 
         try {
-            // 2. Llamar en caliente a la API pública y gratuita de TinyURL para encoger el link
-            const respuestaTiny = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(urlLarga)}`);
-            
-            if (!respuestaTiny.ok) throw new Error("Error en respuesta del acortador");
-            
-            const urlCortada = await respuestaTiny.text();
+            const respuestaIsGd = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://is.gd/create.php?format=simple&url=' + encodeURIComponent(urlLarga))}`);
+            if (!respuestaIsGd.ok) throw new Error("Error en respuesta del acortador");
+            const json = await respuestaIsGd.json();
+            const urlCortada = json.contents.trim();
 
-            // 3. Mostrar enlace corto en la interfaz
+            if (urlCortada.includes("Error")) throw new Error(urlCortada);
+
             document.getElementById('urlGenerated').innerText = urlCortada;
             document.getElementById('resultBox').style.display = 'block';
 
         } catch (error) {
-            console.error("No se pudo acortar automáticamente:", error);
-            alert("⚠️ El acortador falló, pero te dejamos el link largo para que no detengas tu operación.");
+            console.error(error);
             document.getElementById('urlGenerated').innerText = urlLarga;
             document.getElementById('resultBox').style.display = 'block';
         } finally {
@@ -185,8 +186,16 @@
 
     function copiarLink() {
         const urlText = document.getElementById('urlGenerated').innerText;
+        const btnCopiar = document.getElementById('btnCopiar');
+        
         navigator.clipboard.writeText(urlText).then(() => {
-            alert("📋 ¡Enlace copiado al portapapeles! Ya puedes pegarlo directamente en el chat de WhatsApp.");
+            btnCopiar.innerText = "✅ ¡Copiado con éxito!";
+            btnCopiar.style.background = "#2ecc71";
+            
+            setTimeout(() => {
+                btnCopiar.innerText = "📋 Copiar Enlace Corto";
+                btnCopiar.style.background = "#27ae60";
+            }, 3000);
         });
     }
 </script>
