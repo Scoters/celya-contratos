@@ -21,6 +21,306 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
+        canvas { border: 1px dashed #666; width: 100%; height: 180px; display: block; cursor: crosshair; background: #fafafa; }
+        .botones-firma { display: flex; gap: 10px; margin-top: 5px; }
+        .btn-limpiar { background: #7f8c8d; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-limpiar:hover { background: #95a5a6; }
+        
+        button[type="submit"] { width: 100%; background: #2c3e50; color: white; padding: 12px; border: none; border-radius: 4px; font-size: 16px; margin-top: 20px; cursor: pointer; font-weight: bold; }
+        button[type="submit"]:hover { background: #34495e; }
+        .foto-seccion { background: #f9f9f9; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-top: 15px; }
+        .preview-imagen { margin-top: 10px; text-align: center; }
+        .preview-imagen img { max-width: 100%; max-height: 150px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .cargando { text-align: center; color: #2980b9; font-weight: bold; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Registro de Contrato CelYa</h2>
+    <div id="mensajeCarga" class="cargando">⏳ Cargando inventario disponible y configuraciones de red...</div>
+    
+    <form id="contratoForm" onsubmit="procesarFormulario(event)">
+        
+        <label>Seleccionar Equipo Comercial (IMEI):</label>
+        <select id="selectorImei" onchange="seleccionarEquipo()" required>
+            <option value="">-- Seleccione un equipo disponible --</option>
+        </select>
+
+        <label>Nombre Completo del Cliente:</label>
+        <input type="text" id="cliente" name="cliente" placeholder="Ej: Juan Pérez López" required>
+
+        <label>Teléfono de Contacto:</label>
+        <input type="tel" id="telefono" name="telefono" placeholder="Ej: 5512345678" required>
+
+        <label>Fecha de Nacimiento:</label>
+        <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+
+        <label>Modelo del Teléfono:</label>
+        <input type="text" id="modelo" name="modelo" readonly required>
+
+        <label>Monto de Enganche Pagado ($):</label>
+        <input type="text" id="monto" name="monto" readonly required>
+
+        <label>Dirección Completa de Residencia:</label>
+        <textarea id="direccion" name="direccion" rows="2" placeholder="Calle, Número, Colonia, Municipio" required></textarea>
+
+        <label>Teléfono Celular del Aval:</label>
+        <input type="tel" id="telefonoAval" name="telefonoAval" placeholder="Ej: 5587654321" required>
+
+        <label>Plazo de Financiamiento Elegido:</label>
+        <select id="plazoSemanas" name="plazoSemanas" onchange="actualizarCuotaPorPlazo()" required>
+            <option value="">-- Seleccione el plazo --</option>
+            <option value="26">Plan Rápido (26 Semanas)</option>
+            <option value="52">Plan Cómodo (52 Semanas)</option>
+        </select>
+
+        <label>Cuota Semanal Calculada ($):</label>
+        <input type="text" id="cuota" name="cuota" readonly required placeholder="Seleccione un plazo para cotizar">
+
+        <label>Monto Financiado Total ($):</label>
+        <input type="text" id="totalFinanciado" name="totalFinanciado" readonly required>
+
+        <input type="hidden" id="interes" name="interes">
+        <input type="hidden" id="horastol" name="horastol">
+        <input type="hidden" id="semanastol" name="semanastol">
+        <input type="hidden" id="totalLetra" name="totalLetra">
+        <input type="hidden" id="imei" name="imei">
+
+        <div class="foto-seccion">
+            <label>📸 Fotografía de INE (Frente):</label>
+            <input type="file" id="ineDelantera" accept="image/*" capture="environment" onchange="procesarFoto(this, 'previewDelantera', 'delantera')">
+            <div id="previewDelantera" class="preview-imagen"></div>
+        </div>
+
+        <div class="foto-seccion">
+            <label>📸 Fotografía de INE (Reverso):</label>
+            <input type="file" id="ineTrasera" accept="image/*" capture="environment" onchange="procesarFoto(this, 'previewTrasera', 'trasera')">
+            <div id="previewTrasera" class="preview-imagen"></div>
+        </div>
+
+        <label>✍️ Firma Digital del Cliente (Enmarcada):</label>
+        <div class="contenedor-canvas-firma">
+            <canvas id="canvasFirma"></canvas>
+            <div class="botones-firma">
+                <button type="button" class="btn-limpiar" onclick="limpiarFirma()">Blanquear Recuadro</button>
+            </div>
+        </div>
+
+        <button type="submit" id="btnEnviar">Generar Contrato y Archivar</button>
+    </form>
+</div>
+
+<script>
+    let cacheEcosistema = { inventario: [], config: {} };
+    let ineDelanteraB64 = "";
+    let ineTraseraB64 = "";
+    
+    // Configuración del lienzo de firma digital
+    const canvas = document.getElementById('canvasFirma');
+    const ctx = canvas.getContext('2d');
+    let dibujando = false;
+
+    function ajustarLienzo() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = 180;
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "#2c3e50";
+    }
+
+    window.onload = async function() {
+        ajustarLienzo();
+        window.addEventListener('resize', ajustarLienzo);
+        await cargarInventarioYConfiguracion();
+    };
+
+    // Control de trazos táctiles y mouse
+    canvas.addEventListener('mousedown', (e) => { dibujando = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+    canvas.addEventListener('mousemove', (e) => { if (dibujando) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
+    canvas.addEventListener('mouseup', () => dibujando = false);
+    canvas.addEventListener('mouseleave', () => dibujando = false);
+
+    canvas.addEventListener('touchstart', (e) => {
+        dibujando = true;
+        ctx.beginPath();
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        e.preventDefault();
+    });
+    canvas.addEventListener('touchmove', (e) => {
+        if (!dibujando) return;
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        ctx.stroke();
+        e.preventDefault();
+    });
+    canvas.addEventListener('touchend', () => dibujando = false);
+
+    function limpiarFirma() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // CARGA DE DATOS DESDE APPS SCRIPT
+    async function cargarInventarioYConfiguracion() {
+        try {
+            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL);
+            const data = await res.json();
+            
+            cacheEcosistema.config = data.config || {};
+            document.getElementById('interes').value = data.config.interes || "";
+            document.getElementById('horastol').value = data.config.horastol || "";
+            document.getElementById('semanastol').value = data.config.semanastol || "";
+
+            const selectImei = document.getElementById('selectorImei');
+            
+            data.inventario.forEach((prod, index) => {
+                // GUARDADO EXACTO DE VARIABLES CORREGIDAS CON APPS SCRIPT 🚀
+                cacheEcosistema.inventario.push({
+                    imei: prod.imei,
+                    modelo: prod.modelo,
+                    enganche: prod.enganche,
+                    planRapido: prod.planRapido,  
+                    planComodo: prod.planComodo,  
+                    totalFinanciado: prod.totalFinanciado
+                });
+
+                const opt = document.createElement('option');
+                opt.value = index;
+                opt.text = `${prod.modelo} (${prod.imei})`;
+                selectImei.appendChild(opt);
+            });
+
+            document.getElementById('mensajeCarga').style.display = 'none';
+        } catch (err) {
+            document.getElementById('mensajeCarga').innerText = "❌ Error de sincronización con Google Cloud Network.";
+            console.error(err);
+        }
+    }
+
+    function seleccionarEquipo() {
+        const idx = document.getElementById('selectorImei').value;
+        if (idx === "") {
+            document.getElementById('modelo').value = '';
+            document.getElementById('monto').value = '';
+            document.getElementById('totalFinanciado').value = '';
+            document.getElementById('imei').value = '';
+            return;
+        }
+        const equipo = cacheEcosistema.inventario[idx];
+        document.getElementById('modelo').value = equipo.modelo;
+        document.getElementById('monto').value = equipo.enganche;
+        document.getElementById('totalFinanciado').value = equipo.totalFinanciado;
+        document.getElementById('imei').value = equipo.imei;
+        
+        actualizarCuotaPorPlazo();
+    }
+
+    // FUNCIÓN DEL FIX: CÁLCULO DE CUOTA SEMANAL SIN ERRORES 🚀
+    function actualizarCuotaPorPlazo() {
+        const idx = document.getElementById('selectorImei').value;
+        const plazo = document.getElementById('plazoSemanas').value;
+        const campoCuota = document.getElementById('cuota');
+
+        if (idx === "" || plazo === "") {
+            campoCuota.value = '';
+            return;
+        }
+
+        const equipo = cacheEcosistema.inventario[idx];
+        
+        if (plazo === "26") {
+            campoCuota.value = equipo.planRapido; // Columna D del Sheets
+        } else if (plazo === "52") {
+            campoCuota.value = equipo.planComodo; // Columna E del Sheets
+        }
+    }
+
+    // Conversión de imágenes de cámara a Base64 ligero
+    function procesarFoto(input, idPreview, tipo) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvasMin = document.createElement('canvas');
+                    const max_size = 800;
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > height) {
+                        if (width > max_size) { height *= max_size / width; width = max_size; }
+                    } else {
+                        if (height > max_size) { width *= max_size / height; height = max_size; }
+                    }
+                    canvasMin.width = width;
+                    canvasMin.height = height;
+                    const ctxMin = canvasMin.getContext('2d');
+                    ctxMin.drawImage(img, 0, 0, width, height);
+                    
+                    const dataUrl = canvasMin.toDataURL('image/jpeg', 0.7);
+                    document.getElementById(idPreview).innerHTML = `<img src="${dataUrl}">`;
+                    if (tipo === 'delantera') ineDelanteraB64 = dataUrl;
+                    if (tipo === 'trasera') ineTraseraB64 = dataUrl;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // REGISTRO GENERAL Y ENVÍO POST
+    async function procesarFormulario(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnEnviar');
+        const colorOriginal = btn.style.background || "#2c3e50";
+
+        btn.innerText = "⏳ Subiendo expediente y firmas...";
+        btn.style.background = "#7f8c8d";
+        btn.disabled = true;
+
+        try {
+            const formularioElemento = document.getElementById('contratoForm');
+            const sheetData = new URLSearchParams(new FormData(formularioElemento));
+            
+            // Adjuntar elementos multimedia
+            const firmaB64 = canvas.toDataURL();
+            sheetData.append('firmaBase64', firmaB64);
+            sheetData.append('ineDelanteraBase64', ineDelanteraB64);
+            sheetData.append('ineTraseraBase64', ineTraseraB64);
+            
+            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, { 
+                method: 'POST', 
+                body: sheetData.toString(), 
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' } 
+            });
+            const data = await res.json();
+
+            if (data.result === 'success') {
+                btn.innerText = "✅ ¡Contrato<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Contrato - CelYa</title>
+    <script src="config.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
+        .container { max-width: 500px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin: 0 auto; }
+        h2 { text-align: center; color: #2c3e50; }
+        label { font-weight: bold; display: block; margin-top: 10px; }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        input[readonly] { background-color: #e9ecef; }
+        
+        .contenedor-canvas-firma {
+            width: 100%;
+            margin-top: 5px;
+            position: relative;
+            background: #fff;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
 
         #canvas-firma { 
             border: 2px dashed #34495e; 
@@ -170,26 +470,25 @@
         document.getElementById('totalFinanciado').value = limpiarValor(equipo.totalFinanciado);
         document.getElementById('totalLetra').value = limpiarValor(equipo.totalLetra);
 
-        actualizarCuotaPorPlazo();
+        function actualizarCuotaPorPlazo() {
+    const idx = document.getElementById('selectorImei').value;
+    const plazo = document.getElementById('plazoSemanas').value;
+    const campoCuota = document.getElementById('cuota');
+
+    if (idx === "" || plazo === "") {
+        campoCuota.value = '';
+        return;
     }
 
-    function actualizarCuotaPorPlazo() {
-        const idx = document.getElementById('selectorImei').value;
-        const plazo = document.getElementById('plazoSemanas').value;
-        const campoCuota = document.getElementById('cuota');
-
-        if (idx === "" || plazo === "") {
-            campoCuota.value = '';
-            return;
-        }
-
-        const equipo = cacheEcosistema.inventario[idx];
-        if (plazo === "26") {
-            campoCuota.value = equipo.cuota;
-        } else if (plazo === "52") {
-            campoCuota.value = equipo.totalFinanciado;
-        }
+    const equipo = cacheEcosistema.inventario[idx];
+    
+    // CORRECCIÓN EXACTA DE LOS PLANES 🚀
+    if (plazo === "26") {
+        campoCuota.value = equipo.planRapido; // Columna D del Sheets
+    } else if (plazo === "52") {
+        campoCuota.value = equipo.planComodo; // Columna E del Sheets
     }
+}
 
     const canvas = document.getElementById('canvas-firma'); 
     const ctx = canvas.getContext('2d'); 

@@ -12,6 +12,7 @@
         h3 { color: #2c3e50; border-bottom: 2px solid #e67e22; padding-bottom: 5px; margin-top: 25px; font-size: 18px; }
         label { font-weight: bold; display: block; margin-top: 15px; color: #34495e; font-size: 14px; }
         input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 15px; }
+        input[readonly] { background-color: #e9ecef; color: #495057; }
         button { width: 100%; background: #e67e22; color: white; padding: 14px; border: none; border-radius: 4px; font-size: 16px; margin-top: 25px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
         button:hover { background: #d35400; }
         .btn-pago { background: #8e44ad; }
@@ -45,7 +46,7 @@
     <h3>💰 Registrar Abono / Pago Semanal</h3>
     <form id="pagoForm" onsubmit="event.preventDefault(); procesarRegistroDePago();">
         <label>Seleccionar Cliente Activo (IMEI):</label>
-        <select id="selectorCliente" onchange="autoRellenarNombreCliente()" required>
+        <select id="selectorCliente" onchange="calcularCobroAutomatico()" required>
             <option value="">-- Selecciona un cliente del sistema --</option>
         </select>
 
@@ -53,7 +54,7 @@
         <input type="hidden" id="hiddenNombre" name="nombreCliente">
 
         <label>Monto a Abonar ($):</label>
-        <input type="text" id="montoPago" placeholder="Ej: 350" required>
+        <input type="text" id="montoPago" readonly required placeholder="Selecciona un cliente para ver su cuota">
 
         <label>Método de Pago:</label>
         <select id="metodoPago" required>
@@ -77,21 +78,56 @@
 
 <script>
     let cacheClientesActivos = [];
+    let cacheInventario = [];
+
+    // LÓGICA INTELIGENTE DE DETERMINACIÓN DE CUOTA SEMANAL 🚀
+    function calcularCobroAutomatico() {
+        const indice = document.getElementById('selectorCliente').value;
+        const campoMonto = document.getElementById('montoPago');
+
+        if(indice === "") {
+            document.getElementById('hiddenImei').value = "";
+            document.getElementById('hiddenNombre').value = "";
+            campoMonto.value = "";
+            return;
+        }
+
+        const datosCliente = cacheClientesActivos[indice];
+        document.getElementById('hiddenImei').value = datosCliente.imei;
+        document.getElementById('hiddenNombre').value = datosCliente.cliente;
+
+        // Buscamos el equipo en el inventario usando el IMEI del cliente
+        const equipo = cacheInventario.find(prod => prod.imei === datosCliente.imei);
+
+        if (equipo) {
+            // Mapeo exacto corregido: 26 -> planRapido (Columna D), 52 -> planComodo (Columna E)
+            if (datosCliente.plan === "26") {
+                campoMonto.value = equipo.planRapido;
+            } else {
+                campoMonto.value = equipo.planComodo;
+            }
+            campoMonto.setAttribute('readonly', true);
+        } else {
+            // Si el equipo ya no está en Inventario (vendido), habilitamos edición manual por contingencia
+            campoMonto.removeAttribute('readonly');
+            campoMonto.value = "";
+            campoMonto.placeholder = "Monto manual (Equipo fuera de Inventario)";
+        }
+    }
 
     window.onload = async function() {
         try {
             const respuesta = await fetch(CONFIG.GOOGLE_SCRIPT_URL);
             const dataEcosistema = await respuesta.json();
             
-            // Cargar datos en los inputs de configuración
             document.getElementById('interes').value = dataEcosistema.config.interes;
             document.getElementById('horastol').value = dataEcosistema.config.horastol;
             document.getElementById('semanastol').value = dataEcosistema.config.semanastol;
             
-            // Cargar select dinámico de clientes activos en calle
             cacheClientesActivos = dataEcosistema.clientesActivos || [];
-            const selectElement = document.getElementById('selectorCliente');
+            cacheInventario = dataEcosistema.inventario || [];
             
+            const selectElement = document.getElementById('selectorCliente');
             cacheClientesActivos.forEach((item, index) => {
                 const opt = document.createElement('option');
                 opt.value = index;
@@ -105,18 +141,6 @@
             console.error(error);
         }
     };
-
-    function autoRellenarNombreCliente() {
-        const indice = document.getElementById('selectorCliente').value;
-        if(indice === "") {
-            document.getElementById('hiddenImei').value = "";
-            document.getElementById('hiddenNombre').value = "";
-            return;
-        }
-        const datosCliente = cacheClientesActivos[indice];
-        document.getElementById('hiddenImei').value = datosCliente.imei;
-        document.getElementById('hiddenNombre').value = datosCliente.cliente;
-    }
 
     // EVENTO GUARDAR CONFIGURACIÓN GLOBAL
     document.getElementById('configForm').addEventListener('submit', async function(e) {
@@ -161,7 +185,7 @@
         }
     });
 
-    // EVENTO VINCULADO PARA REGISTRAR PAGO NUEVO EN LA COLUMNA 🚀
+    // EVENTO PARA REGISTRAR PAGO
     async function procesarRegistroDePago() {
         const btn = document.getElementById('btnPago');
         const colorOriginal = btn.style.background || "#8e44ad";
