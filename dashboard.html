@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CelYa! - Generador de Enlaces</title>
+    <title>CelYa! - Panel Administrativo</title>
+    <script src="config.js"></script>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
         .container { max-width: 600px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.1); margin: 0 auto; }
@@ -11,39 +12,62 @@
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .full-width { grid-column: span 2; }
         label { font-weight: bold; display: block; margin-top: 5px; }
-        input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        input[readonly] { background-color: #e9ecef; }
         button { width: 100%; background: #2980b9; color: white; padding: 12px; border: none; border-radius: 4px; font-size: 16px; margin-top: 20px; cursor: pointer; font-weight: bold; }
         button:hover { background: #2471a3; }
         .result-box { margin-top: 25px; padding: 15px; background: #eef2f5; border-left: 5px solid #2980b9; border-radius: 4px; display: none; }
         .url-text { background: white; padding: 10px; border: 1px solid #ddd; border-radius: 4px; word-break: break-all; font-family: monospace; font-size: 13px; margin: 10px 0; max-height: 80px; overflow-y: auto; }
         .btn-copy { background: #27ae60; margin-top: 5px; padding: 8px; font-size: 14px; }
-        .btn-copy:hover { background: #219150; }
+        .status-load { color: #e67e22; font-weight: bold; text-align: center; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>📊 CelYa! Dashboard<br><span style="font-size: 14px; color: #7f8c8d; font-weight: normal;">Generador de Enlaces para Choferes</span></h2>
+    <h2>📊 CelYa! Dashboard v2<br><span style="font-size: 14px; color: #7f8c8d; font-weight: normal;">Sincronizado con Inventario Real</span></h2>
     
+    <div id="loadingStatus" class="status-load">⏳ Cargando inventario desde Google Sheets...</div>
+
     <div class="grid">
         <div class="full-width">
-            <label>IMEI del Equipo (15 dígitos):</label>
-            <input type="text" id="imei" placeholder="Ej. 123456789012345" maxlength="15">
+            <label>Seleccionar IMEI del Inventario:</label>
+            <select id="selectorInventario" onchange="seleccionarEquipo()">
+                <option value="">-- Selecciona un equipo disponible --</option>
+            </select>
         </div>
 
         <div class="full-width">
             <label>Modelo / Marca:</label>
-            <input type="text" id="modelo" placeholder="Ej. Moto G24 Power">
+            <input type="text" id="modelo" readonly>
         </div>
 
         <div>
             <label>Monto Enganche ($):</label>
-            <input type="number" id="monto" placeholder="Ej. 1500">
+            <input type="text" id="monto" readonly>
         </div>
 
         <div>
             <label>Cuota Semanal ($):</label>
-            <input type="number" id="cuota" placeholder="Ej. 250">
+            <input type="text" id="cuota" readonly>
+        </div>
+
+        <div class="full-width">
+            <label>Monto Total Financiado ($):</label>
+            <input type="text" id="totalFinanciado" readonly>
+        </div>
+
+        <div class="full-width">
+            <label>Total en Letra:</label>
+            <input type="text" id="totalLetra" readonly>
+        </div>
+
+        <div class="full-width">
+            <label>Plan de Financiamiento (Plazo):</label>
+            <select id="planPlazo" onchange="calcularSemanas()">
+                <option value="26">Plan Rápido (6 Meses / 26 Semanas)</option>
+                <option value="52">Plan Cómodo (12 Meses / 52 Semanas)</option>
+            </select>
         </div>
 
         <div>
@@ -57,7 +81,7 @@
         </div>
 
         <div class="full-width">
-            <label>Semanas Tolerancia:</label>
+            <label>Semanas Tolerancia (Atraso):</label>
             <input type="number" id="semanastol" value="3">
         </div>
     </div>
@@ -72,28 +96,65 @@
 </div>
 
 <script>
+    let cacheInventario = [];
+
+    // Llamada automática al abrir para jalar la base de datos de Google por medio de GET
+    window.onload = async function() {
+        try {
+            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL);
+            cacheInventario = await res.json();
+            
+            const selector = document.getElementById('selectorInventario');
+            cacheInventario.forEach((equipo, index) => {
+                const opt = document.createElement('option');
+                opt.value = index;
+                opt.text = `${equipo.imei} - ${equipo.modelo}`;
+                selector.appendChild(opt);
+            });
+            
+            document.getElementById('loadingStatus').style.display = 'none';
+        } catch (err) {
+            document.getElementById('loadingStatus').innerText = "❌ Error al conectar con el Inventario.";
+            console.error(err);
+        }
+    };
+
+    function seleccionarEquipo() {
+        const idx = document.getElementById('selectorInventario').value;
+        if(idx === "") {
+            document.getElementById('modelo').value = '';
+            document.getElementById('monto').value = '';
+            document.getElementById('cuota').value = '';
+            document.getElementById('totalFinanciado').value = '';
+            document.getElementById('totalLetra').value = '';
+            return;
+        }
+        const equipo = cacheInventario[idx];
+        document.getElementById('modelo').value = equipo.modelo;
+        document.getElementById('monto').value = equipo.enganche;
+        document.getElementById('cuota').value = equipo.cuota;
+        document.getElementById('totalFinanciado').value = equipo.totalFinanciado;
+        document.getElementById('totalLetra').value = equipo.totalLetra;
+    }
+
     function generarLink() {
-        const imei = document.getElementById('imei').value.trim();
-        const modelo = document.getElementById('modelo').value.trim();
-        const monto = document.getElementById('monto').value.trim();
-        const cuota = document.getElementById('cuota').value.trim();
+        const idx = document.getElementById('selectorInventario').value;
+        if(idx === "") { alert("⚠️ Por favor selecciona un equipo del inventario."); return; }
+
+        const equipo = cacheInventario[idx];
         const interes = document.getElementById('interes').value.trim();
         const horastol = document.getElementById('horastol').value.trim();
         const semanastol = document.getElementById('semanastol').value.trim();
+        const plazoSemanas = document.getElementById('planPlazo').value;
 
-        if(!imei || !modelo || !monto || !cuota) {
-            alert("⚠️ Por favor, llena el IMEI, Modelo, Enganche y Cuota Semanal.");
-            return;
-        }
+        const modeloCodificado = encodeURIComponent(equipo.modelo);
+        const letraCodificada = encodeURIComponent(equipo.totalLetra);
 
-        // Codificar el modelo para que los espacios no rompan la URL
-        const modeloCodificado = encodeURIComponent(modelo);
-
-        // Construir la URL apuntando a tu index.html principal
         const baseUrl = "https://scoters.github.io/celya-contratos/";
-        const finalUrl = `${baseUrl}?imei=${imei}&modelo=${modeloCodificado}&monto=${monto}&cuota=${cuota}&interes=${interes}&horastol=${horastol}&semanastol=${semanastol}`;
+        
+        // Adjuntamos absolutamente todos los parámetros para capturarlos en Autocrat
+        const finalUrl = `${baseUrl}?imei=${equipo.imei}&modelo=${modeloCodificado}&monto=${equipo.enganche}&cuota=${equipo.cuota}&interes=${interes}&horastol=${horastol}&semanastol=${semanastol}&plazoSemanas=${plazoSemanas}&totalFinanciado=${equipo.totalFinanciado}&totalLetra=${letraCodificada}`;
 
-        // Mostrar caja de resultado
         document.getElementById('urlGenerated').innerText = finalUrl;
         document.getElementById('resultBox').style.display = 'block';
     }
@@ -101,9 +162,7 @@
     function copiarLink() {
         const urlText = document.getElementById('urlGenerated').innerText;
         navigator.clipboard.writeText(urlText).then(() => {
-            alert("📋 ¡Enlace copiado al portapapeles! Ya puedes pegarlo en WhatsApp.");
-        }).catch(err => {
-            console.error('Error al copiar: ', err);
+            alert("📋 ¡Enlace de venta copiado!");
         });
     }
 </script>

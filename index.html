@@ -43,20 +43,20 @@
         <label>Nombre Completo del Cliente:</label>
         <input type="text" id="cliente" name="cliente" required>
 
-        <label>Teléfono Celular Principal (10 dígitos):</label>
+        <label>Teléfono Celular Principal:</label>
         <input type="tel" id="telefono" name="telefono" maxlength="10" required>
 
-        <label>Fecha de Nacimiento del Cliente:</label>
+        <label>Fecha de Nacimiento:</label>
         <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
 
         <label>Dirección Completa de Domicilio:</label>
         <textarea id="direccion" name="direccion" rows="3" required></textarea>
 
-        <label>Teléfono de Aval o Referencia Familiar:</label>
+        <label>Teléfono de Aval / Referencia:</label>
         <input type="tel" id="telefonoAval" name="telefonoAval" maxlength="10">
 
         <div class="photo-container">
-            <label>📷 Foto INE Delantera (Frontal):</label>
+            <label>📷 Foto INE Delantera:</label>
             <input type="file" id="ineDelantera" accept="image/*" capture="camera" required>
             <div id="previewDelantera"></div>
         </div>
@@ -67,7 +67,7 @@
             <div id="previewTrasera"></div>
         </div>
 
-        <label>Firma del Cliente (Dibuje aquí):</label>
+        <label>Firma del Cliente:</label>
         <canvas id="canvas-firma" width="460" height="200"></canvas>
         <button type="button" class="btn-clear" onclick="limpiarFirma()">Borrar Firma</button>
 
@@ -78,127 +78,72 @@
         <input type="hidden" id="interes" name="interes">
         <input type="hidden" id="horastol" name="horastol">
         <input type="hidden" id="semanastol" name="semanastol">
+        <input type="hidden" id="plazoSemanas" name="plazoSemanas">
+        <input type="hidden" id="totalFinanciado" name="totalFinanciado">
+        <input type="hidden" id="totalLetra" name="totalLetra">
 
         <button type="submit" id="btnEnviar">Generar Contrato y Archivar</button>
     </form>
 </div>
 
 <script>
-    // 1. Capturar TODAS las variables de la URL (Tanto visibles como ocultas)
     const urlParams = new URLSearchParams(window.location.search);
     document.getElementById('imei').value = urlParams.get('imei') || '';
     document.getElementById('modelo').value = urlParams.get('modelo') || '';
     document.getElementById('monto').value = urlParams.get('monto') || '';
     document.getElementById('cuota').value = urlParams.get('cuota') || '';
     
-    // Captura oculta para Autocrat
     document.getElementById('interes').value = urlParams.get('interes') || '';
     document.getElementById('horastol').value = urlParams.get('horastol') || '';
     document.getElementById('semanastol').value = urlParams.get('semanastol') || '';
+    document.getElementById('plazoSemanas').value = urlParams.get('plazoSemanas') || '';
+    document.getElementById('totalFinanciado').value = urlParams.get('totalFinanciado') || '';
+    document.getElementById('totalLetra').value = urlParams.get('totalLetra') || '';
 
-    // 2. Lógica del Canvas para la Firma
-    const canvas = document.getElementById('canvas-firma');
-    const ctx = canvas.getContext('2d');
-    let dibujando = false;
-
-    function obtenerPosicion(e) {
-        const rect = canvas.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        return { x: clientX - rect.left, y: clientY - rect.top };
-    }
-    function iniciarDibujo(e) { dibujando = true; pautarDibujo(e); }
-    function terminarDibujo() { dibujando = false; ctx.beginPath(); }
-    function pautarDibujo(e) {
-        if (!dibujando) return;
-        e.preventDefault();
-        const pos = obtenerPosicion(e);
-        ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = '#000000';
-        ctx.lineTo(pos.x, pos.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
-    }
-    canvas.addEventListener('mousedown', iniciarDibujo);
-    canvas.addEventListener('mousemove', pautarDibujo);
-    canvas.addEventListener('mouseup', terminarDibujo);
-    canvas.addEventListener('touchstart', iniciarDibujo);
-    canvas.addEventListener('touchmove', pautarDibujo);
-    canvas.addEventListener('touchend', terminarDibujo);
+    // Lógica básica Canvas Firma
+    const canvas = document.getElementById('canvas-firma'); const ctx = canvas.getContext('2d'); let dibujando = false;
+    function obtenerPosicion(e) { const rect = canvas.getBoundingClientRect(); const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY; return { x: clientX - rect.left, y: clientY - rect.top }; }
+    function iniciarDibujo(e) { dibujando = true; pautarDibujo(e); } function terminarDibujo() { dibujando = false; ctx.beginPath(); }
+    function pautarDibujo(e) { if (!dibujando) return; e.preventDefault(); const pos = obtenerPosicion(e); ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = '#000000'; ctx.lineTo(pos.x, pos.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
+    canvas.addEventListener('mousedown', iniciarDibujo); canvas.addEventListener('mousemove', pautarDibujo); canvas.addEventListener('mouseup', terminarDibujo);
+    canvas.addEventListener('touchstart', iniciarDibujo); canvas.addEventListener('touchmove', pautarDibujo); canvas.addEventListener('touchend', terminarDibujo);
     function limpiarFirma() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
-    let ineDelanteraB64 = "";
-    let ineTraseraB64 = "";
-
-    // 3. Procesar e igualar fotos a HD legible
+    let ineDelanteraB64 = ""; let ineTraseraB64 = "";
     function procesarYComprimirImagen(input, previewId, tipo) {
-        const preview = document.getElementById(previewId);
-        preview.innerHTML = '';
+        const preview = document.getElementById(previewId); preview.innerHTML = '';
         if (input.files && input.files[0]) {
-            const file = input.files[0];
-            const reader = new FileReader();
+            const file = input.files[0]; const reader = new FileReader();
             reader.onload = function(e) {
-                const img = new Image();
-                img.src = e.target.result;
+                const img = new Image(); img.src = e.target.result;
                 img.onload = function() {
-                    const maxAncho = 2048;
-                    let ancho = img.width; let alto = img.height;
+                    const maxAncho = 2048; let ancho = img.width; let alto = img.height;
                     if (ancho > maxAncho) { alto = Math.round((alto * maxAncho) / ancho); ancho = maxAncho; }
-                    const canvasOculto = document.createElement('canvas');
-                    canvasOculto.width = ancho; canvasOculto.height = alto;
-                    const ctxOculto = canvasOculto.getContext('2d');
-                    ctxOculto.drawImage(img, 0, 0, ancho, alto);
+                    const canvasOculto = document.createElement('canvas'); canvasOculto.width = ancho; canvasOculto.height = alto;
+                    const ctxOculto = canvasOculto.getContext('2d'); ctxOculto.drawImage(img, 0, 0, ancho, alto);
                     const altaCalidadDataURL = canvasOculto.toDataURL('image/jpeg', 0.95);
-                    const imgPreview = document.createElement('img');
-                    imgPreview.src = altaCalidadDataURL; imgPreview.className = 'preview';
-                    preview.appendChild(imgPreview);
-                    if (tipo === 'delantera') ineDelanteraB64 = altaCalidadDataURL;
-                    if (tipo === 'trasera') ineTraseraB64 = altaCalidadDataURL;
+                    const imgPreview = document.createElement('img'); imgPreview.src = altaCalidadDataURL; imgPreview.className = 'preview'; preview.appendChild(imgPreview);
+                    if (tipo === 'delantera') ineDelanteraB64 = altaCalidadDataURL; if (tipo === 'trasera') ineTraseraB64 = altaCalidadDataURL;
                 };
-            };
-            reader.readAsDataURL(file);
+            }; reader.readAsDataURL(file);
         }
     }
-
     document.getElementById('ineDelantera').addEventListener('change', function() { procesarYComprimirImagen(this, 'previewDelantera', 'delantera'); });
     document.getElementById('ineTrasera').addEventListener('change', function() { procesarYComprimirImagen(this, 'previewTrasera', 'trasera'); });
 
-    // 4. Envío de paquete unificado
     document.getElementById('contratoForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const btn = document.getElementById('btnEnviar');
-        btn.innerText = "Procesando y protegiendo envío...";
-        btn.disabled = true;
-
+        e.preventDefault(); const btn = document.getElementById('btnEnviar'); btn.innerText = "Procesando..."; btn.disabled = true;
         try {
             document.getElementById('firmaBase64').value = canvas.toDataURL('image/png');
-            document.getElementById('ineDelanteraBase64').value = ineDelanteraB64;
-            document.getElementById('ineTraseraBase64').value = ineTraseraB64;
-
+            document.getElementById('ineDelanteraBase64').value = ineDelanteraB64; document.getElementById('ineTraseraBase64').value = ineTraseraB64;
             const sheetData = new URLSearchParams(new FormData(this));
-            const URL_GOOGLE_SCRIPT = CONFIG.GOOGLE_SCRIPT_URL;
-
-            const res = await fetch(URL_GOOGLE_SCRIPT, { 
-                method: 'POST', 
-                body: sheetData.toString(),
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-            });
+            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, { method: 'POST', body: sheetData.toString(), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
             const data = await res.json();
-
             if (data.result === 'success') {
-                alert('✅ ¡Éxito total! Datos registrados en Sheets e INEs archivadas en tu Telegram.');
-                document.getElementById('contratoForm').reset();
-                limpiarFirma();
-                document.getElementById('previewDelantera').innerHTML = '';
-                document.getElementById('previewTrasera').innerHTML = '';
-                ineDelanteraB64 = ""; ineTraseraB64 = "";
-            } else {
-                alert('⚠️ Error en Google Sheets: ' + data.error);
-            }
-        } catch (err) {
-            console.error(err);
-            alert('❌ Hubo un problema al procesar el envío.');
-        } finally {
-            btn.innerText = "Generar Contrato y Archivar";
-            btn.disabled = false;
-        }
+                alert('✅ ¡Éxito total! Contrato registrado.'); document.getElementById('contratoForm').reset(); limpiarFirma();
+                document.getElementById('previewDelantera').innerHTML = ''; document.getElementById('previewTrasera').innerHTML = '';
+            } else { alert('⚠️ Error: ' + data.error); }
+        } catch (err) { alert('❌ Error de conexión.'); } finally { btn.innerText = "Generar Contrato"; btn.disabled = false; }
     });
 </script>
 </body>
