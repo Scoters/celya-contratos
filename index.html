@@ -171,7 +171,7 @@
     const ctx = canvas.getContext('2d'); 
     let dibujando = false;
 
-    // 🛠️ AJUSTE DE ALTA DEFINICIÓN: Escala la resolución interna para máxima nitidez en pantallas móviles
+    // Ajuste de alta definición (HD)
     function resizeCanvas() {
         const rect = canvas.getBoundingClientRect();
         if (rect.width > 0) {
@@ -183,14 +183,17 @@
     }
     window.addEventListener('resize', resizeCanvas);
 
+    // 🛠️ CORRECCIÓN MATEMÁTICA DEFINITIVA: Calcula la posición real del dedo sin importar el escalado HD
     function obtenerPosicion(e) { 
         const rect = canvas.getBoundingClientRect(); 
         const clientX = e.touches ? e.touches[0].clientX : e.clientX; 
         const clientY = e.touches ? e.touches[0].clientY : e.clientY; 
         
+        // Al estar el contexto ya escalado con ctx.scale(ratio, ratio), las coordenadas 
+        // deben calcularse estrictamente relativas al espacio visual de la pantalla (CSS pixels)
         return { 
-            x: (clientX - rect.left) * (canvas.width / rect.width), 
-            y: (clientY - rect.top) * (canvas.height / rect.height) 
+            x: clientX - rect.left, 
+            y: clientY - rect.top 
         }; 
     }
     
@@ -206,7 +209,7 @@
         if(!dibujando) return; 
         e.preventDefault(); 
         const p = obtenerPosicion(e); 
-        ctx.lineWidth = 2; /* Grosor ideal estilizado para HD */
+        ctx.lineWidth = 2.5; /* Trazo nítido y con buen cuerpo */
         ctx.lineCap = 'round'; 
         ctx.strokeStyle = '#000000'; 
         ctx.lineTo(p.x, p.y); 
@@ -226,7 +229,7 @@
         if(!dibujando) return; 
         e.preventDefault(); 
         const p = obtenerPosicion(e); 
-        ctx.lineWidth = 2; /* Grosor ideal para el dedo en móviles */
+        ctx.lineWidth = 2.5; 
         ctx.lineCap = 'round'; 
         ctx.strokeStyle = '#000000'; 
         ctx.lineTo(p.x, p.y); 
