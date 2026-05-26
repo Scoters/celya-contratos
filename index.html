@@ -153,41 +153,43 @@
     };
 
     function autoRellenarEquipo() {
-    const idx = document.getElementById('selectorImei').value;
-    if(idx === "") {
-        document.getElementById('modelo').value = ''; document.getElementById('monto').value = '';
-        document.getElementById('cuota').value = ''; document.getElementById('imei').value = '';
-        document.getElementById('totalFinanciado').value = ''; document.getElementById('totalLetra').value = '';
-        return;
-    }
-    const equipo = cacheEcosistema.inventario[idx];
-    document.getElementById('imei').value = equipo.imei;
-    document.getElementById('modelo').value = equipo.modelo;
-    document.getElementById('monto').value = equipo.enganche;
-    document.getElementById('totalFinanciado').value = equipo.totalFinanciado;
-    document.getElementById('totalLetra').value = equipo.totalLetra;
+        const idx = document.getElementById('selectorImei').value;
+        if(idx === "") {
+            document.getElementById('modelo').value = ''; document.getElementById('monto').value = '';
+            document.getElementById('cuota').value = ''; document.getElementById('imei').value = '';
+            document.getElementById('totalFinanciado').value = ''; document.getElementById('totalLetra').value = '';
+            return;
+        }
+        const equipo = cacheEcosistema.inventario[idx];
+        document.getElementById('imei').value = equipo.imei;
+        document.getElementById('modelo').value = equipo.modelo;
+        document.getElementById('monto').value = equipo.enganche;
+        document.getElementById('totalFinanciado').value = equipo.totalFinanciado;
+        document.getElementById('totalLetra').value = equipo.totalLetra;
 
-    actualizarCuotaPorPlazo();
-}
-
-function actualizarCuotaPorPlazo() {
-    const idx = document.getElementById('selectorImei').value;
-    const plazo = document.getElementById('plazoSemanas').value;
-    const campoCuota = document.getElementById('cuota');
-
-    if (idx === "" || plazo === "") {
-        campoCuota.value = '';
-        return;
+        actualizarCuotaPorPlazo();
     }
 
-    const equipo = cacheEcosistema.inventario[idx];
-    
-    if (plazo === "26") {
-        campoCuota.value = equipo.cuota;
-    } else if (plazo === "52") {
-        campoCuota.value = equipo.totalLetra;
+    // LÓGICA DE DETECCIÓN DINÁMICA DE CUOTAS 🚀
+    function actualizarCuotaPorPlazo() {
+        const idx = document.getElementById('selectorImei').value;
+        const plazo = document.getElementById('plazoSemanas').value;
+        const campoCuota = document.getElementById('cuota');
+
+        if (idx === "" || plazo === "") {
+            campoCuota.value = '';
+            return;
+        }
+
+        const equipo = cacheEcosistema.inventario[idx];
+        
+        // Si elige 26 semanas jala .cuota (Columna D), si elige 52 semanas jala .totalFinanciado (Columna E)
+        if (plazo === "26") {
+            campoCuota.value = equipo.cuota;
+        } else if (plazo === "52") {
+            campoCuota.value = equipo.totalFinanciado;
+        }
     }
-}
 
     const canvas = document.getElementById('canvas-firma'); 
     const ctx = canvas.getContext('2d'); 
