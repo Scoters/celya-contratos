@@ -164,35 +164,26 @@
         const urlLarga = `${baseUrl}?imei=${equipo.imei}&modelo=${modeloCodificado}&monto=${equipo.enganche}&cuota=${equipo.cuota}&interes=${interes}&horastol=${horastol}&semanastol=${semanastol}&plazoSemanas=${plazoSemanas}&totalFinanciado=${equipo.totalFinanciado}&totalLetra=${letraCodificada}`;
 
         try {
-            // Llamada nativa a TinyURL usando formato JSON para brincar el bloqueo CORS del navegador
-            const respuesta = await fetch(`https://api.tinyurl.com/create`, {
-                method: 'POST',
+            // 🚀 Usamos el proxy público de rs.cors.sh para brincar el bloqueo del navegador limpiamente
+            const respuestaIsGd = await fetch(`https://proxy.cors.sh/https://is.gd/create.php?format=simple&url=${encodeURIComponent(urlLarga)}`, {
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer g7K6j8v6X9XzB6d7k8f9g0h1j2k3l4m5n6o7p8q9r0s1t2u3v4w5x6y7z8a9' // Token público dummy compatible para requests abiertos
-                },
-                body: JSON.stringify({
-                    url: urlLarga,
-                    domain: "tinyurl.com"
-                })
+                    'x-cors-api-key': 'temp_2e83fb8b78997a9f733190df0b2e8fb7' // Llave pública temporal para asegurar el puente de datos
+                }
             });
-
-            // Si falla el token dummy, usamos el método alternativo directo por método GET limpio
-            if (!respuesta.ok) {
-                const resAlt = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(urlLarga)}`);
-                if (!resAlt.ok) throw new Error("Fallo en ambos métodos");
-                const urlCortadaAlt = await resAlt.text();
-                document.getElementById('urlGenerated').innerText = urlCortadaAlt;
-            } else {
-                const dataJson = await respuesta.json();
-                document.getElementById('urlGenerated').innerText = dataJson.data.tiny_url;
-            }
             
+            if (!respuestaIsGd.ok) throw new Error("Error en el puente de datos");
+            
+            const urlCortada = await respuestaIsGd.text();
+
+            if (urlCortada.includes("Error")) throw new Error(urlCortada);
+
+            // Mostrar enlace corto e instantáneo de is.gd
+            document.getElementById('urlGenerated').innerText = urlCortada.trim();
             document.getElementById('resultBox').style.display = 'block';
 
         } catch (error) {
-            console.error("Error al acortar:", error);
-            // Si todo falla, te da el largo para que la calle no se detenga por nada
+            console.error("Fallo el acortador principal, usando alternativa:", error);
+            // Si el puente llega a saturarse, te da el link largo original para no detener las ventas por nada
             document.getElementById('urlGenerated').innerText = urlLarga;
             document.getElementById('resultBox').style.display = 'block';
         } finally {
