@@ -1,46 +1,256 @@
-// Envío del paquete unificado al Spreadsheet con Candados Estrictos
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Contrato - CelYa</title>
+    <script src="config.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
+        .container { max-width: 500px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin: 0 auto; }
+        h2 { text-align: center; color: #2c3e50; }
+        label { font-weight: bold; display: block; margin-top: 10px; }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        input[readonly] { background-color: #e9ecef; }
+        #canvas-firma { border: 2px dashed #34495e; background: #fff; border-radius: 4px; margin-top: 5px; cursor: crosshair; touch-action: none; }
+        button { width: 100%; background: #27ae60; color: white; padding: 12px; border: none; border-radius: 4px; font-size: 16px; margin-top: 15px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
+        button:hover { background: #219150; }
+        .btn-clear { background: #e74c3c; margin-top: 5px; padding: 5px; font-size: 12px; }
+        .btn-clear:hover { background: #c0392b; }
+        .photo-container { margin: 15px 0; }
+        .preview { max-width: 100%; margin-top: 8px; border: 2px solid #ddd; border-radius: 6px; }
+        .loading-inv { color: #e67e22; font-weight: bold; text-align: center; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>CelYa - Nuevo Contrato</h2>
+    <div id="loadMsg" class="loading-inv">⏳ Sincronizando Equipos e Inventario CelYa...</div>
+    
+    <form id="contratoForm">
+        <label>Seleccionar IMEI del Teléfono:</label>
+        <select id="selectorImei" onchange="autoRellenarEquipo()" required>
+            <option value="">-- Elige el IMEI del celular --</option>
+        </select>
+
+        <label>Modelo / Marca:</label>
+        <input type="text" id="modelo" name="modelo" readonly>
+
+        <label>Monto del Enganche ($):</label>
+        <input type="text" id="monto" name="monto" readonly>
+
+        <label>Cuota Semanal ($):</label>
+        <input type="text" id="cuota" name="cuota" readonly>
+
+        <label>Plazo del Crédito:</label>
+        <select id="plazoSemanas" name="plazoSemanas" required>
+            <option value="26">Plan Rápido (6 Meses / 26 Semanas)</option>
+            <option value="52">Plan Cómodo (12 Meses / 52 Semanas)</option>
+        </select>
+
+        <hr style="margin-top:20px;">
+
+        <label>Nombre Completo del Cliente:</label>
+        <input type="text" id="cliente" name="cliente" required>
+
+        <label>Teléfono Celular Principal:</label>
+        <input type="tel" id="telefono" name="telefono" maxlength="10" required>
+
+        <label>Fecha de Nacimiento:</label>
+        <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+
+        <label>Dirección Completa de Domicilio:</label>
+        <textarea id="direccion" name="direccion" rows="3" required></textarea>
+
+        <label>Teléfono de Aval / Referencia:</label>
+        <input type="tel" id="telefonoAval" name="telefonoAval" maxlength="10">
+
+        <div class="photo-container">
+            <label>📷 Foto INE Frontal:</label>
+            <input type="file" id="ineDelantera" accept="image/*" capture="camera">
+            <div id="previewDelantera"></div>
+        </div>
+
+        <div class="photo-container">
+            <label>📷 Foto INE Reverso:</label>
+            <input type="file" id="ineTrasera" accept="image/*" capture="camera">
+            <div id="previewTrasera"></div>
+        </div>
+
+        <label>Firma del Cliente:</label>
+        <canvas id="canvas-firma" width="460" height="200"></canvas>
+        <button type="button" class="btn-clear" onclick="limpiarFirma()">Borrar Firma</button>
+
+        <input type="hidden" id="firmaBase64" name="firmaBase64">
+        <input type="hidden" id="ineDelanteraBase64" name="ineDelanteraBase64">
+        <input type="hidden" id="ineTraseraBase64" name="ineTraseraBase64">
+        <input type="hidden" id="imei" name="imei">
+        
+        <input type="hidden" id="interes" name="interes">
+        <input type="hidden" id="horastol" name="horastol">
+        <input type="hidden" id="semanastol" name="semanastol">
+        <input type="hidden" id="totalFinanciado" name="totalFinanciado">
+        <input type="hidden" id="totalLetra" name="totalLetra">
+
+        <button type="submit" id="btnEnviar">Generar Contrato y Archivar</button>
+    </form>
+</div>
+
+<script>
+    let cacheEcosistema = {};
+    let ineDelanteraB64 = ""; 
+    let ineTraseraB64 = "";
+
+    // 1. Carga automática de inventario y configuración global desde Google
+    window.onload = async function() {
+        try {
+            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL);
+            cacheEcosistema = await res.json();
+            
+            const selector = document.getElementById('selectorImei');
+            cacheEcosistema.inventario.forEach((equipo, index) => {
+                const opt = document.createElement('option');
+                opt.value = index;
+                opt.text = `${equipo.imei} (${equipo.modelo})`;
+                selector.appendChild(opt);
+            });
+
+            // Precargar variables del panel de control
+            document.getElementById('interes').value = cacheEcosistema.config.interes;
+            document.getElementById('horastol').value = cacheEcosistema.config.horastol;
+            document.getElementById('semanastol').value = cacheEcosistema.config.semanastol;
+            
+            document.getElementById('loadMsg').style.display = 'none';
+        } catch (err) {
+            document.getElementById('loadMsg').innerText = "❌ Error de sincronización con CelYa.";
+            console.error(err);
+        }
+    };
+
+    function autoRellenarEquipo() {
+        const idx = document.getElementById('selectorImei').value;
+        if(idx === "") {
+            document.getElementById('modelo').value = ''; document.getElementById('monto').value = '';
+            document.getElementById('cuota').value = ''; document.getElementById('imei').value = '';
+            document.getElementById('totalFinanciado').value = ''; document.getElementById('totalLetra').value = '';
+            return;
+        }
+        const equipo = cacheEcosistema.inventario[idx];
+        document.getElementById('imei').value = equipo.imei;
+        document.getElementById('modelo').value = equipo.modelo;
+        document.getElementById('monto').value = equipo.enganche;
+        document.getElementById('cuota').value = equipo.cuota;
+        document.getElementById('totalFinanciado').value = equipo.totalFinanciado;
+        document.getElementById('totalLetra').value = equipo.totalLetra;
+    }
+
+    // 2. Lógica del Canvas de la Firma (Arreglado para pantallas táctiles)
+    const canvas = document.getElementById('canvas-firma'); 
+    const ctx = canvas.getContext('2d'); 
+    let dibujando = false;
+
+    function obtenerPosicion(e) { 
+        const rect = canvas.getBoundingClientRect(); 
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX; 
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY; 
+        return { x: clientX - rect.left, y: clientY - rect.top }; 
+    }
+    
+    canvas.addEventListener('mousedown', (e) => { dibujando = true; ctx.beginPath(); const p = obtenerPosicion(e); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener('mousemove', (e) => { 
+        if(!dibujando) return; 
+        e.preventDefault(); 
+        const p = obtenerPosicion(e); 
+        ctx.lineWidth = 3; 
+        ctx.lineCap = 'round'; 
+        ctx.strokeStyle = '#000000'; 
+        ctx.lineTo(p.x, p.y); 
+        ctx.stroke(); 
+    });
+    canvas.addEventListener('mouseup', () => dibujando = false);
+    
+    canvas.addEventListener('touchstart', (e) => { dibujando = true; ctx.beginPath(); const p = obtenerPosicion(e); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener('touchmove', (e) => { 
+        if(!dibujando) return; 
+        e.preventDefault(); 
+        const p = obtenerPosicion(e); 
+        ctx.lineWidth = 3; 
+        ctx.lineCap = 'round'; 
+        ctx.strokeStyle = '#000000'; 
+        ctx.lineTo(p.x, p.y); 
+        ctx.stroke(); 
+    });
+    canvas.addEventListener('touchend', () => dibujando = false);
+    
+    function limpiarFirma() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+    // 3. Procesamiento y Compresión de Fotos de la INE
+    function procesarImagen(input, tipo) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image(); 
+                img.src = e.target.result;
+                img.onload = function() {
+                    const canvasO = document.createElement('canvas'); 
+                    canvasO.width = img.width > 2048 ? 2048 : img.width; 
+                    canvasO.height = Math.round((img.height * canvasO.width) / img.width);
+                    
+                    canvasO.getContext('2d').drawImage(img, 0, 0, canvasO.width, canvasO.height);
+                    const b64 = canvasO.toDataURL('image/jpeg', 0.90);
+                    
+                    const pImg = document.createElement('img'); 
+                    pImg.src = b64; 
+                    pImg.className = "preview";
+                    
+                    const div = document.getElementById(tipo === 'delantera' ? 'previewDelantera' : 'previewTrasera'); 
+                    div.innerHTML = ''; 
+                    div.appendChild(pImg);
+                    
+                    if (tipo === 'delantera') ineDelanteraB64 = b64; else ineTraseraB64 = b64;
+                };
+            }; 
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    document.getElementById('ineDelantera').addEventListener('change', function() { procesarImagen(this, 'delantera'); });
+    document.getElementById('ineTrasera').addEventListener('change', function() { procesarImagen(this, 'trasera'); });
+
+    // 4. Envío del formulario con validaciones directamente en el botón
     document.getElementById('contratoForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const btn = document.getElementById('btnEnviar');
+        const colorOriginal = btn.style.background || "#27ae60";
         
-        // 🔒 CANDADOS DE VALIDACIÓN MANUAL ESTRICTA
+        // Extracción de datos para validación
         const nombreCliente = document.getElementById('cliente').value.trim();
         const telCelular = document.getElementById('telefono').value.trim();
         const fNacimiento = document.getElementById('fechaNacimiento').value;
         const domCompleto = document.getElementById('direccion').value.trim();
         const imeiSeleccionado = document.getElementById('selectorImei').value;
 
-        if (imeiSeleccionado === "") {
-            alert("⚠️ Por favor, selecciona un IMEI del inventario.");
-            return;
-        }
-        if (nombreCliente === "") {
-            alert("⚠️ El 'Nombre Completo del Cliente' es obligatorio.");
-            return;
-        }
-        if (telCelular.length < 10) {
-            alert("⚠️ El 'Teléfono Celular Principal' debe tener 10 dígitos.");
-            return;
-        }
-        if (!fNacimiento) {
-            alert("⚠️ La 'Fecha de Nacimiento' es obligatoria.");
-            return;
-        }
-        if (domCompleto === "") {
-            alert("⚠️ La 'Dirección Completa de Domicilio' es obligatoria.");
-            return;
-        }
-        if (!ineDelanteraB64 || ineDelanteraB64 === "") {
-            alert("⚠️ Falta capturar la foto de la INE FRONTAL.");
-            return;
-        }
-        if (!ineTraseraB64 || ineTraseraB64 === "") {
-            alert("⚠️ Falta capturar la foto de la INE REVERSO.");
-            return;
-        }
+        // Inyector visual de errores en el botón
+        const mostrarErrorEnBoton = (mensaje) => {
+            btn.innerText = "⚠️ " + mensaje;
+            btn.style.background = "#c0392b"; 
+            btn.disabled = true;
+            setTimeout(() => {
+                btn.innerText = "Generar Contrato y Archivar";
+                btn.style.background = colorOriginal;
+                btn.disabled = false;
+            }, 3500);
+        };
 
-        // Si pasa todas las pruebas, bloqueamos el botón y mandamos los datos
-        const colorO = btn.style.background;
+        if (imeiSeleccionado === "") { mostrarErrorEnBoton("Selecciona un IMEI del inventario"); return; }
+        if (nombreCliente === "") { mostrarErrorEnBoton("El Nombre del Cliente es obligatorio"); return; }
+        if (telCelular.length < 10) { mostrarErrorEnBoton("El Teléfono debe tener 10 dígitos"); return; }
+        if (!fNacimiento) { mostrarErrorEnBoton("La Fecha de Nacimiento es obligatoria"); return; }
+        if (domCompleto === "") { mostrarErrorEnBoton("La Dirección es obligatoria"); return; }
+        if (!ineDelanteraB64 || ineDelanteraB64 === "") { mostrarErrorEnBoton("Falta capturar la foto de la INE Frontal"); return; }
+        if (!ineTraseraB64 || ineTraseraB64 === "") { mostrarErrorEnBoton("Falta capturar la foto de la INE Reverso"); return; }
+
+        // Si pasa todos los candados, enviamos el formulario
         btn.innerText = "⏳ Guardando Contrato y Subiendo INEs...";
         btn.style.background = "#d35400"; 
         btn.disabled = true;
@@ -51,21 +261,26 @@
             document.getElementById('ineTraseraBase64').value = ineTraseraB64;
 
             const sheetData = new URLSearchParams(new FormData(this));
-            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, { method: 'POST', body: sheetData.toString(), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, { 
+                method: 'POST', 
+                body: sheetData.toString(), 
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' } 
+            });
             const data = await res.json();
 
             if (data.result === 'success') {
                 btn.innerText = "✅ ¡Contrato Guardado con Éxito!";
                 btn.style.background = "#27ae60"; 
+                
                 document.getElementById('contratoForm').reset(); 
                 limpiarFirma();
                 document.getElementById('previewDelantera').innerHTML = ''; 
                 document.getElementById('previewTrasera').innerHTML = '';
-                ineDelanteraB64 = ""; 
-                ineTraseraB64 = "";
+                ineDelanteraB64 = ""; ineTraseraB64 = "";
+                
                 setTimeout(() => { 
                     btn.innerText = "Generar Contrato y Archivar"; 
-                    btn.style.background = colorO; 
+                    btn.style.background = colorOriginal; 
                     btn.disabled = false; 
                     location.reload(); 
                 }, 4000);
@@ -80,3 +295,6 @@
             btn.disabled = false; 
         }
     });
+</script>
+</body>
+</html>
