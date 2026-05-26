@@ -3,209 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CelYa! - Panel Administrativo</title>
+    <title>CelYa! - Panel de Control Administrativo</title>
     <script src="config.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
-        .container { max-width: 600px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.1); margin: 0 auto; }
-        h2 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .full-width { grid-column: span 2; }
-        label { font-weight: bold; display: block; margin-top: 5px; }
-        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
-        input[readonly] { background-color: #e9ecef; }
-        button { width: 100%; background: #2980b9; color: white; padding: 12px; border: none; border-radius: 4px; font-size: 16px; margin-top: 20px; cursor: pointer; font-weight: bold; transition: background 0.3s, content 0.3s; }
-        button:hover { background: #2471a3; }
-        .result-box { margin-top: 25px; padding: 15px; background: #eef2f5; border-left: 5px solid #27ae60; border-radius: 4px; display: none; }
-        .url-text { background: white; padding: 10px; border: 1px solid #ddd; border-radius: 4px; word-break: break-all; font-family: monospace; font-size: 14px; margin: 10px 0; font-weight: bold; color: #27ae60; }
-        .btn-copy { background: #27ae60; margin-top: 5px; padding: 8px; font-size: 14px; }
-        .btn-copy:hover { background: #219150; }
-        .status-load { color: #e67e22; font-weight: bold; text-align: center; margin-bottom: 10px; }
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #2c3e50; color: #333; }
+        .container { max-width: 500px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin: 40px auto; }
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 25px; }
+        label { font-weight: bold; display: block; margin-top: 15px; color: #34495e; }
+        input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; background: #e67e22; color: white; padding: 14px; border: none; border-radius: 4px; font-size: 16px; margin-top: 25px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
+        button:hover { background: #d35400; }
+        .status { text-align: center; font-weight: bold; margin-top: 15px; color: #7f8c8d; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>📊 CelYa! Dashboard v2.6<br><span style="font-size: 14px; color: #7f8c8d; font-weight: normal;">Sincronizado con Inventario Real</span></h2>
+    <h2>⚙️ CelYa! Panel Admin<br><span style="font-size: 14px; color: #7f8c8d; font-weight: normal;">Configuración Global de Contratos</span></h2>
     
-    <div id="loadingStatus" class="status-load">⏳ Cargando inventario desde Google Sheets...</div>
+    <div id="statusMsg" class="status">⏳ Leyendo configuración actual desde Sheets...</div>
 
-    <div class="grid">
-        <div class="full-width">
-            <label>Seleccionar IMEI del Inventario:</label>
-            <select id="selectorInventario" onchange="seleccionarEquipo()">
-                <option value="">-- Selecciona un equipo disponible --</option>
-            </select>
-        </div>
+    <form id="configForm">
+        <label>Porcentaje de Interés Moratorio (%):</label>
+        <input type="number" id="interes" name="interes" required>
 
-        <div class="full-width">
-            <label>Modelo / Marca:</label>
-            <input type="text" id="modelo" readonly>
-        </div>
+        <label>Horas de Tolerancia para Pago:</label>
+        <input type="number" id="horastol" name="horastol" required>
 
-        <div>
-            <label>Monto Enganche ($):</label>
-            <input type="text" id="monto" readonly>
-        </div>
+        <label>Semanas Máximas de Tolerancia (Atraso):</label>
+        <input type="number" id="semanastol" name="semanastol" required>
 
-        <div>
-            <label>Cuota Semanal ($):</label>
-            <input type="text" id="cuota" readonly>
-        </div>
-
-        <div class="full-width">
-            <label>Monto Total Financiado ($):</label>
-            <input type="text" id="totalFinanciado" readonly>
-        </div>
-
-        <div class="full-width">
-            <label>Total en Letra:</label>
-            <input type="text" id="totalLetra" readonly>
-        </div>
-
-        <div class="full-width">
-            <label>Plan de Financiamiento (Plazo):</label>
-            <select id="planPlazo">
-                <option value="26">Plan Rápido (6 Meses / 26 Semanas)</option>
-                <option value="52">Plan Cómodo (12 Meses / 52 Semanas)</option>
-            </select>
-        </div>
-
-        <div>
-            <label>Porcentaje Interés (%):</label>
-            <input type="number" id="interes" value="6">
-        </div>
-
-        <div>
-            <label>Horas Tolerancia:</label>
-            <input type="number" id="horastol" value="24">
-        </div>
-
-        <div class="full-width">
-            <label>Semanas Tolerancia (Atraso):</label>
-            <input type="number" id="semanastol" value="3">
-        </div>
-    </div>
-
-    <button id="btnGenerar" onclick="generarLink()">🚀 Generar Enlace Corto</button>
-
-    <div id="resultBox" class="result-box">
-        <label style="color: #2c3e50; font-weight: bold;">🔗 Enlace acortado listo para mandar por WhatsApp:</label>
-        <div id="urlGenerated" class="url-text"></div>
-        <button id="btnCopiar" class="btn-copy" onclick="copiarLink()">📋 Copiar Enlace Corto</button>
-    </div>
+        <button type="submit" id="btnGuardar">💾 Guardar Configuración Global</button>
+    </form>
 </div>
 
 <script>
-    let cacheInventario = [];
-
+    // 1. Cargar las variables actuales del Sheets al abrir la página
     window.onload = async function() {
         try {
             const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL);
-            cacheInventario = await res.json();
+            const data = await res.json();
             
-            const selector = document.getElementById('selectorInventario');
-            cacheInventario.forEach((equipo, index) => {
-                const opt = document.createElement('option');
-                opt.value = index;
-                opt.text = `${equipo.imei} - ${equipo.modelo}`;
-                selector.appendChild(opt);
-            });
+            document.getElementById('interes').value = data.config.interes;
+            document.getElementById('horastol').value = data.config.horastol;
+            document.getElementById('semanastol').value = data.config.semanastol;
             
-            document.getElementById('loadingStatus').style.display = 'none';
+            document.getElementById('statusMsg').style.display = 'none';
         } catch (err) {
-            document.getElementById('loadingStatus').innerText = "❌ Error al conectar con el Inventario.";
+            document.getElementById('statusMsg').innerText = "❌ Error al cargar datos remotos.";
             console.error(err);
         }
     };
 
-    function seleccionarEquipo() {
-        const idx = document.getElementById('selectorInventario').value;
-        if(idx === "") {
-            document.getElementById('modelo').value = '';
-            document.getElementById('monto').value = '';
-            document.getElementById('cuota').value = '';
-            document.getElementById('totalFinanciado').value = '';
-            document.getElementById('totalLetra').value = '';
-            return;
-        }
-        const equipo = cacheInventario[idx];
-        document.getElementById('modelo').value = equipo.modelo;
-        document.getElementById('monto').value = equipo.enganche;
-        document.getElementById('cuota').value = equipo.cuota;
-        document.getElementById('totalFinanciado').value = equipo.totalFinanciado;
-        document.getElementById('totalLetra').value = equipo.totalLetra;
-    }
-
-    async function generarLink() {
-        const idx = document.getElementById('selectorInventario').value;
-        if(idx === "") { 
-            const btnGen = document.getElementById('btnGenerar');
-            btnGen.innerText = "⚠️ Selecciona un equipo primero";
-            btnGen.style.background = "#e67e22";
-            setTimeout(() => { btnGen.innerText = "🚀 Generar Enlace Corto"; btnGen.style.background = "#2980b9"; }, 3000);
-            return; 
-        }
-
-        const btn = document.getElementById('btnGenerar');
-        btn.innerText = "⏳ Generando y acortando enlace...";
+    // 2. Guardar los cambios hacia el Sheets sin alertas flotantes
+    document.getElementById('configForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnGuardar');
+        
+        btn.innerText = "⏳ Aplicando cambios en el servidor...";
+        btn.style.background = "#34495e";
         btn.disabled = true;
 
-        const equipo = cacheInventario[idx];
-        const interes = document.getElementById('interes').value.trim();
-        const horastol = document.getElementById('horastol').value.trim();
-        const semanastol = document.getElementById('semanastol').value.trim();
-        const plazoSemanas = document.getElementById('planPlazo').value;
-
-        const modeloCodificado = encodeURIComponent(equipo.modelo);
-        const letraCodificada = encodeURIComponent(equipo.totalLetra);
-
-        const baseUrl = "https://scoters.github.io/celya-contratos/";
-        const urlLarga = `${baseUrl}?imei=${equipo.imei}&modelo=${modeloCodificado}&monto=${equipo.enganche}&cuota=${equipo.cuota}&interes=${interes}&horastol=${horastol}&semanastol=${semanastol}&plazoSemanas=${plazoSemanas}&totalFinanciado=${equipo.totalFinanciado}&totalLetra=${letraCodificada}`;
-
         try {
-            // 🚀 Usamos el proxy público de rs.cors.sh para brincar el bloqueo del navegador limpiamente
-            const respuestaIsGd = await fetch(`https://proxy.cors.sh/https://is.gd/create.php?format=simple&url=${encodeURIComponent(urlLarga)}`, {
-                headers: {
-                    'x-cors-api-key': 'temp_2e83fb8b78997a9f733190df0b2e8fb7' // Llave pública temporal para asegurar el puente de datos
-                }
+            const formData = new URLSearchParams();
+            formData.append('action', 'updateConfig');
+            formData.append('interes', document.getElementById('interes').value);
+            formData.append('horastol', document.getElementById('horastol').value);
+            formData.append('semanastol', document.getElementById('semanastol').value);
+
+            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                body: formData.toString(),
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
             });
-            
-            if (!respuestaIsGd.ok) throw new Error("Error en el puente de datos");
-            
-            const urlCortada = await respuestaIsGd.text();
+            const data = await res.json();
 
-            if (urlCortada.includes("Error")) throw new Error(urlCortada);
-
-            // Mostrar enlace corto e instantáneo de is.gd
-            document.getElementById('urlGenerated').innerText = urlCortada.trim();
-            document.getElementById('resultBox').style.display = 'block';
-
-        } catch (error) {
-            console.error("Fallo el acortador principal, usando alternativa:", error);
-            // Si el puente llega a saturarse, te da el link largo original para no detener las ventas por nada
-            document.getElementById('urlGenerated').innerText = urlLarga;
-            document.getElementById('resultBox').style.display = 'block';
+            if (data.result === 'success') {
+                btn.innerText = "✅ ¡Configuración Guardada!";
+                btn.style.background = "#27ae60";
+            } else {
+                btn.innerText = "⚠️ Error al guardar";
+                btn.style.background = "#c0392b";
+            }
+        } catch (err) {
+            btn.innerText = "❌ Error de conexión de red";
+            btn.style.background = "#c0392b";
         } finally {
-            btn.innerText = "🚀 Generar Enlace Corto";
-            btn.disabled = false;
-        }
-    }
-
-    function copiarLink() {
-        const urlText = document.getElementById('urlGenerated').innerText;
-        const btnCopiar = document.getElementById('btnCopiar');
-        
-        navigator.clipboard.writeText(urlText).then(() => {
-            btnCopiar.innerText = "✅ ¡Copiado con éxito!";
-            btnCopiar.style.background = "#2ecc71";
-            
             setTimeout(() => {
-                btnCopiar.innerText = "📋 Copiar Enlace Corto";
-                btnCopiar.style.background = "#27ae60";
-            }, 3000);
-        });
-    }
+                btn.innerText = "💾 Guardar Configuración Global";
+                btn.style.background = "#e67e22";
+                btn.disabled = false;
+            }, 4000);
+        }
+    });
 </script>
 </body>
 </html>
