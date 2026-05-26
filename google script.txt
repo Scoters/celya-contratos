@@ -1,0 +1,142 @@
+const SHEET_ID = "1yVLsl9_08wn-UBRZpi-pIhD1xfxx5RgcgIW6ru2kaM8";
+const FOLDER_ID = "1gp76uUHbJRP_mr3WlhW2WqmWcDzEFsw6N8hlmPxr5nfMZBAirnLkF4OEAcTLq4O789cWv57h";
+
+// 🔐 TUS LLAVES CONFIGURADAS (TELEGRAM)
+const TELEGRAM_TOKEN = "8675643343:AAHMah04qHh6lj7q-Q5wJ2d4mfZnO59cNrs";
+const CHAT_ID = "6590305617";
+
+// =========================================================================
+// 📡 1. FUNCIÓN GET: ATIENDE AL CELULAR DEL CHOFER Y AL DASHBOARD ADMIN
+// =========================================================================
+function doGet(e) {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  try {
+    const sheetInv = ss.getSheetByName('Inventario');
+    const sheetConfig = ss.getSheetByName('Configuracion');
+    
+    let configActual = { interes: "6", horastol: "24", semanastol: "3" };
+    if (sheetConfig) {
+      const dataConfig = sheetConfig.getDataRange().getValues();
+      if (dataConfig.length > 1) {
+        configActual.interes = dataConfig[1][0];
+        configActual.horastol = dataConfig[1][1];
+        configActual.semanastol = dataConfig[1][2];
+      }
+    }
+
+    const dataInv = sheetInv ? sheetInv.getDataRange().getValues() : [];
+    const inventario = [];
+    
+    for (let i = 1; i < dataInv.length; i++) {
+      const estado = dataInv[i][6] ? dataInv[i][6].toString().trim().toLowerCase() : "";
+      if (estado === "disponible") {
+        inventario.push({
+          imei: dataInv[i][0], modelo: dataInv[i][1], enganche: dataInv[i][2], cuota: dataInv[i][3], totalFinanciado: dataInv[i][4], totalLetra: dataInv[i][5]
+        });
+      }
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({ inventario: inventario, config: configActual }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({error: err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// =========================================================================
+// 📥 2. FUNCIÓN POST: RECIBE CONTRATOS Y ACTUALIZACIONES DEL PANEL ADMIN
+// =========================================================================
+function doPost(e) {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  try {
+    if (e.parameter.action === "updateConfig") {
+      const sheetConfig = ss.getSheetByName('Configuracion');
+      if (!sheetConfig) throw new Error("Falta pestaña Configuracion");
+      sheetConfig.getRange("A2:C2").setValues([[e.parameter.interes, e.parameter.horastol, e.parameter.semanastol]]);
+      return ContentService.createTextOutput(JSON.stringify({result: "success", message: "Configuración actualizada"}))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const sheetClientes = ss.getSheetByName('Clientes');
+    if (!sheetClientes) throw new Error("No se encontró la pestaña 'Clientes'");
+
+    const cliente = e.parameter.cliente ? e.parameter.cliente : "SinNombre";
+    const modelo = e.parameter.modelo ? e.parameter.modelo : "SinModelo";
+    const imei = e.parameter.imei ? e.parameter.imei : "SinIMEI";
+    const timestamp = new Date();
+    let firmaUrl = "";
+
+    const mensajeTelegram = `👤 Cliente: ${cliente}\n📱 Modelo: ${modelo}\n🆔 IMEI: ${imei}`;
+
+    // Procesar Firma
+    if (e.parameter.firmaBase64 && e.parameter.firmaBase64 !== "") {
+      const base64Data = e.parameter.firmaBase64.split(',')[1];
+      const blob = Utilities.newBlob(Utilities.base64Decode(base64Data), 'image/png', `${cliente}_Firma.png`);
+      firmaUrl = DriveApp.getFolderById(FOLDER_ID).createFile(blob).getUrl();
+    }
+
+    // Reenvíos a Telegram (Nombres de archivo y títulos actualizados)
+    if (e.parameter.ineDelanteraBase64 && e.parameter.ineDelanteraBase64.includes(",")) {
+      const base64Data = e.parameter.ineDelanteraBase64.split(',')[1];
+      enviarBlobATelegram(Utilities.newBlob(Utilities.base64Decode(base64Data), 'image/jpeg', `${cliente}_INE_Frontal.jpg`), `🪪 INE FRONTAL\n\n${mensajeTelegram}`);
+    }
+    if (e.parameter.ineTraseraBase64 && e.parameter.ineTraseraBase64.includes(",")) {
+      const base64Data = e.parameter.ineTraseraBase64.split(',')[1];
+      enviarBlobATelegram(Utilities.newBlob(Utilities.base64Decode(base64Data), 'image/jpeg', `${cliente}_INE_Reverso.jpg`), `🪪 INE REVERSO\n\n${mensajeTelegram}`);
+    }
+
+    // 🧮 FORMATEO DE MONEDA Y PORCENTAJE ANTES DE INSERTAR
+    const formatearMoneda = (valor) => {
+      if (!valor || valor.toString().trim() === "") return "";
+      let numero = valor.toString().replace(/[\$,]/g, "").trim();
+      if (isNaN(numero)) return valor; 
+      return "$" + parseFloat(numero).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    };
+
+    const formatearPorcentaje = (valor) => {
+      if (!valor || valor.toString().trim() === "") return "";
+      let numero = valor.toString().replace(/%/g, "").trim();
+      if (isNaN(numero)) return valor;
+      return numero + "%";
+    };
+
+    // Identificar cuál será la fila donde va a caer el registro (última + 1)
+    const proximaFila = sheetClientes.getLastRow() + 1;
+
+    // Construimos la fórmula dinámica apuntando exactamente a la fila que se va a crear en la columna Q
+    // El plazo en N cae con la palabra " semanas" (ej: "26 semanas"), por lo que usamos VALOR o VALUE para extraer solo el número en la fórmula
+    const formulaVencimiento = `=IF(OR(A${proximaFila}="", N${proximaFila}=""), "", A${proximaFila} + (VALUE(REGEXEXTRACT(N${proximaFila}, "[0-9]+")) * 7))`;
+
+    // Guardar fila completa con textos formateados (Columnas A a la Q)
+    sheetClientes.appendRow([
+      timestamp,                                                         // A: Fecha
+      cliente,                                                           // B: Cliente
+      e.parameter.telefono ? e.parameter.telefono : "",                 // C: Telefono
+      e.parameter.fechaNacimiento ? e.parameter.fechaNacimiento : "",    // D: Nacimiento
+      modelo,                                                            // E: Modelo
+      imei,                                                              // F: IMEI
+      formatearMoneda(e.parameter.monto),                                // G: Enganche Recibido ($)
+      e.parameter.direccion ? e.parameter.direccion : "",               // H: Domicilio
+      e.parameter.telefonoAval ? e.parameter.telefonoAval : "",          // I: Aval
+      firmaUrl !== "" ? `=HYPERLINK("${firmaUrl}", "Abrir firma")` : "",    // J: Firma
+      formatearPorcentaje(e.parameter.interes),                          // K: Interés (%)
+      e.parameter.horastol ? e.parameter.horastol + " hrs" : "",         // L: Horas de Tolerancia
+      e.parameter.semanastol ? e.parameter.semanastol + " sem" : "",     // M: Semanas Máximas
+      e.parameter.plazoSemanas ? e.parameter.plazoSemanas + " semanas" : "", // N: Plazo del Plan
+      formatearMoneda(e.parameter.totalFinanciado),                      // O: Costo Total ($)
+      e.parameter.totalLetra ? e.parameter.totalLetra : "",              // P: Total Letra
+      formulaVencimiento                                                 // Q: Fórmula de Vencimiento Automática 🚀
+    ]);
+
+    return ContentService.createTextOutput(JSON.stringify({result: "success"}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({result: "error", error: error.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function enviarBlobATelegram(blob, caption) {
+  const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`;
+  UrlFetchApp.fetch(url, { 'method': 'post', 'payload': { 'chat_id': CHAT_ID, 'photo': blob, 'caption': caption }, 'muteHttpExceptions': true });
+}
