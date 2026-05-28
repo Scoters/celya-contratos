@@ -195,8 +195,13 @@
             </select>
 
             <h3>Estructura del Crédito</h3>
-            <label for="monto">Monto Inicial (Precio Lista):</label>
-            <input type="text" id="monto" name="monto" readonly style="background-color: #e9ecef;">
+
+            <label for="precioContado">💰 Precio de Contado:</label>
+            <input type="text" id="precioContado" readonly
+                style="background-color: #e9ecef; font-weight: bold; color: #1a5276;">
+
+            <label for="monto">🏁 Pago Inicial / Enganche:</label>
+            <input type="text" id="monto" name="monto" readonly style="background-color: #e9ecef; color: #c0392b;">
 
             <label for="plazoSemanas">Plazo de Financiamiento:</label>
             <select id="plazoSemanas" required>
@@ -518,6 +523,9 @@
                 totalFinanciadoActual = 0;
                 document.getElementById('modeloDisplay').value = "";
                 document.getElementById('engancheDisplay').value = "";
+                if (document.getElementById('precioContado')) {
+                    document.getElementById('precioContado').value = "";
+                }
                 document.getElementById('monto').value = "";
                 document.getElementById('cuota').value = "";
                 document.getElementById('totalFinanciado').value = "";
@@ -528,6 +536,9 @@
             document.getElementById('modeloDisplay').value = equipo.modelo;
             document.getElementById('engancheDisplay').value = equipo.enganche;
             document.getElementById('monto').value = equipo.enganche;
+            if (document.getElementById('precioContado')) {
+                document.getElementById('precioContado').value = equipo.precioContado || "$0";
+            }
 
             // Guardamos el número puro quitándole el signo de pesos para hacer matemáticas
             totalFinanciadoActual = parseFloat(equipo.totalFinanciado.toString().replace(/[\$,]/g, "").trim()) || 0;
