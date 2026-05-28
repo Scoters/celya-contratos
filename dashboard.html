@@ -118,15 +118,22 @@
 </head>
 
 <body>
-<div id="lockscreen-celya" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#2c3e50; z-index:999999; display:flex; justify-content:center; align-items:center; font-family:Arial, sans-serif;">
-    <div style="background:white; padding:30px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.3); text-align:center; max-width:360px; width:90%;">
-        <h2 style="color:#2c3e50; margin-bottom:5px;">CelYa!</h2>
-        <p style="color:#7f8c8d; font-size:14px; margin-top:0; margin-bottom:20px;">Acceso restringido al sistema</p>
-        <input type="password" id="pass-input-celya" placeholder="Introduce la contraseña" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box; font-size:16px; text-align:center;">
-        <button id="btn-login-celya" style="width:100%; padding:12px; background:#9b59b6; color:white; border:none; border-radius:4px; font-weight:bold; font-size:16px; cursor:pointer; transition:background 0.3s;">Entrar al Sistema</button>
-        <p id="error-login-celya" style="color:#c0392b; font-size:14px; margin-top:15px; display:none; font-weight:bold;"></p>
+    <div id="lockscreen-celya"
+        style="position:fixed; top:0; left:0; width:100%; height:100%; background:#2c3e50; z-index:999999; display:flex; justify-content:center; align-items:center; font-family:Arial, sans-serif;">
+        <div
+            style="background:white; padding:30px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.3); text-align:center; max-width:360px; width:90%;">
+            <h2 style="color:#2c3e50; margin-bottom:5px;">CelYa!</h2>
+            <p style="color:#7f8c8d; font-size:14px; margin-top:0; margin-bottom:20px;">Acceso restringido al sistema
+            </p>
+            <input type="password" id="pass-input-celya" placeholder="Introduce la contraseña"
+                style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box; font-size:16px; text-align:center;">
+            <button id="btn-login-celya"
+                style="width:100%; padding:12px; background:#9b59b6; color:white; border:none; border-radius:4px; font-weight:bold; font-size:16px; cursor:pointer; transition:background 0.3s;">Entrar
+                al Sistema</button>
+            <p id="error-login-celya"
+                style="color:#c0392b; font-size:14px; margin-top:15px; display:none; font-weight:bold;"></p>
+        </div>
     </div>
-</div>
 
     <div class="container">
         <h2>💜 CelYa! Ecosistema</h2>
@@ -188,6 +195,17 @@
 
             <button type="button" class="btn-config" id="btnGuardarConfig">💾 Guardar Configuración Global</button>
         </form>
+    </div>
+
+    <div class="container" style="margin-top: 20px;">
+        <h3>🌟 Renovación de Contrato VIP</h3>
+        <p style="color: #7f8c8d; font-size: 13px; margin-top: -10px;">Busca un cliente existente para clonar sus datos e INE en un nuevo contrato.</p>
+        
+        <label for="buscarVip">Buscar Cliente (Nombre o IMEI):</label>
+        <input type="text" id="buscarVip" placeholder="Escribe para buscar..." style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;">
+        
+        <div id="resultadosVip" style="background: #f8f9fa; border: 1px solid #e2e8f0; border-top: none; max-height: 200px; overflow-y: auto; border-radius: 0 0 4px 4px; display: none;">
+        </div>
     </div>
 
     <script>
@@ -368,70 +386,127 @@
                 }, 3500);
             }
         });
-    </script>
-<script>
-    (function() {
-        // Verificar si ya cuenta con sesión activa en esta pestaña
-        if (sessionStorage.getItem('celya_authenticated') === 'true') {
-            document.getElementById('lockscreen-celya').style.display = 'none';
-            return;
-        }
 
-        // Eventos del botón y teclado
-        document.getElementById('btn-login-celya').addEventListener('click', ejecutarLoginCelya);
-        document.getElementById('pass-input-celya').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') ejecutarLoginCelya();
+        // --- MOTOR DE BÚSQUEDA VIP EN DASHBOARD ---
+        document.addEventListener("DOMContentLoaded", function() {
+            const inputBuscar = document.getElementById('buscarVip');
+            const listaResultados = document.getElementById('resultadosVip');
+
+            if (inputBuscar && listaResultados) {
+                inputBuscar.addEventListener('input', function() {
+                    const query = this.value.trim().toUpperCase();
+                    listaResultados.innerHTML = "";
+                    
+                    if (query.length < 2) {
+                        listaResultados.style.display = "none";
+                        return;
+                    }
+
+                    // Filtra sobre 'dbClientesActivos' que el doGet ya te entrega en el combo original
+                    const filtrados = dbClientesActivos.filter(c => c.cliente.toUpperCase().includes(query));
+
+                    if (filtrados.length === 0) {
+                        listaResultados.innerHTML = "<div style='padding:10px; color:#7f8c8d;'>No se encontraron resultados</div>";
+                        listaResultados.style.display = "block";
+                        return;
+                    }
+
+                    // Evitar duplicados visuales si el cliente ya tiene varios equipos
+                    const nombresUnicos = [...new Set(filtrados.map(c => c.cliente))];
+
+                    nombresUnicos.forEach(nombre => {
+                        const div = document.createElement('div');
+                        div.style.padding = "10px";
+                        div.style.cursor = "pointer";
+                        div.style.borderBottom = "1px solid #edf2f7";
+                        div.style.fontSize = "14px";
+                        div.innerText = nombre;
+                        
+                        div.addEventListener('click', function() {
+                            // Buscamos el registro completo de ese cliente para recuperar sus datos de texto
+                            const infoCliente = filtrados.find(c => c.cliente === nombre);
+                            
+                            // Mandamos los datos limpios por la URL encriptados hacia el index
+                            const params = new URLSearchParams();
+                            params.append('vip', 'true');
+                            params.append('nombre', nombre);
+                            params.append('imei_ref', infoCliente.imei); // Usamos su IMEI actual como llave de consulta rápida
+                            
+                            window.location.href = `index.html?${params.toString()}`;
+                        });
+                        
+                        div.onmouseover = () => div.style.background = "#edf2f7";
+                        div.onmouseout = () => div.style.background = "transparent";
+                        listaResultados.appendChild(div);
+                    });
+                    listaResultados.style.display = "block";
+                });
+            }
         });
-
-        async function ejecutarLoginCelya() {
-            const btn = document.getElementById('btn-login-celya');
-            const errorTxt = document.getElementById('error-login-celya');
-            const passValue = document.getElementById('pass-input-celya').value;
-
-            if (!passValue) {
-                errorTxt.innerText = "⚠️ Escribe la contraseña";
-                errorTxt.style.display = 'block';
+    </script>
+    <script>
+        (function () {
+            // Verificar si ya cuenta con sesión activa en esta pestaña
+            if (sessionStorage.getItem('celya_authenticated') === 'true') {
+                document.getElementById('lockscreen-celya').style.display = 'none';
                 return;
             }
 
-            btn.disabled = true;
-            btn.innerText = "Verificando...";
-            errorTxt.style.display = 'none';
+            // Eventos del botón y teclado
+            document.getElementById('btn-login-celya').addEventListener('click', ejecutarLoginCelya);
+            document.getElementById('pass-input-celya').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') ejecutarLoginCelya();
+            });
 
-            try {
-                const formData = new URLSearchParams();
-                formData.append('action', 'login');
-                formData.append('password', passValue);
+            async function ejecutarLoginCelya() {
+                const btn = document.getElementById('btn-login-celya');
+                const errorTxt = document.getElementById('error-login-celya');
+                const passValue = document.getElementById('pass-input-celya').value;
 
-                // CONFIG.GOOGLE_SCRIPT_URL se jala de tu archivo config.js ya enlazado
-                const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    body: formData.toString(),
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                });
-                
-                const data = await response.json();
+                if (!passValue) {
+                    errorTxt.innerText = "⚠️ Escribe la contraseña";
+                    errorTxt.style.display = 'block';
+                    return;
+                }
 
-                if (data.result === 'success') {
-                    // Guardar token temporal de sesión
-                    sessionStorage.setItem('celya_authenticated', 'true');
-                    // Desvanecer pantalla de bloqueo
-                    document.getElementById('lockscreen-celya').style.display = 'none';
-                } else {
-                    errorTxt.innerText = "❌ Contraseña incorrecta";
+                btn.disabled = true;
+                btn.innerText = "Verificando...";
+                errorTxt.style.display = 'none';
+
+                try {
+                    const formData = new URLSearchParams();
+                    formData.append('action', 'login');
+                    formData.append('password', passValue);
+
+                    // CONFIG.GOOGLE_SCRIPT_URL se jala de tu archivo config.js ya enlazado
+                    const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        body: formData.toString(),
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.result === 'success') {
+                        // Guardar token temporal de sesión
+                        sessionStorage.setItem('celya_authenticated', 'true');
+                        // Desvanecer pantalla de bloqueo
+                        document.getElementById('lockscreen-celya').style.display = 'none';
+                    } else {
+                        errorTxt.innerText = "❌ Contraseña incorrecta";
+                        errorTxt.style.display = 'block';
+                        btn.disabled = false;
+                        btn.innerText = "Entrar al Sistema";
+                    }
+                } catch (err) {
+                    errorTxt.innerText = "🌐 Error de red, revisa tu conexión";
                     errorTxt.style.display = 'block';
                     btn.disabled = false;
                     btn.innerText = "Entrar al Sistema";
                 }
-            } catch (err) {
-                errorTxt.innerText = "🌐 Error de red, revisa tu conexión";
-                errorTxt.style.display = 'block';
-                btn.disabled = false;
-                btn.innerText = "Entrar al Sistema";
             }
-        }
-    })();
-</script>
+        })();
+    </script>
 </body>
 
 </html>

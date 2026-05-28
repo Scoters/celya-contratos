@@ -226,14 +226,6 @@
                 <div id="previewTrasera" class="preview-imagen"></div>
             </div>
 
-            <label>✍️ Firma Digital del Cliente:</label>
-            <div class="contenedor-canvas-firma">
-                <canvas id="canvasFirma"></canvas>
-            </div>
-            <div class="botones-firma">
-                <button type="button" class="btn-limpiar" onclick="limpiarFirma()">🧹 Borrar Firma y Reintentar</button>
-            </div>
-
             <div class="foto-seccion">
                 <label>📸 Foto de Evidencia Física (Celular Encendido):</label>
                 <input type="file" id="fotoEvidencia" accept="image/*" capture="camera" required>
@@ -270,6 +262,14 @@
                     <span><strong>Política de Bloqueo</strong> — Acepto que el equipo puede ser bloqueado remotamente en
                         caso de incumplimiento de pago.</span>
                 </label>
+            </div>
+
+            <label>✍️ Firma Digital del Cliente:</label>
+            <div class="contenedor-canvas-firma">
+                <canvas id="canvasFirma"></canvas>
+            </div>
+            <div class="botones-firma">
+                <button type="button" class="btn-limpiar" onclick="limpiarFirma()">🧹 Borrar Firma y Reintentar</button>
             </div>
 
             <input type="hidden" id="interesGlobal" name="interes">
@@ -438,6 +438,45 @@
                     opt.innerText = `${eq.modelo} (${eq.imei})`;
                     select.appendChild(opt);
                 });
+
+                // --- LECTOR DE DATOS DE TEXTO VIP ---
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('vip') === 'true') {
+                    // 1. Cambiamos visualmente el título para saber qué es una renovación
+                    const titulo = document.querySelector('h2');
+                    if (titulo) titulo.innerHTML = "🌟 Registro de Contrato VIP";
+                    
+                    // 2. Desactivamos la obligatoriedad de las fotos de la INE (ya que las tienes archivadas)
+                    const ineDel = document.getElementById('ineDelanteraInput');
+                    const ineTras = document.getElementById('ineTraseraInput');
+                    if (ineDel) ineDel.required = false;
+                    if (ineTras) ineTras.required = false;
+                    
+                    // Colocamos un mensaje estético avisando que no se ocupan fotos de INE
+                    document.getElementById('previewDelantera').innerHTML = `<span style="color:#27ae60; font-size:12px; font-weight:bold;">✅ Cliente VIP: INE ya archivada previamente</span>`;
+                    document.getElementById('previewTrasera').innerHTML = `<span style="color:#27ae60; font-size:12px; font-weight:bold;">✅ Cliente VIP: INE ya archivada previamente</span>`;
+
+                    // 3. Le pedimos a la base de datos que nos traiga los textos usando el imei de referencia
+                    const imeiRef = urlParams.get('imei_ref');
+                    if (imeiRef) {
+                        fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=buscarDatosVip&imeiAnterior=${imeiRef}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data && data.success) {
+                                    document.getElementById('cliente').value = data.cliente.toUpperCase();
+                                    const telInput = document.querySelector('[name="telefono"]');
+                                    if (telInput) telInput.value = data.telefono || "";
+                                    document.getElementById('direccion').value = (data.direccion || "").toUpperCase();
+                                    const avalInput = document.querySelector('[name="telefonoAval"]');
+                                    if (avalInput) avalInput.value = data.telefonoAval || "";
+                                    const fechaInput = document.querySelector('[name="fechaNacimiento"]');
+                                    if (fechaInput && data.fechaNacimiento) {
+                                        fechaInput.value = data.fechaNacimiento.split("T")[0];
+                                    }
+                                }
+                            }).catch(e => console.log("Error al precargar textos VIP"));
+                    }
+                }
 
             } catch (err) {
                 document.getElementById('selectDispositivo').innerHTML = '<option value="">❌ Error al conectar con inventario</option>';
