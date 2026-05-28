@@ -180,8 +180,14 @@
             <label>Monto de Enganche Pago ($):</label>
             <input type="text" id="engancheDisplay" readonly>
 
+            <label>📆 Tipo de Periodo (Frecuencia de Pago):</label>
+            <select id="tipoPeriodo" name="tipoPeriodo" required>
+                <option value="semanal" selected>Semanal</option>
+                <option value="quincenal">Quincenal</option>
+            </select>
+
             <label>Plazo de Financiamiento:</label>
-            <select id="selectPlazo" name="plazoSemanas" required>
+            <select id="plazoSemanas" name="plazoSemanas" required>
                 <option value="26">Plan Rápido (26 Semanas)</option>
                 <option value="52" selected>Plan Cómodo (52 Semanas)</option>
             </select>
@@ -191,6 +197,25 @@
 
             <label>Monto Financiado Total ($):</label>
             <input type="text" id="totalFinanciadoDisplay" name="totalFinanciado" readonly>
+
+            <label>🗓️ Anclaje al Día de Raya Laboral:</label>
+            <select id="diaRaya" name="diaRaya" required>
+                <option value="">-- Seleccione frecuencia y día de pago --</option>
+                <optgroup label="Pago Semanal">
+                    <option value="Semanal - Sábado">Semanal - Sábado</option>
+                    <option value="Semanal - Viernes">Semanal - Viernes</option>
+                    <option value="Semanal - Lunes">Semanal - Lunes</option>
+                    <option value="Semanal - Martes">Semanal - Martes</option>
+                    <option value="Semanal - Miércoles">Semanal - Miércoles</option>
+                    <option value="Semanal - Jueves">Semanal - Jueves</option>
+                    <option value="Semanal - Domingo">Semanal - Domingo</option>
+                </optgroup>
+                <optgroup label="Pago Quincenal">
+                    <option value="Quincenal - Día 15 y 30">Quincenal - Día 15 y 30</option>
+                    <option value="Quincenal - Día 10 y 25">Quincenal - Día 10 y 25</option>
+                    <option value="Quincenal - Otro">Quincenal - Otro Día</option>
+                </optgroup>
+            </select>
 
             <input type="hidden" id="totalLetraHidden" name="totalLetra">
 
@@ -445,13 +470,13 @@
                     // 1. Cambiamos visualmente el título para saber qué es una renovación
                     const titulo = document.querySelector('h2');
                     if (titulo) titulo.innerHTML = "🌟 Registro de Contrato VIP";
-                    
+
                     // 2. Desactivamos la obligatoriedad de las fotos de la INE (ya que las tienes archivadas)
                     const ineDel = document.getElementById('ineDelanteraInput');
                     const ineTras = document.getElementById('ineTraseraInput');
                     if (ineDel) ineDel.required = false;
                     if (ineTras) ineTras.required = false;
-                    
+
                     // Colocamos un mensaje estético avisando que no se ocupan fotos de INE
                     document.getElementById('previewDelantera').innerHTML = `<span style="color:#27ae60; font-size:12px; font-weight:bold;">✅ Cliente VIP: INE ya archivada previamente</span>`;
                     document.getElementById('previewTrasera').innerHTML = `<span style="color:#27ae60; font-size:12px; font-weight:bold;">✅ Cliente VIP: INE ya archivada previamente</span>`;
@@ -484,11 +509,12 @@
         };
 
         document.getElementById('selectDispositivo').addEventListener('change', actualizarFormularioPrecios);
-        document.getElementById('selectPlazo').addEventListener('change', actualizarFormularioPrecios);
+        document.getElementById('plazoSemanas').addEventListener('change', actualizarFormularioPrecios);
+        document.getElementById('tipoPeriodo').addEventListener('change', actualizarFormularioPrecios);
 
         function actualizarFormularioPrecios() {
             const imeiSelected = document.getElementById('selectDispositivo').value;
-            const plazo = document.getElementById('selectPlazo').value;
+            const plazo = document.getElementById('plazoSemanas').value;
             const equipo = cacheInventario.find(e => e.imei === imeiSelected);
 
             if (!equipo) {
@@ -505,10 +531,56 @@
             document.getElementById('totalFinanciadoDisplay').value = equipo.totalFinanciado;
             document.getElementById('totalLetraHidden').value = equipo.totalLetra;
 
-            if (plazo === "26") {
-                document.getElementById('cuotaDisplay').value = equipo.planRapido;
+            const tipoPeriodoVal = document.getElementById('tipoPeriodo').value;
+            if (tipoPeriodoVal === "quincenal") {
+                const totalFin = parseFloat(equipo.totalFinanciado.toString().replace(/[\$,]/g, "").trim()) || 0;
+                const plazoNum = parseInt(plazo) || 1;
+                const cuotaQ = Math.round(totalFin / plazoNum);
+                document.getElementById('cuotaDisplay').value = "$" + cuotaQ.toLocaleString('es-MX');
             } else {
-                document.getElementById('cuotaDisplay').value = equipo.planComodo;
+                if (plazo === "26") {
+                    document.getElementById('cuotaDisplay').value = equipo.planRapido;
+                } else {
+                    document.getElementById('cuotaDisplay').value = equipo.planComodo;
+                }
+            }
+
+            // --- VERIFICACIÓN DE IMEI EN TIEMPO REAL ---
+            const selectDisp = document.getElementById('selectDispositivo');
+            const btnSubmit = document.getElementById('btnEnviar');
+
+            if (imeiSelected !== "") {
+                // Alerta visual de carga
+                selectDisp.style.background = "#fff3cd";
+
+                fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=verificarImei&imei=${imeiSelected}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.existe) {
+                            const comprador = data.cliente ? data.cliente.toString().toUpperCase() : "DESCONOCIDO";
+                            alert(`🚨 ¡ATENCIÓN! Este celular (IMEI) ya fue vendido a: ${comprador}.\nElige otro equipo.`);
+                            selectDisp.style.background = "#f8d7da"; // Color rojo de error
+                            selectDisp.style.color = "#721c24";
+                            btnSubmit.disabled = true; // Congela el botón
+                            btnSubmit.innerText = `❌ IMEI de ${comprador} - Bloqueado`;
+                            btnSubmit.style.background = "#c0392b";
+                        } else {
+                            selectDisp.style.background = "#fff"; // Color original
+                            selectDisp.style.color = "#333";
+                            btnSubmit.disabled = false;
+                            btnSubmit.innerText = "Generar Contrato y Archivar";
+                            btnSubmit.style.background = "#e67e22";
+                        }
+                    }).catch(err => {
+                        console.log("Error verificando IMEI", err);
+                        selectDisp.style.background = "#fff";
+                    });
+            } else {
+                selectDisp.style.background = "#fff";
+                selectDisp.style.color = "#333";
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "Generar Contrato y Archivar";
+                btnSubmit.style.background = "#e67e22";
             }
         }
 
@@ -524,6 +596,22 @@
             try {
                 const formularioElemento = document.getElementById('contratoForm');
                 const sheetData = new URLSearchParams(new FormData(formularioElemento));
+
+                // --- CAPTURA Y CÁLCULO DE VALORES DE PAGO ---
+                const plazoUnidades = parseInt(document.getElementById('plazoSemanas').value) || 0;
+                const tipoPeriodoSeleccionado = document.getElementById('tipoPeriodo').value;
+
+                const totalFinVal = document.getElementById('totalFinanciadoDisplay').value;
+                const totalFinanciado = parseFloat(totalFinVal.replace(/[\$,]/g, "").trim()) || 0;
+
+                // El cálculo de la cuota se hace igual usando el total financiado dividido entre el plazo elegido
+                const cuotaCalculada = totalFinanciado / plazoUnidades;
+
+                sheetData.set('cuota', cuotaCalculada);
+                sheetData.set('plazoSemanas', plazoUnidades);
+                sheetData.append('plazo', plazoUnidades);
+                sheetData.set('tipoPeriodo', tipoPeriodoSeleccionado);
+                sheetData.set('diaRaya', document.getElementById('diaRaya').value);
 
                 const clienteMayusculas = document.getElementById('cliente').value.trim().toUpperCase();
                 const direccionMayusculas = document.getElementById('direccion').value.trim().toUpperCase();
@@ -562,9 +650,13 @@
                         location.reload();
                     }, 4000);
                 } else {
-                    btn.innerText = "⚠️ Error: " + data.error;
+                    btn.innerText = "⚠️ " + data.error;
                     btn.style.background = "#c0392b";
                     btn.disabled = false;
+                    setTimeout(() => {
+                        btn.innerText = "Generar Contrato y Archivar";
+                        btn.style.background = colorOriginal;
+                    }, 4500);
                 }
             } catch (err) {
                 btn.innerText = "❌ Error de conexión, reintente.";

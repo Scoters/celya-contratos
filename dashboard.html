@@ -199,12 +199,15 @@
 
     <div class="container" style="margin-top: 20px;">
         <h3>🌟 Renovación de Contrato VIP</h3>
-        <p style="color: #7f8c8d; font-size: 13px; margin-top: -10px;">Busca un cliente existente para clonar sus datos e INE en un nuevo contrato.</p>
-        
+        <p style="color: #7f8c8d; font-size: 13px; margin-top: -10px;">Busca un cliente existente para clonar sus datos
+            e INE en un nuevo contrato.</p>
+
         <label for="buscarVip">Buscar Cliente (Nombre o IMEI):</label>
-        <input type="text" id="buscarVip" placeholder="Escribe para buscar..." style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;">
-        
-        <div id="resultadosVip" style="background: #f8f9fa; border: 1px solid #e2e8f0; border-top: none; max-height: 200px; overflow-y: auto; border-radius: 0 0 4px 4px; display: none;">
+        <input type="text" id="buscarVip" placeholder="Escribe para buscar..."
+            style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;">
+
+        <div id="resultadosVip"
+            style="background: #f8f9fa; border: 1px solid #e2e8f0; border-top: none; max-height: 200px; overflow-y: auto; border-radius: 0 0 4px 4px; display: none;">
         </div>
     </div>
 
@@ -388,15 +391,15 @@
         });
 
         // --- MOTOR DE BÚSQUEDA VIP EN DASHBOARD ---
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             const inputBuscar = document.getElementById('buscarVip');
             const listaResultados = document.getElementById('resultadosVip');
 
             if (inputBuscar && listaResultados) {
-                inputBuscar.addEventListener('input', function() {
+                inputBuscar.addEventListener('input', function () {
                     const query = this.value.trim().toUpperCase();
                     listaResultados.innerHTML = "";
-                    
+
                     if (query.length < 2) {
                         listaResultados.style.display = "none";
                         return;
@@ -421,20 +424,20 @@
                         div.style.borderBottom = "1px solid #edf2f7";
                         div.style.fontSize = "14px";
                         div.innerText = nombre;
-                        
-                        div.addEventListener('click', function() {
+
+                        div.addEventListener('click', function () {
                             // Buscamos el registro completo de ese cliente para recuperar sus datos de texto
                             const infoCliente = filtrados.find(c => c.cliente === nombre);
-                            
+
                             // Mandamos los datos limpios por la URL encriptados hacia el index
                             const params = new URLSearchParams();
                             params.append('vip', 'true');
                             params.append('nombre', nombre);
                             params.append('imei_ref', infoCliente.imei); // Usamos su IMEI actual como llave de consulta rápida
-                            
+
                             window.location.href = `index.html?${params.toString()}`;
                         });
-                        
+
                         div.onmouseover = () => div.style.background = "#edf2f7";
                         div.onmouseout = () => div.style.background = "transparent";
                         listaResultados.appendChild(div);
