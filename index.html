@@ -180,23 +180,27 @@
             <label>Monto de Enganche Pago ($):</label>
             <input type="text" id="engancheDisplay" readonly>
 
-            <label>📆 Tipo de Periodo (Frecuencia de Pago):</label>
+            <label>📆 Frecuencia de Pago:</label>
             <select id="tipoPeriodo" name="tipoPeriodo" required>
                 <option value="semanal" selected>Semanal</option>
                 <option value="quincenal">Quincenal</option>
             </select>
 
-            <label>Plazo de Financiamiento:</label>
-            <select id="plazoSemanas" name="plazoSemanas" required>
-                <option value="26">Plan Rápido (26 Semanas)</option>
-                <option value="52" selected>Plan Cómodo (52 Semanas)</option>
+            <h3>Estructura del Crédito</h3>
+            <label for="monto">Monto Inicial (Precio Lista):</label>
+            <input type="text" id="monto" name="monto" readonly style="background-color: #e9ecef;">
+
+            <label for="plazoSemanas">Plazo de Financiamiento:</label>
+            <select id="plazoSemanas" required>
+                <option value="26">Plan Rápido (26 Pagos)</option>
+                <option value="52" selected>Plan Cómodo (52 Pagos)</option>
             </select>
 
-            <label>Pago Semanal Calculado ($):</label>
-            <input type="text" id="cuotaDisplay" name="cuota" readonly>
+            <label for="cuota">Monto del Abono Regular ($):</label>
+            <input type="text" id="cuota" name="cuota" readonly style="background-color: #e9ecef; font-weight: bold; color: #2e7d32;">
 
-            <label>Monto Financiado Total ($):</label>
-            <input type="text" id="totalFinanciadoDisplay" name="totalFinanciado" readonly>
+            <label for="totalFinanciado">Total Financiado (Monto + Interés):</label>
+            <input type="text" id="totalFinanciado" name="totalFinanciado" readonly style="background-color: #e9ecef;">
 
             <label>🗓️ Anclaje al Día de Raya Laboral:</label>
             <select id="diaRaya" name="diaRaya" required>
@@ -307,6 +311,7 @@
 
     <script>
         let cacheInventario = [];
+        let totalFinanciadoActual = 0;
         let ineDelanteraB64 = "";
         let ineTraseraB64 = "";
         let fotoEvidenciaB64 = "";
@@ -509,41 +514,34 @@
         };
 
         document.getElementById('selectDispositivo').addEventListener('change', actualizarFormularioPrecios);
-        document.getElementById('plazoSemanas').addEventListener('change', actualizarFormularioPrecios);
-        document.getElementById('tipoPeriodo').addEventListener('change', actualizarFormularioPrecios);
+        document.getElementById('tipoPeriodo').addEventListener('change', recalcularCuotaPorFrecuencia);
+        document.getElementById('plazoSemanas').addEventListener('change', recalcularCuotaPorFrecuencia);
 
         function actualizarFormularioPrecios() {
             const imeiSelected = document.getElementById('selectDispositivo').value;
-            const plazo = document.getElementById('plazoSemanas').value;
             const equipo = cacheInventario.find(e => e.imei === imeiSelected);
 
             if (!equipo) {
+                totalFinanciadoActual = 0;
                 document.getElementById('modeloDisplay').value = "";
                 document.getElementById('engancheDisplay').value = "";
-                document.getElementById('cuotaDisplay').value = "";
-                document.getElementById('totalFinanciadoDisplay').value = "";
+                document.getElementById('monto').value = "";
+                document.getElementById('cuota').value = "";
+                document.getElementById('totalFinanciado').value = "";
                 document.getElementById('totalLetraHidden').value = "";
                 return;
             }
 
             document.getElementById('modeloDisplay').value = equipo.modelo;
             document.getElementById('engancheDisplay').value = equipo.enganche;
-            document.getElementById('totalFinanciadoDisplay').value = equipo.totalFinanciado;
+            document.getElementById('monto').value = equipo.enganche;
+            
+            // Guardamos el número puro quitándole el signo de pesos para hacer matemáticas
+            totalFinanciadoActual = parseFloat(equipo.totalFinanciado.toString().replace(/[\$,]/g, "").trim()) || 0;
+            document.getElementById('totalFinanciado').value = equipo.totalFinanciado;
             document.getElementById('totalLetraHidden').value = equipo.totalLetra;
 
-            const tipoPeriodoVal = document.getElementById('tipoPeriodo').value;
-            if (tipoPeriodoVal === "quincenal") {
-                const totalFin = parseFloat(equipo.totalFinanciado.toString().replace(/[\$,]/g, "").trim()) || 0;
-                const plazoNum = parseInt(plazo) || 1;
-                const cuotaQ = Math.round(totalFin / plazoNum);
-                document.getElementById('cuotaDisplay').value = "$" + cuotaQ.toLocaleString('es-MX');
-            } else {
-                if (plazo === "26") {
-                    document.getElementById('cuotaDisplay').value = equipo.planRapido;
-                } else {
-                    document.getElementById('cuotaDisplay').value = equipo.planComodo;
-                }
-            }
+            recalcularCuotaPorFrecuencia();
 
             // --- VERIFICACIÓN DE IMEI EN TIEMPO REAL ---
             const selectDisp = document.getElementById('selectDispositivo');
@@ -584,6 +582,25 @@
             }
         }
 
+        function recalcularCuotaPorFrecuencia() {
+            const frecuencia = document.getElementById('tipoPeriodo').value; // 'semanal' o 'quincenal'
+            const plazoSemanas = parseInt(document.getElementById('plazoSemanas').value) || 26; 
+            
+            if (totalFinanciadoActual === 0) return;
+
+            let totalAbonos = plazoSemanas;
+
+            // 💰 Si el periodo es quincenal, dará la mitad de abonos en el mismo tiempo
+            if (frecuencia === "quincenal") {
+                totalAbonos = plazoSemanas / 2; 
+            }
+
+            let cuotaCalculada = totalFinanciadoActual / totalAbonos;
+
+            // Pintamos la cuota formateada en el campo correspondiente
+            document.getElementById('cuota').value = "$" + Math.round(cuotaCalculada).toLocaleString('es-MX');
+        }
+
         document.getElementById('contratoForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const btn = document.getElementById('btnEnviar');
@@ -601,11 +618,15 @@
                 const plazoUnidades = parseInt(document.getElementById('plazoSemanas').value) || 0;
                 const tipoPeriodoSeleccionado = document.getElementById('tipoPeriodo').value;
 
-                const totalFinVal = document.getElementById('totalFinanciadoDisplay').value;
+                const totalFinVal = document.getElementById('totalFinanciado').value;
                 const totalFinanciado = parseFloat(totalFinVal.replace(/[\$,]/g, "").trim()) || 0;
 
-                // El cálculo de la cuota se hace igual usando el total financiado dividido entre el plazo elegido
-                const cuotaCalculada = totalFinanciado / plazoUnidades;
+                // Calcular abonos reales según la regla de frecuencia
+                let numPagos = plazoUnidades;
+                if (tipoPeriodoSeleccionado === 'quincenal') {
+                    numPagos = plazoUnidades / 2;
+                }
+                const cuotaCalculada = totalFinanciado / numPagos;
 
                 sheetData.set('cuota', cuotaCalculada);
                 sheetData.set('plazoSemanas', plazoUnidades);
