@@ -140,6 +140,16 @@
 </head>
 
 <body>
+<div id="lockscreen-celya" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#2c3e50; z-index:999999; display:flex; justify-content:center; align-items:center; font-family:Arial, sans-serif;">
+    <div style="background:white; padding:30px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.3); text-align:center; max-width:360px; width:90%;">
+        <h2 style="color:#2c3e50; margin-bottom:5px;">CelYa!</h2>
+        <p style="color:#7f8c8d; font-size:14px; margin-top:0; margin-bottom:20px;">Acceso restringido al sistema</p>
+        <input type="password" id="pass-input-celya" placeholder="Introduce la contraseña" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box; font-size:16px; text-align:center;">
+        <button id="btn-login-celya" style="width:100%; padding:12px; background:#9b59b6; color:white; border:none; border-radius:4px; font-weight:bold; font-size:16px; cursor:pointer; transition:background 0.3s;">Entrar al Sistema</button>
+        <p id="error-login-celya" style="color:#c0392b; font-size:14px; margin-top:15px; display:none; font-weight:bold;"></p>
+    </div>
+</div>
+
     <div class="container">
         <h2>📱 Registro de Contrato CelYa</h2>
         <form id="contratoForm">
@@ -426,6 +436,69 @@
             }
         });
     </script>
+<script>
+    (function() {
+        // Verificar si ya cuenta con sesión activa en esta pestaña
+        if (sessionStorage.getItem('celya_authenticated') === 'true') {
+            document.getElementById('lockscreen-celya').style.display = 'none';
+            return;
+        }
+
+        // Eventos del botón y teclado
+        document.getElementById('btn-login-celya').addEventListener('click', ejecutarLoginCelya);
+        document.getElementById('pass-input-celya').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') ejecutarLoginCelya();
+        });
+
+        async function ejecutarLoginCelya() {
+            const btn = document.getElementById('btn-login-celya');
+            const errorTxt = document.getElementById('error-login-celya');
+            const passValue = document.getElementById('pass-input-celya').value;
+
+            if (!passValue) {
+                errorTxt.innerText = "⚠️ Escribe la contraseña";
+                errorTxt.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Verificando...";
+            errorTxt.style.display = 'none';
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('action', 'login');
+                formData.append('password', passValue);
+
+                // CONFIG.GOOGLE_SCRIPT_URL se jala de tu archivo config.js ya enlazado
+                const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData.toString(),
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                
+                const data = await response.json();
+
+                if (data.result === 'success') {
+                    // Guardar token temporal de sesión
+                    sessionStorage.setItem('celya_authenticated', 'true');
+                    // Desvanecer pantalla de bloqueo
+                    document.getElementById('lockscreen-celya').style.display = 'none';
+                } else {
+                    errorTxt.innerText = "❌ Contraseña incorrecta";
+                    errorTxt.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerText = "Entrar al Sistema";
+                }
+            } catch (err) {
+                errorTxt.innerText = "🌐 Error de red, revisa tu conexión";
+                errorTxt.style.display = 'block';
+                btn.disabled = false;
+                btn.innerText = "Entrar al Sistema";
+            }
+        }
+    })();
+</script>
 </body>
 
 </html>
