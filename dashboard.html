@@ -180,7 +180,15 @@
 
         <h3>⚙️ Parámetros Globales del Negocio</h3>
         <form id="configForm">
-            <div class="grid-config">
+            <div class="grid-config" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>% Interés Plan Rápido (26v):</label>
+                    <input type="number" id="interesPlanRapido" required placeholder="Ej. 35">
+                </div>
+                <div>
+                    <label>% Interés Plan Cómodo (52v):</label>
+                    <input type="number" id="interesPlanComodo" required placeholder="Ej. 50">
+                </div>
                 <div>
                     <label>Interés Moratorio (%):</label>
                     <input type="number" id="interes" required>
@@ -189,9 +197,11 @@
                     <label>Horas de Tolerancia:</label>
                     <input type="number" id="horastol" required>
                 </div>
+                <div>
+                    <label>Semanas de Tolerancia:</label>
+                    <input type="number" id="semanastol" required>
+                </div>
             </div>
-            <label>Semanas de Tolerancia antes de Bloqueo:</label>
-            <input type="number" id="semanastol" required>
 
             <button type="button" class="btn-config" id="btnGuardarConfig">💾 Guardar Configuración Global</button>
         </form>
@@ -230,6 +240,8 @@
                 document.getElementById('interes').value = datos.config.interes;
                 document.getElementById('horastol').value = datos.config.horastol;
                 document.getElementById('semanastol').value = datos.config.semanastol;
+                document.getElementById('interesPlanComodo').value = datos.config.interesPlanComodo || 45;
+                document.getElementById('interesPlanRapido').value = datos.config.interesPlanRapido || 35;
 
                 dbClientesActivos = datos.clientesActivos || [];
                 dbInventarioEquipos = datos.inventario || [];
@@ -363,6 +375,8 @@
                 formData.append('interes', document.getElementById('interes').value);
                 formData.append('horastol', document.getElementById('horastol').value);
                 formData.append('semanastol', document.getElementById('semanastol').value);
+                formData.append('interesPlanRapido', document.getElementById('interesPlanRapido').value);
+                formData.append('interesPlanComodo', document.getElementById('interesPlanComodo').value);
 
                 const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
                     method: 'POST',
