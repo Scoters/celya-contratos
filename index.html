@@ -180,10 +180,18 @@
             <label>Monto de Enganche Pago ($):</label>
             <input type="text" id="engancheDisplay" readonly>
 
-            <label>📆 Frecuencia de Pago:</label>
-            <select id="tipoPeriodo" name="tipoPeriodo" required>
-                <option value="semanal" selected>Semanal</option>
-                <option value="quincenal">Quincenal</option>
+            <label for="agendaCobro">📆 Frecuencia y Día de Pago Obligatorio:</label>
+            <select id="agendaCobro" required>
+                <option value="">-- Selecciona cómo y cuándo pagará --</option>
+                <option value="SEMANAL|LUNES">Semanal — Cada Lunes</option>
+                <option value="SEMANAL|MARTES">Semanal — Cada Martes</option>
+                <option value="SEMANAL|MIERCOLES">Semanal — Cada Miércoles</option>
+                <option value="SEMANAL|JUEVES">Semanal — Cada Jueves</option>
+                <option value="SEMANAL|VIERNES">Semanal — Cada Viernes</option>
+                <option value="SEMANAL|SABADO">Semanal — Cada Sábado</option>
+                <option value="SEMANAL|DOMINGO">Semanal — Cada Domingo</option>
+                <option value="QUINCENAL|15 Y 30">Quincenal — Días 15 y 30 (Fijo)</option>
+                <option value="QUINCENAL|SABADO">Quincenal — Sábado de Raya (Cada 2 semanas)</option>
             </select>
 
             <h3>Estructura del Crédito</h3>
@@ -197,29 +205,11 @@
             </select>
 
             <label for="cuota">Monto del Abono Regular ($):</label>
-            <input type="text" id="cuota" name="cuota" readonly style="background-color: #e9ecef; font-weight: bold; color: #2e7d32;">
+            <input type="text" id="cuota" name="cuota" readonly
+                style="background-color: #e9ecef; font-weight: bold; color: #2e7d32;">
 
             <label for="totalFinanciado">Total Financiado (Monto + Interés):</label>
             <input type="text" id="totalFinanciado" name="totalFinanciado" readonly style="background-color: #e9ecef;">
-
-            <label>🗓️ Anclaje al Día de Raya Laboral:</label>
-            <select id="diaRaya" name="diaRaya" required>
-                <option value="">-- Seleccione frecuencia y día de pago --</option>
-                <optgroup label="Pago Semanal">
-                    <option value="Semanal - Sábado">Semanal - Sábado</option>
-                    <option value="Semanal - Viernes">Semanal - Viernes</option>
-                    <option value="Semanal - Lunes">Semanal - Lunes</option>
-                    <option value="Semanal - Martes">Semanal - Martes</option>
-                    <option value="Semanal - Miércoles">Semanal - Miércoles</option>
-                    <option value="Semanal - Jueves">Semanal - Jueves</option>
-                    <option value="Semanal - Domingo">Semanal - Domingo</option>
-                </optgroup>
-                <optgroup label="Pago Quincenal">
-                    <option value="Quincenal - Día 15 y 30">Quincenal - Día 15 y 30</option>
-                    <option value="Quincenal - Día 10 y 25">Quincenal - Día 10 y 25</option>
-                    <option value="Quincenal - Otro">Quincenal - Otro Día</option>
-                </optgroup>
-            </select>
 
             <input type="hidden" id="totalLetraHidden" name="totalLetra">
 
@@ -514,8 +504,11 @@
         };
 
         document.getElementById('selectDispositivo').addEventListener('change', actualizarFormularioPrecios);
-        document.getElementById('tipoPeriodo').addEventListener('change', actualizarTextosPlazo);
-        document.getElementById('plazoSemanas').addEventListener('change', recalcularCuotaPorFrecuencia);
+        document.getElementById('agendaCobro').addEventListener('change', procesarAgendaCobro);
+        document.getElementById('plazoSemanas').addEventListener('change', function () {
+            const frecuencia = document.getElementById('agendaCobro').value.split('|')[0] || "SEMANAL";
+            recalcularCuotaPorFrecuenciaModificada(frecuencia);
+        });
 
         function actualizarFormularioPrecios() {
             const imeiSelected = document.getElementById('selectDispositivo').value;
@@ -535,13 +528,13 @@
             document.getElementById('modeloDisplay').value = equipo.modelo;
             document.getElementById('engancheDisplay').value = equipo.enganche;
             document.getElementById('monto').value = equipo.enganche;
-            
+
             // Guardamos el número puro quitándole el signo de pesos para hacer matemáticas
             totalFinanciadoActual = parseFloat(equipo.totalFinanciado.toString().replace(/[\$,]/g, "").trim()) || 0;
             document.getElementById('totalFinanciado').value = equipo.totalFinanciado;
             document.getElementById('totalLetraHidden').value = equipo.totalLetra;
 
-            recalcularCuotaPorFrecuencia();
+            procesarAgendaCobro();
 
             // --- VERIFICACIÓN DE IMEI EN TIEMPO REAL ---
             const selectDisp = document.getElementById('selectDispositivo');
@@ -582,42 +575,41 @@
             }
         }
 
-        function recalcularCuotaPorFrecuencia() {
-            const frecuencia = document.getElementById('tipoPeriodo').value; // 'semanal' o 'quincenal'
-            const plazoSemanas = parseInt(document.getElementById('plazoSemanas').value) || 26; 
-            
-            if (totalFinanciadoActual === 0) return;
+        function procesarAgendaCobro() {
+            const selector = document.getElementById('agendaCobro').value;
+            if (!selector) return;
 
-            let totalAbonos = plazoSemanas;
-
-            // 💰 Si el periodo es quincenal, dará la mitad de abonos en el mismo tiempo
-            if (frecuencia === "quincenal") {
-                totalAbonos = plazoSemanas / 2; 
-            }
-
-            let cuotaCalculada = totalFinanciadoActual / totalAbonos;
-
-            // Pintamos la cuota formateada en el campo correspondiente
-            document.getElementById('cuota').value = "$" + Math.round(cuotaCalculada).toLocaleString('es-MX');
-        }
-
-        function actualizarTextosPlazo() {
-            const frecuencia = document.getElementById('tipoPeriodo').value;
+            // Separamos el valor usando el carácter "|"
+            // Ejemplo: "QUINCENAL|15 Y 30" -> frecuencia = "QUINCENAL", diaPago = "15 Y 30"
+            const partes = selector.split('|');
+            const frecuencia = partes[0];
             const optCorto = document.getElementById('optPlazoCorto');
             const optLargo = document.getElementById('optPlazoLargo');
 
-            if (frecuencia === "quincenal") {
-                // Si es quincenal, se mantiene el tiempo en semanas pero se corta el número de abonos a la mitad
-                optCorto.text = "Plan Rápido (26 Semanas / 13 Pagos)";
-                optLargo.text = "Plan Cómodo (52 Semanas / 26 Pagos)";
+            // 1. Modificamos visualmente los planes de financiamiento
+            if (frecuencia === "QUINCENAL") {
+                optCorto.text = "Plan Rápido (13 Quincenas / 13 Pagos)";
+                optLargo.text = "Plan Cómodo (26 Quincenas / 26 Pagos)";
             } else {
-                // Si regresa a semanal, vuelve a su estado normal de siempre
                 optCorto.text = "Plan Rápido (26 Semanas / 26 Pagos)";
                 optLargo.text = "Plan Cómodo (52 Semanas / 52 Pagos)";
             }
 
-            // Después de actualizar el texto, ejecutamos el calculador de la cuota dinero
-            recalcularCuotaPorFrecuencia();
+            // 2. Ejecutamos la matemática de la cuota dinero
+            recalcularCuotaPorFrecuenciaModificada(frecuencia);
+        }
+
+        function recalcularCuotaPorFrecuenciaModificada(frecuencia) {
+            const plazoSemanas = parseInt(document.getElementById('plazoSemanas').value) || 26;
+            if (totalFinanciadoActual === 0) return;
+
+            let totalAbonos = plazoSemanas;
+            if (frecuencia === "QUINCENAL") {
+                totalAbonos = plazoSemanas / 2;
+            }
+
+            let cuotaCalculada = totalFinanciadoActual / totalAbonos;
+            document.getElementById('cuota').value = "$" + Math.round(cuotaCalculada).toLocaleString('es-MX');
         }
 
         document.getElementById('contratoForm').addEventListener('submit', async function (e) {
@@ -635,7 +627,9 @@
 
                 // --- CAPTURA Y CÁLCULO DE VALORES DE PAGO ---
                 const plazoUnidades = parseInt(document.getElementById('plazoSemanas').value) || 0;
-                const tipoPeriodoSeleccionado = document.getElementById('tipoPeriodo').value;
+                const agendaSeleccionada = document.getElementById('agendaCobro').value.split('|');
+                const tipoPeriodoSeleccionado = (agendaSeleccionada[0] || "SEMANAL").toLowerCase();
+                const diaRayaSeleccionado = agendaSeleccionada[1] || "SABADO";
 
                 const totalFinVal = document.getElementById('totalFinanciado').value;
                 const totalFinanciado = parseFloat(totalFinVal.replace(/[\$,]/g, "").trim()) || 0;
@@ -650,8 +644,8 @@
                 sheetData.set('cuota', cuotaCalculada);
                 sheetData.set('plazoSemanas', plazoUnidades);
                 sheetData.append('plazo', plazoUnidades);
-                sheetData.set('tipoPeriodo', tipoPeriodoSeleccionado);
-                sheetData.set('diaRaya', document.getElementById('diaRaya').value);
+                sheetData.set('tipoPeriodo', agendaSeleccionada[0] || "SEMANAL");
+                sheetData.set('diaRaya', agendaSeleccionada[1] || "SABADO");
 
                 const clienteMayusculas = document.getElementById('cliente').value.trim().toUpperCase();
                 const direccionMayusculas = document.getElementById('direccion').value.trim().toUpperCase();
