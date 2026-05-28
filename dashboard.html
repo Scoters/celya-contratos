@@ -245,7 +245,7 @@
 
         window.onload = async function () {
             try {
-                const urlAutenticada = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}`;
+                const urlAutenticada = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}&action=obtenerDatosDashboard`;
                 const respuesta = await fetch(urlAutenticada);
                 const datos = await respuesta.json();
 
@@ -270,8 +270,8 @@
 
                 dbClientesActivos.forEach(c => {
                     let opt = document.createElement('option');
-                    opt.value = c.id;
-                    opt.innerText = `${c.id} - ${c.cliente} (${c.imei})`;
+                    opt.value = c.imei;
+                    opt.innerText = `${c.id || "S/ID"} - ${c.cliente} (${c.imei})`;
                     select.appendChild(opt);
                 });
 
@@ -282,34 +282,35 @@
 
         // 1. 🔄 Carga todos los detalles del deudor en pantalla
         function cargarDetallesCobranza() {
-            const idSeleccionado = document.getElementById('buscarClienteAbono').value;
+            const imeiSeleccionado = document.getElementById('buscarClienteAbono').value;
             
-            if (!idSeleccionado) {
+            if (!imeiSeleccionado) {
                 document.getElementById('cardDetalleCobro').style.display = 'none';
                 document.getElementById('formMontoCobro').style.display = 'none';
                 document.getElementById('moduloHistorialAbonos').style.display = 'none';
                 return;
             }
 
-            clienteSeleccionadoActual = listaClientesGlobal.find(c => c.id === idSeleccionado);
+            clienteSeleccionadoActual = listaClientesGlobal.find(c => c.imei === imeiSeleccionado);
 
             if (clienteSeleccionadoActual) {
-                // A. Visualizar Saldo Pendiente Real
-                document.getElementById('infoCuotaRegular').value = "$" + clienteSeleccionadoActual.cuota;
-                document.getElementById('infoSaldoPendiente').value = "$" + Number(clienteSeleccionadoActual.saldoPendiente).toLocaleString('es-MX');
+                let cuotaLimpia = parseFloat(clienteSeleccionadoActual.cuota) || 0;
+                let saldoReal = parseFloat(clienteSeleccionadoActual.saldoPendiente) || 0;
+                document.getElementById('infoCuotaRegular').value = "$" + (isNaN(cuotaLimpia) ? "0" : cuotaLimpia);
+                document.getElementById('infoSaldoPendiente').value = "$" + Math.round(saldoReal).toLocaleString('es-MX');
 
-                // B. ⏱️ Contador de Días de Atraso Exacto
+                // Manejo del contador de atraso exacto
                 const badge = document.getElementById('badgeAtraso');
                 const diasAtraso = parseInt(clienteSeleccionadoActual.diasAtraso) || 0;
-                
                 badge.innerText = diasAtraso + " días de atraso";
+
                 if (diasAtraso > 0) {
                     badge.style.background = "#fce4d6";
                     badge.style.color = "#c0392b";
                 } else {
                     badge.style.background = "#d4efdf";
                     badge.style.color = "#27ae60";
-                    badge.innerText = "Al corriente ✅";
+                    badge.innerText = "Al Corriente ✅";
                 }
 
                 // C. 📑 Historial Rápido de Abonos (Pintar Tabla)
