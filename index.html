@@ -192,8 +192,8 @@
 
             <label for="plazoSemanas">Plazo de Financiamiento:</label>
             <select id="plazoSemanas" required>
-                <option value="26">Plan Rápido (26 Pagos)</option>
-                <option value="52" selected>Plan Cómodo (52 Pagos)</option>
+                <option id="optPlazoCorto" value="26" selected>Plan Rápido (26 Semanas / 26 Pagos)</option>
+                <option id="optPlazoLargo" value="52">Plan Cómodo (52 Semanas / 52 Pagos)</option>
             </select>
 
             <label for="cuota">Monto del Abono Regular ($):</label>
@@ -514,7 +514,7 @@
         };
 
         document.getElementById('selectDispositivo').addEventListener('change', actualizarFormularioPrecios);
-        document.getElementById('tipoPeriodo').addEventListener('change', recalcularCuotaPorFrecuencia);
+        document.getElementById('tipoPeriodo').addEventListener('change', actualizarTextosPlazo);
         document.getElementById('plazoSemanas').addEventListener('change', recalcularCuotaPorFrecuencia);
 
         function actualizarFormularioPrecios() {
@@ -599,6 +599,25 @@
 
             // Pintamos la cuota formateada en el campo correspondiente
             document.getElementById('cuota').value = "$" + Math.round(cuotaCalculada).toLocaleString('es-MX');
+        }
+
+        function actualizarTextosPlazo() {
+            const frecuencia = document.getElementById('tipoPeriodo').value;
+            const optCorto = document.getElementById('optPlazoCorto');
+            const optLargo = document.getElementById('optPlazoLargo');
+
+            if (frecuencia === "quincenal") {
+                // Si es quincenal, se mantiene el tiempo en semanas pero se corta el número de abonos a la mitad
+                optCorto.text = "Plan Rápido (26 Semanas / 13 Pagos)";
+                optLargo.text = "Plan Cómodo (52 Semanas / 26 Pagos)";
+            } else {
+                // Si regresa a semanal, vuelve a su estado normal de siempre
+                optCorto.text = "Plan Rápido (26 Semanas / 26 Pagos)";
+                optLargo.text = "Plan Cómodo (52 Semanas / 52 Pagos)";
+            }
+
+            // Después de actualizar el texto, ejecutamos el calculador de la cuota dinero
+            recalcularCuotaPorFrecuencia();
         }
 
         document.getElementById('contratoForm').addEventListener('submit', async function (e) {
