@@ -140,18 +140,34 @@
 </head>
 
 <body>
-<div id="lockscreen-celya" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#2c3e50; z-index:999999; display:flex; justify-content:center; align-items:center; font-family:Arial, sans-serif;">
-    <div style="background:white; padding:30px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.3); text-align:center; max-width:360px; width:90%;">
-        <h2 style="color:#2c3e50; margin-bottom:5px;">CelYa!</h2>
-        <p style="color:#7f8c8d; font-size:14px; margin-top:0; margin-bottom:20px;">Acceso restringido al sistema</p>
-        <input type="password" id="pass-input-celya" placeholder="Introduce la contraseña" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box; font-size:16px; text-align:center;">
-        <button id="btn-login-celya" style="width:100%; padding:12px; background:#9b59b6; color:white; border:none; border-radius:4px; font-weight:bold; font-size:16px; cursor:pointer; transition:background 0.3s;">Entrar al Sistema</button>
-        <p id="error-login-celya" style="color:#c0392b; font-size:14px; margin-top:15px; display:none; font-weight:bold;"></p>
+    <div id="lockscreen-celya"
+        style="position:fixed; top:0; left:0; width:100%; height:100%; background:#2c3e50; z-index:999999; display:flex; justify-content:center; align-items:center; font-family:Arial, sans-serif;">
+        <div
+            style="background:white; padding:30px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.3); text-align:center; max-width:360px; width:90%;">
+            <h2 style="color:#2c3e50; margin-bottom:5px;">CelYa!</h2>
+            <p style="color:#7f8c8d; font-size:14px; margin-top:0; margin-bottom:20px;">Acceso restringido al sistema
+            </p>
+            <input type="password" id="pass-input-celya" placeholder="Introduce la contraseña"
+                style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box; font-size:16px; text-align:center;">
+            <button id="btn-login-celya"
+                style="width:100%; padding:12px; background:#9b59b6; color:white; border:none; border-radius:4px; font-weight:bold; font-size:16px; cursor:pointer; transition:background 0.3s;">Entrar
+                al Sistema</button>
+            <p id="error-login-celya"
+                style="color:#c0392b; font-size:14px; margin-top:15px; display:none; font-weight:bold;"></p>
+        </div>
     </div>
-</div>
 
     <div class="container">
         <h2>📱 Registro de Contrato CelYa</h2>
+
+        <div
+            style="margin-bottom: 20px; padding: 10px; background: #f1f2f6; border-left: 5px solid #9b59b6; border-radius: 4px;">
+            <label style="color: #2c3e50; font-weight: bold; margin: 0;">ID de Cliente Asignado para este
+                Contrato:</label>
+            <input type="text" id="idClienteVisual" value="Generando ID..." disabled
+                style="background: transparent; border: none; font-size: 18px; font-weight: bold; color: #9b59b6; padding: 5px 0; width: 100%; box-shadow: none; margin-top: 0;">
+        </div>
+
         <form id="contratoForm">
             <label>Seleccionar Celular de Inventario:</label>
             <select id="selectDispositivo" name="imei" required>
@@ -179,7 +195,7 @@
             <input type="hidden" id="totalLetraHidden" name="totalLetra">
 
             <label>Nombre del Cliente:</label>
-            <input type="text" name="cliente" required placeholder="Ej. Juan Pérez">
+            <input type="text" id="cliente" name="cliente" required placeholder="Ej. Juan Pérez">
 
             <label>Teléfono Celular:</label>
             <input type="tel" name="telefono" required placeholder="10 dígitos">
@@ -188,21 +204,24 @@
             <input type="date" name="fechaNacimiento" required>
 
             <label>Dirección Completa:</label>
-            <textarea name="direccion" rows="2" required placeholder="Calle, Número, Colonia, Municipio"></textarea>
+            <textarea id="direccion" name="direccion" rows="2" required
+                placeholder="Calle, Número, Colonia, Municipio"></textarea>
 
             <label>Teléfono de Aval / Referencia:</label>
             <input type="tel" name="telefonoAval" required placeholder="10 dígitos">
 
             <div class="foto-seccion">
                 <label>📸 Fotografía de INE (Frente):</label>
-                <input type="file" id="ineDelanteraInput" accept="image/*" capture="camera" onchange="procesarFoto(this, 'previewDelantera', 'delantera')">
+                <input type="file" id="ineDelanteraInput" accept="image/*" capture="camera"
+                    onchange="procesarFoto(this, 'previewDelantera', 'delantera')">
                 <span class="texto-carga">Sube o captura la parte delantera de la identificación</span>
                 <div id="previewDelantera" class="preview-imagen"></div>
             </div>
 
             <div class="foto-seccion">
                 <label>📸 Fotografía de INE (Reverso):</label>
-                <input type="file" id="ineTraseraInput" accept="image/*" capture="camera" onchange="procesarFoto(this, 'previewTrasera', 'trasera')">
+                <input type="file" id="ineTraseraInput" accept="image/*" capture="camera"
+                    onchange="procesarFoto(this, 'previewTrasera', 'trasera')">
                 <span class="texto-carga">Sube o captura la parte trasera de la identificación</span>
                 <div id="previewTrasera" class="preview-imagen"></div>
             </div>
@@ -213,6 +232,44 @@
             </div>
             <div class="botones-firma">
                 <button type="button" class="btn-limpiar" onclick="limpiarFirma()">🧹 Borrar Firma y Reintentar</button>
+            </div>
+
+            <div class="foto-seccion">
+                <label>📸 Foto de Evidencia Física (Celular Encendido):</label>
+                <input type="file" id="fotoEvidencia" accept="image/*" capture="camera" required>
+                <span class="texto-carga">Sube o captura una foto del equipo encendido</span>
+                <div id="previewEvidencia" class="preview-imagen"></div>
+            </div>
+
+            <div
+                style="background: #f8f9fa; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                <h3
+                    style="font-size: 15px; margin-top: 0; color: #2c3e50; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-bottom:10px;">
+                    📋 Checklist de Entrega Obligatorio</h3>
+
+                <label
+                    style="display: flex; align-items: flex-start; font-weight: normal; margin-top: 10px; cursor: pointer; width: 100%;">
+                    <input type="checkbox" id="chkDatos" required
+                        style="width: auto; margin-right: 10px; margin-top: 3px;">
+                    <span><strong>Datos y Entrega</strong> — Confirmo que mis datos personales y domicilio son
+                        correctos, y que recibí el equipo en buen estado.</span>
+                </label>
+
+                <label
+                    style="display: flex; align-items: flex-start; font-weight: normal; margin-top: 12px; cursor: pointer; width: 100%;">
+                    <input type="checkbox" id="chkCondiciones" required
+                        style="width: auto; margin-right: 10px; margin-top: 3px;">
+                    <span><strong>Condiciones del Crédito</strong> — Entendí mi cuota semanal, fecha de pago y el
+                        interés moratorio aplicable por atraso.</span>
+                </label>
+
+                <label
+                    style="display: flex; align-items: flex-start; font-weight: normal; margin-top: 12px; cursor: pointer; width: 100%;">
+                    <input type="checkbox" id="chkBloqueo" required
+                        style="width: auto; margin-right: 10px; margin-top: 3px;">
+                    <span><strong>Política de Bloqueo</strong> — Acepto que el equipo puede ser bloqueado remotamente en
+                        caso de incumplimiento de pago.</span>
+                </label>
             </div>
 
             <input type="hidden" id="interesGlobal" name="interes">
@@ -227,6 +284,36 @@
         let cacheInventario = [];
         let ineDelanteraB64 = "";
         let ineTraseraB64 = "";
+        let fotoEvidenciaB64 = "";
+
+        document.getElementById('fotoEvidencia').addEventListener('change', async function (e) {
+            if (e.target.files.length > 0) {
+                document.getElementById('previewEvidencia').innerHTML = "⏳ Comprimiendo evidencia...";
+                fotoEvidenciaB64 = await comprimirImagenAltaCalidad(e.target.files[0]);
+                document.getElementById('previewEvidencia').innerHTML = `<img src="${fotoEvidenciaB64}" class="preview-imagen">`;
+            }
+        });
+
+        // 🗜️ FUNCIÓN COMPRESORA DE IMÁGENES ALTA CALIDAD (Manteniendo resolución original)
+        function comprimirImagenAltaCalidad(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = function (event) {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = function () {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, img.width, img.height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.90)); // 90% Calidad Nítida, sin alterar resolución
+                    };
+                };
+                reader.onerror = error => reject(error);
+            });
+        }
 
         const canvas = document.getElementById('canvasFirma');
         const ctx = canvas.getContext('2d');
@@ -300,13 +387,9 @@
                 img.onload = function () {
                     let canvasMin = document.createElement('canvas');
                     let ctxMin = canvasMin.getContext('2d');
-                    let maxDim = 900;
-                    let w = img.width, h = img.height;
-                    if (w > h && w > maxDim) { h *= maxDim / w; w = maxDim; }
-                    else if (h > maxDim) { w *= maxDim / h; h = maxDim; }
-                    canvasMin.width = w; canvasMin.height = h;
-                    ctxMin.drawImage(img, 0, 0, w, h);
-                    let compressData = canvasMin.toDataURL('image/jpeg', 0.7);
+                    canvasMin.width = img.width; canvasMin.height = img.height;
+                    ctxMin.drawImage(img, 0, 0, img.width, img.height);
+                    let compressData = canvasMin.toDataURL('image/jpeg', 0.90); // 90% Calidad, sin alterar resolución
                     document.getElementById(previewId).innerHTML = `<img src="${compressData}" class="preview-imagen">`;
                     if (tipo === 'delantera') ineDelanteraB64 = compressData;
                     if (tipo === 'trasera') ineTraseraB64 = compressData;
@@ -321,6 +404,17 @@
             window.addEventListener('resize', redimensionarCanvas);
 
             try {
+                // Solicitar ID Siguiente
+                try {
+                    const resId = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerSiguienteId`);
+                    const dataId = await resId.json();
+                    if (dataId && dataId.siguienteId) {
+                        document.getElementById('idClienteVisual').value = dataId.siguienteId;
+                    }
+                } catch (errId) {
+                    document.getElementById('idClienteVisual').value = "C-Y000";
+                }
+
                 const urlAutenticada = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}`;
                 const res = await fetch(urlAutenticada);
                 const data = await res.json();
@@ -392,10 +486,17 @@
                 const formularioElemento = document.getElementById('contratoForm');
                 const sheetData = new URLSearchParams(new FormData(formularioElemento));
 
+                const clienteMayusculas = document.getElementById('cliente').value.trim().toUpperCase();
+                const direccionMayusculas = document.getElementById('direccion').value.trim().toUpperCase();
+
+                sheetData.set('cliente', clienteMayusculas);
+                sheetData.set('direccion', direccionMayusculas);
+
                 sheetData.append('token', CONFIG.API_TOKEN);
                 sheetData.append('firmaBase64', canvas.toDataURL());
                 sheetData.append('ineDelanteraBase64', ineDelanteraB64);
                 sheetData.append('ineTraseraBase64', ineTraseraB64);
+                sheetData.append('fotoEvidenciaBase64', fotoEvidenciaB64);
 
                 const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
                     method: 'POST',
@@ -412,7 +513,8 @@
                     limpiarFirma();
                     document.getElementById('previewDelantera').innerHTML = '';
                     document.getElementById('previewTrasera').innerHTML = '';
-                    ineDelanteraB64 = ""; ineTraseraB64 = "";
+                    document.getElementById('previewEvidencia').innerHTML = '';
+                    ineDelanteraB64 = ""; ineTraseraB64 = ""; fotoEvidenciaB64 = "";
 
                     setTimeout(() => {
                         btn.innerText = "Generar Contrato y Archivar";
@@ -436,69 +538,69 @@
             }
         });
     </script>
-<script>
-    (function() {
-        // Verificar si ya cuenta con sesión activa en esta pestaña
-        if (sessionStorage.getItem('celya_authenticated') === 'true') {
-            document.getElementById('lockscreen-celya').style.display = 'none';
-            return;
-        }
-
-        // Eventos del botón y teclado
-        document.getElementById('btn-login-celya').addEventListener('click', ejecutarLoginCelya);
-        document.getElementById('pass-input-celya').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') ejecutarLoginCelya();
-        });
-
-        async function ejecutarLoginCelya() {
-            const btn = document.getElementById('btn-login-celya');
-            const errorTxt = document.getElementById('error-login-celya');
-            const passValue = document.getElementById('pass-input-celya').value;
-
-            if (!passValue) {
-                errorTxt.innerText = "⚠️ Escribe la contraseña";
-                errorTxt.style.display = 'block';
+    <script>
+        (function () {
+            // Verificar si ya cuenta con sesión activa en esta pestaña
+            if (sessionStorage.getItem('celya_authenticated') === 'true') {
+                document.getElementById('lockscreen-celya').style.display = 'none';
                 return;
             }
 
-            btn.disabled = true;
-            btn.innerText = "Verificando...";
-            errorTxt.style.display = 'none';
+            // Eventos del botón y teclado
+            document.getElementById('btn-login-celya').addEventListener('click', ejecutarLoginCelya);
+            document.getElementById('pass-input-celya').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') ejecutarLoginCelya();
+            });
 
-            try {
-                const formData = new URLSearchParams();
-                formData.append('action', 'login');
-                formData.append('password', passValue);
+            async function ejecutarLoginCelya() {
+                const btn = document.getElementById('btn-login-celya');
+                const errorTxt = document.getElementById('error-login-celya');
+                const passValue = document.getElementById('pass-input-celya').value;
 
-                // CONFIG.GOOGLE_SCRIPT_URL se jala de tu archivo config.js ya enlazado
-                const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    body: formData.toString(),
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                });
-                
-                const data = await response.json();
+                if (!passValue) {
+                    errorTxt.innerText = "⚠️ Escribe la contraseña";
+                    errorTxt.style.display = 'block';
+                    return;
+                }
 
-                if (data.result === 'success') {
-                    // Guardar token temporal de sesión
-                    sessionStorage.setItem('celya_authenticated', 'true');
-                    // Desvanecer pantalla de bloqueo
-                    document.getElementById('lockscreen-celya').style.display = 'none';
-                } else {
-                    errorTxt.innerText = "❌ Contraseña incorrecta";
+                btn.disabled = true;
+                btn.innerText = "Verificando...";
+                errorTxt.style.display = 'none';
+
+                try {
+                    const formData = new URLSearchParams();
+                    formData.append('action', 'login');
+                    formData.append('password', passValue);
+
+                    // CONFIG.GOOGLE_SCRIPT_URL se jala de tu archivo config.js ya enlazado
+                    const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        body: formData.toString(),
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.result === 'success') {
+                        // Guardar token temporal de sesión
+                        sessionStorage.setItem('celya_authenticated', 'true');
+                        // Desvanecer pantalla de bloqueo
+                        document.getElementById('lockscreen-celya').style.display = 'none';
+                    } else {
+                        errorTxt.innerText = "❌ Contraseña incorrecta";
+                        errorTxt.style.display = 'block';
+                        btn.disabled = false;
+                        btn.innerText = "Entrar al Sistema";
+                    }
+                } catch (err) {
+                    errorTxt.innerText = "🌐 Error de red, revisa tu conexión";
                     errorTxt.style.display = 'block';
                     btn.disabled = false;
                     btn.innerText = "Entrar al Sistema";
                 }
-            } catch (err) {
-                errorTxt.innerText = "🌐 Error de red, revisa tu conexión";
-                errorTxt.style.display = 'block';
-                btn.disabled = false;
-                btn.innerText = "Entrar al Sistema";
             }
-        }
-    })();
-</script>
+        })();
+    </script>
 </body>
 
 </html>
