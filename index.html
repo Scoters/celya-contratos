@@ -311,6 +311,27 @@
         let ineTraseraB64 = "";
         let fotoEvidenciaB64 = "";
 
+        let CONFIG_TASAS_SHEETS = {}; // Aquí caen en vivo el 66% y 90% del Sheets
+
+        // Conexión directa al backend para traer los intereses de D2 y E2
+        async function sincronizarTasasDesdeSheets() {
+            try {
+                const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerTasasConfig`);
+                const data = await response.json();
+                if (data.result === 'success') {
+                    CONFIG_TASAS_SHEETS = data;
+                    console.log("🎯 Tasas CelYa! Sincronizadas:", CONFIG_TASAS_SHEETS);
+                }
+            } catch (err) {
+                console.error("⚠️ Error de red al sincronizar tasas, usando respaldo local:", err);
+                // Respaldo de seguridad por si falla la conexión un segundo
+                CONFIG_TASAS_SHEETS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45 };
+            }
+        }
+
+        // Disparador automático al cargar la interfaz
+        window.addEventListener('DOMContentLoaded', sincronizarTasasDesdeSheets);
+
         document.getElementById('fotoEvidencia').addEventListener('change', async function (e) {
             if (e.target.files.length > 0) {
                 document.getElementById('previewEvidencia').innerHTML = "⏳ Comprimiendo evidencia...";
@@ -625,6 +646,40 @@
 
         document.getElementById('contratoForm').addEventListener('submit', async function (e) {
             e.preventDefault();
+
+            // ⛔ --- CANDADO DE ENGANCHE AUTOMÁTICO (D2 Y E2 DE CONFIGURACIÓN) ---
+            const planElegido = document.getElementById('plazoSemanas').value; // Toma "26" o "52"
+            const selectDisp = document.getElementById('selectDispositivo');
+            let precioContado = 0;
+
+            // Detectamos si el celular ya tiene un precio cargado en la lista de stock
+            if (selectDisp.value && typeof cacheInventario !== 'undefined') {
+                const equipo = cacheInventario.find(e => e.imei === selectDisp.value);
+                if (equipo) {
+                    precioContado = parseFloat(equipo.precioContado.toString().replace(/[\$,]/g, "").trim()) || 0;
+                }
+            }
+
+            // Si conocemos el precio, aplicamos el porcentaje estricto del Sheets (33% o 45%)
+            if (precioContado > 0) {
+                const factorEngancheMinimo = (planElegido === "26") ? CONFIG_TASAS_SHEETS.enganche26 : CONFIG_TASAS_SHEETS.enganche52;
+                const engancheMinimoObligatorio = precioContado * factorEngancheMinimo;
+                const engancheIngresado = parseFloat(document.getElementById('monto').value.replace(/[\$,]/g, "")) || 0;
+
+                if (engancheIngresado < Math.round(engancheMinimoObligatorio)) {
+                    alert(`⛔ CANDADO CELYA! DE ENGANCHE\n\nEl enganche mínimo obligatorio configurado en Sheets para este equipo (Plan ${planElegido} semanas) es de $${Math.round(engancheMinimoObligatorio).toLocaleString('es-MX')}.\n\nIngresado por el chofer: $${engancheIngresado.toLocaleString('es-MX')}.\n\nNo se puede registrar la venta con un monto menor.`);
+                    return;
+                }
+            } else {
+                // Validación de seguridad para celulares express de Mercado Libre (Placeholder)
+                const engancheIngresado = parseFloat(document.getElementById('monto').value.replace(/[\$,]/g, "")) || 0;
+                if (engancheIngresado <= 0) {
+                    alert("⛔ ERROR: Debes ingresar el enganche recolectado para procesar este pedido especial de Mercado Libre.");
+                    return;
+                }
+            }
+            // --- FIN DEL CANDADO ---
+
             const btn = document.getElementById('btnEnviar');
             const colorOriginal = btn.style.background;
 
