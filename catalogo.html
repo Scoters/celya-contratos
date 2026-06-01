@@ -37,14 +37,7 @@
 
     <header>
         <div style="text-align: center; margin-bottom: 15px;">
-            <img id="logoCelyaHeader" src="" alt="CelYa!" style="max-height: 80px; width: auto; display: none;">
-            <script>
-                if (typeof CONFIG !== 'undefined' && CONFIG.LOGO_URL) {
-                    const img = document.getElementById('logoCelyaHeader');
-                    img.src = CONFIG.LOGO_URL;
-                    img.style.display = 'inline-block';
-                }
-            </script>
+            <img src="https://drive.google.com/uc?export=view&id=13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo" style="max-height: 80px; width: auto;">
         </div>
         <h1>CelYa! Créditos Celulares</h1>
         <p>Estrena el smartphone que buscas con pagos semanales a tu medida</p>
@@ -60,7 +53,7 @@
             </div>
         </div>
 
-        <h2 id="tituloSeccion">🔥 Equipos Más Vendidos (Entrega Inmediata)</h2>
+        <h2 id="tituloSeccion">✨ Modelos Destacados y Favoritos CelYa!</h2>
         
         <div id="contenedorResultados" class="grid-equipos">
             <p style="grid-column: 1/-1; text-align:center; color:#7f8c8d; font-style:italic;">Cargando catálogo oficial...</p>
@@ -106,7 +99,7 @@
         function solicitarBusqueda() {
             const query = document.getElementById('inputBusqueda').value.trim();
             if(!query) {
-                document.getElementById('tituloSeccion').innerText = "🔥 Equipos Más Vendidos (Entrega Inmediata)";
+                document.getElementById('tituloSeccion').innerText = "✨ Modelos Destacados y Favoritos CelYa!";
                 renderizarCatalogo("");
                 return;
             }
@@ -130,11 +123,19 @@
 
                 if (data.result === 'success' && data.resultados.length > 0) {
                     data.resultados.forEach(item => {
+                        // 🏷️ LÓGICA DE ETIQUETAS COMERCIALES DISCRETAS
+                        let etiquetaEntrega = "";
+                        if (item.entregaInmediata) {
+                            etiquetaEntrega = `<div style="background: #27ae60; color: white; font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 20px; display: inline-block; margin-bottom: 8px;">⚡ Entrega Inmediata</div>`;
+                        } else {
+                            etiquetaEntrega = `<div style="background: #e67e22; color: white; font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 20px; display: inline-block; margin-bottom: 8px;">🔥 El Más Vendido (Bajo Pedido)</div>`;
+                        }
+
                         contenedor.innerHTML += `
                             <div class="card-celular">
                                 <div>
                                     <img src="${item.foto}" alt="Celular">
-                                    <h4>${item.modelo}</h4>
+                                    ${etiquetaEntrega} <h4>${item.modelo}</h4>
                                     <div class="enganche">Enganche: $${Math.round(item.engancheMinimo).toLocaleString('es-MX')}</div>
                                 </div>
                                 <div>

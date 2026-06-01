@@ -122,7 +122,10 @@
         style="position:fixed; top:0; left:0; width:100%; height:100%; background:#2c3e50; z-index:999999; display:flex; justify-content:center; align-items:center; font-family:Arial, sans-serif;">
         <div
             style="background:white; padding:30px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.3); text-align:center; max-width:360px; width:90%;">
-            <h2 style="color:#2c3e50; margin-bottom:5px;">CelYa!</h2>
+            <div style="text-align: center; margin-bottom: 15px;">
+                <img src="https://drive.google.com/uc?export=view&id=13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo" style="max-height: 80px; width: auto;">
+            </div>
+            <h2 style="color:#2c3e50; margin-bottom:5px; display: none;">CelYa!</h2>
             <p style="color:#7f8c8d; font-size:14px; margin-top:0; margin-bottom:20px;">Acceso restringido al sistema
             </p>
             <input type="password" id="pass-input-celya" placeholder="Introduce la contraseña"
@@ -136,6 +139,9 @@
     </div>
 
     <div class="container">
+        <div style="text-align: center; margin-bottom: 15px;">
+            <img src="https://drive.google.com/uc?export=view&id=13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo" style="max-height: 80px; width: auto;">
+        </div>
         <h2>💜 CelYa! Ecosistema</h2>
         <p class="subtitulo">Módulo de Cobranza y Administración Global</p>
 
@@ -216,6 +222,10 @@
                     <label>Semanas de Tolerancia:</label>
                     <input type="number" id="semanastol" required>
                 </div>
+                <div>
+                    <label>% Ganancia Contado (Fisco/Sobre Pedido):</label>
+                    <input type="number" id="cfgGananciaContado" required placeholder="Ej. 15">
+                </div>
             </div>
 
             <button type="button" class="btn-config" id="btnGuardarConfig">💾 Guardar Configuración Global</button>
@@ -259,6 +269,7 @@
                 document.getElementById('semanastol').value = datos.config.semanastol;
                 document.getElementById('interesPlanComodo').value = datos.config.interesPlanComodo || 45;
                 document.getElementById('interesPlanRapido').value = datos.config.interesPlanRapido || 35;
+                document.getElementById('cfgGananciaContado').value = datos.config.gananciaContado !== undefined ? datos.config.gananciaContado : 15;
 
                 dbClientesActivos = datos.clientesActivos || [];
                 listaClientesGlobal = dbClientesActivos;
@@ -424,6 +435,7 @@
                 formData.append('semanastol', document.getElementById('semanastol').value);
                 formData.append('interesPlanRapido', document.getElementById('interesPlanRapido').value);
                 formData.append('interesPlanComodo', document.getElementById('interesPlanComodo').value);
+                formData.append('gananciaContado', document.getElementById('cfgGananciaContado').value);
 
                 const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
                     method: 'POST',
