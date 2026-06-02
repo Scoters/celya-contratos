@@ -246,6 +246,28 @@
         </div>
     </div>
 
+    <div class="container" style="margin-top: 20px;">
+        <h3>📱 Agregar Celular al Catálogo</h3>
+        <p style="color: #7f8c8d; font-size: 13px; margin-top: -10px;">Pega el enlace de Mercado Libre. Traeremos nombre, foto, precio y especificaciones automáticamente.</p>
+        
+        <form id="formAgregarCelular">
+            <label for="nuevoLink">Enlace de Mercado Libre (Se recomienda link de catálogo /p/):</label>
+            <input type="text" id="nuevoLink" placeholder="https://www.mercadolibre.com.mx/p/MLM..." required>
+
+            <label for="nuevoImei">IMEI o ID del Celular (Dejar vacío para autogenerar temporal):</label>
+            <input type="text" id="nuevoImei" placeholder="Ej. 999999000000005">
+
+            <label for="nuevoEstado">Estado de Disponibilidad:</label>
+            <select id="nuevoEstado">
+                <option value="DISPONIBLE">🟢 DISPONIBLE (Entrega inmediata)</option>
+                <option value="MAS VENDIDO">⭐ DESTACADO (Fila superior / Más vendido)</option>
+                <option value="BAJO DEMANDA">⏳ BAJO DEMANDA (Sobre pedido)</option>
+            </select>
+
+            <button type="button" class="btn-pago" id="btnAgregarCelular" style="background: #27ae60; margin-top: 15px;">➕ Importar y Agregar al Excel</button>
+        </form>
+    </div>
+
     <script>
         let dbClientesActivos = [];
         let listaClientesGlobal = [];
@@ -516,6 +538,56 @@
                         listaResultados.appendChild(div);
                     });
                     listaResultados.style.display = "block";
+                });
+            // --- AGREGAR CELULAR AL CATÁLOGO ---
+            const btnAgregar = document.getElementById('btnAgregarCelular');
+            if (btnAgregar) {
+                btnAgregar.addEventListener('click', async function () {
+                    const link = document.getElementById('nuevoLink').value.trim();
+                    const imei = document.getElementById('nuevoImei').value.trim();
+                    const estado = document.getElementById('nuevoEstado').value;
+
+                    if (!link) {
+                        alert("⚠️ Por favor introduce el enlace de Mercado Libre.");
+                        return;
+                    }
+
+                    const originalText = btnAgregar.innerText;
+                    btnAgregar.innerText = "⏳ Consultando e inyectando...";
+                    btnAgregar.disabled = true;
+
+                    try {
+                        const formData = new URLSearchParams();
+                        formData.append('action', 'agregarCelularCatalogo');
+                        formData.append('token', CONFIG.API_TOKEN);
+                        formData.append('link', link);
+                        formData.append('imei', imei);
+                        formData.append('estado', estado);
+
+                        const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                            method: 'POST',
+                            body: formData.toString(),
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                        });
+                        const data = await res.json();
+
+                        if (data.result === 'success') {
+                            alert(`✅ Celular agregado con éxito!\n\nModelo: ${data.modelo}\nPrecio calculado: $${data.precioContado.toLocaleString('es-MX')}\nIMEI asignado: ${data.imei}`);
+                            document.getElementById('formAgregarCelular').reset();
+                            
+                            // Limpiar caché local del catálogo para obligar a refrescar la base de datos
+                            localStorage.removeItem("celya_catalogo_cache");
+                            localStorage.removeItem("celya_catalogo_timestamp");
+                        } else {
+                            alert("⚠️ Error al importar celular: " + (data.message || "Error desconocido"));
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert("❌ Error de comunicación con la base de datos.");
+                    } finally {
+                        btnAgregar.innerText = originalText;
+                        btnAgregar.disabled = false;
+                    }
                 });
             }
         });

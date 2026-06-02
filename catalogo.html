@@ -240,6 +240,7 @@
         }
         .status-available { background-color: #dcfce7; color: #15803d; }
         .status-order { background-color: #fef3c7; color: #b45309; }
+        .status-featured { background-color: #fef08a; color: #854d0e; border: 1px solid #facc15; }
 
         .card-celular .img-container {
             height: 160px;
@@ -270,6 +271,22 @@
             -webkit-line-clamp: 2; 
             -webkit-box-orient: vertical; 
             line-height: 1.4;
+        }
+        
+        .specs-container {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .spec-tag {
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 6px;
         }
 
         .price-row {
@@ -481,6 +498,16 @@
                 <label>Tu WhatsApp de Contacto:</label>
                 <input type="tel" id="cliTelefono" required placeholder="Ej. 667 123 4567">
 
+                <label>¿Cuál es tu ingreso mensual promedio? ($):</label>
+                <input type="number" id="cliSueldo" required placeholder="Ej. 8500" min="0">
+
+                <label>¿Tienes otros préstamos o créditos activos actualmente?:</label>
+                <select id="cliPrestamos">
+                    <option value="Ninguno">No, ninguno</option>
+                    <option value="1 préstamo">Sí, 1 préstamo activo</option>
+                    <option value="2 o más">Sí, 2 o más créditos/préstamos activos</option>
+                </select>
+
                 <label>Plazo de Pago de tu Preferencia:</label>
                 <select id="cliPlazo">
                     <option value="26 Semanas">Plan Rápido (26 Pagos Semanales)</option>
@@ -540,7 +567,7 @@
             return "brand-otro";
         }
 
-        // Carga los datos por red
+        // Carga los datos por red (con soporte de caché instantáneo para F5)
         async function renderizarCatalogo(busqueda) {
             const contenedor = document.getElementById('contenedorResultados');
             const btn = document.getElementById('btnBuscar');
@@ -548,12 +575,54 @@
             btn.innerText = "⏳";
             btn.disabled = true;
 
+            const cacheKey = "celya_catalogo_cache";
+            const cacheTimeKey = "celya_catalogo_timestamp";
+            const cacheDuration = 5 * 60 * 1000; // 5 minutos de validez absoluta
+
+            // Si es la carga inicial (búsqueda vacía), intentar usar la caché local
+            if (busqueda === "") {
+                const cachedDataStr = localStorage.getItem(cacheKey);
+                const cachedTimestampStr = localStorage.getItem(cacheTimeKey);
+
+                if (cachedDataStr && cachedTimestampStr) {
+                    try {
+                        const cachedData = JSON.parse(cachedDataStr);
+                        const age = Date.now() - parseInt(cachedTimestampStr || "0");
+                        
+                        // Pintamos inmediatamente de la caché para dar velocidad instantánea
+                        window.equiposCargados = cachedData;
+                        rellenarDropdownMarcas(cachedData);
+                        aplicarFiltrosYOrden();
+
+                        // Si la caché tiene menos de 5 minutos, no consultamos la red para ahorrar peticiones
+                        if (age < cacheDuration) {
+                            btn.innerText = "Buscar";
+                            btn.disabled = false;
+                            return;
+                        }
+                    } catch (e) {
+                        console.warn("Error leyendo caché local:", e);
+                    }
+                } else if (CONFIG.PRELOADED_CATALOG && CONFIG.PRELOADED_CATALOG.length > 0) {
+                    // Si es la primera visita y no hay caché, pintamos instantáneamente la lista precargada
+                    window.equiposCargados = CONFIG.PRELOADED_CATALOG;
+                    rellenarDropdownMarcas(CONFIG.PRELOADED_CATALOG);
+                    aplicarFiltrosYOrden();
+                }
+            }
+
             try {
                 const res = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=buscarModelosCatalogo&q=${encodeURIComponent(busqueda)}`);
                 const data = await res.json();
                 
                 if (data.result === 'success' && data.resultados) {
                     window.equiposCargados = data.resultados;
+                    
+                    // Guardar en caché si la búsqueda fue vacía (el catálogo completo)
+                    if (busqueda === "") {
+                        localStorage.setItem(cacheKey, JSON.stringify(data.resultados));
+                        localStorage.setItem(cacheTimeKey, Date.now().toString());
+                    }
                     
                     // Rellenar dinámicamente el listado de marcas del dropdown
                     rellenarDropdownMarcas(data.resultados);
@@ -567,7 +636,10 @@
                 }
             } catch (err) {
                 console.error(err);
-                contenedor.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:var(--danger); padding:30px; font-weight:600;'>Error de comunicación con la base de datos.</p>";
+                // Si falla la red pero tenemos datos cargados de la caché, no pisamos la pantalla con error
+                if (!window.equiposCargados || window.equiposCargados.length === 0) {
+                    contenedor.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:var(--danger); padding:30px; font-weight:600;'>Error de comunicación con la base de datos.</p>";
+                }
             } finally {
                 btn.innerText = "Buscar";
                 btn.disabled = false;
@@ -637,9 +709,13 @@
                     const claseMarca = obtenerClaseMarca(marca);
                     
                     // Etiqueta de entrega inmediata o pedido
-                    const badgeEstado = item.entregaInmediata
+                    let badgeEstado = item.entregaInmediata
                         ? `<span class="status-badge status-available">⚡ Disponible</span>`
                         : `<span class="status-badge status-order">⏳ Bajo Pedido</span>`;
+
+                    if (item.estado === "MAS VENDIDO") {
+                        badgeEstado = `<span class="status-badge status-featured">⭐ Destacado</span>`;
+                    }
 
                     // Mostrar precio de contado si existe
                     const rowContado = item.precioContado && item.precioContado > 0
@@ -660,6 +736,10 @@
                                     <img src="${item.foto}" alt="${item.modelo}" onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop'">
                                 </div>
                                 <h4>${item.modelo}</h4>
+                                <div class="specs-container">
+                                    ${item.memoria ? `<span class="spec-tag">💾 ${item.memoria}</span>` : ''}
+                                    ${item.color ? `<span class="spec-tag">🎨 ${item.color}</span>` : ''}
+                                </div>
                                 ${rowContado}
                                 <div class="enganche">
                                     <span>Pago Inicial</span>
@@ -700,16 +780,18 @@
             document.getElementById('formInteresado').reset();
         }
 
-        async function enviarSolicitudFinal() {
+         async function enviarSolicitudFinal() {
             const nombre = document.getElementById('cliNombre').value.trim();
             const telefono = document.getElementById('cliTelefono').value.trim();
+            const sueldo = document.getElementById('cliSueldo').value.trim();
+            const prestamos = document.getElementById('cliPrestamos').value;
             const id = document.getElementById('hiddenId').value;
             const modelo = document.getElementById('hiddenModelo').value;
             const esFijo = document.getElementById('hiddenEsFijo').value;
             const plazo = document.getElementById('cliPlazo').value;
 
-            if(!nombre || !telefono) {
-                alert("Por favor rellena tus datos de contacto.");
+            if(!nombre || !telefono || !sueldo) {
+                alert("Por favor rellena todos tus datos de contacto e ingresos.");
                 return;
             }
 
@@ -718,6 +800,8 @@
                 params.append('action', 'registrarCotizacionPublica');
                 params.append('nombre', nombre);
                 params.append('telefono', telefono);
+                params.append('sueldo', sueldo);
+                params.append('prestamos', prestamos);
                 
                 const referenciaProducto = (esFijo === "true") ? `Stock Fijo: ${modelo}` : `https://articulo.mercadolibre.com.mx/MLM-${id.replace("MLM","")}`;
                 params.append('link', referenciaProducto);
@@ -732,6 +816,9 @@
 
                 if (data.result === 'success') {
                     alert(`✅ ¡Excelente, ${nombre}!\n\nHemos recibido tu solicitud para el ${modelo}.\n\nUn asesor validará tu crédito y te escribirá por WhatsApp en unos minutos.`);
+                    cerrarModal();
+                } else if (data.result === 'rejected') {
+                    alert(`⚠️ Hola ${nombre}, gracias por tu interés.\n\nPor el momento, de acuerdo a nuestras políticas de riesgo vigentes, no es posible autorizar tu solicitud en este momento.\n\nTe invitamos a volver a intentar en 30 días.`);
                     cerrarModal();
                 } else {
                     alert("Ocurrió un detalle al guardar la solicitud.");
