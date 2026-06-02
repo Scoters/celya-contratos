@@ -375,6 +375,43 @@
             transform: scale(0.98);
         }
 
+        /* Estilos para círculos de color */
+        .color-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .color-circle:hover { transform: scale(1.1); }
+        .color-circle.selected {
+            border-color: #e67e22;
+            outline: 2px solid #e67e22;
+            outline-offset: 2px;
+        }
+
+        /* Estilos para las pastillas de memoria */
+        .storage-pill {
+            padding: 8px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #334155;
+        }
+        .storage-pill:hover { background: #f8fafc; border-color: #94a3b8; }
+        .storage-pill.selected {
+            border-color: #e67e22;
+            background-color: #fff7ed;
+            color: #e67e22;
+            font-weight: 600;
+        }
+
         /* Modal */
         .modal-solicitud { 
             display: none; 
@@ -491,6 +528,29 @@
                 <input type="hidden" id="hiddenId">
                 <input type="hidden" id="hiddenModelo">
                 <input type="hidden" id="hiddenEsFijo">
+                <input type="hidden" id="hiddenCuota26">
+                <input type="hidden" id="hiddenCuota52">
+
+                <div style="text-align: center; margin: 10px 0;">
+                    <img id="modal-producto-foto" src="" style="max-height: 120px; max-width: 100%; object-fit: contain; border-radius: 8px; border: 1px solid var(--border-color); padding: 5px;">
+                </div>
+
+                <!-- Contenedor de variantes de Mercado Libre -->
+                <div id="ml-dynamic-variants-container" style="display: none; margin: 15px 0; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; text-align: left;">
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-weight: 600; font-size: 13px; color: #1e293b; display: block; margin-bottom: 6px;">
+                            Color: <span id="color-seleccionado-txt" style="font-weight: 400; color: #64748b;">-</span>
+                        </label>
+                        <div id="ml-colors-wrapper" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                    </div>
+
+                    <div id="ml-storage-section" style="display: none;">
+                        <label style="font-weight: 600; font-size: 13px; color: #1e293b; display: block; margin-bottom: 6px;">
+                            Capacidad: <span id="memoria-seleccionada-txt" style="font-weight: 400; color: #64748b;">-</span>
+                        </label>
+                        <div id="ml-storage-wrapper" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                    </div>
+                </div>
 
                 <label>Tu Nombre Completo:</label>
                 <input type="text" id="cliNombre" required placeholder="Ej. Juan Pérez">
@@ -498,14 +558,20 @@
                 <label>Tu WhatsApp de Contacto:</label>
                 <input type="tel" id="cliTelefono" required placeholder="Ej. 667 123 4567">
 
-                <label>¿Cuál es tu ingreso mensual promedio? ($):</label>
-                <input type="number" id="cliSueldo" required placeholder="Ej. 8500" min="0">
+                <label>¿Cuánto ganas libres a la semana? (Ingresos):</label>
+                <select id="cliSueldo">
+                    <option value="Menos de $1,500">Menos de $1,500</option>
+                    <option value="$1,500 a $3,000">$1,500 a $3,000</option>
+                    <option value="$3,000 a $5,000">$3,000 a $5,000</option>
+                    <option value="Más de $5,000">Más de $5,000</option>
+                </select>
 
-                <label>¿Tienes otros préstamos o créditos activos actualmente?:</label>
+                <label>¿Cuánto pagas de abonos actualmente a la semana? (Deudas activas en Coppel, Elektra, préstamos, etc.):</label>
                 <select id="cliPrestamos">
-                    <option value="Ninguno">No, ninguno</option>
-                    <option value="1 préstamo">Sí, 1 préstamo activo</option>
-                    <option value="2 o más">Sí, 2 o más créditos/préstamos activos</option>
+                    <option value="Nada, no tengo deudas">Nada, no tengo deudas</option>
+                    <option value="Menos de $500">Menos de $500</option>
+                    <option value="$500 a $1,000">$500 a $1,000</option>
+                    <option value="Más de $1,000">Más de $1,000</option>
                 </select>
 
                 <label>Plazo de Pago de tu Preferencia:</label>
@@ -757,7 +823,7 @@
                                         <span class="plan-val">$${Math.round(item.cuota52).toLocaleString('es-MX')}/sem</span>
                                     </div>
                                 </div>
-                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${item.modelo.replace(/'/g, "")}', ${item.esFijo})">Pedir a Crédito</button>
+                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${item.modelo.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)})">Pedir a Crédito</button>
                             </div>
                         </div>
                     `;
@@ -767,23 +833,43 @@
             }
         }
 
-        function abrirModalCredito(id, modelo, esFijo) {
+        function abrirModalCredito(id, modelo, esFijo, foto, cuota26, cuota52) {
             document.getElementById('hiddenId').value = id;
             document.getElementById('hiddenModelo').value = modelo;
             document.getElementById('hiddenEsFijo').value = esFijo;
+            document.getElementById('hiddenCuota26').value = cuota26 || 0;
+            document.getElementById('hiddenCuota52').value = cuota52 || 0;
             document.getElementById('modalEquipoTexto').innerText = `Equipo: ${modelo}`;
+            
+            const imgElement = document.getElementById('modal-producto-foto');
+            if (imgElement) {
+                imgElement.src = foto || "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop";
+            }
+            
             document.getElementById('modalCredito').style.display = 'flex';
+            
+            // Cargar variantes reales desde Mercado Libre en vivo
+            cargarVariantesRealesML(id);
         }
 
         function cerrarModal() {
             document.getElementById('modalCredito').style.display = 'none';
             document.getElementById('formInteresado').reset();
+            
+            // Limpiar variantes
+            document.getElementById('ml-dynamic-variants-container').style.display = "none";
+            document.getElementById('ml-colors-wrapper').innerHTML = "";
+            document.getElementById('ml-storage-wrapper').innerHTML = "";
+            document.getElementById('ml-storage-section').style.display = "none";
+            colorSeleccionado = "";
+            almacenamientoSeleccionado = "";
+            itemVariationsData = [];
         }
 
          async function enviarSolicitudFinal() {
             const nombre = document.getElementById('cliNombre').value.trim();
             const telefono = document.getElementById('cliTelefono').value.trim();
-            const sueldo = document.getElementById('cliSueldo').value.trim();
+            const sueldo = document.getElementById('cliSueldo').value;
             const prestamos = document.getElementById('cliPrestamos').value;
             const id = document.getElementById('hiddenId').value;
             const modelo = document.getElementById('hiddenModelo').value;
@@ -803,9 +889,22 @@
                 params.append('sueldo', sueldo);
                 params.append('prestamos', prestamos);
                 
+                // Determinar cuota correspondiente al plazo elegido
+                const cuota26 = parseFloat(document.getElementById('hiddenCuota26').value) || 150;
+                const cuota52 = parseFloat(document.getElementById('hiddenCuota52').value) || 100;
+                const cuota = (plazo === "26 Semanas") ? cuota26 : cuota52;
+                params.append('cuota', cuota);
+                
                 const referenciaProducto = (esFijo === "true") ? `Stock Fijo: ${modelo}` : `https://articulo.mercadolibre.com.mx/MLM-${id.replace("MLM","")}`;
                 params.append('link', referenciaProducto);
-                params.append('plazo', `${plazo} (${modelo})`);
+                
+                // Formatear el plazo incluyendo las variantes seleccionadas
+                let detallesVariante = "";
+                if (colorSeleccionado) detallesVariante += ` - ${colorSeleccionado}`;
+                if (almacenamientoSeleccionado) detallesVariante += ` - ${almacenamientoSeleccionado}`;
+
+                // Añadimos las especificaciones directo entre paréntesis al lado del modelo
+                params.append('plazo', `${plazo} (${modelo}${detallesVariante})`);
 
                 const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
                     method: 'POST',
@@ -825,6 +924,151 @@
                 }
             } catch (e) {
                 alert("Error de red, intenta más tarde.");
+            }
+        }
+
+        // Variables globales para almacenar la selección interactiva real de la API
+        let colorSeleccionado = "";
+        let almacenamientoSeleccionado = "";
+        let itemVariationsData = [];
+
+        async function cargarVariantesRealesML(idProducto) {
+            const contenedor = document.getElementById('ml-dynamic-variants-container');
+            const wrapperColores = document.getElementById('ml-colors-wrapper');
+            const wrapperStorage = document.getElementById('ml-storage-wrapper');
+            const seccionStorage = document.getElementById('ml-storage-section');
+
+            // Reseteamos el modal por si el producto anterior no tenía variantes
+            wrapperColores.innerHTML = "";
+            wrapperStorage.innerHTML = "";
+            seccionStorage.style.display = "none";
+            contenedor.style.display = "none";
+            colorSeleccionado = "";
+            almacenamientoSeleccionado = "";
+            itemVariationsData = [];
+
+            // Limpiamos la ID por si viene como "MLM-XXXXX" o URL
+            let cleanId = "";
+            if (idProducto.startsWith("MLM")) {
+                cleanId = idProducto;
+            } else {
+                const match = idProducto.match(/(MLM\-?\d+)/i);
+                if (match) {
+                    cleanId = match[0].replace("-", "").toUpperCase();
+                }
+            }
+
+            if (!cleanId) return;
+
+            try {
+                const res = await fetch(`https://api.mercadolibre.com/items/${cleanId}`);
+                if (!res.ok) return;
+                const data = await res.json();
+
+                if (data.variations && data.variations.length > 0) {
+                    itemVariationsData = data.variations;
+                    contenedor.style.display = "block";
+
+                    const coloresUnicos = new Map();
+                    const memoriasUnicas = new Set();
+
+                    // Mapeamos todas las variantes reales publicadas por el vendedor
+                    data.variations.forEach(v => {
+                        const attrColor = v.attribute_combinations.find(a => a.id === 'COLOR' || a.id === 'MAIN_COLOR');
+                        const attrStorage = v.attribute_combinations.find(a => a.id === 'INTERNAL_MEMORY' || a.id === 'MEMORY_CAPACITY');
+
+                        const nameColor = attrColor ? attrColor.value_name : "Único";
+                        const nameStorage = attrStorage ? attrStorage.value_name : null;
+
+                        if (!coloresUnicos.has(nameColor)) {
+                            coloresUnicos.set(nameColor, v.id);
+                        }
+                        if (nameStorage) memoriasUnicas.add(nameStorage);
+                    });
+
+                    // 🎨 Pintamos los círculos de Colores reales obtenidos
+                    let esPrimeroColor = true;
+                    coloresUnicos.forEach((vId, nombreColor) => {
+                        const divColor = document.createElement('div');
+                        divColor.className = `color-circle ${esPrimeroColor ? 'selected' : ''}`;
+                        divColor.title = nombreColor;
+                        divColor.setAttribute('data-color', nombreColor);
+                        
+                        // Color genérico visual mapping
+                        const colorMap = {
+                            "negro": "#1e293b", "black": "#1e293b", "oscuro": "#0f172a",
+                            "blanco": "#ffffff", "white": "#ffffff",
+                            "azul": "#3b82f6", "blue": "#3b82f6",
+                            "verde": "#10b981", "green": "#10b981",
+                            "rojo": "#ef4444", "red": "#ef4444",
+                            "rosa": "#ec4899", "pink": "#ec4899",
+                            "amarillo": "#eab308", "yellow": "#eab308",
+                            "gris": "#6b7280", "grey": "#6b7280", "silver": "#cbd5e1", "plata": "#cbd5e1",
+                            "oro": "#f59e0b", "gold": "#f59e0b", "dorado": "#f59e0b"
+                        };
+                        const nombreLower = nombreColor.toLowerCase();
+                        let bgCircleColor = "#94a3b8";
+                        for (const key in colorMap) {
+                            if (nombreLower.includes(key)) {
+                                bgCircleColor = colorMap[key];
+                                break;
+                            }
+                        }
+                        divColor.style.backgroundColor = bgCircleColor;
+
+                        if (esPrimeroColor) {
+                            colorSeleccionado = nombreColor;
+                            document.getElementById('color-seleccionado-txt').innerText = nombreColor;
+                            actualizarFotoModalPorVariante(vId); // Cambia la foto del modal por la del color seleccionado
+                            esPrimeroColor = false;
+                        }
+
+                        divColor.onclick = function() {
+                            document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
+                            this.classList.add('selected');
+                            colorSeleccionado = this.getAttribute('data-color');
+                            document.getElementById('color-seleccionado-txt').innerText = colorSeleccionado;
+                            actualizarFotoModalPorVariante(vId);
+                        };
+                        wrapperColores.appendChild(divColor);
+                    });
+
+                    // 💾 Pintamos las pastillas de Almacenamiento reales obtenidas
+                    if (memoriasUnicas.size > 0) {
+                        seccionStorage.style.display = "block";
+                        let esPrimeroStorage = true;
+                        memoriasUnicas.forEach(storageName => {
+                            const divStorage = document.createElement('div');
+                            divStorage.className = `storage-pill ${esPrimeroStorage ? 'selected' : ''}`;
+                            divStorage.innerText = storageName;
+                            divStorage.setAttribute('data-storage', storageName);
+
+                            if (esPrimeroStorage) {
+                                almacenamientoSeleccionado = storageName;
+                                document.getElementById('memoria-seleccionada-txt').innerText = storageName;
+                                esPrimeroStorage = false;
+                            }
+
+                            divStorage.onclick = function() {
+                                document.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
+                                this.classList.add('selected');
+                                almacenamientoSeleccionado = this.getAttribute('data-storage');
+                                document.getElementById('memoria-seleccionada-txt').innerText = almacenamientoSeleccionado;
+                            };
+                            wrapperStorage.appendChild(divStorage);
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error("Error obteniendo variantes vivas desde ML:", e);
+            }
+        }
+
+        function actualizarFotoModalPorVariante(variantId) {
+            const variante = itemVariationsData.find(v => v.id === variantId);
+            if (variante && variante.picture_ids && variante.picture_ids.length > 0) {
+                const fotoId = variante.picture_ids[0];
+                document.getElementById('modal-producto-foto').src = `https://http2.mlstatic.com/D_NQ_NP_${fotoId}-O.jpg`;
             }
         }
 
