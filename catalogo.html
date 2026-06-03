@@ -430,41 +430,203 @@
         }
         .modal-content { 
             background: white; 
-            padding: 30px; 
+            padding: 24px; 
             border-radius: 16px; 
-            max-width: 480px; 
+            max-width: 980px; 
             width: 100%; 
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
             border: 1px solid var(--border-color);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
         }
-        .modal-content h3 {
-            margin: 0 0 10px 0;
+        .pdp-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 28px;
+            color: #94a3b8;
+            cursor: pointer;
+            border: none;
+            background: none;
+            transition: color 0.2s;
+            line-height: 1;
+            z-index: 10;
+        }
+        .pdp-close-btn:hover {
+            color: #1e293b;
+        }
+        .pdp-layout {
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+            margin-top: 10px;
+            text-align: left;
+        }
+        .pdp-left-col {
+            flex: 1.2;
+            display: flex;
+            gap: 15px;
+        }
+        .pdp-gallery-thumbs {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 60px;
+            flex-shrink: 0;
+        }
+        .pdp-thumb {
+            width: 54px;
+            height: 54px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+            object-fit: contain;
+            padding: 2px;
+            background: white;
+            transition: border-color 0.2s;
+        }
+        .pdp-thumb.active, .pdp-thumb:hover {
+            border-color: #3483fa;
+            border-width: 2px;
+        }
+        .pdp-main-img-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #f1f5f9;
+            border-radius: 12px;
+            padding: 20px;
+            background: #ffffff;
+            height: 380px;
+        }
+        .pdp-main-img-wrapper img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+        .pdp-right-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .pdp-condition {
+            font-size: 12px;
+            color: #737373;
+            font-weight: 500;
+        }
+        .pdp-title {
             font-size: 22px;
-            font-weight: 700;
-            color: var(--primary);
-            border-bottom: 2px solid var(--accent);
-            padding-bottom: 8px;
+            font-weight: 600;
+            color: #1e293b;
+            line-height: 1.2;
+            margin: 5px 0 0 0;
+        }
+        .pdp-price-container {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 16px;
+            text-align: left;
+        }
+        .pdp-price-amount {
+            font-size: 32px;
+            font-weight: 300;
+            color: #1e293b;
+        }
+        .pdp-weekly-payments {
+            font-size: 15px;
+            color: #00a650;
+            font-weight: 600;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .pdp-features-list {
+            margin: 15px 0;
+            padding: 0;
+            list-style: none;
+            font-size: 13px;
+            color: #64748b;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+        }
+        .pdp-features-list li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .pdp-features-list li svg {
+            color: #00a650;
+            flex-shrink: 0;
+        }
+        .pdp-form-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 5px;
+            text-align: left;
+        }
+        .pdp-form-card h4 {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 2px solid #e67e22;
+            padding-bottom: 6px;
+            display: inline-block;
         }
         .modal-content label { 
             font-weight: 600; 
             font-size: 13px; 
-            margin-top: 15px; 
+            margin-top: 12px; 
             display: block; 
             color: var(--text-main);
+            text-align: left;
         }
         .modal-content input, .modal-content select { 
             width: 100%; 
-            padding: 12px; 
-            margin-top: 6px; 
+            padding: 10px; 
+            margin-top: 4px; 
             border: 1.5px solid var(--border-color); 
-            border-radius: 10px; 
+            border-radius: 8px; 
             font-family: inherit;
-            font-size: 15px;
+            font-size: 14px;
             box-sizing: border-box;
             outline: none;
+            text-align: left;
         }
         .modal-content input:focus, .modal-content select:focus {
             border-color: var(--accent);
+        }
+        @media (max-width: 768px) {
+            .pdp-layout {
+                flex-direction: column;
+            }
+            .pdp-left-col {
+                flex-direction: column-reverse;
+            }
+            .pdp-gallery-thumbs {
+                flex-direction: row;
+                width: 100%;
+                justify-content: center;
+            }
+            .pdp-main-img-wrapper {
+                height: 250px;
+            }
+            .modal-content {
+                max-height: 95vh;
+                padding: 16px;
+            }
         }
     </style>
 </head>
@@ -518,73 +680,110 @@
         </div>
     </div>
 
-    <!-- Modal de Registro -->
+    <!-- Modal de Registro (PDP Estilo Mercado Libre) -->
     <div id="modalCredito" class="modal-solicitud">
         <div class="modal-content">
-            <h3>📋 Solicitar Crédito CelYa!</h3>
-            <p style="font-size: 15px; color: var(--primary); font-weight: 600; margin: 15px 0 5px 0; background: var(--bg-light); padding: 10px; border-radius: 8px; border-left: 4px solid var(--accent);" id="modalEquipoTexto">Equipo: --</p>
+            <button type="button" class="pdp-close-btn" onclick="cerrarModal()">×</button>
             
-            <form id="formInteresado">
-                <input type="hidden" id="hiddenId">
-                <input type="hidden" id="hiddenModelo">
-                <input type="hidden" id="hiddenEsFijo">
-                <input type="hidden" id="hiddenCuota26">
-                <input type="hidden" id="hiddenCuota52">
-
-                <div style="text-align: center; margin: 10px 0;">
-                    <img id="modal-producto-foto" src="" style="max-height: 120px; max-width: 100%; object-fit: contain; border-radius: 8px; border: 1px solid var(--border-color); padding: 5px;">
-                </div>
-
-                <!-- Contenedor de variantes de Mercado Libre -->
-                <div id="ml-dynamic-variants-container" style="display: none; margin: 15px 0; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; text-align: left;">
-                    <div style="margin-bottom: 12px;">
-                        <label style="font-weight: 600; font-size: 13px; color: #1e293b; display: block; margin-bottom: 6px;">
-                            Color: <span id="color-seleccionado-txt" style="font-weight: 400; color: #64748b;">-</span>
-                        </label>
-                        <div id="ml-colors-wrapper" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+            <div class="pdp-layout">
+                <!-- Columna Izquierda: Galería y Garantías -->
+                <div class="pdp-left-col">
+                    <div class="pdp-gallery-thumbs" id="pdp-thumbs-container">
+                        <!-- Se llenará dinámicamente -->
                     </div>
-
-                    <div id="ml-storage-section" style="display: none;">
-                        <label style="font-weight: 600; font-size: 13px; color: #1e293b; display: block; margin-bottom: 6px;">
-                            Capacidad: <span id="memoria-seleccionada-txt" style="font-weight: 400; color: #64748b;">-</span>
-                        </label>
-                        <div id="ml-storage-wrapper" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                    
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+                        <div class="pdp-main-img-wrapper">
+                            <img id="modal-producto-foto" src="" alt="Foto del Producto">
+                        </div>
                     </div>
                 </div>
+                
+                <!-- Columna Derecha: Información y Formulario -->
+                <div class="pdp-right-col">
+                    <div>
+                        <span class="pdp-condition" id="pdp-product-condition">Nuevo | +100 vendidos</span>
+                        <h2 class="pdp-title" id="pdp-product-title">Cargando modelo...</h2>
+                    </div>
+                    
+                    <div class="pdp-price-container">
+                        <div style="display: flex; align-items: baseline; gap: 8px;">
+                            <span class="pdp-price-amount" id="pdp-enganche-grande">$0</span>
+                            <span style="font-size: 14px; color: #737373;">Pago Inicial (Enganche)</span>
+                        </div>
+                        
+                        <div class="pdp-weekly-payments">
+                            <span style="font-size: 24px;" id="pdp-weekly-amount">$0</span>
+                            <span id="pdp-weekly-term" style="font-size: 14px; font-weight: normal; color: #737373;">en -- pagos semanales</span>
+                        </div>
+                        <div style="font-size: 13px; color: #64748b; margin-top: 6px;" id="pdp-contado-chico-texto">
+                            Precio de Contado: <strong>$0</strong>
+                        </div>
+                    </div>
+                    
+                    <!-- Variantes Dinámicas -->
+                    <div id="ml-dynamic-variants-container" style="display: none; border: none; padding: 0; background: none; text-align: left;">
+                        <div style="margin-bottom: 12px;">
+                            <label style="font-weight: 600; font-size: 14px; color: #1e293b; display: block; margin-bottom: 8px;">
+                                Color: <span id="color-seleccionado-txt" style="font-weight: 400; color: #64748b;">-</span>
+                            </label>
+                            <div id="ml-colors-wrapper" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+                        </div>
 
-                <label>Tu Nombre Completo:</label>
-                <input type="text" id="cliNombre" required placeholder="Ej. Juan Pérez">
+                        <div id="ml-storage-section" style="display: none; margin-bottom: 12px;">
+                            <label style="font-weight: 600; font-size: 14px; color: #1e293b; display: block; margin-bottom: 8px;">
+                                Capacidad: <span id="memoria-seleccionada-txt" style="font-weight: 400; color: #64748b;">-</span>
+                            </label>
+                            <div id="ml-storage-wrapper" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Formulario de Crédito CelYa! -->
+                    <div class="pdp-form-card">
+                        <h4 style="margin-top: 0;">📋 Rellena tu Solicitud de Crédito</h4>
+                        
+                        <form id="formInteresado">
+                            <input type="hidden" id="hiddenId">
+                            <input type="hidden" id="hiddenModelo">
+                            <input type="hidden" id="hiddenEsFijo">
+                            <input type="hidden" id="hiddenCuota26">
+                            <input type="hidden" id="hiddenCuota52">
+                            
+                            <label style="margin-top: 0;">Tu Nombre Completo:</label>
+                            <input type="text" id="cliNombre" required placeholder="Ej. Juan Pérez">
 
-                <label>Tu WhatsApp de Contacto:</label>
-                <input type="tel" id="cliTelefono" required placeholder="Ej. 667 123 4567">
+                            <label style="margin-top: 10px;">WhatsApp de Contacto:</label>
+                            <input type="tel" id="cliTelefono" required placeholder="Ej. 667 123 4567">
 
-                <label>¿Cuánto ganas libres a la semana? (Ingresos):</label>
-                <select id="cliSueldo">
-                    <option value="Menos de $1,500">Menos de $1,500</option>
-                    <option value="$1,500 a $3,000">$1,500 a $3,000</option>
-                    <option value="$3,000 a $5,000">$3,000 a $5,000</option>
-                    <option value="Más de $5,000">Más de $5,000</option>
-                </select>
+                            <label style="margin-top: 10px;">¿Cuánto ganas libres a la semana? (Ingresos):</label>
+                            <select id="cliSueldo">
+                                <option value="Menos de $1,500">Menos de $1,500</option>
+                                <option value="$1,500 a $3,000">$1,500 a $3,000</option>
+                                <option value="$3,000 a $5,000">$3,000 a $5,000</option>
+                                <option value="Más de $5,000">Más de $5,000</option>
+                            </select>
 
-                <label>¿Cuánto pagas de abonos actualmente a la semana? (Deudas activas en Coppel, Elektra, préstamos, etc.):</label>
-                <select id="cliPrestamos">
-                    <option value="Nada, no tengo deudas">Nada, no tengo deudas</option>
-                    <option value="Menos de $500">Menos de $500</option>
-                    <option value="$500 a $1,000">$500 a $1,000</option>
-                    <option value="Más de $1,000">Más de $1,000</option>
-                </select>
+                            <label style="margin-top: 10px;">¿Cuánto pagas de abonos actualmente a la semana? (Deudas activas):</label>
+                            <select id="cliPrestamos">
+                                <option value="Nada, no tengo deudas">Nada, no tengo deudas</option>
+                                <option value="Menos de $500">Menos de $500</option>
+                                <option value="$500 a $1,000">$500 a $1,000</option>
+                                <option value="Más de $1,000">Más de $1,000</option>
+                            </select>
 
-                <label>Plazo de Pago de tu Preferencia:</label>
-                <select id="cliPlazo">
-                    <option value="26 Semanas">Plan Rápido (26 Pagos Semanales)</option>
-                    <option value="52 Semanas">Plan Cómodo (52 Pagos Semanales)</option>
-                </select>
+                            <label style="margin-top: 10px;">Plazo de Pago de tu Preferencia:</label>
+                            <select id="cliPlazo" onchange="actualizarPrecioCalculadoPDP()">
+                                <option value="26 Semanas">Plan Rápido (26 Pagos Semanales)</option>
+                                <option value="52 Semanas">Plan Cómodo (52 Pagos Semanales)</option>
+                            </select>
 
-                <div style="display: flex; gap: 12px; margin-top: 25px;">
-                    <button type="button" onclick="enviarSolicitudFinal()" style="background:var(--success); color:white; border:none; padding:12px; flex:2; font-weight:bold; border-radius:10px; cursor:pointer; font-size:15px;">📲 Solicitar Crédito</button>
-                    <button type="button" onclick="cerrarModal()" style="background:var(--text-muted); color:white; border:none; padding:12px; flex:1; font-weight:bold; border-radius:10px; cursor:pointer; font-size:15px;">Cancelar</button>
+                            <div style="display: flex; gap: 12px; margin-top: 20px;">
+                                <button type="button" onclick="enviarSolicitudFinal()" style="background:#3483fa; color:white; border:none; padding:14px; flex:1; font-weight:bold; border-radius:8px; cursor:pointer; font-size:16px; transition: background 0.2s;" onmouseover="this.style.background='#2968c8'" onmouseout="this.style.background='#3483fa'">📲 Solicitar Crédito CelYa!</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -798,10 +997,10 @@
                                     <span class="brand-badge ${claseMarca}">${marca}</span>
                                     ${badgeEstado}
                                 </div>
-                                <div class="img-container">
+                                <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${item.modelo.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}')">
                                     <img src="${item.foto}" alt="${item.modelo}" onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop'">
                                 </div>
-                                <h4>${item.modelo}</h4>
+                                <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${item.modelo.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}')">${item.modelo}</h4>
                                 <div class="specs-container">
                                     ${item.memoria ? `<span class="spec-tag">💾 ${item.memoria}</span>` : ''}
                                     ${item.color ? `<span class="spec-tag">🎨 ${item.color}</span>` : ''}
@@ -823,7 +1022,7 @@
                                         <span class="plan-val">$${Math.round(item.cuota52).toLocaleString('es-MX')}/sem</span>
                                     </div>
                                 </div>
-                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${item.modelo.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)})">Pedir a Crédito</button>
+                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${item.modelo.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}')">Pedir a Crédito</button>
                             </div>
                         </div>
                     `;
@@ -833,23 +1032,68 @@
             }
         }
 
-        function abrirModalCredito(id, modelo, esFijo, foto, cuota26, cuota52) {
+        let currentMLItemLink = ""; // Global variable to store the link
+
+        let defaultColor = "";
+        let defaultMemoria = "";
+
+        function abrirModalCredito(id, modelo, esFijo, foto, cuota26, cuota52, link, precioContado, engancheMinimo, color, memoria) {
             document.getElementById('hiddenId').value = id;
             document.getElementById('hiddenModelo').value = modelo;
             document.getElementById('hiddenEsFijo').value = esFijo;
             document.getElementById('hiddenCuota26').value = cuota26 || 0;
             document.getElementById('hiddenCuota52').value = cuota52 || 0;
-            document.getElementById('modalEquipoTexto').innerText = `Equipo: ${modelo}`;
+            
+            // Set PDP UI fields
+            document.getElementById('pdp-product-title').innerText = modelo;
+            document.getElementById('pdp-product-condition').innerText = (esFijo === "true" || esFijo === true) ? "Destacado | Calidad Garantizada CelYa!" : "Nuevo | Envió Rápido";
+            
+            // Intercambiar tamaño y lugar del precio de contado por el enganche (Pago Inicial)
+            document.getElementById('pdp-enganche-grande').innerText = `$${Math.round(engancheMinimo || 0).toLocaleString('es-MX')}`;
+            document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(precioContado || 0).toLocaleString('es-MX')}</strong>`;
+            
+            currentMLItemLink = link || "";
+            defaultColor = color || "";
+            defaultMemoria = memoria || "";
             
             const imgElement = document.getElementById('modal-producto-foto');
             if (imgElement) {
                 imgElement.src = foto || "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop";
             }
             
+            // Initialize Dynamic Price Calculator
+            actualizarPrecioCalculadoPDP();
+            
+            // Initialize vertical thumbnails gallery with main picture
+            const thumbsContainer = document.getElementById('pdp-thumbs-container');
+            if (thumbsContainer) {
+                thumbsContainer.innerHTML = "";
+                const imgThumb = document.createElement('img');
+                imgThumb.src = foto || "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop";
+                imgThumb.className = "pdp-thumb active";
+                imgThumb.onclick = function() {
+                    document.querySelectorAll('.pdp-thumb').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById('modal-producto-foto').src = this.src;
+                };
+                thumbsContainer.appendChild(imgThumb);
+            }
+
             document.getElementById('modalCredito').style.display = 'flex';
             
             // Cargar variantes reales desde Mercado Libre en vivo
             cargarVariantesRealesML(id);
+        }
+
+        function actualizarPrecioCalculadoPDP() {
+            const plazo = document.getElementById('cliPlazo').value;
+            const cuota26 = parseFloat(document.getElementById('hiddenCuota26').value) || 0;
+            const cuota52 = parseFloat(document.getElementById('hiddenCuota52').value) || 0;
+            const cuotaActiva = (plazo === "26 Semanas") ? cuota26 : cuota52;
+            const numPagos = (plazo === "26 Semanas") ? 26 : 52;
+            
+            document.getElementById('pdp-weekly-amount').innerText = `$${Math.round(cuotaActiva)}`;
+            document.getElementById('pdp-weekly-term').innerText = `en ${numPagos} pagos semanales`;
         }
 
         function cerrarModal() {
@@ -861,9 +1105,15 @@
             document.getElementById('ml-colors-wrapper').innerHTML = "";
             document.getElementById('ml-storage-wrapper').innerHTML = "";
             document.getElementById('ml-storage-section').style.display = "none";
+            
+            // Limpiar thumbs
+            const thumbsContainer = document.getElementById('pdp-thumbs-container');
+            if (thumbsContainer) thumbsContainer.innerHTML = "";
+            
             colorSeleccionado = "";
             almacenamientoSeleccionado = "";
             itemVariationsData = [];
+            currentMLItemLink = "";
         }
 
          async function enviarSolicitudFinal() {
@@ -895,7 +1145,7 @@
                 const cuota = (plazo === "26 Semanas") ? cuota26 : cuota52;
                 params.append('cuota', cuota);
                 
-                const referenciaProducto = (esFijo === "true") ? `Stock Fijo: ${modelo}` : `https://articulo.mercadolibre.com.mx/MLM-${id.replace("MLM","")}`;
+                const referenciaProducto = currentMLItemLink || ((esFijo === "true" || esFijo === true) ? `Stock Fijo: ${modelo}` : `https://articulo.mercadolibre.com.mx/MLM-${id.replace("MLM","")}`);
                 params.append('link', referenciaProducto);
                 
                 // Formatear el plazo incluyendo las variantes seleccionadas
@@ -947,6 +1197,9 @@
             almacenamientoSeleccionado = "";
             itemVariationsData = [];
 
+            // Cargar variantes locales por defecto
+            mostrarVariantesFallback();
+
             // Limpiamos la ID por si viene como "MLM-XXXXX" o URL
             let cleanId = "";
             if (idProducto.startsWith("MLM")) {
@@ -961,9 +1214,49 @@
             if (!cleanId) return;
 
             try {
-                const res = await fetch(`https://api.mercadolibre.com/items/${cleanId}`);
-                if (!res.ok) return;
-                const data = await res.json();
+                let data = null;
+                try {
+                    const res = await fetch(`https://api.mercadolibre.com/items/${cleanId}`);
+                    if (res.ok) {
+                        data = await res.json();
+                    }
+                } catch (fetchErr) {
+                    console.warn("Direct ML fetch failed, trying via GAS proxy...", fetchErr);
+                }
+
+                if (!data) {
+                    const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${cleanId}`;
+                    const resProxy = await fetch(proxyUrl);
+                    if (resProxy.ok) {
+                        const rawData = await resProxy.json();
+                        if (rawData && !rawData.error) {
+                            data = rawData;
+                        }
+                    }
+                }
+
+                if (!data) return;
+
+                // 📸 Pintamos las fotos de la galería si existen (todas las disponibles)
+                if (data.pictures && data.pictures.length > 0) {
+                    const thumbsContainer = document.getElementById('pdp-thumbs-container');
+                    if (thumbsContainer) {
+                        thumbsContainer.innerHTML = "";
+                        const numThumbs = data.pictures.length;
+                        for (let i = 0; i < numThumbs; i++) {
+                            const pic = data.pictures[i];
+                            const imgThumb = document.createElement('img');
+                            imgThumb.src = pic.secure_url || pic.url;
+                            imgThumb.className = `pdp-thumb ${i === 0 ? 'active' : ''}`;
+                            imgThumb.onclick = function() {
+                                document.querySelectorAll('.pdp-thumb').forEach(t => t.classList.remove('active'));
+                                this.classList.add('active');
+                                document.getElementById('modal-producto-foto').src = this.src;
+                            };
+                            thumbsContainer.appendChild(imgThumb);
+                        }
+                    }
+                }
 
                 if (data.variations && data.variations.length > 0) {
                     itemVariationsData = data.variations;
@@ -972,10 +1265,16 @@
                     const coloresUnicos = new Map();
                     const memoriasUnicas = new Set();
 
-                    // Mapeamos todas las variantes reales publicadas por el vendedor
+                    // Mapeamos todas las variantes reales publicadas por el vendedor con búsqueda flexible de IDs de atributos
                     data.variations.forEach(v => {
-                        const attrColor = v.attribute_combinations.find(a => a.id === 'COLOR' || a.id === 'MAIN_COLOR');
-                        const attrStorage = v.attribute_combinations.find(a => a.id === 'INTERNAL_MEMORY' || a.id === 'MEMORY_CAPACITY');
+                        const attrColor = v.attribute_combinations.find(a => {
+                            const idUpper = a.id.toUpperCase();
+                            return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
+                        });
+                        const attrStorage = v.attribute_combinations.find(a => {
+                            const idUpper = a.id.toUpperCase();
+                            return idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO";
+                        });
 
                         const nameColor = attrColor ? attrColor.value_name : "Único";
                         const nameStorage = attrStorage ? attrStorage.value_name : null;
@@ -1058,9 +1357,88 @@
                             wrapperStorage.appendChild(divStorage);
                         });
                     }
+                } else if (data.attributes && data.attributes.length > 0) {
+                    // Si no tiene variaciones en sí, pero tiene atributos de color/capacidad de único modelo en la publicación
+                    const attrColor = data.attributes.find(a => {
+                        const idUpper = a.id.toUpperCase();
+                        return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
+                    });
+                    const attrStorage = data.attributes.find(a => {
+                        const idUpper = a.id.toUpperCase();
+                        return idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO";
+                    });
+                    if (attrColor && attrColor.value_name) {
+                        defaultColor = attrColor.value_name;
+                    }
+                    if (attrStorage && attrStorage.value_name) {
+                        defaultMemoria = attrStorage.value_name;
+                    }
+                    mostrarVariantesFallback();
                 }
             } catch (e) {
                 console.error("Error obteniendo variantes vivas desde ML:", e);
+            }
+        }
+
+        function mostrarVariantesFallback() {
+            const contenedor = document.getElementById('ml-dynamic-variants-container');
+            const wrapperColores = document.getElementById('ml-colors-wrapper');
+            const wrapperStorage = document.getElementById('ml-storage-wrapper');
+            const seccionStorage = document.getElementById('ml-storage-section');
+
+            let hasColor = false;
+            let hasStorage = false;
+
+            if (defaultColor && defaultColor.trim() !== "" && defaultColor.trim() !== "-") {
+                contenedor.style.display = "block";
+                wrapperColores.innerHTML = "";
+                
+                const divColor = document.createElement('div');
+                divColor.className = "color-circle selected";
+                divColor.title = defaultColor;
+                divColor.setAttribute('data-color', defaultColor);
+                
+                const colorMap = {
+                    "negro": "#1e293b", "black": "#1e293b", "oscuro": "#0f172a",
+                    "blanco": "#ffffff", "white": "#ffffff",
+                    "azul": "#3b82f6", "blue": "#3b82f6",
+                    "verde": "#10b981", "green": "#10b981",
+                    "rojo": "#ef4444", "red": "#ef4444",
+                    "rosa": "#ec4899", "pink": "#ec4899",
+                    "amarillo": "#eab308", "yellow": "#eab308",
+                    "gris": "#6b7280", "grey": "#6b7280", "silver": "#cbd5e1", "plata": "#cbd5e1",
+                    "oro": "#f59e0b", "gold": "#f59e0b", "dorado": "#f59e0b"
+                };
+                const nombreLower = defaultColor.toLowerCase();
+                let bgCircleColor = "#94a3b8";
+                for (const key in colorMap) {
+                    if (nombreLower.includes(key)) {
+                        bgCircleColor = colorMap[key];
+                        break;
+                    }
+                }
+                divColor.style.backgroundColor = bgCircleColor;
+                
+                colorSeleccionado = defaultColor;
+                document.getElementById('color-seleccionado-txt').innerText = defaultColor;
+                wrapperColores.appendChild(divColor);
+                hasColor = true;
+            }
+
+            if (defaultMemoria && defaultMemoria.trim() !== "" && defaultMemoria.trim() !== "-") {
+                contenedor.style.display = "block";
+                seccionStorage.style.display = "block";
+                wrapperStorage.innerHTML = "";
+
+                const divStorage = document.createElement('div');
+                divStorage.className = "storage-pill selected";
+                divStorage.innerText = defaultMemoria;
+                divStorage.setAttribute('data-storage', defaultMemoria);
+
+                almacenamientoSeleccionado = defaultMemoria;
+                document.getElementById('memoria-seleccionada-txt').innerText = defaultMemoria;
+                wrapperStorage.appendChild(divStorage);
+                hasStorage = true;
             }
         }
 
