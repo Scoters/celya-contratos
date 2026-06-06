@@ -1128,13 +1128,6 @@
                         window.equiposCargados = cachedData;
                         rellenarDropdownMarcas(cachedData);
                         aplicarFiltrosYOrden();
-
-                        // Si la caché tiene menos de 5 minutos, no consultamos la red para ahorrar peticiones
-                        if (age < cacheDuration) {
-                            btn.innerText = "Buscar";
-                            btn.disabled = false;
-                            return;
-                        }
                     } catch (e) {
                         console.warn("Error leyendo caché local:", e);
                     }
