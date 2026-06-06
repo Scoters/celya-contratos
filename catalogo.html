@@ -1223,17 +1223,21 @@
 
             try {
                 let data = null;
-                try {
-                    const res = await fetch(`https://api.mercadolibre.com/items/${cleanId}`);
-                    if (res.ok) {
-                        data = await res.json();
+                const isProduct = currentMLItemLink && currentMLItemLink.includes("/p/");
+
+                if (!isProduct) {
+                    try {
+                        const res = await fetch(`https://api.mercadolibre.com/items/${cleanId}`);
+                        if (res.ok) {
+                            data = await res.json();
+                        }
+                    } catch (fetchErr) {
+                        console.warn("Direct ML fetch failed, trying via GAS proxy...", fetchErr);
                     }
-                } catch (fetchErr) {
-                    console.warn("Direct ML fetch failed, trying via GAS proxy...", fetchErr);
                 }
 
                 if (!data) {
-                    const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${cleanId}`;
+                    const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${cleanId}&isProduct=${isProduct}`;
                     const resProxy = await fetch(proxyUrl);
                     if (resProxy.ok) {
                         const rawData = await resProxy.json();
@@ -1275,11 +1279,12 @@
 
                     // Mapeamos todas las variantes reales publicadas por el vendedor con búsqueda flexible de IDs de atributos
                     data.variations.forEach(v => {
-                        const attrColor = v.attribute_combinations.find(a => {
+                        const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
+                        const attrColor = allAttrs.find(a => {
                             const idUpper = a.id.toUpperCase();
                             return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
                         });
-                        const attrStorage = v.attribute_combinations.find(a => {
+                        const attrStorage = allAttrs.find(a => {
                             const idUpper = a.id.toUpperCase();
                             return idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO";
                         });
