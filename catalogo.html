@@ -733,6 +733,55 @@
                 max-height: 95vh;
                 padding: 16px;
             }
+
+            /* Controles responsivos */
+            .controls-bar {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 15px;
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+
+            .control-group {
+                flex-direction: column;
+                align-items: stretch;
+                width: 100%;
+                gap: 6px;
+            }
+
+            .control-group select {
+                width: 100%;
+                box-sizing: border-box;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .search-wrapper {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .search-wrapper input {
+                width: 100%;
+                box-sizing: border-box;
+                height: 48px;
+            }
+
+            .btn-buscar {
+                width: 100%;
+                height: 48px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-sizing: border-box;
+                padding: 0;
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -743,7 +792,7 @@
         <div style="text-align: center; margin-bottom: 10px;">
             <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo">
         </div>
-        <h1>CelYa! Créditos Celulares</h1>
+        <h1>Créditos Celulares</h1>
         <p>Estrena el smartphone que buscas con pagos semanales a tu medida</p>
     </header>
 
@@ -1191,6 +1240,7 @@
 
             if (filtrados.length > 0) {
                 filtrados.forEach(item => {
+                    const modeloLimpio = limpiarNombreModelo(item.modelo);
                     const marca = obtenerMarca(item.modelo);
                     const claseMarca = obtenerClaseMarca(marca);
 
@@ -1218,10 +1268,10 @@
                                     <span class="brand-badge ${claseMarca}">${marca}</span>
                                     ${badgeEstado}
                                 </div>
-                                <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${item.modelo.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}')">
-                                    <img src="${item.foto}" alt="${item.modelo}" onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop'">
+                                <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}')">
+                                    <img src="${item.foto}" alt="${modeloLimpio}" onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop'">
                                 </div>
-                                <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${item.modelo.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}')">${item.modelo}</h4>
+                                <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}')">${modeloLimpio}</h4>
                                 <div class="specs-container">
                                     ${item.memoria ? `<span class="spec-tag">💾 ${item.memoria}</span>` : ''}
                                     ${item.color ? `<span class="spec-tag">🎨 ${item.color}</span>` : ''}
@@ -1243,7 +1293,7 @@
                                         <span class="plan-val">$${Math.round(item.cuota52).toLocaleString('es-MX')}/sem</span>
                                     </div>
                                 </div>
-                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${item.modelo.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}')">Pedir a Crédito</button>
+                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}')">Pedir a Crédito</button>
                             </div>
                         </div>
                     `;
@@ -1254,6 +1304,7 @@
         }
 
         let currentMLItemLink = ""; // Global variable to store the link
+        let isSubmitting = false;
 
         let defaultColor = "";
         let defaultMemoria = "";
@@ -1481,6 +1532,8 @@
         }
 
         async function enviarSolicitudPedidoEspecial() {
+            if (isSubmitting) return;
+
             const nombre = document.getElementById('pe-cliNombre').value.trim();
             const telefono = document.getElementById('pe-cliTelefono').value.trim();
             const sueldo = document.getElementById('pe-cliSueldo').value;
@@ -1493,6 +1546,18 @@
             }
 
             if (!pe_data_actual) return;
+
+            // Deshabilitar botón para evitar doble envío
+            const btn = document.querySelector('button[onclick="enviarSolicitudPedidoEspecial()"]');
+            const originalBtnText = btn ? btn.innerText : "";
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "⏳ Enviando solicitud...";
+                btn.style.opacity = "0.6";
+                btn.style.cursor = "not-allowed";
+            }
+
+            isSubmitting = true;
 
             const basePrice = parseFloat(pe_data_actual.price) || 0;
             const precioContado = basePrice * CONFIG_TASAS.gananciaContadoFactor;
@@ -1514,6 +1579,8 @@
                 params.append('cuota', cuotaSemanal);
                 params.append('link', pe_link_actual);
                 params.append('plazo', `${plazo} (PEDIDO ESPECIAL: ${pe_data_actual.title})`);
+                params.append('color', "");
+                params.append('capacidad', "");
 
                 const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
                     method: 'POST',
@@ -1531,10 +1598,20 @@
             } catch (err) {
                 console.error(err);
                 alert("Error de red. Por favor, reintenta enviar la solicitud.");
+            } finally {
+                isSubmitting = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = originalBtnText;
+                    btn.style.opacity = "";
+                    btn.style.cursor = "pointer";
+                }
             }
         }
 
         async function enviarSolicitudFinal() {
+            if (isSubmitting) return;
+
             const nombre = document.getElementById('cliNombre').value.trim();
             const telefono = document.getElementById('cliTelefono').value.trim();
             const sueldo = document.getElementById('cliSueldo').value;
@@ -1548,6 +1625,18 @@
                 alert("Por favor rellena todos tus datos de contacto e ingresos.");
                 return;
             }
+
+            // Deshabilitar botón para evitar doble envío
+            const btn = document.querySelector('button[onclick="enviarSolicitudFinal()"]');
+            const originalBtnText = btn ? btn.innerText : "";
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "⏳ Enviando solicitud...";
+                btn.style.opacity = "0.6";
+                btn.style.cursor = "not-allowed";
+            }
+
+            isSubmitting = true;
 
             try {
                 const params = new URLSearchParams();
@@ -1573,6 +1662,8 @@
 
                 // Añadimos las especificaciones directo entre paréntesis al lado del modelo
                 params.append('plazo', `${plazo} (${modelo}${detallesVariante})`);
+                params.append('color', colorSeleccionado || "");
+                params.append('capacidad', almacenamientoSeleccionado || "");
 
                 const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
                     method: 'POST',
@@ -1592,6 +1683,14 @@
                 }
             } catch (e) {
                 alert("Error de red, intenta más tarde.");
+            } finally {
+                isSubmitting = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = originalBtnText;
+                    btn.style.opacity = "";
+                    btn.style.cursor = "pointer";
+                }
             }
         }
 
@@ -1605,6 +1704,11 @@
             const wrapperColores = document.getElementById('ml-colors-wrapper');
             const wrapperStorage = document.getElementById('ml-storage-wrapper');
             const seccionStorage = document.getElementById('ml-storage-section');
+
+            if (esCambioVariante) {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) overlay.style.display = 'flex';
+            }
 
             if (!esCambioVariante) {
                 // Reseteamos el modal por si el producto anterior no tenía variantes
@@ -1651,6 +1755,8 @@
                     wrapperColores.style.pointerEvents = "";
                     wrapperStorage.style.opacity = "";
                     wrapperStorage.style.pointerEvents = "";
+                    const overlay = document.getElementById('loadingOverlay');
+                    if (overlay) overlay.style.display = 'none';
                 }
                 return;
             }
@@ -1792,11 +1898,13 @@
                         }
 
                         divColor.onclick = function () {
-                            document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
-                            this.classList.add('selected');
-                            colorSeleccionado = this.getAttribute('data-color');
-                            document.getElementById('color-seleccionado-txt').innerText = colorSeleccionado;
-                            actualizarFotoModalPorVariante(vId);
+                            mostrarLoadingTemporal(() => {
+                                document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
+                                this.classList.add('selected');
+                                colorSeleccionado = this.getAttribute('data-color');
+                                document.getElementById('color-seleccionado-txt').innerText = colorSeleccionado;
+                                actualizarFotoModalPorVariante(vId);
+                            });
                         };
                         wrapperColores.appendChild(divColor);
                     });
@@ -1818,10 +1926,12 @@
                             }
 
                             divStorage.onclick = function () {
-                                document.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
-                                this.classList.add('selected');
-                                almacenamientoSeleccionado = this.getAttribute('data-storage');
-                                document.getElementById('memoria-seleccionada-txt').innerText = almacenamientoSeleccionado;
+                                mostrarLoadingTemporal(() => {
+                                    document.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
+                                    this.classList.add('selected');
+                                    almacenamientoSeleccionado = this.getAttribute('data-storage');
+                                    document.getElementById('memoria-seleccionada-txt').innerText = almacenamientoSeleccionado;
+                                });
                             };
                             wrapperStorage.appendChild(divStorage);
                         });
@@ -1936,6 +2046,11 @@
                 }
             } catch (e) {
                 console.error("Error obteniendo variantes vivas desde ML:", e);
+            } finally {
+                if (esCambioVariante) {
+                    const overlay = document.getElementById('loadingOverlay');
+                    if (overlay) overlay.style.display = 'none';
+                }
             }
         }
 
@@ -2009,9 +2124,70 @@
             }
         }
 
+        function limpiarNombreModelo(modelo) {
+            if (!modelo) return "";
+            let clean = modelo.trim();
+
+            // 1. Remover colores conocidos (incluyendo variaciones)
+            const colores = [
+                "black", "negro", "blue", "azul", "white", "blanco", "green", "verde", "silver", "plata", 
+                "gray", "gris", "gold", "oro", "purple", "morado", "pink", "rosa", "red", "rojo", "light", 
+                "dark", "sky", "navy", "rose", "violet", "violeta", "lavender", "lavanda", "carbon", "carbono",
+                "claro", "oscuro", "space", "estelar", "celeste", "brillante", "mate"
+            ];
+            colores.forEach(color => {
+                const regex = new RegExp("\\b" + color + "\\b", "gi");
+                clean = clean.replace(regex, "");
+            });
+
+            // 2. Remover capacidades de almacenamiento (>= 32gb) pero conservar RAM (< 32gb)
+            const regexGb = /(\d+)\s*(gb|tb|ram)\b/gi;
+            let matches = [...clean.matchAll(regexGb)];
+            
+            matches.forEach(match => {
+                const fullMatch = match[0];
+                const numero = parseInt(match[1]);
+                const unidad = match[2].toLowerCase();
+
+                if (unidad === "ram") {
+                    return;
+                }
+                if (numero >= 32 || unidad === "tb") {
+                    const r = new RegExp(fullMatch, "gi");
+                    clean = clean.replace(r, "");
+                }
+            });
+
+            // Remover palabras conectoras/redundantes
+            clean = clean.replace(/\b(con|de|color|ram)\b/gi, "");
+
+            // Limpiar múltiples espacios en blanco y caracteres colgantes
+            clean = clean.replace(/\s+/g, " ").trim();
+            clean = clean.replace(/^[,\-\s]+|[,\-\s]+$/g, "");
+
+            return clean;
+        }
+
+        function mostrarLoadingTemporal(callback) {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.style.display = 'flex';
+            setTimeout(() => {
+                try {
+                    if (callback) callback();
+                } catch (e) {
+                    console.error(e);
+                }
+                if (overlay) overlay.style.display = 'none';
+            }, 300);
+        }
+
         // Ejecutar al abrir
         window.onload = cargarPantallaInicial;
     </script>
+    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
+        <div style="width: 50px; height: 50px; border: 5px solid rgba(255, 255, 255, 0.1); border-top: 5px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; box-shadow: 0 0 15px rgba(230, 126, 34, 0.5);"></div>
+        <p style="color: white; margin-top: 15px; font-weight: 600; font-size: 16px; font-family: inherit; letter-spacing: 0.5px;">Actualizando variante...</p>
+    </div>
 </body>
 
 </html>
