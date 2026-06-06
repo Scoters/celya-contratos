@@ -1,5 +1,5 @@
 const CONFIG = {
-    GOOGLE_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbysqYhhbSbYPiTt4regDcQAsmu8XFLNRaSSH9GUKVlMfqD5DKX71gXmJkE56usdc1Qx/exec",
+    GOOGLE_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx_0carw9rDU7Rmk_nUjIkZRLWxeDksPc8eiv177Pu0U4EABoSrZ4uEJVh-e1eltoh1/exec",
     API_TOKEN: "celya_k9x2m_s7q4p",
     PRELOADED_CATALOG: [
         {

@@ -1116,6 +1116,14 @@
             currentMLItemLink = "";
         }
 
+        // Cerrar modal al hacer clic en el fondo oscuro exterior
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('modalCredito');
+            if (event.target === modal) {
+                cerrarModal();
+            }
+        });
+
          async function enviarSolicitudFinal() {
             const nombre = document.getElementById('cliNombre').value.trim();
             const telefono = document.getElementById('cliTelefono').value.trim();
@@ -1249,6 +1257,12 @@
 
                 if (!data) return;
 
+                // Actualizar el título del producto con el nombre real de Mercado Libre si existe
+                if (data.name) {
+                    document.getElementById('pdp-product-title').innerText = data.name;
+                    document.getElementById('hiddenModelo').value = data.name;
+                }
+
                 // 📸 Pintamos las fotos de la galería si existen (todas las disponibles)
                 if (data.pictures && data.pictures.length > 0) {
                     const thumbsContainer = document.getElementById('pdp-thumbs-container');
@@ -1366,6 +1380,96 @@
                                 this.classList.add('selected');
                                 almacenamientoSeleccionado = this.getAttribute('data-storage');
                                 document.getElementById('memoria-seleccionada-txt').innerText = almacenamientoSeleccionado;
+                            };
+                            wrapperStorage.appendChild(divStorage);
+                        });
+                    }
+                } else if (data.pickers && data.pickers.length > 0) {
+                    contenedor.style.display = "block";
+
+                    const colorPicker = data.pickers.find(p => {
+                        const idUpper = p.picker_id.toUpperCase();
+                        return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
+                    });
+                    const storagePicker = data.pickers.find(p => {
+                        const idUpper = p.picker_id.toUpperCase();
+                        return idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO";
+                    });
+
+                    // 🎨 Pintamos los círculos de colores reales obtenidos
+                    if (colorPicker && colorPicker.products && colorPicker.products.length > 0) {
+                        colorPicker.products.forEach(p => {
+                            const nombreColor = p.picker_label;
+                            const vId = p.product_id;
+                            const isSelected = p.tags && p.tags.includes("selected");
+
+                            const divColor = document.createElement('div');
+                            divColor.className = `color-circle ${isSelected ? 'selected' : ''}`;
+                            divColor.title = nombreColor;
+                            divColor.setAttribute('data-color', nombreColor);
+
+                            // Color genérico visual mapping
+                            const colorMap = {
+                                "negro": "#1e293b", "black": "#1e293b", "oscuro": "#0f172a",
+                                "blanco": "#ffffff", "white": "#ffffff",
+                                "azul": "#3b82f6", "blue": "#3b82f6",
+                                "verde": "#10b981", "green": "#10b981",
+                                "rojo": "#ef4444", "red": "#ef4444",
+                                "rosa": "#ec4899", "pink": "#ec4899",
+                                "amarillo": "#eab308", "yellow": "#eab308",
+                                "gris": "#6b7280", "grey": "#6b7280", "silver": "#cbd5e1", "plata": "#cbd5e1",
+                                "oro": "#f59e0b", "gold": "#f59e0b", "dorado": "#f59e0b"
+                            };
+                            const nombreLower = nombreColor.toLowerCase();
+                            let bgCircleColor = "#94a3b8";
+                            for (const key in colorMap) {
+                                if (nombreLower.includes(key)) {
+                                    bgCircleColor = colorMap[key];
+                                    break;
+                                }
+                            }
+                            divColor.style.backgroundColor = bgCircleColor;
+
+                            if (isSelected) {
+                                colorSeleccionado = nombreColor;
+                                document.getElementById('color-seleccionado-txt').innerText = nombreColor;
+                            }
+
+                            divColor.onclick = function() {
+                                if (vId === cleanId) return;
+                                document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
+                                this.classList.add('selected');
+                                currentMLItemLink = `https://www.mercadolibre.com.mx/p/${vId}`;
+                                cargarVariantesRealesML(vId);
+                            };
+                            wrapperColores.appendChild(divColor);
+                        });
+                    }
+
+                    // 💾 Pintamos las pastillas de Almacenamiento reales obtenidas
+                    if (storagePicker && storagePicker.products && storagePicker.products.length > 0) {
+                        seccionStorage.style.display = "block";
+                        storagePicker.products.forEach(p => {
+                            const storageName = p.picker_label;
+                            const vId = p.product_id;
+                            const isSelected = p.tags && p.tags.includes("selected");
+
+                            const divStorage = document.createElement('div');
+                            divStorage.className = `storage-pill ${isSelected ? 'selected' : ''}`;
+                            divStorage.innerText = storageName;
+                            divStorage.setAttribute('data-storage', storageName);
+
+                            if (isSelected) {
+                                almacenamientoSeleccionado = storageName;
+                                document.getElementById('memoria-seleccionada-txt').innerText = storageName;
+                            }
+
+                            divStorage.onclick = function() {
+                                if (vId === cleanId) return;
+                                document.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
+                                this.classList.add('selected');
+                                currentMLItemLink = `https://www.mercadolibre.com.mx/p/${vId}`;
+                                cargarVariantesRealesML(vId);
                             };
                             wrapperStorage.appendChild(divStorage);
                         });
