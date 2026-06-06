@@ -842,7 +842,7 @@
 
             const cacheKey = "celya_catalogo_cache";
             const cacheTimeKey = "celya_catalogo_timestamp";
-            const cacheDuration = 5 * 60 * 1000; // 5 minutos de validez absoluta
+            const cacheDuration = 12 * 60 * 60 * 1000; // 12 horas de validez absoluta
 
             // Si es la carga inicial (búsqueda vacía), intentar usar la caché local
             if (busqueda === "") {
@@ -1202,12 +1202,20 @@
 
             // Limpiamos la ID por si viene como "MLM-XXXXX" o URL
             let cleanId = "";
-            if (idProducto.startsWith("MLM")) {
+            if (idProducto && idProducto.startsWith("MLM")) {
                 cleanId = idProducto;
-            } else {
+            } else if (idProducto) {
                 const match = idProducto.match(/(MLM\-?\d+)/i);
                 if (match) {
                     cleanId = match[0].replace("-", "").toUpperCase();
+                }
+            }
+
+            // Si no se encontró ID en idProducto (ej. es un IMEI local), la buscamos en el enlace global
+            if (!cleanId && currentMLItemLink) {
+                const matchLink = currentMLItemLink.match(/(MLM\-?\d+)/i);
+                if (matchLink) {
+                    cleanId = matchLink[0].replace("-", "").toUpperCase();
                 }
             }
 

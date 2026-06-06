@@ -498,111 +498,110 @@
         });
 
         // --- MOTOR DE BÚSQUEDA VIP EN DASHBOARD ---
-        document.addEventListener("DOMContentLoaded", function () {
-            const inputBuscar = document.getElementById('buscarVip');
-            const listaResultados = document.getElementById('resultadosVip');
+        const inputBuscar = document.getElementById('buscarVip');
+        const listaResultados = document.getElementById('resultadosVip');
 
-            if (inputBuscar && listaResultados) {
-                inputBuscar.addEventListener('input', function () {
-                    const query = this.value.trim().toUpperCase();
-                    listaResultados.innerHTML = "";
+        if (inputBuscar && listaResultados) {
+            inputBuscar.addEventListener('input', function () {
+                const query = this.value.trim().toUpperCase();
+                listaResultados.innerHTML = "";
 
-                    if (query.length < 2) {
-                        listaResultados.style.display = "none";
-                        return;
-                    }
-
-                    // Filtra sobre 'dbClientesActivos' que el doGet ya te entrega en el combo original
-                    const filtrados = dbClientesActivos.filter(c => c.cliente.toUpperCase().includes(query));
-
-                    if (filtrados.length === 0) {
-                        listaResultados.innerHTML = "<div style='padding:10px; color:#7f8c8d;'>No se encontraron resultados</div>";
-                        listaResultados.style.display = "block";
-                        return;
-                    }
-
-                    // Evitar duplicados visuales si el cliente ya tiene varios equipos
-                    const nombresUnicos = [...new Set(filtrados.map(c => c.cliente))];
-
-                    nombresUnicos.forEach(nombre => {
-                        const div = document.createElement('div');
-                        div.style.padding = "10px";
-                        div.style.cursor = "pointer";
-                        div.style.borderBottom = "1px solid #edf2f7";
-                        div.style.fontSize = "14px";
-                        div.innerText = nombre;
-
-                        div.addEventListener('click', function () {
-                            // Buscamos el registro completo de ese cliente para recuperar sus datos de texto
-                            const infoCliente = filtrados.find(c => c.cliente === nombre);
-
-                            // Mandamos los datos limpios por la URL encriptados hacia el index
-                            const params = new URLSearchParams();
-                            params.append('vip', 'true');
-                            params.append('nombre', nombre);
-                            params.append('imei_ref', infoCliente.imei); // Usamos su IMEI actual como llave de consulta rápida
-
-                            window.location.href = `index.html?${params.toString()}`;
-                        });
-
-                        div.onmouseover = () => div.style.background = "#edf2f7";
-                        div.onmouseout = () => div.style.background = "transparent";
-                        listaResultados.appendChild(div);
-                    });
-                    listaResultados.style.display = "block";
-                });
-                // --- AGREGAR CELULAR AL CATÁLOGO ---
-                const btnAgregar = document.getElementById('btnAgregarCelular');
-                if (btnAgregar) {
-                    btnAgregar.addEventListener('click', async function () {
-                        const link = document.getElementById('nuevoLink').value.trim();
-                        const imei = document.getElementById('nuevoImei').value.trim();
-                        const estado = document.getElementById('nuevoEstado').value;
-
-                        if (!link) {
-                            alert("⚠️ Por favor introduce el enlace de Mercado Libre.");
-                            return;
-                        }
-
-                        const originalText = btnAgregar.innerText;
-                        btnAgregar.innerText = "⏳ Consultando e inyectando...";
-                        btnAgregar.disabled = true;
-
-                        try {
-                            const formData = new URLSearchParams();
-                            formData.append('action', 'agregarCelularCatalogo');
-                            formData.append('token', CONFIG.API_TOKEN);
-                            formData.append('link', link);
-                            formData.append('imei', imei);
-                            formData.append('estado', estado);
-
-                            const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                                method: 'POST',
-                                body: formData.toString(),
-                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                            });
-                            const data = await res.json();
-
-                            if (data.result === 'success') {
-                                alert(`✅ Celular agregado con éxito!\n\nModelo: ${data.modelo}\nPrecio calculado: $${data.precioContado.toLocaleString('es-MX')}\nIMEI asignado: ${data.imei}`);
-                                document.getElementById('formAgregarCelular').reset();
-
-                                // Limpiar caché local del catálogo para obligar a refrescar la base de datos
-                                localStorage.removeItem("celya_catalogo_cache");
-                                localStorage.removeItem("celya_catalogo_timestamp");
-                            } else {
-                                alert("⚠️ Error al importar celular: " + (data.message || "Error desconocido"));
-                            }
-                        } catch (err) {
-                            console.error(err);
-                            alert("❌ Error de comunicación con la base de datos.");
-                        } finally {
-                            btnAgregar.innerText = originalText;
-                            btnAgregar.disabled = false;
-                        }
-                    });
+                if (query.length < 2) {
+                    listaResultados.style.display = "none";
+                    return;
                 }
+
+                // Filtra sobre 'dbClientesActivos' que el doGet ya te entrega en el combo original
+                const filtrados = dbClientesActivos.filter(c => c.cliente.toUpperCase().includes(query));
+
+                if (filtrados.length === 0) {
+                    listaResultados.innerHTML = "<div style='padding:10px; color:#7f8c8d;'>No se encontraron resultados</div>";
+                    listaResultados.style.display = "block";
+                    return;
+                }
+
+                // Evitar duplicados visuales si el cliente ya tiene varios equipos
+                const nombresUnicos = [...new Set(filtrados.map(c => c.cliente))];
+
+                nombresUnicos.forEach(nombre => {
+                    const div = document.createElement('div');
+                    div.style.padding = "10px";
+                    div.style.cursor = "pointer";
+                    div.style.borderBottom = "1px solid #edf2f7";
+                    div.style.fontSize = "14px";
+                    div.innerText = nombre;
+
+                    div.addEventListener('click', function () {
+                        // Buscamos el registro completo de ese cliente para recuperar sus datos de texto
+                        const infoCliente = filtrados.find(c => c.cliente === nombre);
+
+                        // Mandamos los datos limpios por la URL encriptados hacia el index
+                        const params = new URLSearchParams();
+                        params.append('vip', 'true');
+                        params.append('nombre', nombre);
+                        params.append('imei_ref', infoCliente.imei); // Usamos su IMEI actual como llave de consulta rápida
+
+                        window.location.href = `index.html?${params.toString()}`;
+                    });
+
+                    div.onmouseover = () => div.style.background = "#edf2f7";
+                    div.onmouseout = () => div.style.background = "transparent";
+                    listaResultados.appendChild(div);
+                });
+                listaResultados.style.display = "block";
             });
+            // --- AGREGAR CELULAR AL CATÁLOGO ---
+            const btnAgregar = document.getElementById('btnAgregarCelular');
+            if (btnAgregar) {
+                btnAgregar.addEventListener('click', async function () {
+                    const link = document.getElementById('nuevoLink').value.trim();
+                    const imei = document.getElementById('nuevoImei').value.trim();
+                    const estado = document.getElementById('nuevoEstado').value;
+
+                    if (!link) {
+                        alert("⚠️ Por favor introduce el enlace de Mercado Libre.");
+                        return;
+                    }
+
+                    const originalText = btnAgregar.innerText;
+                    btnAgregar.innerText = "⏳ Consultando e inyectando...";
+                    btnAgregar.disabled = true;
+
+                    try {
+                        const formData = new URLSearchParams();
+                        formData.append('action', 'agregarCelularCatalogo');
+                        formData.append('token', CONFIG.API_TOKEN);
+                        formData.append('link', link);
+                        formData.append('imei', imei);
+                        formData.append('estado', estado);
+
+                        const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                            method: 'POST',
+                            body: formData.toString(),
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                        });
+                        const data = await res.json();
+
+                        if (data.result === 'success') {
+                            alert(`✅ Celular agregado con éxito!\n\nModelo: ${data.modelo}\nPrecio calculado: $${data.precioContado.toLocaleString('es-MX')}\nIMEI asignado: ${data.imei}`);
+                            document.getElementById('formAgregarCelular').reset();
+
+                            // Limpiar caché local del catálogo para obligar a refrescar la base de datos
+                            localStorage.removeItem("celya_catalogo_cache");
+                            localStorage.removeItem("celya_catalogo_timestamp");
+                        } else {
+                            alert("⚠️ Error al importar celular: " + (data.message || "Error desconocido"));
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert("❌ Error de comunicación con la base de datos.");
+                    } finally {
+                        btnAgregar.innerText = originalText;
+                        btnAgregar.disabled = false;
+                    }
+                });
+            }
+        };
     </script>
     <script>
         (function () {
