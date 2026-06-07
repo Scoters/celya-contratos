@@ -2189,8 +2189,9 @@
                 wrapperStorage.style.pointerEvents = "none";
             }
 
-            let data = null;
-            if (ML_CACHE_VARIANTES[cleanId]) {
+            try {
+                let data = null;
+                if (ML_CACHE_VARIANTES[cleanId]) {
                 data = ML_CACHE_VARIANTES[cleanId];
             } else {
                 try {
