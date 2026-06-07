@@ -7,7 +7,7 @@
     <title>CelYa! - Catálogo Oficial</title>
     <!-- Google Fonts Outfit -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="config.js"></script>
+    <script src="config.js?v=2"></script>
     <style>
         :root {
             --primary: #0f172a;
@@ -30,6 +30,49 @@
             background-color: #f1f5f9;
             color: var(--text-main);
             line-height: 1.5;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        input, textarea, select {
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+        .frecuencia-toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 10px 0 15px 0;
+            background: var(--bg-light);
+            padding: 6px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .frecuencia-toggle {
+            display: flex;
+            background: #e2e8f0;
+            border-radius: 6px;
+            padding: 2px;
+        }
+
+        .freq-btn {
+            background: transparent;
+            border: none;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .freq-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         header {
@@ -797,7 +840,7 @@
         <div style="text-align: center; margin-bottom: 10px;">
             <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo">
         </div>
-        <p>Estrena el smartphone que buscas con pagos semanales a tu medida</p>
+        <p>Estrena el smartphone que buscas con pagos semanales/quincenales a tu medida</p>
     </header>
 
     <div class="container">
@@ -841,14 +884,19 @@
         </div>
 
         <!-- Caja de Pedido Especial al final de la página -->
-        <div class="pedido-especial-box" style="margin-top: 40px; text-align: center; background: var(--bg-light); border: 1.5px dashed var(--border-color); border-radius: 16px; padding: 30px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
-            <p style="font-size: 16px; font-weight: 600; color: var(--primary); margin: 0 0 8px 0;">✨ ¿No encontraste el celular que querías?</p>
-            <p style="font-size: 14px; color: var(--text-muted); margin: 0 0 20px 0; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.5;">
-                ¡No te preocupes! Podemos traerte cualquier modelo de <strong>Samsung, Motorola, Xiaomi u Oppo</strong> de Mercado Libre bajo financiamiento. ¡Cotízalo en segundos!
+        <div class="pedido-especial-box"
+            style="margin-top: 40px; text-align: center; background: var(--bg-light); border: 1.5px dashed var(--border-color); border-radius: 16px; padding: 30px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+            <p style="font-size: 16px; font-weight: 600; color: var(--primary); margin: 0 0 8px 0;">✨ ¿No encontraste el
+                celular que querías?</p>
+            <p
+                style="font-size: 14px; color: var(--text-muted); margin: 0 0 20px 0; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+                ¡No te preocupes! Podemos traerte cualquier modelo de <strong>Samsung, Motorola, Xiaomi u Oppo</strong>
+                de Mercado Libre bajo financiamiento. ¡Cotízalo en segundos!
             </p>
             <button type="button" onclick="abrirModalPedidoEspecial()"
                 style="background: linear-gradient(135deg, #e67e22, #d35400); color: white; border: none; padding: 14px 32px; font-weight: 700; border-radius: 12px; cursor: pointer; font-size: 15px; box-shadow: 0 6px 15px rgba(230,126,34,0.25); transition: transform 0.2s ease, opacity 0.2s ease;"
-                onmouseover="this.style.opacity='0.95'; this.style.transform='scale(1.02)';" onmouseout="this.style.opacity='1'; this.style.transform='scale(1)';">
+                onmouseover="this.style.opacity='0.95'; this.style.transform='scale(1.02)';"
+                onmouseout="this.style.opacity='1'; this.style.transform='scale(1)';">
                 📲 Cotizar Pedido Especial de Mercado Libre
             </button>
         </div>
@@ -928,6 +976,7 @@
                             <input type="hidden" id="hiddenEsFijo">
                             <input type="hidden" id="hiddenCuota26">
                             <input type="hidden" id="hiddenCuota52">
+                            <input type="hidden" id="hiddenPrecioContado">
 
                             <label style="margin-top: 0;">Tu Nombre Completo:</label>
                             <input type="text" id="cliNombre" required placeholder="Ej. Juan Pérez">
@@ -935,21 +984,29 @@
                             <label style="margin-top: 10px;">WhatsApp de Contacto:</label>
                             <input type="tel" id="cliTelefono" required placeholder="Ej. 667 123 4567">
 
-                            <label style="margin-top: 10px;">¿Cuánto ganas libres a la semana? (Ingresos):</label>
-                            <select id="cliSueldo">
-                                <option value="Menos de $1,500">Menos de $1,500</option>
-                                <option value="$1,500 a $3,000">$1,500 a $3,000</option>
-                                <option value="$3,000 a $5,000">$3,000 a $5,000</option>
-                                <option value="Más de $5,000">Más de $5,000</option>
-                            </select>
+                            <div id="seccionPreguntasCredito">
+                                <label id="lbl-cliSueldo" style="margin-top: 10px;">¿Cuánto ganas libres a la semana? (Ingresos):</label>
+                                <select id="cliSueldo">
+                                    <option value="Menos de $1,500">Menos de $1,500</option>
+                                    <option value="$1,500 a $3,000">$1,500 a $3,000</option>
+                                    <option value="$3,000 a $5,000">$3,000 a $5,000</option>
+                                    <option value="Más de $5,000">Más de $5,000</option>
+                                </select>
 
-                            <label style="margin-top: 10px;">¿Cuánto pagas de abonos actualmente a la semana? (Deudas
-                                activas):</label>
-                            <select id="cliPrestamos">
-                                <option value="Nada, no tengo deudas">Nada, no tengo deudas</option>
-                                <option value="Menos de $500">Menos de $500</option>
-                                <option value="$500 a $1,000">$500 a $1,000</option>
-                                <option value="Más de $1,000">Más de $1,000</option>
+                                <label id="lbl-cliPrestamos" style="margin-top: 10px;">¿Cuánto pagas de abonos actualmente a la semana? (Deudas activas):</label>
+                                <select id="cliPrestamos">
+                                    <option value="Nada, no tengo deudas">Nada, no tengo deudas</option>
+                                    <option value="Menos de $500">Menos de $500</option>
+                                    <option value="$500 a $1,000">$500 a $1,000</option>
+                                    <option value="Más de $1,000">Más de $1,000</option>
+                                </select>
+                            </div>
+
+                            <label style="margin-top: 10px;">Frecuencia de Pago de tu Preferencia:</label>
+                            <select id="cliFrecuencia" onchange="actualizarPlazosYPrecioPDP()">
+                                <option value="SEMANAL">Semanal (Cada Semana)</option>
+                                <option value="QUINCENAL">Quincenal (Cada 15 días)</option>
+                                <option value="CONTADO">De Contado (Pago Único)</option>
                             </select>
 
                             <label style="margin-top: 10px;">Plazo de Pago de tu Preferencia:</label>
@@ -1038,7 +1095,7 @@
                         <input type="tel" id="pe-cliTelefono" required placeholder="10 dígitos"
                             style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
 
-                        <label
+                        <label id="pe-lbl-cliSueldo"
                             style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">Sueldo
                             Semanal Libre:</label>
                         <select id="pe-cliSueldo"
@@ -1050,7 +1107,7 @@
                             <option value="Más de $5,000">Más de $5,000 semanales</option>
                         </select>
 
-                        <label
+                        <label id="pe-lbl-cliPrestamos"
                             style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">¿Cuánto
                             pagas de abonos actualmente? (Deudas):</label>
                         <select id="pe-cliPrestamos"
@@ -1059,6 +1116,14 @@
                             <option value="Menos de $500">Menos de $500</option>
                             <option value="$500 a $1,000">$500 a $1,000</option>
                             <option value="Más de $1,000">Más de $1,000</option>
+                        </select>
+
+                        <label
+                            style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">Frecuencia de Pago:</label>
+                        <select id="pe-cliFrecuencia" onchange="actualizarPlazosYPreciosPedidoEspecial()"
+                            style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
+                            <option value="SEMANAL">Semanal (Cada Semana)</option>
+                            <option value="QUINCENAL">Quincenal (Cada 15 días)</option>
                         </select>
 
                         <label
@@ -1155,8 +1220,10 @@
             btn.innerText = "⏳";
             btn.disabled = true;
 
-            const cacheKey = "celya_catalogo_cache";
-            const cacheTimeKey = "celya_catalogo_timestamp";
+            // Clave de caché única según la URL del script para evitar datos stale si cambia de URL
+            const urlHash = btoa(CONFIG.GOOGLE_SCRIPT_URL).substring(0, 15);
+            const cacheKey = "celya_catalogo_cache_" + urlHash;
+            const cacheTimeKey = "celya_catalogo_timestamp_" + urlHash;
             const cacheDuration = 12 * 60 * 60 * 1000; // 12 horas de validez absoluta
 
             // Si es la carga inicial (búsqueda vacía), intentar usar la caché local
@@ -1306,10 +1373,10 @@
                                     <span class="brand-badge ${claseMarca}">${marca}</span>
                                     ${badgeEstado}
                                 </div>
-                                <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}')">
+                                <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">
                                     <img src="${item.foto}" alt="${modeloLimpio}" onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop'">
                                 </div>
-                                <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}')">${modeloLimpio}</h4>
+                                <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpio}</h4>
                                 <div class="specs-container">
                                     ${item.memoria ? `<span class="spec-tag">💾 ${item.memoria}</span>` : ''}
                                     ${item.color ? `<span class="spec-tag">🎨 ${item.color}</span>` : ''}
@@ -1321,17 +1388,43 @@
                                 </div>
                             </div>
                             <div>
-                                <div class="cuotas">
-                                    <div class="cuota-item">
-                                        <span class="plan-label">⏱️ Plan Rápido (26 sem):</span>
-                                        <span class="plan-val">$${Math.round(item.cuota26).toLocaleString('es-MX')}/sem</span>
-                                    </div>
-                                    <div class="cuota-item" style="margin-top: 8px;">
-                                        <span class="plan-label">🗓️ Plan Cómodo (52 sem):</span>
-                                        <span class="plan-val">$${Math.round(item.cuota52).toLocaleString('es-MX')}/sem</span>
+                                <div class="frecuencia-toggle-container">
+                                    <span style="font-size: 12px; font-weight: 600; color: var(--text-muted);">Pago:</span>
+                                    <div class="frecuencia-toggle">
+                                        <button type="button" class="freq-btn active" onclick="setCardFrecuencia(this, 'semanal')">Semanal</button>
+                                        <button type="button" class="freq-btn" onclick="setCardFrecuencia(this, 'quincenal')">Quincenal</button>
+                                        <button type="button" class="freq-btn" onclick="setCardFrecuencia(this, 'contado')">Contado</button>
                                     </div>
                                 </div>
-                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}')">Pedir a Crédito</button>
+                                <div class="cuotas">
+                                    <div class="cuotas-semanal">
+                                        <div class="cuota-item">
+                                            <span class="plan-label">⏱️ Plan Rápido (26 sem):</span>
+                                            <span class="plan-val">$${Math.round(item.cuota26).toLocaleString('es-MX')}/sem</span>
+                                        </div>
+                                        <div class="cuota-item" style="margin-top: 8px;">
+                                            <span class="plan-label">🗓️ Plan Cómodo (52 sem):</span>
+                                            <span class="plan-val">$${Math.round(item.cuota52).toLocaleString('es-MX')}/sem</span>
+                                        </div>
+                                    </div>
+                                    <div class="cuotas-quincenal" style="display: none;">
+                                        <div class="cuota-item">
+                                            <span class="plan-label">⏱️ Plan Rápido (13 quin):</span>
+                                            <span class="plan-val">$${Math.round(item.cuota26 * 2).toLocaleString('es-MX')}/quin</span>
+                                        </div>
+                                        <div class="cuota-item" style="margin-top: 8px;">
+                                            <span class="plan-label">🗓️ Plan Cómodo (26 quin):</span>
+                                            <span class="plan-val">$${Math.round(item.cuota52 * 2).toLocaleString('es-MX')}/quin</span>
+                                        </div>
+                                    </div>
+                                    <div class="cuotas-contado" style="display: none;">
+                                        <div class="cuota-item">
+                                            <span class="plan-label">💰 Pago Único:</span>
+                                            <span class="plan-val" style="color:var(--success); font-weight:bold;">$${Math.round(item.precioContado).toLocaleString('es-MX')}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">Pedir a Crédito</button>
                             </div>
                         </div>
                     `;
@@ -1347,12 +1440,46 @@
         let defaultColor = "";
         let defaultMemoria = "";
 
-        function abrirModalCredito(id, modelo, esFijo, foto, cuota26, cuota52, link, precioContado, engancheMinimo, color, memoria) {
+        function setCardFrecuencia(btn, freq) {
+            const card = btn.closest('.card-celular');
+            const btns = btn.parentNode.querySelectorAll('.freq-btn');
+            btns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const cuotasSemanal = card.querySelector('.cuotas-semanal');
+            const cuotasQuincenal = card.querySelector('.cuotas-quincenal');
+            const cuotasContado = card.querySelector('.cuotas-contado');
+            const btnSolicitar = card.querySelector('.btn-solicitar');
+            const divEnganche = card.querySelector('.enganche');
+
+            if (freq === 'semanal') {
+                if (cuotasSemanal) cuotasSemanal.style.display = 'block';
+                if (cuotasQuincenal) cuotasQuincenal.style.display = 'none';
+                if (cuotasContado) cuotasContado.style.display = 'none';
+                if (btnSolicitar) btnSolicitar.innerText = 'Pedir a Crédito';
+                if (divEnganche) divEnganche.style.opacity = '1';
+            } else if (freq === 'quincenal') {
+                if (cuotasSemanal) cuotasSemanal.style.display = 'none';
+                if (cuotasQuincenal) cuotasQuincenal.style.display = 'block';
+                if (cuotasContado) cuotasContado.style.display = 'none';
+                if (btnSolicitar) btnSolicitar.innerText = 'Pedir a Crédito';
+                if (divEnganche) divEnganche.style.opacity = '1';
+            } else { // contado
+                if (cuotasSemanal) cuotasSemanal.style.display = 'none';
+                if (cuotasQuincenal) cuotasQuincenal.style.display = 'none';
+                if (cuotasContado) cuotasContado.style.display = 'block';
+                if (btnSolicitar) btnSolicitar.innerText = 'Comprar de Contado';
+                if (divEnganche) divEnganche.style.opacity = '0';
+            }
+        }
+
+        function abrirModalCredito(id, modelo, esFijo, foto, cuota26, cuota52, link, precioContado, engancheMinimo, color, memoria, triggerElement) {
             document.getElementById('hiddenId').value = id;
             document.getElementById('hiddenModelo').value = modelo;
             document.getElementById('hiddenEsFijo').value = esFijo;
             document.getElementById('hiddenCuota26').value = cuota26 || 0;
             document.getElementById('hiddenCuota52').value = cuota52 || 0;
+            document.getElementById('hiddenPrecioContado').value = precioContado || 0;
 
             // Set PDP UI fields
             document.getElementById('pdp-product-title').innerText = modelo;
@@ -1371,8 +1498,31 @@
                 imgElement.src = foto || "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop";
             }
 
+            // Determinar frecuencia activa de la tarjeta
+            let freqInicial = "SEMANAL";
+            if (triggerElement) {
+                const card = triggerElement.closest('.card-celular');
+                if (card) {
+                    const activeBtn = card.querySelector('.freq-btn.active');
+                    if (activeBtn) {
+                        const clickAttr = activeBtn.getAttribute('onclick') || '';
+                        if (clickAttr.includes('quincenal')) {
+                            freqInicial = "QUINCENAL";
+                        } else if (clickAttr.includes('contado')) {
+                            freqInicial = "CONTADO";
+                        }
+                    }
+                }
+            }
+
+            // Establecer frecuencia en el select del modal
+            const cliFrecuencia = document.getElementById('cliFrecuencia');
+            if (cliFrecuencia) {
+                cliFrecuencia.value = freqInicial;
+            }
+
             // Initialize Dynamic Price Calculator
-            actualizarPrecioCalculadoPDP();
+            actualizarPlazosYPrecioPDP();
 
             // Initialize vertical thumbnails gallery with main picture
             const thumbsContainer = document.getElementById('pdp-thumbs-container');
@@ -1395,15 +1545,117 @@
             cargarVariantesRealesML(id);
         }
 
+        function actualizarPlazosYPrecioPDP() {
+            const freq = document.getElementById('cliFrecuencia').value;
+            const selectPlazo = document.getElementById('cliPlazo');
+            const seccionPreguntas = document.getElementById('seccionPreguntasCredito');
+
+            const lblSueldo = document.getElementById('lbl-cliSueldo');
+            const selectSueldo = document.getElementById('cliSueldo');
+            const lblPrestamos = document.getElementById('lbl-cliPrestamos');
+            const selectPrestamos = document.getElementById('cliPrestamos');
+
+            if (freq === "CONTADO") {
+                if (seccionPreguntas) seccionPreguntas.style.display = "none";
+                selectPlazo.options[0].text = "Pago Único de Contado";
+                selectPlazo.options[1].style.display = "none";
+                selectPlazo.options[1].disabled = true;
+                selectPlazo.value = "26 Semanas";
+            } else {
+                if (seccionPreguntas) seccionPreguntas.style.display = "block";
+                selectPlazo.options[1].style.display = "block";
+                selectPlazo.options[1].disabled = false;
+
+                if (freq === "QUINCENAL") {
+                    selectPlazo.options[0].text = "Plan Rápido (13 Pagos Quincenales)";
+                    selectPlazo.options[1].text = "Plan Cómodo (26 Pagos Quincenales)";
+
+                    if (lblSueldo) lblSueldo.innerText = "¿Cuánto ganas libres a la quincena? (Ingresos):";
+                    if (selectSueldo) {
+                        selectSueldo.options[0].text = "Menos de $3,000";
+                        selectSueldo.options[0].value = "Menos de $3,000";
+                        selectSueldo.options[1].text = "$3,000 a $6,000";
+                        selectSueldo.options[1].value = "$3,000 a $6,000";
+                        selectSueldo.options[2].text = "$6,000 a $10,000";
+                        selectSueldo.options[2].value = "$6,000 a $10,000";
+                        selectSueldo.options[3].text = "Más de $10,000";
+                        selectSueldo.options[3].value = "Más de $10,000";
+                    }
+
+                    if (lblPrestamos) lblPrestamos.innerText = "¿Cuánto pagas de abonos actualmente a la quincena? (Deudas activas):";
+                    if (selectPrestamos) {
+                        selectPrestamos.options[0].text = "Nada, no tengo deudas";
+                        selectPrestamos.options[0].value = "Nada, no tengo deudas";
+                        selectPrestamos.options[1].text = "Menos de $1,000";
+                        selectPrestamos.options[1].value = "Menos de $1,000";
+                        selectPrestamos.options[2].text = "$1,000 a $2,000";
+                        selectPrestamos.options[2].value = "$1,000 a $2,000";
+                        selectPrestamos.options[3].text = "Más de $2,000";
+                        selectPrestamos.options[3].value = "Más de $2,000";
+                    }
+                } else {
+                    selectPlazo.options[0].text = "Plan Rápido (26 Pagos Semanales)";
+                    selectPlazo.options[1].text = "Plan Cómodo (52 Pagos Semanales)";
+
+                    if (lblSueldo) lblSueldo.innerText = "¿Cuánto ganas libres a la semana? (Ingresos):";
+                    if (selectSueldo) {
+                        selectSueldo.options[0].text = "Menos de $1,500";
+                        selectSueldo.options[0].value = "Menos de $1,500";
+                        selectSueldo.options[1].text = "$1,500 a $3,000";
+                        selectSueldo.options[1].value = "$1,500 a $3,000";
+                        selectSueldo.options[2].text = "$3,000 a $5,000";
+                        selectSueldo.options[2].value = "$3,000 a $5,000";
+                        selectSueldo.options[3].text = "Más de $5,000";
+                        selectSueldo.options[3].value = "Más de $5,000";
+                    }
+
+                    if (lblPrestamos) lblPrestamos.innerText = "¿Cuánto pagas de abonos actualmente a la semana? (Deudas activas):";
+                    if (selectPrestamos) {
+                        selectPrestamos.options[0].text = "Nada, no tengo deudas";
+                        selectPrestamos.options[0].value = "Nada, no tengo deudas";
+                        selectPrestamos.options[1].text = "Menos de $500";
+                        selectPrestamos.options[1].value = "Menos de $500";
+                        selectPrestamos.options[2].text = "$500 a $1,000";
+                        selectPrestamos.options[2].value = "$500 a $1,000";
+                        selectPrestamos.options[3].text = "Más de $1,000";
+                        selectPrestamos.options[3].value = "Más de $1,000";
+                    }
+                }
+            }
+
+            actualizarPrecioCalculadoPDP();
+        }
+
         function actualizarPrecioCalculadoPDP() {
-            const plazo = document.getElementById('cliPlazo').value;
+            const freq = document.getElementById('cliFrecuencia').value;
+            const plazo = document.getElementById('cliPlazo').value; // "26 Semanas" o "52 Semanas"
             const cuota26 = parseFloat(document.getElementById('hiddenCuota26').value) || 0;
             const cuota52 = parseFloat(document.getElementById('hiddenCuota52').value) || 0;
-            const cuotaActiva = (plazo === "26 Semanas") ? cuota26 : cuota52;
-            const numPagos = (plazo === "26 Semanas") ? 26 : 52;
 
-            document.getElementById('pdp-weekly-amount').innerText = `$${Math.round(cuotaActiva)}`;
-            document.getElementById('pdp-weekly-term').innerText = `en ${numPagos} pagos semanales`;
+            let cuotaActiva = (plazo === "26 Semanas") ? cuota26 : cuota52;
+            let numPagos = (plazo === "26 Semanas") ? 26 : 52;
+            let labelFrecuencia = "semanales";
+
+            if (freq === "QUINCENAL") {
+                cuotaActiva = cuotaActiva * 2;
+                numPagos = numPagos / 2;
+                labelFrecuencia = "quincenales";
+            }
+
+            const precioContado = parseFloat(document.getElementById('hiddenPrecioContado').value) || 0;
+
+            if (freq === "CONTADO") {
+                document.getElementById('pdp-enganche-grande').innerText = `$${Math.round(precioContado).toLocaleString('es-MX')}`;
+                document.getElementById('pdp-weekly-amount').innerText = `$0`;
+                document.getElementById('pdp-weekly-term').innerText = `en 1 pago de contado`;
+            } else {
+                const factorEnganche = (plazo === "26 Semanas") ? CONFIG_TASAS.enganche26 : CONFIG_TASAS.enganche52;
+                const engancheCalculado = precioContado * factorEnganche;
+
+                document.getElementById('pdp-enganche-grande').innerText = `$${Math.round(engancheCalculado).toLocaleString('es-MX')}`;
+                document.getElementById('pdp-weekly-amount').innerText = `$${Math.round(cuotaActiva)}`;
+                document.getElementById('pdp-weekly-term').innerText = `en ${numPagos} pagos ${labelFrecuencia}`;
+            }
         }
 
         function cerrarModal() {
@@ -1544,6 +1796,78 @@
             }
         }
 
+        function actualizarPlazosYPreciosPedidoEspecial() {
+            const freq = document.getElementById('pe-cliFrecuencia').value;
+            const selectPlazo = document.getElementById('pe-cliPlazo');
+
+            const lblSueldo = document.getElementById('pe-lbl-cliSueldo');
+            const selectSueldo = document.getElementById('pe-cliSueldo');
+            const lblPrestamos = document.getElementById('pe-lbl-cliPrestamos');
+            const selectPrestamos = document.getElementById('pe-cliPrestamos');
+
+            if (freq === "QUINCENAL") {
+                selectPlazo.options[0].text = "Plan Rápido (13 Quincenas)";
+                selectPlazo.options[1].text = "Plan Cómodo (26 Quincenas)";
+
+                if (lblSueldo) lblSueldo.innerText = "Sueldo Quincenal Libre:";
+                if (selectSueldo) {
+                    selectSueldo.options[0].text = "Menos de $3,000 quincenales";
+                    selectSueldo.options[0].value = "Menos de $3,000";
+                    selectSueldo.options[1].text = "$3,000 a $5,000 quincenales";
+                    selectSueldo.options[1].value = "$3,000 a $5,000";
+                    selectSueldo.options[2].text = "$5,000 a $7,000 quincenales";
+                    selectSueldo.options[2].value = "$5,000 a $7,000";
+                    selectSueldo.options[3].text = "$7,000 a $10,000 quincenales";
+                    selectSueldo.options[3].value = "$7,000 a $10,000";
+                    selectSueldo.options[4].text = "Más de $10,000 quincenales";
+                    selectSueldo.options[4].value = "Más de $10,000";
+                }
+
+                if (lblPrestamos) lblPrestamos.innerText = "¿Cuánto pagas de abonos actualmente? (Deudas Quincenales):";
+                if (selectPrestamos) {
+                    selectPrestamos.options[0].text = "Nada, no tengo deudas";
+                    selectPrestamos.options[0].value = "Nada, no tengo deudas";
+                    selectPrestamos.options[1].text = "Menos de $1,000";
+                    selectPrestamos.options[1].value = "Menos de $1,000";
+                    selectPrestamos.options[2].text = "$1,000 a $2,000";
+                    selectPrestamos.options[2].value = "$1,000 a $2,000";
+                    selectPrestamos.options[3].text = "Más de $2,000";
+                    selectPrestamos.options[3].value = "Más de $2,000";
+                }
+            } else {
+                selectPlazo.options[0].text = "Plan Rápido (26 Semanas)";
+                selectPlazo.options[1].text = "Plan Cómodo (52 Semanas)";
+
+                if (lblSueldo) lblSueldo.innerText = "Sueldo Semanal Libre:";
+                if (selectSueldo) {
+                    selectSueldo.options[0].text = "Menos de $1,500 semanales";
+                    selectSueldo.options[0].value = "Menos de $1,500";
+                    selectSueldo.options[1].text = "$1,500 a $2,500 semanales";
+                    selectSueldo.options[1].value = "$1,500 a $2,500";
+                    selectSueldo.options[2].text = "$2,500 a $3,500 semanales";
+                    selectSueldo.options[2].value = "$2,500 a $3,500";
+                    selectSueldo.options[3].text = "$3,500 a $5,000 semanales";
+                    selectSueldo.options[3].value = "$3,500 a $5,000";
+                    selectSueldo.options[4].text = "Más de $5,000 semanales";
+                    selectSueldo.options[4].value = "Más de $5,000";
+                }
+
+                if (lblPrestamos) lblPrestamos.innerText = "¿Cuánto pagas de abonos actualmente? (Deudas):";
+                if (selectPrestamos) {
+                    selectPrestamos.options[0].text = "Nada, no tengo deudas";
+                    selectPrestamos.options[0].value = "Nada, no tengo deudas";
+                    selectPrestamos.options[1].text = "Menos de $500";
+                    selectPrestamos.options[1].value = "Menos de $500";
+                    selectPrestamos.options[2].text = "$500 a $1,000";
+                    selectPrestamos.options[2].value = "$500 a $1,000";
+                    selectPrestamos.options[3].text = "Más de $1,000";
+                    selectPrestamos.options[3].value = "Más de $1,000";
+                }
+            }
+
+            actualizarPreciosPedidoEspecial();
+        }
+
         function actualizarPreciosPedidoEspecial() {
             if (!pe_data_actual) return;
 
@@ -1555,18 +1879,27 @@
 
             // Plazo elegido
             const plazo = document.getElementById('pe-cliPlazo').value;
+            const freq = document.getElementById('pe-cliFrecuencia').value;
 
             // Matemática
             const factorEnganche = (plazo === "26 Semanas") ? CONFIG_TASAS.enganche26 : CONFIG_TASAS.enganche52;
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
-            const numPagos = (plazo === "26 Semanas") ? 26 : 52;
+            let numPagos = (plazo === "26 Semanas") ? 26 : 52;
 
             const enganche = precioContado * factorEnganche;
             const totalFinanciado = (precioContado * (1 + factorInteres)) - enganche;
-            const cuotaSemanal = totalFinanciado / numPagos;
+            
+            let cuota = totalFinanciado / numPagos;
+            let labelFrecuencia = "/sem";
+
+            if (freq === "QUINCENAL") {
+                numPagos = numPagos / 2;
+                cuota = totalFinanciado / numPagos;
+                labelFrecuencia = "/quin";
+            }
 
             document.getElementById('pe-preview-enganche').innerText = `$${Math.round(enganche).toLocaleString('es-MX')}`;
-            document.getElementById('pe-preview-semanal').innerText = `$${Math.round(cuotaSemanal).toLocaleString('es-MX')}/sem`;
+            document.getElementById('pe-preview-semanal').innerText = `$${Math.round(cuota).toLocaleString('es-MX')}${labelFrecuencia}`;
         }
 
         async function enviarSolicitudPedidoEspecial() {
@@ -1577,6 +1910,7 @@
             const sueldo = document.getElementById('pe-cliSueldo').value;
             const prestamos = document.getElementById('pe-cliPrestamos').value;
             const plazo = document.getElementById('pe-cliPlazo').value;
+            const freq = document.getElementById('pe-cliFrecuencia').value;
 
             if (!nombre || !telefono || !sueldo) {
                 alert("Por favor rellena todos tus datos de contacto e ingresos.");
@@ -1601,11 +1935,22 @@
             const precioContado = basePrice * CONFIG_TASAS.gananciaContadoFactor;
             const factorEnganche = (plazo === "26 Semanas") ? CONFIG_TASAS.enganche26 : CONFIG_TASAS.enganche52;
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
-            const numPagos = (plazo === "26 Semanas") ? 26 : 52;
+            let numPagos = (plazo === "26 Semanas") ? 26 : 52;
+            let textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (26 Semanas)" : "Plan Cómodo (52 Semanas)";
 
             const enganche = precioContado * factorEnganche;
             const totalFinanciado = (precioContado * (1 + factorInteres)) - enganche;
-            const cuotaSemanal = Math.round(totalFinanciado / numPagos);
+            
+            let cuota = totalFinanciado / numPagos;
+
+            if (freq === "QUINCENAL") {
+                numPagos = numPagos / 2;
+                cuota = totalFinanciado / numPagos;
+                textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (13 Quincenas)" : "Plan Cómodo (26 Quincenas)";
+            }
+
+            const baseUrl = window.location.origin + window.location.pathname.replace('catalogo.html', 'index.html');
+            const prefilledUrl = `${baseUrl}?pre_modelo=${encodeURIComponent(pe_data_actual.title)}&pre_frecuencia=${encodeURIComponent(freq)}&pre_plazo=${encodeURIComponent(plazo === "26 Semanas" ? "26" : "52")}&pre_nombre=${encodeURIComponent(nombre)}&pre_telefono=${encodeURIComponent(telefono)}`;
 
             try {
                 const params = new URLSearchParams();
@@ -1614,11 +1959,12 @@
                 params.append('telefono', telefono);
                 params.append('sueldo', sueldo);
                 params.append('prestamos', prestamos);
-                params.append('cuota', cuotaSemanal);
+                params.append('cuota', Math.round(cuota));
                 params.append('link', pe_link_actual);
-                params.append('plazo', `${plazo} (PEDIDO ESPECIAL: ${pe_data_actual.title})`);
+                params.append('plazo', `${textoPlazoEnvio} (PEDIDO ESPECIAL: ${pe_data_actual.title})`);
                 params.append('color', "");
                 params.append('capacidad', "");
+                params.append('linkPrellenado', prefilledUrl);
 
                 const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
                     method: 'POST',
@@ -1628,7 +1974,9 @@
                 const data = await res.json();
 
                 if (data.result === 'success') {
-                    alert("¡Tu Solicitud de Pedido Especial ha sido enviada con éxito! Nos pondremos en contacto contigo vía WhatsApp.");
+                    if (confirm("¡Tu Solicitud de Pedido Especial ha sido enviada con éxito! Nos pondremos en contacto contigo vía WhatsApp.\n\n¿Deseas abrir el Formulario de Contrato prellenado con estos datos ahora?")) {
+                        window.open(prefilledUrl, '_blank');
+                    }
                     cerrarModalPedidoEspecial();
                 } else {
                     alert("Ocurrió un error al enviar tu solicitud: " + (data.error || "Reintenta más tarde."));
@@ -1684,11 +2032,17 @@
                 params.append('sueldo', sueldo);
                 params.append('prestamos', prestamos);
 
-                // Determinar cuota correspondiente al plazo elegido
+                const freq = document.getElementById('cliFrecuencia').value;
+
+                // Determinar cuota correspondiente al plazo elegido y frecuencia
                 const cuota26 = parseFloat(document.getElementById('hiddenCuota26').value) || 150;
                 const cuota52 = parseFloat(document.getElementById('hiddenCuota52').value) || 100;
-                const cuota = (plazo === "26 Semanas") ? cuota26 : cuota52;
-                params.append('cuota', cuota);
+                let cuotaBase = (plazo === "26 Semanas") ? cuota26 : cuota52;
+                
+                if (freq === "QUINCENAL") {
+                    cuotaBase = cuotaBase * 2;
+                }
+                params.append('cuota', Math.round(cuotaBase));
 
                 const referenciaProducto = currentMLItemLink || ((esFijo === "true" || esFijo === true) ? `Stock Fijo: ${modelo}` : `https://articulo.mercadolibre.com.mx/MLM-${id.replace("MLM", "")}`);
                 params.append('link', referenciaProducto);
@@ -1698,10 +2052,22 @@
                 if (colorSeleccionado) detallesVariante += ` - ${colorSeleccionado}`;
                 if (almacenamientoSeleccionado) detallesVariante += ` - ${almacenamientoSeleccionado}`;
 
+                // Determinar el texto del plazo según frecuencia
+                let textoPlazoEnvio = "";
+                if (freq === "QUINCENAL") {
+                    textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (13 Quincenas)" : "Plan Cómodo (26 Quincenas)";
+                } else {
+                    textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (26 Semanas)" : "Plan Cómodo (52 Semanas)";
+                }
+
                 // Añadimos las especificaciones directo entre paréntesis al lado del modelo
-                params.append('plazo', `${plazo} (${modelo}${detallesVariante})`);
+                params.append('plazo', `${textoPlazoEnvio} (${modelo}${detallesVariante})`);
                 params.append('color', colorSeleccionado || "");
                 params.append('capacidad', almacenamientoSeleccionado || "");
+
+                const baseUrl = window.location.origin + window.location.pathname.replace('catalogo.html', 'index.html');
+                const prefilledUrl = `${baseUrl}?pre_modelo=${encodeURIComponent(modelo)}&pre_frecuencia=${encodeURIComponent(freq)}&pre_plazo=${encodeURIComponent(plazo === "26 Semanas" ? "26" : "52")}&pre_nombre=${encodeURIComponent(nombre)}&pre_telefono=${encodeURIComponent(telefono)}`;
+                params.append('linkPrellenado', prefilledUrl);
 
                 const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
                     method: 'POST',
@@ -1711,7 +2077,9 @@
                 const data = await res.json();
 
                 if (data.result === 'success') {
-                    alert(`✅ ¡Excelente, ${nombre}!\n\nHemos recibido tu solicitud para el ${modelo}.\n\nUn asesor validará tu crédito y te escribirá por WhatsApp en unos minutos.`);
+                    if (confirm(`✅ ¡Excelente, ${nombre}!\n\nHemos recibido tu solicitud para el ${modelo}.\n\n¿Deseas abrir el Formulario de Contrato prellenado con estos datos ahora?`)) {
+                        window.open(prefilledUrl, '_blank');
+                    }
                     cerrarModal();
                 } else if (data.result === 'rejected') {
                     alert(`⚠️ Hola ${nombre}, gracias por tu interés.\n\nPor el momento, de acuerdo a nuestras políticas de riesgo vigentes, no es posible autorizar tu solicitud en este momento.\n\nTe invitamos a volver a intentar en 30 días.`);

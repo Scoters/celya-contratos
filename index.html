@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Contrato - CelYa</title>
-    <script src="config.js"></script>
+    <script src="config.js?v=2"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -200,6 +200,7 @@
                 <option value="SEMANAL|DOMINGO">Semanal — Cada Domingo</option>
                 <option value="QUINCENAL|15 Y 30">Quincenal — Días 15 y 30 (Fijo)</option>
                 <option value="QUINCENAL|SABADO">Quincenal — Sábado de Raya (Cada 2 semanas)</option>
+                <option value="CONTADO|UNICO">De Contado — Pago Único</option>
             </select>
 
             <h3>Estructura del Crédito</h3>
@@ -493,8 +494,59 @@
                     select.appendChild(opt);
                 });
 
-                // --- LECTOR DE DATOS DE TEXTO VIP ---
+                // --- LECTOR DE DATOS DE TEXTO PRE-LLENADO DESDE EL CATÁLOGO ---
                 const urlParams = new URLSearchParams(window.location.search);
+                const preModelo = urlParams.get('pre_modelo');
+                if (preModelo) {
+                    const options = select.options;
+                    for (let i = 0; i < options.length; i++) {
+                        if (options[i].text.toLowerCase().includes(preModelo.toLowerCase())) {
+                            select.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                const preFrecuencia = urlParams.get('pre_frecuencia');
+                if (preFrecuencia) {
+                    const selectCobro = document.getElementById('agendaCobro');
+                    if (preFrecuencia.toUpperCase() === "QUINCENAL") {
+                        selectCobro.value = "QUINCENAL|15 Y 30";
+                    } else if (preFrecuencia.toUpperCase() === "SEMANAL") {
+                        selectCobro.value = "SEMANAL|SABADO";
+                    }
+                    if (typeof procesarAgendaCobro === 'function') {
+                        procesarAgendaCobro();
+                    }
+                }
+
+                const prePlazo = urlParams.get('pre_plazo');
+                if (prePlazo) {
+                    const selectPlazo = document.getElementById('plazoSemanas');
+                    if (prePlazo === "26" || prePlazo === "13") {
+                        selectPlazo.value = "26";
+                    } else if (prePlazo === "52" || prePlazo === "26_largo") {
+                        selectPlazo.value = "52";
+                    }
+                }
+
+                const preNombre = urlParams.get('pre_nombre');
+                if (preNombre) {
+                    document.getElementById('cliente').value = preNombre.toUpperCase();
+                }
+
+                const preTelefono = urlParams.get('pre_telefono');
+                if (preTelefono) {
+                    const telInput = document.querySelector('[name="telefono"]');
+                    if (telInput) telInput.value = preTelefono;
+                }
+
+                // Disparar cálculo inicial tras pre-llenado
+                if (typeof actualizarFormularioPrecios === 'function') {
+                    actualizarFormularioPrecios();
+                }
+
+                // --- LECTOR DE DATOS DE TEXTO VIP ---
                 if (urlParams.get('vip') === 'true') {
                     // 1. Cambiamos visualmente el título para saber qué es una renovación
                     const titulo = document.querySelector('h2');
@@ -540,9 +592,49 @@
         document.getElementById('selectDispositivo').addEventListener('change', actualizarFormularioPrecios);
         document.getElementById('agendaCobro').addEventListener('change', procesarAgendaCobro);
         document.getElementById('plazoSemanas').addEventListener('change', function () {
-            const frecuencia = document.getElementById('agendaCobro').value.split('|')[0] || "SEMANAL";
-            recalcularCuotaPorFrecuenciaModificada(frecuencia);
+            actualizarEngancheYFinanciamientoPorPlazo();
         });
+
+        function actualizarEngancheYFinanciamientoPorPlazo() {
+            const imeiSelected = document.getElementById('selectDispositivo').value;
+            const equipo = cacheInventario.find(e => e.imei === imeiSelected);
+            if (!equipo) return;
+
+            const planElegido = document.getElementById('plazoSemanas').value; // "26" o "52"
+            const precioContado = parseFloat(equipo.precioContado.toString().replace(/[\$,]/g, "").trim()) || 0;
+
+            if (precioContado > 0) {
+                const selector = document.getElementById('agendaCobro').value;
+                const partes = selector ? selector.split('|') : [];
+                const frecuencia = partes[0] || "SEMANAL";
+
+                if (frecuencia === "CONTADO") {
+                    // Contado: Pago inicial = Precio de contado, Total Financiado = 0, Cuota = 0
+                    document.getElementById('engancheDisplay').value = precioContado;
+                    document.getElementById('monto').value = precioContado;
+                    totalFinanciadoActual = 0;
+                    document.getElementById('totalFinanciado').value = "$0";
+                    document.getElementById('cuota').value = "$0";
+                } else {
+                    const factorEngancheMinimo = (planElegido === "26") ? CONFIG_TASAS_SHEETS.enganche26 : CONFIG_TASAS_SHEETS.enganche52;
+                    const engancheMinimoObligatorio = Math.round(precioContado * factorEngancheMinimo);
+
+                    // Actualizar enganche
+                    document.getElementById('engancheDisplay').value = engancheMinimoObligatorio;
+                    document.getElementById('monto').value = engancheMinimoObligatorio;
+
+                    // Actualizar total financiado
+                    const factorInteres = (planElegido === "26") ? CONFIG_TASAS_SHEETS.interes26 : CONFIG_TASAS_SHEETS.interes52;
+                    const totalFinanciadoCalculado = Math.round((precioContado * (1 + factorInteres)) - engancheMinimoObligatorio);
+                    
+                    totalFinanciadoActual = totalFinanciadoCalculado;
+                    document.getElementById('totalFinanciado').value = "$" + totalFinanciadoCalculado.toLocaleString('es-MX');
+
+                    // Recalcular cuota
+                    recalcularCuotaPorFrecuenciaModificada(frecuencia);
+                }
+            }
+        }
 
         function actualizarFormularioPrecios() {
             const imeiSelected = document.getElementById('selectDispositivo').value;
@@ -563,16 +655,14 @@
             }
 
             document.getElementById('modeloDisplay').value = equipo.modelo;
-            document.getElementById('engancheDisplay').value = equipo.enganche;
-            document.getElementById('monto').value = equipo.enganche;
             if (document.getElementById('precioContado')) {
-                document.getElementById('precioContado').value = equipo.precioContado || "$0";
+                document.getElementById('precioContado').value = "$" + parseFloat(equipo.precioContado).toLocaleString('es-MX') || "$0";
             }
 
-            // Guardamos el número puro quitándole el signo de pesos para hacer matemáticas
-            totalFinanciadoActual = parseFloat(equipo.totalFinanciado.toString().replace(/[\$,]/g, "").trim()) || 0;
-            document.getElementById('totalFinanciado').value = equipo.totalFinanciado;
-            document.getElementById('totalLetraHidden').value = equipo.totalLetra;
+            // Llamamos a la función de cálculo dinámico para llenar enganche, total financiado y cuota
+            actualizarEngancheYFinanciamientoPorPlazo();
+
+            document.getElementById('totalLetraHidden').value = equipo.totalLetra || "";
 
             procesarAgendaCobro();
 
@@ -620,7 +710,6 @@
             if (!selector) return;
 
             // Separamos el valor usando el carácter "|"
-            // Ejemplo: "QUINCENAL|15 Y 30" -> frecuencia = "QUINCENAL", diaPago = "15 Y 30"
             const partes = selector.split('|');
             const frecuencia = partes[0];
             const optCorto = document.getElementById('optPlazoCorto');
@@ -630,17 +719,30 @@
             if (frecuencia === "QUINCENAL") {
                 optCorto.text = "Plan Rápido (13 Quincenas / 13 Pagos)";
                 optLargo.text = "Plan Cómodo (26 Quincenas / 26 Pagos)";
+                optLargo.style.display = "block";
+                optLargo.disabled = false;
+            } else if (frecuencia === "CONTADO") {
+                optCorto.text = "Pago Único (Contado)";
+                optLargo.style.display = "none";
+                optLargo.disabled = true;
+                document.getElementById('plazoSemanas').value = "26";
             } else {
                 optCorto.text = "Plan Rápido (26 Semanas / 26 Pagos)";
                 optLargo.text = "Plan Cómodo (52 Semanas / 52 Pagos)";
+                optLargo.style.display = "block";
+                optLargo.disabled = false;
             }
 
             // 2. Ejecutamos la matemática de la cuota dinero
-            recalcularCuotaPorFrecuenciaModificada(frecuencia);
+            actualizarEngancheYFinanciamientoPorPlazo();
         }
 
         function recalcularCuotaPorFrecuenciaModificada(frecuencia) {
             const plazoSemanas = parseInt(document.getElementById('plazoSemanas').value) || 26;
+            if (frecuencia === "CONTADO") {
+                document.getElementById('cuota').value = "$0";
+                return;
+            }
             if (totalFinanciadoActual === 0) return;
 
             let totalAbonos = plazoSemanas;
@@ -658,6 +760,8 @@
             // ⛔ --- CANDADO DE ENGANCHE AUTOMÁTICO (D2 Y E2 DE CONFIGURACIÓN) ---
             const planElegido = document.getElementById('plazoSemanas').value; // Toma "26" o "52"
             const selectDisp = document.getElementById('selectDispositivo');
+            const selectorCobro = document.getElementById('agendaCobro').value;
+            const esContado = selectorCobro && selectorCobro.split('|')[0] === "CONTADO";
             let precioContado = 0;
 
             // Detectamos si el celular ya tiene un precio cargado en la lista de stock
@@ -669,7 +773,7 @@
             }
 
             // Si conocemos el precio, aplicamos el porcentaje estricto del Sheets (33% o 45%)
-            if (precioContado > 0) {
+            if (precioContado > 0 && !esContado) {
                 const factorEngancheMinimo = (planElegido === "26") ? CONFIG_TASAS_SHEETS.enganche26 : CONFIG_TASAS_SHEETS.enganche52;
                 const engancheMinimoObligatorio = precioContado * factorEngancheMinimo;
                 const engancheIngresado = parseFloat(document.getElementById('monto').value.replace(/[\$,]/g, "")) || 0;
@@ -678,7 +782,7 @@
                     alert(`⛔ CANDADO CELYA! DE ENGANCHE\n\nEl enganche mínimo obligatorio configurado en Sheets para este equipo (Plan ${planElegido} semanas) es de $${Math.round(engancheMinimoObligatorio).toLocaleString('es-MX')}.\n\nIngresado por el chofer: $${engancheIngresado.toLocaleString('es-MX')}.\n\nNo se puede registrar la venta con un monto menor.`);
                     return;
                 }
-            } else {
+            } else if (!esContado) {
                 // Validación de seguridad para celulares express de Mercado Libre (Placeholder)
                 const engancheIngresado = parseFloat(document.getElementById('monto').value.replace(/[\$,]/g, "")) || 0;
                 if (engancheIngresado <= 0) {
@@ -710,12 +814,22 @@
 
                 // Calcular abonos reales según la regla de frecuencia
                 let numPagos = plazoUnidades;
-                if (tipoPeriodoSeleccionado === 'quincenal') {
-                    numPagos = plazoUnidades / 2;
+                let totalFinanciadoFinal = totalFinanciado;
+                let cuotaCalculada = 0;
+
+                if (tipoPeriodoSeleccionado === 'contado') {
+                    numPagos = 1;
+                    totalFinanciadoFinal = 0;
+                    cuotaCalculada = 0;
+                } else {
+                    if (tipoPeriodoSeleccionado === 'quincenal') {
+                        numPagos = plazoUnidades / 2;
+                    }
+                    cuotaCalculada = totalFinanciadoFinal / numPagos;
                 }
-                const cuotaCalculada = totalFinanciado / numPagos;
 
                 sheetData.set('cuota', cuotaCalculada);
+                sheetData.set('totalFinanciado', totalFinanciadoFinal);
                 sheetData.set('plazoSemanas', plazoUnidades);
                 sheetData.append('plazo', plazoUnidades);
                 sheetData.set('tipoPeriodo', agendaSeleccionada[0] || "SEMANAL");
