@@ -334,7 +334,7 @@
             } catch (err) {
                 console.error("⚠️ Error de red al sincronizar tasas, usando respaldo local:", err);
                 // Respaldo de seguridad por si falla la conexión un segundo
-                CONFIG_TASAS_SHEETS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45 };
+                CONFIG_TASAS_SHEETS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, engancheSemanal: 0.165, engancheQuincenal: 0.33 };
             }
         }
 
@@ -618,7 +618,9 @@
                     document.getElementById('totalFinanciado').value = "$0";
                     document.getElementById('cuota').value = "$0";
                 } else {
-                    const factorEngancheMinimo = (planElegido === "26") ? CONFIG_TASAS_SHEETS.enganche26 : CONFIG_TASAS_SHEETS.enganche52;
+                    const factorEngancheMinimo = (frecuencia === "SEMANAL") 
+                        ? (CONFIG_TASAS_SHEETS.engancheSemanal || 0.165) 
+                        : (CONFIG_TASAS_SHEETS.engancheQuincenal || 0.33);
                     const engancheMinimoObligatorio = Math.round(precioContado * factorEngancheMinimo);
 
                     // Actualizar enganche
@@ -774,14 +776,19 @@
                 }
             }
 
-            // Si conocemos el precio, aplicamos el porcentaje estricto del Sheets (33% o 45%)
+            // Si conocemos el precio, aplicamos el porcentaje estricto del Sheets
             if (precioContado > 0 && !esContado) {
-                const factorEngancheMinimo = (planElegido === "26") ? CONFIG_TASAS_SHEETS.enganche26 : CONFIG_TASAS_SHEETS.enganche52;
+                const selector = document.getElementById('selectorCobro') ? document.getElementById('selectorCobro').value : "";
+                const partes = selector ? selector.split('|') : [];
+                const frecuencia = partes[0] || "SEMANAL";
+                const factorEngancheMinimo = (frecuencia === "SEMANAL") 
+                    ? (CONFIG_TASAS_SHEETS.engancheSemanal || 0.165) 
+                    : (CONFIG_TASAS_SHEETS.engancheQuincenal || 0.33);
                 const engancheMinimoObligatorio = precioContado * factorEngancheMinimo;
                 const engancheIngresado = parseFloat(document.getElementById('monto').value.replace(/[\$,]/g, "")) || 0;
 
                 if (engancheIngresado < Math.round(engancheMinimoObligatorio)) {
-                    alert(`⛔ CANDADO CELYA! DE ENGANCHE\n\nEl enganche mínimo obligatorio configurado en Sheets para este equipo (Plan ${planElegido} semanas) es de $${Math.round(engancheMinimoObligatorio).toLocaleString('es-MX')}.\n\nIngresado por el chofer: $${engancheIngresado.toLocaleString('es-MX')}.\n\nNo se puede registrar la venta con un monto menor.`);
+                    alert(`⛔ CANDADO CELYA! DE ENGANCHE\n\nEl enganche mínimo obligatorio configurado en Sheets para este equipo (Frecuencia ${frecuencia}) es de $${Math.round(engancheMinimoObligatorio).toLocaleString('es-MX')}.\n\nIngresado por el chofer: $${engancheIngresado.toLocaleString('es-MX')}.\n\nNo se puede registrar la venta con un monto menor.`);
                     return;
                 }
             } else if (!esContado) {

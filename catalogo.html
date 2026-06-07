@@ -1153,7 +1153,7 @@
         window.equiposCargados = [];
 
         // Variables globales para Pedido Especial
-        let CONFIG_TASAS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, gananciaContadoFactor: 1.36 };
+        let CONFIG_TASAS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, gananciaContadoFactor: 1.36, engancheSemanal: 0.165, engancheQuincenal: 0.33 };
         let pe_data_actual = null;
         let pe_link_actual = "";
 
@@ -1172,7 +1172,7 @@
 
         // 🚀 Carga inicial
         async function cargarPantallaInicial() {
-            sincronizarTasas();
+            await sincronizarTasas();
             renderizarCatalogo("");
         }
 
@@ -1362,7 +1362,7 @@
                     const rowContado = item.precioContado && item.precioContado > 0
                         ? `<div class="price-row">
                             <span class="price-contado">Precio Contado:</span>
-                            <span class="price-contado"><span>$${Math.round(item.precioContado).toLocaleString('es-MX')}</span></span>
+                            <span class="price-contado"><span>$${Math.round(item.precioContado).toLocaleString('es-MX')} MXN</span></span>
                            </div>`
                         : '';
 
@@ -1382,9 +1382,9 @@
                                     ${item.color ? `<span class="spec-tag">🎨 ${item.color}</span>` : ''}
                                 </div>
                                 ${rowContado}
-                                <div class="enganche">
+                                <div class="enganche" data-enganche="${Math.round(item.engancheMinimo).toLocaleString('es-MX')}" data-precio="${Math.round(item.precioContado).toLocaleString('es-MX')}">
                                     <span>Pago Inicial</span>
-                                    Enganche: $${Math.round(item.engancheMinimo).toLocaleString('es-MX')}
+                                    Enganche: $${Math.round(item.precioContado * (CONFIG_TASAS.engancheSemanal || 0.165)).toLocaleString('es-MX')} MXN
                                 </div>
                             </div>
                             <div>
@@ -1400,27 +1400,27 @@
                                     <div class="cuotas-semanal">
                                         <div class="cuota-item">
                                             <span class="plan-label">⏱️ Plan Rápido (26 sem):</span>
-                                            <span class="plan-val">$${Math.round(item.cuota26).toLocaleString('es-MX')}/sem</span>
+                                            <span class="plan-val">$${Math.round(item.cuota26).toLocaleString('es-MX')} MXN/sem</span>
                                         </div>
                                         <div class="cuota-item" style="margin-top: 8px;">
                                             <span class="plan-label">🗓️ Plan Cómodo (52 sem):</span>
-                                            <span class="plan-val">$${Math.round(item.cuota52).toLocaleString('es-MX')}/sem</span>
+                                            <span class="plan-val">$${Math.round(item.cuota52).toLocaleString('es-MX')} MXN/sem</span>
                                         </div>
                                     </div>
                                     <div class="cuotas-quincenal" style="display: none;">
                                         <div class="cuota-item">
                                             <span class="plan-label">⏱️ Plan Rápido (13 quin):</span>
-                                            <span class="plan-val">$${Math.round(item.cuota26 * 2).toLocaleString('es-MX')}/quin</span>
+                                            <span class="plan-val">$${Math.round(item.cuota26 * 2).toLocaleString('es-MX')} MXN/quin</span>
                                         </div>
                                         <div class="cuota-item" style="margin-top: 8px;">
                                             <span class="plan-label">🗓️ Plan Cómodo (26 quin):</span>
-                                            <span class="plan-val">$${Math.round(item.cuota52 * 2).toLocaleString('es-MX')}/quin</span>
+                                            <span class="plan-val">$${Math.round(item.cuota52 * 2).toLocaleString('es-MX')} MXN/quin</span>
                                         </div>
                                     </div>
                                     <div class="cuotas-contado" style="display: none;">
                                         <div class="cuota-item">
                                             <span class="plan-label">💰 Pago Único:</span>
-                                            <span class="plan-val" style="color:var(--success); font-weight:bold;">$${Math.round(item.precioContado).toLocaleString('es-MX')}</span>
+                                            <span class="plan-val" style="color:var(--success); font-weight:bold;">$${Math.round(item.precioContado).toLocaleString('es-MX')} MXN</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1457,19 +1457,35 @@
                 if (cuotasQuincenal) cuotasQuincenal.style.display = 'none';
                 if (cuotasContado) cuotasContado.style.display = 'none';
                 if (btnSolicitar) btnSolicitar.innerText = 'Pedir a Crédito';
-                if (divEnganche) divEnganche.style.opacity = '1';
+                if (divEnganche) {
+                    divEnganche.style.opacity = '1';
+                    const precioContado = parseFloat((divEnganche.getAttribute('data-precio') || '').replace(/[\$,]/g, '')) || 0;
+                    const factorEng = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
+                    const weeklyEnganche = Math.round(precioContado * factorEng);
+                    divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche: $${weeklyEnganche.toLocaleString('es-MX')} MXN`;
+                }
             } else if (freq === 'quincenal') {
                 if (cuotasSemanal) cuotasSemanal.style.display = 'none';
                 if (cuotasQuincenal) cuotasQuincenal.style.display = 'block';
                 if (cuotasContado) cuotasContado.style.display = 'none';
                 if (btnSolicitar) btnSolicitar.innerText = 'Pedir a Crédito';
-                if (divEnganche) divEnganche.style.opacity = '1';
+                if (divEnganche) {
+                    divEnganche.style.opacity = '1';
+                    const precioContado = parseFloat((divEnganche.getAttribute('data-precio') || '').replace(/[\$,]/g, '')) || 0;
+                    const factorEng = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+                    const quinEnganche = Math.round(precioContado * factorEng);
+                    divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche: $${quinEnganche.toLocaleString('es-MX')} MXN`;
+                }
             } else { // contado
                 if (cuotasSemanal) cuotasSemanal.style.display = 'none';
                 if (cuotasQuincenal) cuotasQuincenal.style.display = 'none';
                 if (cuotasContado) cuotasContado.style.display = 'block';
                 if (btnSolicitar) btnSolicitar.innerText = 'Comprar de Contado';
-                if (divEnganche) divEnganche.style.opacity = '0';
+                if (divEnganche) {
+                    divEnganche.style.opacity = '1';
+                    const priceVal = divEnganche.getAttribute('data-precio') || '';
+                    divEnganche.innerHTML = `Pago Único: $${priceVal} MXN`;
+                }
             }
         }
 
@@ -1486,8 +1502,8 @@
             document.getElementById('pdp-product-condition').innerText = (esFijo === "true" || esFijo === true) ? "Destacado | Calidad Garantizada CelYa!" : "Nuevo | Envió Rápido";
 
             // Intercambiar tamaño y lugar del precio de contado por el enganche (Pago Inicial)
-            document.getElementById('pdp-enganche-grande').innerText = `$${Math.round(engancheMinimo || 0).toLocaleString('es-MX')}`;
-            document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(precioContado || 0).toLocaleString('es-MX')}</strong>`;
+            document.getElementById('pdp-enganche-grande').innerText = `$${Math.round(engancheMinimo || 0).toLocaleString('es-MX')} MXN`;
+            document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(precioContado || 0).toLocaleString('es-MX')} MXN</strong>`;
 
             currentMLItemLink = link || "";
             defaultColor = color || "";
@@ -1629,31 +1645,32 @@
         function actualizarPrecioCalculadoPDP() {
             const freq = document.getElementById('cliFrecuencia').value;
             const plazo = document.getElementById('cliPlazo').value; // "26 Semanas" o "52 Semanas"
-            const cuota26 = parseFloat(document.getElementById('hiddenCuota26').value) || 0;
-            const cuota52 = parseFloat(document.getElementById('hiddenCuota52').value) || 0;
+            const precioContado = parseFloat(document.getElementById('hiddenPrecioContado').value) || 0;
 
-            let cuotaActiva = (plazo === "26 Semanas") ? cuota26 : cuota52;
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
             let labelFrecuencia = "semanales";
 
             if (freq === "QUINCENAL") {
-                cuotaActiva = cuotaActiva * 2;
                 numPagos = numPagos / 2;
                 labelFrecuencia = "quincenales";
             }
 
-            const precioContado = parseFloat(document.getElementById('hiddenPrecioContado').value) || 0;
-
             if (freq === "CONTADO") {
-                document.getElementById('pdp-enganche-grande').innerText = `$${Math.round(precioContado).toLocaleString('es-MX')}`;
-                document.getElementById('pdp-weekly-amount').innerText = `$0`;
+                document.getElementById('pdp-enganche-grande').innerText = `$${Math.round(precioContado).toLocaleString('es-MX')} MXN`;
+                document.getElementById('pdp-weekly-amount').innerText = `$0 MXN`;
                 document.getElementById('pdp-weekly-term').innerText = `en 1 pago de contado`;
             } else {
-                const factorEnganche = (plazo === "26 Semanas") ? CONFIG_TASAS.enganche26 : CONFIG_TASAS.enganche52;
-                const engancheCalculado = precioContado * factorEnganche;
+                const factorEnganche = (freq === "SEMANAL") 
+                    ? (CONFIG_TASAS.engancheSemanal || 0.165) 
+                    : (CONFIG_TASAS.engancheQuincenal || 0.33);
+                const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
 
-                document.getElementById('pdp-enganche-grande').innerText = `$${Math.round(engancheCalculado).toLocaleString('es-MX')}`;
-                document.getElementById('pdp-weekly-amount').innerText = `$${Math.round(cuotaActiva)}`;
+                const engancheCalculado = precioContado * factorEnganche;
+                const totalFinanciado = (precioContado * (1 + factorInteres)) - engancheCalculado;
+                const cuotaActiva = totalFinanciado / numPagos;
+
+                document.getElementById('pdp-enganche-grande').innerText = `$${Math.round(engancheCalculado).toLocaleString('es-MX')} MXN`;
+                document.getElementById('pdp-weekly-amount').innerText = `$${Math.round(cuotaActiva).toLocaleString('es-MX')} MXN`;
                 document.getElementById('pdp-weekly-term').innerText = `en ${numPagos} pagos ${labelFrecuencia}`;
             }
         }
@@ -1882,7 +1899,9 @@
             const freq = document.getElementById('pe-cliFrecuencia').value;
 
             // Matemática
-            const factorEnganche = (plazo === "26 Semanas") ? CONFIG_TASAS.enganche26 : CONFIG_TASAS.enganche52;
+            const factorEnganche = (freq === "SEMANAL") 
+                ? (CONFIG_TASAS.engancheSemanal || 0.165) 
+                : (CONFIG_TASAS.engancheQuincenal || 0.33);
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
 
@@ -1898,8 +1917,8 @@
                 labelFrecuencia = "/quin";
             }
 
-            document.getElementById('pe-preview-enganche').innerText = `$${Math.round(enganche).toLocaleString('es-MX')}`;
-            document.getElementById('pe-preview-semanal').innerText = `$${Math.round(cuota).toLocaleString('es-MX')}${labelFrecuencia}`;
+            document.getElementById('pe-preview-enganche').innerText = `$${Math.round(enganche).toLocaleString('es-MX')} MXN`;
+            document.getElementById('pe-preview-semanal').innerText = `$${Math.round(cuota).toLocaleString('es-MX')} MXN${labelFrecuencia}`;
         }
 
         async function enviarSolicitudPedidoEspecial() {
@@ -1933,7 +1952,9 @@
 
             const basePrice = parseFloat(pe_data_actual.price) || 0;
             const precioContado = basePrice * CONFIG_TASAS.gananciaContadoFactor;
-            const factorEnganche = (plazo === "26 Semanas") ? CONFIG_TASAS.enganche26 : CONFIG_TASAS.enganche52;
+            const factorEnganche = (freq === "SEMANAL") 
+                ? (CONFIG_TASAS.engancheSemanal || 0.165) 
+                : (CONFIG_TASAS.engancheQuincenal || 0.33);
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
             let textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (26 Semanas)" : "Plan Cómodo (52 Semanas)";
