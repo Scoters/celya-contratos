@@ -621,7 +621,7 @@
                     const factorEngancheMinimo = (frecuencia === "SEMANAL") 
                         ? (CONFIG_TASAS_SHEETS.engancheSemanal || 0.165) 
                         : (CONFIG_TASAS_SHEETS.engancheQuincenal || 0.33);
-                    const engancheMinimoObligatorio = Math.round(precioContado * factorEngancheMinimo);
+                    const engancheMinimoObligatorio = Math.ceil((precioContado * factorEngancheMinimo) / 10) * 10;
 
                     // Actualizar enganche
                     document.getElementById('engancheDisplay').value = engancheMinimoObligatorio;
@@ -784,11 +784,11 @@
                 const factorEngancheMinimo = (frecuencia === "SEMANAL") 
                     ? (CONFIG_TASAS_SHEETS.engancheSemanal || 0.165) 
                     : (CONFIG_TASAS_SHEETS.engancheQuincenal || 0.33);
-                const engancheMinimoObligatorio = precioContado * factorEngancheMinimo;
+                const engancheMinimoObligatorio = Math.ceil((precioContado * factorEngancheMinimo) / 10) * 10;
                 const engancheIngresado = parseFloat(document.getElementById('monto').value.replace(/[\$,]/g, "")) || 0;
 
-                if (engancheIngresado < Math.round(engancheMinimoObligatorio)) {
-                    alert(`⛔ CANDADO CELYA! DE ENGANCHE\n\nEl enganche mínimo obligatorio configurado en Sheets para este equipo (Frecuencia ${frecuencia}) es de $${Math.round(engancheMinimoObligatorio).toLocaleString('es-MX')}.\n\nIngresado por el chofer: $${engancheIngresado.toLocaleString('es-MX')}.\n\nNo se puede registrar la venta con un monto menor.`);
+                if (engancheIngresado < engancheMinimoObligatorio) {
+                    alert(`⛔ CANDADO CELYA! DE ENGANCHE\n\nEl enganche mínimo obligatorio configurado en Sheets para este equipo (Frecuencia ${frecuencia}) es de $${engancheMinimoObligatorio.toLocaleString('es-MX')}.\n\nIngresado por el chofer: $${engancheIngresado.toLocaleString('es-MX')}.\n\nNo se puede registrar la venta con un monto menor.`);
                     return;
                 }
             } else if (!esContado) {

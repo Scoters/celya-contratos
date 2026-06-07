@@ -1154,6 +1154,7 @@
 
         // Variables globales para Pedido Especial
         let CONFIG_TASAS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, gananciaContadoFactor: 1.36, engancheSemanal: 0.165, engancheQuincenal: 0.33 };
+        let ML_CACHE_VARIANTES = {};
         let pe_data_actual = null;
         let pe_link_actual = "";
 
@@ -1384,7 +1385,7 @@
                                 ${rowContado}
                                 <div class="enganche" data-enganche="${Math.round(item.engancheMinimo).toLocaleString('es-MX')}" data-precio="${Math.round(item.precioContado).toLocaleString('es-MX')}">
                                     <span>Pago Inicial</span>
-                                    Enganche: $${Math.round(item.precioContado * (CONFIG_TASAS.engancheSemanal || 0.165)).toLocaleString('es-MX')} MXN
+                                    Enganche: $${(Math.ceil((item.precioContado * (CONFIG_TASAS.engancheSemanal || 0.165)) / 10) * 10).toLocaleString('es-MX')} MXN
                                 </div>
                             </div>
                             <div>
@@ -1461,7 +1462,7 @@
                     divEnganche.style.opacity = '1';
                     const precioContado = parseFloat((divEnganche.getAttribute('data-precio') || '').replace(/[\$,]/g, '')) || 0;
                     const factorEng = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
-                    const weeklyEnganche = Math.round(precioContado * factorEng);
+                    const weeklyEnganche = Math.ceil((precioContado * factorEng) / 10) * 10;
                     divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche: $${weeklyEnganche.toLocaleString('es-MX')} MXN`;
                 }
             } else if (freq === 'quincenal') {
@@ -1473,7 +1474,7 @@
                     divEnganche.style.opacity = '1';
                     const precioContado = parseFloat((divEnganche.getAttribute('data-precio') || '').replace(/[\$,]/g, '')) || 0;
                     const factorEng = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
-                    const quinEnganche = Math.round(precioContado * factorEng);
+                    const quinEnganche = Math.ceil((precioContado * factorEng) / 10) * 10;
                     divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche: $${quinEnganche.toLocaleString('es-MX')} MXN`;
                 }
             } else { // contado
@@ -1665,11 +1666,11 @@
                     : (CONFIG_TASAS.engancheQuincenal || 0.33);
                 const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
 
-                const engancheCalculado = precioContado * factorEnganche;
+                const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
                 const totalFinanciado = (precioContado * (1 + factorInteres)) - engancheCalculado;
                 const cuotaActiva = totalFinanciado / numPagos;
 
-                document.getElementById('pdp-enganche-grande').innerText = `$${Math.round(engancheCalculado).toLocaleString('es-MX')} MXN`;
+                document.getElementById('pdp-enganche-grande').innerText = `$${engancheCalculado.toLocaleString('es-MX')} MXN`;
                 document.getElementById('pdp-weekly-amount').innerText = `$${Math.round(cuotaActiva).toLocaleString('es-MX')} MXN`;
                 document.getElementById('pdp-weekly-term').innerText = `en ${numPagos} pagos ${labelFrecuencia}`;
             }
@@ -1905,7 +1906,7 @@
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
 
-            const enganche = precioContado * factorEnganche;
+            const enganche = Math.ceil((precioContado * factorEnganche) / 10) * 10;
             const totalFinanciado = (precioContado * (1 + factorInteres)) - enganche;
             
             let cuota = totalFinanciado / numPagos;
@@ -1917,7 +1918,7 @@
                 labelFrecuencia = "/quin";
             }
 
-            document.getElementById('pe-preview-enganche').innerText = `$${Math.round(enganche).toLocaleString('es-MX')} MXN`;
+            document.getElementById('pe-preview-enganche').innerText = `$${enganche.toLocaleString('es-MX')} MXN`;
             document.getElementById('pe-preview-semanal').innerText = `$${Math.round(cuota).toLocaleString('es-MX')} MXN${labelFrecuencia}`;
         }
 
@@ -1959,7 +1960,7 @@
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
             let textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (26 Semanas)" : "Plan Cómodo (52 Semanas)";
 
-            const enganche = precioContado * factorEnganche;
+            const enganche = Math.ceil((precioContado * factorEnganche) / 10) * 10;
             const totalFinanciado = (precioContado * (1 + factorInteres)) - enganche;
             
             let cuota = totalFinanciado / numPagos;
@@ -2143,11 +2144,6 @@
             const wrapperStorage = document.getElementById('ml-storage-wrapper');
             const seccionStorage = document.getElementById('ml-storage-section');
 
-            if (esCambioVariante) {
-                const overlay = document.getElementById('loadingOverlay');
-                if (overlay) overlay.style.display = 'flex';
-            }
-
             if (!esCambioVariante) {
                 // Reseteamos el modal por si el producto anterior no tenía variantes
                 wrapperColores.innerHTML = "";
@@ -2160,12 +2156,6 @@
 
                 // Cargar variantes locales por defecto
                 mostrarVariantesFallback();
-            } else {
-                // Agregar feedback de carga para que no sea brusco
-                wrapperColores.style.opacity = "0.4";
-                wrapperColores.style.pointerEvents = "none";
-                wrapperStorage.style.opacity = "0.4";
-                wrapperStorage.style.pointerEvents = "none";
             }
 
             // Limpiamos la ID por si viene como "MLM-XXXXX" o URL
@@ -2188,51 +2178,61 @@
             }
 
             if (!cleanId) {
-                if (esCambioVariante) {
-                    wrapperColores.style.opacity = "";
-                    wrapperColores.style.pointerEvents = "";
-                    wrapperStorage.style.opacity = "";
-                    wrapperStorage.style.pointerEvents = "";
-                    const overlay = document.getElementById('loadingOverlay');
-                    if (overlay) overlay.style.display = 'none';
-                }
                 return;
             }
 
-            try {
-                let data = null;
-                const isProduct = currentMLItemLink && currentMLItemLink.includes("/p/");
+            if (esCambioVariante && !ML_CACHE_VARIANTES[cleanId]) {
+                // Agregar feedback de carga para que no sea brusco, pero sin bloquear toda la pantalla
+                wrapperColores.style.opacity = "0.4";
+                wrapperColores.style.pointerEvents = "none";
+                wrapperStorage.style.opacity = "0.4";
+                wrapperStorage.style.pointerEvents = "none";
+            }
 
+            let data = null;
+            if (ML_CACHE_VARIANTES[cleanId]) {
+                data = ML_CACHE_VARIANTES[cleanId];
+            } else {
                 try {
-                    const endpoint = isProduct ? 'products' : 'items';
-                    const res = await fetch(`https://api.mercadolibre.com/${endpoint}/${cleanId}`);
-                    if (res.ok) {
-                        data = await res.json();
+                    const isProduct = currentMLItemLink && currentMLItemLink.includes("/p/");
+                    try {
+                        const endpoint = isProduct ? 'products' : 'items';
+                        const res = await fetch(`https://api.mercadolibre.com/${endpoint}/${cleanId}`);
+                        if (res.ok) {
+                            data = await res.json();
+                        }
+                    } catch (fetchErr) {
+                        console.warn("Direct ML fetch failed, trying via GAS proxy...", fetchErr);
                     }
-                } catch (fetchErr) {
-                    console.warn("Direct ML fetch failed, trying via GAS proxy...", fetchErr);
-                }
 
-                if (!data) {
-                    const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${cleanId}&isProduct=${isProduct}`;
-                    const resProxy = await fetch(proxyUrl);
-                    if (resProxy.ok) {
-                        const rawData = await resProxy.json();
-                        if (rawData && !rawData.error) {
-                            data = rawData;
+                    if (!data) {
+                        const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${cleanId}&isProduct=${isProduct}`;
+                        const resProxy = await fetch(proxyUrl);
+                        if (resProxy.ok) {
+                            const rawData = await resProxy.json();
+                            if (rawData && !rawData.error) {
+                                data = rawData;
+                            }
                         }
                     }
-                }
 
-                // Restaurar estilos en cualquier caso de finalización de carga
-                if (esCambioVariante) {
-                    wrapperColores.style.opacity = "";
-                    wrapperColores.style.pointerEvents = "";
-                    wrapperStorage.style.opacity = "";
-                    wrapperStorage.style.pointerEvents = "";
+                    if (data) {
+                        ML_CACHE_VARIANTES[cleanId] = data;
+                    }
+                } catch (e) {
+                    console.error("Error obteniendo variantes vivas desde ML:", e);
                 }
+            }
 
-                if (!data) return;
+            // Restaurar estilos en cualquier caso de finalización de carga
+            if (esCambioVariante) {
+                wrapperColores.style.opacity = "";
+                wrapperColores.style.pointerEvents = "";
+                wrapperStorage.style.opacity = "";
+                wrapperStorage.style.pointerEvents = "";
+            }
+
+            if (!data) return;
 
                 // Limpiar selectores previos antes de repintar los reales
                 wrapperColores.innerHTML = "";
@@ -2335,13 +2335,11 @@
                         }
 
                         divColor.onclick = function () {
-                            mostrarLoadingTemporal(() => {
-                                document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
-                                this.classList.add('selected');
-                                colorSeleccionado = this.getAttribute('data-color');
-                                document.getElementById('color-seleccionado-txt').innerText = colorSeleccionado;
-                                actualizarFotoModalPorVariante(vId);
-                            });
+                            document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
+                            this.classList.add('selected');
+                            colorSeleccionado = this.getAttribute('data-color');
+                            document.getElementById('color-seleccionado-txt').innerText = colorSeleccionado;
+                            actualizarFotoModalPorVariante(vId);
                         };
                         wrapperColores.appendChild(divColor);
                     });
@@ -2363,12 +2361,10 @@
                             }
 
                             divStorage.onclick = function () {
-                                mostrarLoadingTemporal(() => {
-                                    document.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
-                                    this.classList.add('selected');
-                                    almacenamientoSeleccionado = this.getAttribute('data-storage');
-                                    document.getElementById('memoria-seleccionada-txt').innerText = almacenamientoSeleccionado;
-                                });
+                                document.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
+                                this.classList.add('selected');
+                                almacenamientoSeleccionado = this.getAttribute('data-storage');
+                                document.getElementById('memoria-seleccionada-txt').innerText = almacenamientoSeleccionado;
                             };
                             wrapperStorage.appendChild(divStorage);
                         });
