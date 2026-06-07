@@ -1346,8 +1346,37 @@
             }
         }
 
+        function poblarCacheVariantes(equipos) {
+            if (!equipos || !Array.isArray(equipos)) return;
+            equipos.forEach(item => {
+                if (item.variantesJson) {
+                    let cleanId = "";
+                    if (item.id && item.id.startsWith("MLM")) {
+                        cleanId = item.id;
+                    } else if (item.link) {
+                        const matchLink = item.link.match(/(MLM\-?\d+)/i);
+                        if (matchLink) {
+                            cleanId = matchLink[0].replace("-", "").toUpperCase();
+                        }
+                    }
+                    if (cleanId) {
+                        try {
+                            if (!ML_CACHE_VARIANTES[cleanId]) {
+                                ML_CACHE_VARIANTES[cleanId] = typeof item.variantesJson === 'string'
+                                    ? JSON.parse(item.variantesJson)
+                                    : item.variantesJson;
+                            }
+                        } catch (e) {
+                            console.warn("Error parseando variantesJson pre-cargadas para " + cleanId, e);
+                        }
+                    }
+                }
+            });
+        }
+
         // Aplica el orden y filtrado localmente
         function aplicarFiltrosYOrden() {
+            poblarCacheVariantes(window.equiposCargados);
             const brandSelected = document.getElementById('filterBrand').value;
             const sortSelected = document.getElementById('sortBy').value;
             const contenedor = document.getElementById('contenedorResultados');
