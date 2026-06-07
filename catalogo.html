@@ -797,6 +797,37 @@
                 width: 100%;
                 box-sizing: border-box;
             }
+
+            /* Botón de Salida Flotante en Mobile */
+            .pdp-close-btn {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                top: auto;
+                left: auto;
+                z-index: 99999;
+                background-color: var(--accent);
+                color: white !important;
+                width: 56px;
+                height: 56px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                font-size: 32px;
+                line-height: 1;
+                padding: 0;
+                border: none;
+                cursor: pointer;
+                transition: transform 0.2s, background-color 0.2s;
+            }
+
+            .pdp-close-btn:hover, .pdp-close-btn:active {
+                background-color: var(--primary-light);
+                transform: scale(1.05);
+                color: white !important;
+            }
         }
 
         @media (max-width: 600px) {
