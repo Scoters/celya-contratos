@@ -798,34 +798,34 @@
                 box-sizing: border-box;
             }
 
-            /* Botón de Salida Flotante en Mobile */
+            /* Botón de Salida Flotante Gigante e Implacable en Mobile */
             .pdp-close-btn {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                top: auto;
-                left: auto;
-                z-index: 99999;
-                background-color: var(--accent);
+                position: fixed !important;
+                bottom: 25px !important;
+                right: 25px !important;
+                top: auto !important;
+                left: auto !important;
+                z-index: 999999 !important;
+                background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
                 color: white !important;
-                width: 56px;
-                height: 56px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-                font-size: 32px;
-                line-height: 1;
-                padding: 0;
-                border: none;
-                cursor: pointer;
+                width: 65px !important;
+                height: 65px !important;
+                border-radius: 50% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+                font-size: 36px !important;
+                line-height: 1 !important;
+                padding: 0 !important;
+                border: none !important;
+                cursor: pointer !important;
                 transition: transform 0.2s, background-color 0.2s;
             }
 
             .pdp-close-btn:hover, .pdp-close-btn:active {
-                background-color: var(--primary-light);
-                transform: scale(1.05);
+                background: #1e293b !important;
+                transform: scale(1.1);
                 color: white !important;
             }
         }
@@ -2165,6 +2165,9 @@
         }
 
         // Variables globales para almacenar la selección interactiva real de la API
+        let variantesVivasGlobal = [];
+        let colorSeleccionadoGlobal = "";
+        let memoriaSeleccionadaGlobal = "";
         let colorSeleccionado = "";
         let almacenamientoSeleccionado = "";
         let itemVariationsData = [];
@@ -2183,7 +2186,10 @@
                 contenedor.style.display = "none";
                 colorSeleccionado = "";
                 almacenamientoSeleccionado = "";
+                colorSeleccionadoGlobal = "";
+                memoriaSeleccionadaGlobal = "";
                 itemVariationsData = [];
+                variantesVivasGlobal = [];
 
                 // Cargar variantes locales por defecto
                 mostrarVariantesFallback();
@@ -2334,131 +2340,88 @@
                 }
 
                 if (data.variations && data.variations.length > 0) {
-                    itemVariationsData = data.variations;
-                    contenedor.style.display = "block";
+                    variantesVivasGlobal = data.variations.filter(v => parseInt(v.available_quantity, 10) > 0);
+                    itemVariationsData = variantesVivasGlobal;
 
-                    const coloresUnicos = new Map();
-                    const memoriasUnicas = new Map();
+                    if (variantesVivasGlobal.length > 0) {
+                        contenedor.style.display = "block";
 
-                    // Mapeamos todas las variantes reales publicadas por el vendedor con búsqueda flexible de IDs de atributos
-                    data.variations.forEach(v => {
-                        const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
-                        const attrColor = allAttrs.find(a => {
-                            const idUpper = a.id.toUpperCase();
-                            return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
-                        });
-                        const attrStorage = allAttrs.find(a => {
-                            const idUpper = a.id.toUpperCase();
-                            return idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO";
-                        });
+                        const coloresSet = new Set();
+                        const memoriasSet = new Set();
 
-                        const nameColor = attrColor ? attrColor.value_name : "Único";
-                        const nameStorage = attrStorage ? attrStorage.value_name : null;
-
-                        const normColor = nameColor.trim().toLowerCase();
-                        if (!coloresUnicos.has(normColor)) {
-                            coloresUnicos.set(normColor, { id: v.id, name: nameColor });
-                        }
-                        
-                        if (nameStorage) {
-                            const normStorage = nameStorage.trim().toLowerCase();
-                            if (!memoriasUnicas.has(normStorage)) {
-                                memoriasUnicas.set(normStorage, nameStorage.trim());
-                            }
-                        }
-                    });
-
-                    // 🎨 Pintamos los círculos de Colores reales obtenidos (Deduplicados)
-                    let esPrimeroColor = true;
-                    const defaultColorNorm = defaultColor ? defaultColor.trim().toLowerCase() : "";
-
-                    // Ordenamos para que el color por defecto (o seleccionado) quede de primero
-                    const coloresOrdenados = Array.from(coloresUnicos.entries()).sort((a, b) => {
-                        const isA = a[0] === defaultColorNorm;
-                        const isB = b[0] === defaultColorNorm;
-                        return isA ? -1 : (isB ? 1 : 0);
-                    });
-
-                    coloresOrdenados.forEach(([normColor, colorInfo]) => {
-                        const divColor = document.createElement('div');
-                        const isSelected = esPrimeroColor;
-                        divColor.className = `color-circle ${isSelected ? 'selected' : ''}`;
-                        divColor.title = colorInfo.name;
-                        divColor.setAttribute('data-color', colorInfo.name);
-
-                        // Color genérico visual mapping
-                        const colorMap = {
-                            "negro": "#1e293b", "black": "#1e293b", "oscuro": "#0f172a",
-                            "blanco": "#ffffff", "white": "#ffffff",
-                            "azul": "#3b82f6", "blue": "#3b82f6",
-                            "verde": "#10b981", "green": "#10b981",
-                            "rojo": "#ef4444", "red": "#ef4444",
-                            "rosa": "#ec4899", "pink": "#ec4899",
-                            "amarillo": "#eab308", "yellow": "#eab308",
-                            "gris": "#6b7280", "grey": "#6b7280", "silver": "#cbd5e1", "plata": "#cbd5e1",
-                            "oro": "#f59e0b", "gold": "#f59e0b", "dorado": "#f59e0b"
-                        };
-                        const nombreLower = normColor;
-                        let bgCircleColor = "#94a3b8";
-                        for (const key in colorMap) {
-                            if (nombreLower.includes(key)) {
-                                bgCircleColor = colorMap[key];
-                                break;
-                            }
-                        }
-                        divColor.style.backgroundColor = bgCircleColor;
-
-                        if (isSelected) {
-                            colorSeleccionado = colorInfo.name;
-                            document.getElementById('color-seleccionado-txt').innerText = colorInfo.name;
-                            actualizarFotoModalPorVariante(colorInfo.id); // Cambia la foto del modal por la del color seleccionado
-                            esPrimeroColor = false;
-                        }
-
-                        divColor.onclick = function () {
-                            document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
-                            this.classList.add('selected');
-                            colorSeleccionado = this.getAttribute('data-color');
-                            document.getElementById('color-seleccionado-txt').innerText = colorSeleccionado;
-                            actualizarFotoModalPorVariante(colorInfo.id);
-                        };
-                        wrapperColores.appendChild(divColor);
-                    });
-
-                    // 💾 Pintamos las pastillas de Almacenamiento reales obtenidas (Deduplicadas)
-                    if (memoriasUnicas.size > 0) {
-                        seccionStorage.style.display = "block";
-                        const defaultMemoriaNorm = defaultMemoria ? defaultMemoria.trim().toLowerCase() : "";
-
-                        // Ordenar para que la memoria por defecto (o seleccionada) quede de primero
-                        const memoriasOrdenadas = Array.from(memoriasUnicas.entries()).sort((a, b) => {
-                            const isA = a[0] === defaultMemoriaNorm;
-                            const isB = b[0] === defaultMemoriaNorm;
-                            return isA ? -1 : (isB ? 1 : 0);
+                        variantesVivasGlobal.forEach(v => {
+                            const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
+                            allAttrs.forEach(attr => {
+                                const idUpper = attr.id.toUpperCase();
+                                const valueName = attr.value_name ? attr.value_name.trim() : "";
+                                if (!valueName) return;
+                                if (idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO") {
+                                    coloresSet.add(valueName);
+                                }
+                                if (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO" || idUpper === "RAM_MEMORY") {
+                                    memoriasSet.add(valueName);
+                                }
+                            });
                         });
 
-                        let esPrimeroStorage = true;
-                        memoriasOrdenadas.forEach(([normStorage, storageName]) => {
-                            const divStorage = document.createElement('div');
-                            const isSelected = esPrimeroStorage;
-                            divStorage.className = `storage-pill ${isSelected ? 'selected' : ''}`;
-                            divStorage.innerText = storageName;
-                            divStorage.setAttribute('data-storage', storageName);
+                        const listaColoresFijos = Array.from(coloresSet)
+                            .sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+                        const listaMemoriasFijas = Array.from(memoriasSet)
+                            .sort((a, b) => {
+                                const numA = parseInt(a.replace(/\D/g, ''), 10) || 0;
+                                const numB = parseInt(b.replace(/\D/g, ''), 10) || 0;
+                                if (numA !== numB) return numA - numB;
+                                return a.localeCompare(b, 'es', { numeric: true });
+                            });
 
-                            if (isSelected) {
-                                almacenamientoSeleccionado = storageName;
-                                document.getElementById('memoria-seleccionada-txt').innerText = storageName;
-                                esPrimeroStorage = false;
-                            }
+                        colorSeleccionadoGlobal = colorSeleccionadoGlobal || colorSeleccionado || defaultColor || listaColoresFijos[0] || "";
+                        memoriaSeleccionadaGlobal = memoriaSeleccionadaGlobal || almacenamientoSeleccionado || defaultMemoria || listaMemoriasFijas[0] || "";
 
-                            divStorage.onclick = function () {
-                                document.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
-                                this.classList.add('selected');
-                                almacenamientoSeleccionado = this.getAttribute('data-storage');
-                                document.getElementById('memoria-seleccionada-txt').innerText = almacenamientoSeleccionado;
-                            };
-                            wrapperStorage.appendChild(divStorage);
-                        });
+                        const wrapperColores = document.getElementById('ml-colors-wrapper') || document.querySelector('.color-picker-wrapper');
+                        if (wrapperColores) {
+                            wrapperColores.innerHTML = '';
+                            listaColoresFijos.forEach(color => {
+                                const btn = document.createElement('button');
+                                btn.className = 'color-pill';
+                                btn.type = 'button';
+                                btn.innerText = color;
+                                if (color === colorSeleccionadoGlobal) btn.classList.add('selected');
+
+                                btn.onclick = function() {
+                                    wrapperColores.querySelectorAll('.color-pill').forEach(b => b.classList.remove('selected'));
+                                    this.classList.add('selected');
+                                    colorSeleccionadoGlobal = color;
+                                    document.getElementById('color-seleccionado-txt').innerText = color;
+                                    actualizarPreciosYFotoPorVarianteActual();
+                                };
+                                wrapperColores.appendChild(btn);
+                            });
+                            document.getElementById('color-seleccionado-txt').innerText = colorSeleccionadoGlobal;
+                        }
+
+                        const wrapperStorage = document.getElementById('ml-storage-wrapper') || document.querySelector('.storage-picker-wrapper');
+                        if (wrapperStorage) {
+                            wrapperStorage.innerHTML = '';
+                            listaMemoriasFijas.forEach(memoria => {
+                                const btn = document.createElement('button');
+                                btn.className = 'storage-pill';
+                                btn.type = 'button';
+                                btn.innerText = memoria;
+                                if (memoria === memoriaSeleccionadaGlobal) btn.classList.add('selected');
+
+                                btn.onclick = function() {
+                                    wrapperStorage.querySelectorAll('.storage-pill').forEach(b => b.classList.remove('selected'));
+                                    this.classList.add('selected');
+                                    memoriaSeleccionadaGlobal = memoria;
+                                    document.getElementById('memoria-seleccionada-txt').innerText = memoria;
+                                    actualizarPreciosYFotoPorVarianteActual();
+                                };
+                                wrapperStorage.appendChild(btn);
+                            });
+                            document.getElementById('memoria-seleccionada-txt').innerText = memoriaSeleccionadaGlobal;
+                        }
+
+                        actualizarPreciosYFotoPorVarianteActual();
                     }
                 } else if (data.pickers && data.pickers.length > 0) {
                     contenedor.style.display = "block";
@@ -2615,6 +2578,50 @@
                 if (esCambioVariante) {
                     const overlay = document.getElementById('loadingOverlay');
                     if (overlay) overlay.style.display = 'none';
+                }
+            }
+        }
+
+        function actualizarPreciosYFotoPorVarianteActual() {
+            if (!variantesVivasGlobal || variantesVivasGlobal.length === 0) return;
+            const varianteSeleccionada = variantesVivasGlobal.find(v => {
+                const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
+                const colorMatch = colorSeleccionadoGlobal ? allAttrs.some(a => {
+                    const idUpper = a.id.toUpperCase();
+                    return (idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO") && a.value_name && a.value_name.trim() === colorSeleccionadoGlobal;
+                }) : true;
+                const memoriaMatch = memoriaSeleccionadaGlobal ? allAttrs.some(a => {
+                    const idUpper = a.id.toUpperCase();
+                    return (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO" || idUpper === "RAM_MEMORY") && a.value_name && a.value_name.trim() === memoriaSeleccionadaGlobal;
+                }) : true;
+                return colorMatch && memoriaMatch;
+            });
+
+            if (!varianteSeleccionada) {
+                return;
+            }
+
+            if (varianteSeleccionada.id) {
+                actualizarFotoModalPorVariante(varianteSeleccionada.id);
+            }
+
+            if (varianteSeleccionada.prices && varianteSeleccionada.prices.length > 0) {
+                const precioReal = varianteSeleccionada.prices[0].amount || varianteSeleccionada.price || 0;
+                const precioTexto = precioReal ? `Precio: $${precioReal.toLocaleString('es-MX')}` : '';
+                const precioElement = document.getElementById('precio-variant-selected');
+                if (precioElement) {
+                    precioElement.innerText = precioTexto;
+                }
+                // Calcular y fijar el precio de contado final que usará el modal y el formulario
+                try {
+                    const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
+                    const precioContadoFinal = Math.round((precioReal || 0) * gananciaFactor);
+                    const hidden = document.getElementById('hiddenPrecioContado');
+                    if (hidden) hidden.value = precioContadoFinal;
+                    // Recalcular enganche/pagos en el PDP con el precio recién fijado
+                    if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
+                } catch (e) {
+                    console.warn('No se pudo fijar precio contado final desde variante:', e);
                 }
             }
         }

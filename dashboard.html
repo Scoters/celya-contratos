@@ -428,6 +428,10 @@
             <button type="button" class="btn-pago" id="btnAgregarCelular"
                 style="background: #27ae60; margin-top: 15px;">➕ Importar y Agregar al Excel</button>
         </form>
+
+        <div style="margin-top:12px; text-align:center;">
+            <button id="btnOpenPlaceholders" class="btn-config" style="width:100%;">🗂️ Administrar Placeholders (Catalogo)</button>
+        </div>
     </div>
 
     <script>
@@ -676,6 +680,150 @@
                 btn.innerText = "💾 Guardar Parámetros";
             }
         }
+
+                // --- Placeholders / Conversión a Inventario ---
+                document.getElementById('btnOpenPlaceholders').addEventListener('click', function () {
+                        abrirModalPlaceholders();
+                });
+
+                function abrirModalPlaceholders() {
+                        // Crear modal si no existe
+                        if (!document.getElementById('modal-placeholders')) {
+                                const modalHtml = `
+                                <div id="modal-placeholders" class="modal-celya-config">
+                                    <div class="modal-config-content" style="max-width:720px;">
+                                        <span class="close-config-btn" onclick="cerrarModalPlaceholders()">&times;</span>
+                                        <h2>📦 Placeholders en Catalogo</h2>
+                                        <p class="modal-subtitle">Lista de placeholders. Edita y convierte a Inventario.</p>
+                                        <div id="placeholders-list" style="max-height:420px; overflow:auto;"></div>
+                                    </div>
+                                </div>`;
+                                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                        }
+                        document.getElementById('modal-placeholders').style.display = 'block';
+                        cargarPlaceholders();
+                }
+
+                function cerrarModalPlaceholders() {
+                        const m = document.getElementById('modal-placeholders');
+                        if (m) m.style.display = 'none';
+                }
+
+                async function cargarPlaceholders() {
+                        const cont = document.getElementById('placeholders-list');
+                        cont.innerHTML = '<div style="padding:14px; text-align:center; color:#666;">Cargando placeholders...</div>';
+                        try {
+                                const res = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}&action=obtenerCatalogoPublico`);
+                                const data = await res.json();
+                                if (!data.result || data.result !== 'success') {
+                                        cont.innerHTML = '<div style="padding:14px; color:#c0392b;">Error al cargar</div>';
+                                        return;
+                                }
+                                const items = data.resultados || [];
+                                if (items.length === 0) {
+                                        cont.innerHTML = '<div style="padding:14px; color:#7f8c8d;">No hay placeholders en la pestaña Catalogo.</div>';
+                                        return;
+                                }
+                                cont.innerHTML = '';
+                                items.forEach(it => {
+                                        const card = document.createElement('div');
+                                        card.style.border = '1px solid #e6e6e6';
+                                        card.style.padding = '10px';
+                                        card.style.margin = '8px';
+                                        card.style.display = 'flex';
+                                        card.style.gap = '10px';
+                                        card.style.alignItems = 'center';
+                                        card.innerHTML = `
+                                            <div style="width:72px; height:72px; background:#fff; border-radius:6px; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+                                                <img src="${it.foto || ''}" style="max-width:100%; max-height:100%; object-fit:contain;" />
+                                            </div>
+                                            <div style="flex:1;">
+                                                <div style="font-weight:bold;">${it.modelo}</div>
+                                                <div style="font-size:13px; color:#666;">Precio placeholder: $${Number(it.precioPlaceholder).toLocaleString('es-MX')}</div>
+                                                <div style="font-size:13px; color:#666;">Color: ${it.color || '—'} • Memoria: ${it.memoria || '—'}</div>
+                                                <div style="margin-top:6px;">
+                                                    <button style="padding:6px 10px; margin-right:6px; background:#2980b9; color:white; border-radius:4px; border:none; cursor:pointer;" onclick="abrirConvertForm(${it.fila})">✏️ Editar y Convertir</button>
+                                                </div>
+                                            </div>
+                                        `;
+                                        cont.appendChild(card);
+                                });
+                        } catch (err) {
+                                cont.innerHTML = '<div style="padding:14px; color:#c0392b;">Error de red al cargar placeholders</div>';
+                        }
+                }
+
+                function abrirConvertForm(fila) {
+                        const cont = document.getElementById('placeholders-list');
+                        // Reemplazamos por formulario simple
+                        cont.innerHTML = `
+                            <div style="padding:6px;">
+                                <h3 style="margin-top:0;">Convertir Placeholder (fila ${fila})</h3>
+                                <label>IMEI nuevo (requerido):</label>
+                                <input id="conv-imei" placeholder="Ej. 990000000000012" />
+                                <label>Color:</label>
+                                <input id="conv-color" placeholder="Ej. Negro" />
+                                <label>Capacidad / Memoria:</label>
+                                <input id="conv-memoria" placeholder="Ej. 128GB" />
+                                <label>Estado:</label>
+                                <select id="conv-estado">
+                                    <option value="DISPONIBLE">DISPONIBLE</option>
+                                    <option value="MAS VENDIDO">MAS VENDIDO</option>
+                                    <option value="BAJO DEMANDA">BAJO DEMANDA</option>
+                                </select>
+                                <label>Notas (opcional):</label>
+                                <textarea id="conv-notas" placeholder="Ej. Cliente solicitó cambio de color" style="width:100%; min-height:80px; padding:10px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;"></textarea>
+                                <div style="display:flex; gap:8px; margin-top:10px;">
+                                    <button id="conv-confirm" style="flex:1; background:#27ae60; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer;">✅ Convertir a Inventario</button>
+                                    <button id="conv-cancel" style="flex:1; background:#95a5a6; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer;">Cancelar</button>
+                                </div>
+                            </div>
+                        `;
+
+                        document.getElementById('conv-cancel').addEventListener('click', cargarPlaceholders);
+                        document.getElementById('conv-confirm').addEventListener('click', async function () {
+                                const imei = document.getElementById('conv-imei').value.trim();
+                                const color = document.getElementById('conv-color').value.trim();
+                                const memoria = document.getElementById('conv-memoria').value.trim();
+                                const estado = document.getElementById('conv-estado').value.trim();
+                                const notas = document.getElementById('conv-notas').value.trim();
+
+                                if (!imei) { alert('IMEI es requerido'); return; }
+
+                                const params = new URLSearchParams();
+                                params.append('action', 'convertirPlaceholderAInventario');
+                                params.append('token', CONFIG.API_TOKEN);
+                                params.append('fila', String(fila));
+                                params.append('imei', imei);
+                                params.append('color', color);
+                                params.append('memoria', memoria);
+                                params.append('estado', estado);
+                                params.append('notas', notas);
+
+                                try {
+                                        const resp = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                                                method: 'POST',
+                                                body: params.toString(),
+                                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                                        });
+                                        const d = await resp.json();
+                                        if (d.result === 'success') {
+                                                alert('✅ Placeholder convertido correctamente.');
+                                                cargarPlaceholders();
+                                        } else {
+                                                alert('⚠️ Error: ' + (d.message || 'No se pudo convertir'));
+                                        }
+                                } catch (err) {
+                                        alert('❌ Error de red al convertir placeholder');
+                                }
+                        });
+                }
+
+                // Cerrar modal si clic fuera
+                window.addEventListener('click', function (e) {
+                        const modal = document.getElementById('modal-placeholders');
+                        if (modal && e.target === modal) modal.style.display = 'none';
+                });
 
         // Cerrar si hacen clic fuera del cuadro blanco
         window.onclick = function(event) {
