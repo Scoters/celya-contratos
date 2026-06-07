@@ -1222,13 +1222,13 @@
         // Extrae la marca del título del modelo de forma inteligente
         function obtenerMarca(modelo) {
             const m = modelo.trim().toUpperCase();
-            if (m.includes("SAMSUNG")) return "Samsung";
-            if (m.includes("APPLE") || m.includes("IPHONE")) return "Apple";
-            if (m.includes("XIAOMI") || m.includes("REDMI") || m.includes("POCO")) return "Xiaomi";
-            if (m.includes("MOTOROLA") || m.includes("MOTO")) return "Motorola";
-            if (m.includes("OPPO")) return "Oppo";
-            if (m.includes("INFINIX")) return "Infinix";
-            if (m.includes("HONOR")) return "Honor";
+            if (m.startsWith("SAMSUNG")) return "Samsung";
+            if (m.startsWith("APPLE") || m.startsWith("IPHONE")) return "Apple";
+            if (m.startsWith("XIAOMI") || m.startsWith("REDMI") || m.startsWith("POCO")) return "Xiaomi";
+            if (m.startsWith("MOTO") || m.startsWith("MOTOROLA")) return "Motorola";
+            if (m.startsWith("OPPO")) return "Oppo";
+            if (m.startsWith("INFINIX")) return "Infinix";
+            if (m.startsWith("HONOR")) return "Honor";
 
             const primeraPalabra = modelo.trim().split(" ")[0];
             return primeraPalabra.charAt(0).toUpperCase() + primeraPalabra.slice(1).toLowerCase();
@@ -1346,37 +1346,8 @@
             }
         }
 
-        function poblarCacheVariantes(equipos) {
-            if (!equipos || !Array.isArray(equipos)) return;
-            equipos.forEach(item => {
-                if (item.variantesJson) {
-                    let cleanId = "";
-                    if (item.id && item.id.startsWith("MLM")) {
-                        cleanId = item.id;
-                    } else if (item.link) {
-                        const matchLink = item.link.match(/(MLM\-?\d+)/i);
-                        if (matchLink) {
-                            cleanId = matchLink[0].replace("-", "").toUpperCase();
-                        }
-                    }
-                    if (cleanId) {
-                        try {
-                            if (!ML_CACHE_VARIANTES[cleanId]) {
-                                ML_CACHE_VARIANTES[cleanId] = typeof item.variantesJson === 'string'
-                                    ? JSON.parse(item.variantesJson)
-                                    : item.variantesJson;
-                            }
-                        } catch (e) {
-                            console.warn("Error parseando variantesJson pre-cargadas para " + cleanId, e);
-                        }
-                    }
-                }
-            });
-        }
-
         // Aplica el orden y filtrado localmente
         function aplicarFiltrosYOrden() {
-            poblarCacheVariantes(window.equiposCargados);
             const brandSelected = document.getElementById('filterBrand').value;
             const sortSelected = document.getElementById('sortBy').value;
             const contenedor = document.getElementById('contenedorResultados');
@@ -1410,50 +1381,6 @@
                     const marca = obtenerMarca(item.modelo);
                     const claseMarca = obtenerClaseMarca(marca);
 
-                    let coloresDisponiblesStr = item.color || "";
-                    let memoriasDisponiblesStr = item.memoria || "";
-
-                    if (item.variantesJson) {
-                        try {
-                            const dataVariantes = typeof item.variantesJson === 'string'
-                                ? JSON.parse(item.variantesJson)
-                                : item.variantesJson;
-                            
-                            if (dataVariantes && dataVariantes.variations && dataVariantes.variations.length > 0) {
-                                const coloresUnicos = new Set();
-                                const memoriasUnicas = new Set();
-
-                                dataVariantes.variations.forEach(v => {
-                                    const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
-                                    const attrColor = allAttrs.find(a => {
-                                        const idUpper = a.id ? a.id.toUpperCase() : "";
-                                        return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
-                                    });
-                                    const attrStorage = allAttrs.find(a => {
-                                        const idUpper = a.id ? a.id.toUpperCase() : "";
-                                        return idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO";
-                                    });
-
-                                    if (attrColor && attrColor.value_name) coloresUnicos.add(attrColor.value_name);
-                                    if (attrStorage && attrStorage.value_name) memoriasUnicas.add(attrStorage.value_name);
-                                });
-
-                                if (coloresUnicos.size > 0) {
-                                    coloresDisponiblesStr = Array.from(coloresUnicos).join(", ");
-                                }
-                                if (memoriasUnicas.size > 0) {
-                                    memoriasDisponiblesStr = Array.from(memoriasUnicas).sort((a,b) => {
-                                        const numA = parseInt(a) || 0;
-                                        const numB = parseInt(b) || 0;
-                                        return numA - numB;
-                                    }).join(", ");
-                                }
-                            }
-                        } catch (err) {
-                            console.warn("Error parseando variantesJson en renderizado de tarjeta:", err);
-                        }
-                    }
-
                     // Etiqueta de entrega inmediata o pedido
                     let badgeEstado = item.entregaInmediata
                         ? `<span class="status-badge status-available">⚡ Disponible</span>`
@@ -1483,8 +1410,8 @@
                                 </div>
                                 <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpio}</h4>
                                 <div class="specs-container">
-                                    ${memoriasDisponiblesStr ? `<span class="spec-tag">💾 ${memoriasDisponiblesStr}</span>` : ''}
-                                    ${coloresDisponiblesStr ? `<span class="spec-tag">🎨 ${coloresDisponiblesStr}</span>` : ''}
+                                    ${item.memoria ? `<span class="spec-tag">💾 ${item.memoria}</span>` : ''}
+                                    ${item.color ? `<span class="spec-tag">🎨 ${item.color}</span>` : ''}
                                 </div>
                                 ${rowContado}
                                 <div class="enganche" data-enganche="${(Math.ceil((item.engancheMinimo || 0) / 10) * 10).toLocaleString('es-MX')}" data-precio="${Math.round(item.precioContado).toLocaleString('es-MX')}">
@@ -2262,23 +2189,38 @@
                 mostrarVariantesFallback();
             }
 
-            // Limpiamos la ID por si viene como "MLM-XXXXX" o URL
+            // 1. Intentar obtener el ID desde el parámetro 'wid' (ID de publicación específica) en la URL
             let cleanId = "";
-            if (idProducto && idProducto.startsWith("MLM")) {
-                cleanId = idProducto;
-            } else if (idProducto) {
-                const match = idProducto.match(/(MLM\-?\d+)/i);
-                if (match) {
-                    cleanId = match[0].replace("-", "").toUpperCase();
+            let isProduct = false;
+
+            if (currentMLItemLink) {
+                const widMatch = currentMLItemLink.match(/wid=([A-Z]*\d+)/i);
+                if (widMatch) {
+                    cleanId = widMatch[1].toUpperCase();
+                    isProduct = false;
                 }
             }
 
-            // Si no se encontró ID en idProducto (ej. es un IMEI local), la buscamos en el enlace global
+            // 2. Si no hay 'wid', intentamos extraer la ID de la publicación del enlace global
             if (!cleanId && currentMLItemLink) {
                 const matchLink = currentMLItemLink.match(/(MLM\-?\d+)/i);
                 if (matchLink) {
                     cleanId = matchLink[0].replace("-", "").toUpperCase();
+                    isProduct = currentMLItemLink.includes("/p/");
                 }
+            }
+
+            // 3. Como última opción, usamos el idProducto de la fila
+            if (!cleanId) {
+                if (idProducto && idProducto.startsWith("MLM")) {
+                    cleanId = idProducto;
+                } else if (idProducto) {
+                    const match = idProducto.match(/(MLM\-?\d+)/i);
+                    if (match) {
+                        cleanId = match[0].replace("-", "").toUpperCase();
+                    }
+                }
+                isProduct = currentMLItemLink && currentMLItemLink.includes("/p/");
             }
 
             if (!cleanId) {
@@ -2295,77 +2237,54 @@
 
             try {
                 let data = null;
-                if (ML_CACHE_VARIANTES[cleanId] && ML_CACHE_VARIANTES[cleanId].variations && ML_CACHE_VARIANTES[cleanId].variations.length > 0) {
+                if (ML_CACHE_VARIANTES[cleanId]) {
                     data = ML_CACHE_VARIANTES[cleanId];
                 } else {
-                    try {
-                        const isProduct = currentMLItemLink && currentMLItemLink.includes("/p/");
+                    // Función auxiliar de fetch local
+                    async function fetchMLData(id, isProd) {
+                        const endpoint = isProd ? 'products' : 'items';
                         try {
-                            const endpoint = isProduct ? 'products' : 'items';
-                            const res = await fetch(`https://api.mercadolibre.com/${endpoint}/${cleanId}`);
+                            const res = await fetch(`https://api.mercadolibre.com/${endpoint}/${id}`);
                             if (res.ok) {
-                                data = await res.json();
+                                return await res.json();
                             }
-                        } catch (fetchErr) {
-                            console.warn("Direct ML fetch failed, trying via GAS proxy...", fetchErr);
+                        } catch (e) {
+                            console.warn(`Direct fetch failed for ${id}:`, e);
                         }
-
-                        if (!data) {
-                            const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${cleanId}&isProduct=${isProduct}`;
+                        
+                        try {
+                            const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${id}&isProduct=${isProd}`;
                             const resProxy = await fetch(proxyUrl);
                             if (resProxy.ok) {
                                 const rawData = await resProxy.json();
                                 if (rawData && !rawData.error) {
-                                    data = rawData;
+                                    return rawData;
                                 }
                             }
+                        } catch (e) {
+                            console.error(`Proxy fetch failed for ${id}:`, e);
                         }
+                        return null;
+                    }
 
-                        if (data) {
-                            ML_CACHE_VARIANTES[cleanId] = data;
+                    // Intentar obtener la publicación específica (item)
+                    data = await fetchMLData(cleanId, isProduct);
 
-                            // Actualizar caché persistente en local para que la tarjeta del catálogo muestre todas las variantes de inmediato
-                            if (data.variations && data.variations.length > 0 && window.equiposCargados) {
-                                let itemActualizado = false;
-                                window.equiposCargados.forEach(eq => {
-                                    let eqCleanId = "";
-                                    if (eq.id && eq.id.startsWith("MLM")) {
-                                        eqCleanId = eq.id;
-                                    } else if (eq.link) {
-                                        const matchLink = eq.link.match(/(MLM\-?\d+)/i);
-                                        if (matchLink) eqCleanId = matchLink[0].replace("-", "").toUpperCase();
-                                    }
-                                    if (eqCleanId === cleanId) {
-                                        eq.variantesJson = data;
-                                        itemActualizado = true;
-                                    }
-                                });
-                                if (itemActualizado) {
-                                    const urlHash = btoa(CONFIG.GOOGLE_SCRIPT_URL).substring(0, 15);
-                                    const cacheKey = "celya_catalogo_cache_" + urlHash;
-                                    localStorage.setItem(cacheKey, JSON.stringify(window.equiposCargados));
-                                    
-                                    // Re-renderizar las tarjetas en segundo plano
-                                    aplicarFiltrosYOrden();
-
-                                    // Enviar asíncronamente las variantes al backend para guardarlas permanentemente en la hoja de cálculo
-                                    fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                                        method: 'POST',
-                                        mode: 'no-cors',
-                                        headers: {
-                                            'Content-Type': 'application/x-www-form-urlencoded'
-                                        },
-                                        body: new URLSearchParams({
-                                            action: 'guardarVariantesProducto',
-                                            id: cleanId,
-                                            variantesJson: JSON.stringify(data)
-                                        })
-                                    }).catch(err => console.warn("Error enviando variantes al backend:", err));
-                                }
+                    // Si falló (ej. 403 en item) y la URL original era un catálogo /p/, intentar fallback al product ID genérico
+                    if (!data && !isProduct && currentMLItemLink && currentMLItemLink.includes("/p/")) {
+                        const pMatch = currentMLItemLink.match(/\/p\/(MLM\-?\d+)/i);
+                        if (pMatch) {
+                            const parentProductId = pMatch[1].replace("-", "").toUpperCase();
+                            console.log("Item fetch failed (403), falling back to parent product:", parentProductId);
+                            data = await fetchMLData(parentProductId, true);
+                            if (data) {
+                                cleanId = parentProductId;
                             }
                         }
-                    } catch (e) {
-                        console.error("Error obteniendo variantes vivas desde ML:", e);
+                    }
+
+                    if (data) {
+                        ML_CACHE_VARIANTES[cleanId] = data;
                     }
                 }
 
@@ -2379,11 +2298,14 @@
 
                 if (!data) return;
 
+                // Limpiar selectores previos antes de repintar los reales
+                wrapperColores.innerHTML = "";
+                wrapperStorage.innerHTML = "";
+
                 // Actualizar el título del producto con el nombre real de Mercado Libre si existe
-                const nombreProducto = data.name || data.title;
-                if (nombreProducto) {
-                    document.getElementById('pdp-product-title').innerText = nombreProducto;
-                    document.getElementById('hiddenModelo').value = nombreProducto;
+                if (data.name) {
+                    document.getElementById('pdp-product-title').innerText = data.name;
+                    document.getElementById('hiddenModelo').value = data.name;
                 }
 
                 // 📸 Pintamos las fotos de la galería si existen (todas las disponibles)
@@ -2412,10 +2334,6 @@
                 }
 
                 if (data.variations && data.variations.length > 0) {
-                    // Limpiar selectores previos antes de repintar los reales
-                    wrapperColores.innerHTML = "";
-                    wrapperStorage.innerHTML = "";
-
                     itemVariationsData = data.variations;
                     contenedor.style.display = "block";
 
@@ -2437,29 +2355,36 @@
                         const nameColor = attrColor ? attrColor.value_name : "Único";
                         const nameStorage = attrStorage ? attrStorage.value_name : null;
 
-                        const keyColor = nameColor.trim().toLowerCase();
-                        if (!coloresUnicos.has(keyColor)) {
-                            coloresUnicos.set(keyColor, { id: v.id, name: nameColor });
+                        const normColor = nameColor.trim().toLowerCase();
+                        if (!coloresUnicos.has(normColor)) {
+                            coloresUnicos.set(normColor, { id: v.id, name: nameColor });
                         }
-
+                        
                         if (nameStorage) {
-                            const keyStorage = nameStorage.trim().toLowerCase();
-                            if (!memoriasUnicas.has(keyStorage)) {
-                                memoriasUnicas.set(keyStorage, nameStorage);
+                            const normStorage = nameStorage.trim().toLowerCase();
+                            if (!memoriasUnicas.has(normStorage)) {
+                                memoriasUnicas.set(normStorage, nameStorage.trim());
                             }
                         }
                     });
 
-                    // 🎨 Pintamos los círculos de Colores reales obtenidos
+                    // 🎨 Pintamos los círculos de Colores reales obtenidos (Deduplicados)
                     let esPrimeroColor = true;
-                    coloresUnicos.forEach((colorObj, keyColor) => {
-                        const nombreColor = colorObj.name;
-                        const vId = colorObj.id;
+                    const defaultColorNorm = defaultColor ? defaultColor.trim().toLowerCase() : "";
 
+                    // Ordenamos para que el color por defecto (o seleccionado) quede de primero
+                    const coloresOrdenados = Array.from(coloresUnicos.entries()).sort((a, b) => {
+                        const isA = a[0] === defaultColorNorm;
+                        const isB = b[0] === defaultColorNorm;
+                        return isA ? -1 : (isB ? 1 : 0);
+                    });
+
+                    coloresOrdenados.forEach(([normColor, colorInfo]) => {
                         const divColor = document.createElement('div');
-                        divColor.className = `color-circle ${esPrimeroColor ? 'selected' : ''}`;
-                        divColor.title = nombreColor;
-                        divColor.setAttribute('data-color', nombreColor);
+                        const isSelected = esPrimeroColor;
+                        divColor.className = `color-circle ${isSelected ? 'selected' : ''}`;
+                        divColor.title = colorInfo.name;
+                        divColor.setAttribute('data-color', colorInfo.name);
 
                         // Color genérico visual mapping
                         const colorMap = {
@@ -2473,7 +2398,7 @@
                             "gris": "#6b7280", "grey": "#6b7280", "silver": "#cbd5e1", "plata": "#cbd5e1",
                             "oro": "#f59e0b", "gold": "#f59e0b", "dorado": "#f59e0b"
                         };
-                        const nombreLower = nombreColor.toLowerCase();
+                        const nombreLower = normColor;
                         let bgCircleColor = "#94a3b8";
                         for (const key in colorMap) {
                             if (nombreLower.includes(key)) {
@@ -2483,10 +2408,10 @@
                         }
                         divColor.style.backgroundColor = bgCircleColor;
 
-                        if (esPrimeroColor) {
-                            colorSeleccionado = nombreColor;
-                            document.getElementById('color-seleccionado-txt').innerText = nombreColor;
-                            actualizarFotoModalPorVariante(vId); // Cambia la foto del modal por la del color seleccionado
+                        if (isSelected) {
+                            colorSeleccionado = colorInfo.name;
+                            document.getElementById('color-seleccionado-txt').innerText = colorInfo.name;
+                            actualizarFotoModalPorVariante(colorInfo.id); // Cambia la foto del modal por la del color seleccionado
                             esPrimeroColor = false;
                         }
 
@@ -2495,29 +2420,32 @@
                             this.classList.add('selected');
                             colorSeleccionado = this.getAttribute('data-color');
                             document.getElementById('color-seleccionado-txt').innerText = colorSeleccionado;
-                            actualizarFotoModalPorVariante(vId);
+                            actualizarFotoModalPorVariante(colorInfo.id);
                         };
                         wrapperColores.appendChild(divColor);
                     });
 
-                    // 💾 Pintamos las pastillas de Almacenamiento reales obtenidas
+                    // 💾 Pintamos las pastillas de Almacenamiento reales obtenidas (Deduplicadas)
                     if (memoriasUnicas.size > 0) {
                         seccionStorage.style.display = "block";
-                        let esPrimeroStorage = true;
+                        const defaultMemoriaNorm = defaultMemoria ? defaultMemoria.trim().toLowerCase() : "";
 
-                        const sortedStorages = Array.from(memoriasUnicas.values()).sort((a, b) => {
-                            const numA = parseInt(a) || 0;
-                            const numB = parseInt(b) || 0;
-                            return numA - numB;
+                        // Ordenar para que la memoria por defecto (o seleccionada) quede de primero
+                        const memoriasOrdenadas = Array.from(memoriasUnicas.entries()).sort((a, b) => {
+                            const isA = a[0] === defaultMemoriaNorm;
+                            const isB = b[0] === defaultMemoriaNorm;
+                            return isA ? -1 : (isB ? 1 : 0);
                         });
 
-                        sortedStorages.forEach(storageName => {
+                        let esPrimeroStorage = true;
+                        memoriasOrdenadas.forEach(([normStorage, storageName]) => {
                             const divStorage = document.createElement('div');
-                            divStorage.className = `storage-pill ${esPrimeroStorage ? 'selected' : ''}`;
+                            const isSelected = esPrimeroStorage;
+                            divStorage.className = `storage-pill ${isSelected ? 'selected' : ''}`;
                             divStorage.innerText = storageName;
                             divStorage.setAttribute('data-storage', storageName);
 
-                            if (esPrimeroStorage) {
+                            if (isSelected) {
                                 almacenamientoSeleccionado = storageName;
                                 document.getElementById('memoria-seleccionada-txt').innerText = storageName;
                                 esPrimeroStorage = false;
@@ -2544,37 +2472,37 @@
                         return idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO";
                     });
 
-                    // 🎨 Pintamos los círculos de colores reales obtenidos
+                    // 🎨 Pintamos los círculos de colores reales obtenidos (Deduplicados)
                     if (colorPicker && colorPicker.products && colorPicker.products.length > 0) {
-                        const coloresVistos = new Set();
-                        const productosUnicosColores = [];
-                        
-                        // Agregar el seleccionado primero
+                        const coloresVistos = new Map(); // key: lowercase -> { id, name, isSelected }
+
                         colorPicker.products.forEach(p => {
-                            const isSelected = p.tags && p.tags.includes("selected");
-                            if (isSelected) {
-                                coloresVistos.add(p.picker_label);
-                                productosUnicosColores.push(p);
-                            }
-                        });
-                        
-                        // Agregar el resto sin duplicar
-                        colorPicker.products.forEach(p => {
-                            if (!coloresVistos.has(p.picker_label)) {
-                                coloresVistos.add(p.picker_label);
-                                productosUnicosColores.push(p);
+                            const normColor = p.picker_label.trim().toLowerCase();
+                            const isSel = p.tags && p.tags.includes("selected");
+                            if (!coloresVistos.has(normColor) || isSel) {
+                                coloresVistos.set(normColor, {
+                                    id: p.product_id,
+                                    name: p.picker_label,
+                                    isSelected: isSel
+                                });
                             }
                         });
 
-                        productosUnicosColores.forEach(p => {
-                            const nombreColor = p.picker_label;
-                            const vId = p.product_id;
-                            const isSelected = p.tags && p.tags.includes("selected");
+                        // Ordenar para que el color por defecto o seleccionado quede de primero
+                        const defaultColorNorm = defaultColor ? defaultColor.trim().toLowerCase() : "";
+                        const coloresOrdenados = Array.from(coloresVistos.entries()).sort((a, b) => {
+                            const isA = a[0] === defaultColorNorm || a[1].isSelected;
+                            const isB = b[0] === defaultColorNorm || b[1].isSelected;
+                            return isA ? -1 : (isB ? 1 : 0);
+                        });
 
+                        let esPrimeroColor = true;
+                        coloresOrdenados.forEach(([normColor, colorInfo]) => {
                             const divColor = document.createElement('div');
+                            const isSelected = esPrimeroColor;
                             divColor.className = `color-circle ${isSelected ? 'selected' : ''}`;
-                            divColor.title = nombreColor;
-                            divColor.setAttribute('data-color', nombreColor);
+                            divColor.title = colorInfo.name;
+                            divColor.setAttribute('data-color', colorInfo.name);
 
                             // Color genérico visual mapping
                             const colorMap = {
@@ -2588,7 +2516,7 @@
                                 "gris": "#6b7280", "grey": "#6b7280", "silver": "#cbd5e1", "plata": "#cbd5e1",
                                 "oro": "#f59e0b", "gold": "#f59e0b", "dorado": "#f59e0b"
                             };
-                            const nombreLower = nombreColor.toLowerCase();
+                            const nombreLower = normColor;
                             let bgCircleColor = "#94a3b8";
                             for (const key in colorMap) {
                                 if (nombreLower.includes(key)) {
@@ -2599,66 +2527,66 @@
                             divColor.style.backgroundColor = bgCircleColor;
 
                             if (isSelected) {
-                                colorSeleccionado = nombreColor;
-                                document.getElementById('color-seleccionado-txt').innerText = nombreColor;
+                                colorSeleccionado = colorInfo.name;
+                                document.getElementById('color-seleccionado-txt').innerText = colorInfo.name;
+                                esPrimeroColor = false;
                             }
 
                             divColor.onclick = function () {
-                                if (vId === cleanId) return;
+                                if (colorInfo.id === cleanId) return;
                                 document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
                                 this.classList.add('selected');
-                                currentMLItemLink = `https://www.mercadolibre.com.mx/p/${vId}`;
-                                cargarVariantesRealesML(vId, true);
+                                currentMLItemLink = `https://www.mercadolibre.com.mx/p/${colorInfo.id}`;
+                                cargarVariantesRealesML(colorInfo.id, true);
                             };
                             wrapperColores.appendChild(divColor);
                         });
                     }
 
-                    // 💾 Pintamos las pastillas de Almacenamiento reales obtenidas
+                    // 💾 Pintamos las pastillas de Almacenamiento reales obtenidas (Deduplicadas)
                     if (storagePicker && storagePicker.products && storagePicker.products.length > 0) {
                         seccionStorage.style.display = "block";
-                        
-                        const memoriasVistas = new Set();
-                        const productosUnicosMemoria = [];
-                        
-                        // Agregar el seleccionado primero
+                        const memoriasVistas = new Map();
+
                         storagePicker.products.forEach(p => {
-                            const isSelected = p.tags && p.tags.includes("selected");
-                            if (isSelected) {
-                                memoriasVistas.add(p.picker_label);
-                                productosUnicosMemoria.push(p);
-                            }
-                        });
-                        
-                        // Agregar el resto sin duplicar
-                        storagePicker.products.forEach(p => {
-                            if (!memoriasVistas.has(p.picker_label)) {
-                                memoriasVistas.add(p.picker_label);
-                                productosUnicosMemoria.push(p);
+                            const normStorage = p.picker_label.trim().toLowerCase();
+                            const isSel = p.tags && p.tags.includes("selected");
+                            if (!memoriasVistas.has(normStorage) || isSel) {
+                                memoriasVistas.set(normStorage, {
+                                    id: p.product_id,
+                                    name: p.picker_label,
+                                    isSelected: isSel
+                                });
                             }
                         });
 
-                        productosUnicosMemoria.forEach(p => {
-                            const storageName = p.picker_label;
-                            const vId = p.product_id;
-                            const isSelected = p.tags && p.tags.includes("selected");
+                        const defaultMemoriaNorm = defaultMemoria ? defaultMemoria.trim().toLowerCase() : "";
+                        const memoriasOrdenadas = Array.from(memoriasVistas.entries()).sort((a, b) => {
+                            const isA = a[0] === defaultMemoriaNorm || a[1].isSelected;
+                            const isB = b[0] === defaultMemoriaNorm || b[1].isSelected;
+                            return isA ? -1 : (isB ? 1 : 0);
+                        });
 
+                        let esPrimeroStorage = true;
+                        memoriasOrdenadas.forEach(([normStorage, storageInfo]) => {
                             const divStorage = document.createElement('div');
+                            const isSelected = esPrimeroStorage;
                             divStorage.className = `storage-pill ${isSelected ? 'selected' : ''}`;
-                            divStorage.innerText = storageName;
-                            divStorage.setAttribute('data-storage', storageName);
+                            divStorage.innerText = storageInfo.name;
+                            divStorage.setAttribute('data-storage', storageInfo.name);
 
                             if (isSelected) {
-                                almacenamientoSeleccionado = storageName;
-                                document.getElementById('memoria-seleccionada-txt').innerText = storageName;
+                                almacenamientoSeleccionado = storageInfo.name;
+                                document.getElementById('memoria-seleccionada-txt').innerText = storageInfo.name;
+                                esPrimeroStorage = false;
                             }
 
                             divStorage.onclick = function () {
-                                if (vId === cleanId) return;
+                                if (storageInfo.id === cleanId) return;
                                 document.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
                                 this.classList.add('selected');
-                                currentMLItemLink = `https://www.mercadolibre.com.mx/p/${vId}`;
-                                cargarVariantesRealesML(vId, true);
+                                currentMLItemLink = `https://www.mercadolibre.com.mx/p/${storageInfo.id}`;
+                                cargarVariantesRealesML(storageInfo.id, true);
                             };
                             wrapperStorage.appendChild(divStorage);
                         });
