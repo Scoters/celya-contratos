@@ -1222,13 +1222,13 @@
         // Extrae la marca del título del modelo de forma inteligente
         function obtenerMarca(modelo) {
             const m = modelo.trim().toUpperCase();
-            if (m.startsWith("SAMSUNG")) return "Samsung";
-            if (m.startsWith("APPLE") || m.startsWith("IPHONE")) return "Apple";
-            if (m.startsWith("XIAOMI") || m.startsWith("REDMI") || m.startsWith("POCO")) return "Xiaomi";
-            if (m.startsWith("MOTO") || m.startsWith("MOTOROLA")) return "Motorola";
-            if (m.startsWith("OPPO")) return "Oppo";
-            if (m.startsWith("INFINIX")) return "Infinix";
-            if (m.startsWith("HONOR")) return "Honor";
+            if (m.includes("SAMSUNG")) return "Samsung";
+            if (m.includes("APPLE") || m.includes("IPHONE")) return "Apple";
+            if (m.includes("XIAOMI") || m.includes("REDMI") || m.includes("POCO")) return "Xiaomi";
+            if (m.includes("MOTOROLA") || m.includes("MOTO")) return "Motorola";
+            if (m.includes("OPPO")) return "Oppo";
+            if (m.includes("INFINIX")) return "Infinix";
+            if (m.includes("HONOR")) return "Honor";
 
             const primeraPalabra = modelo.trim().split(" ")[0];
             return primeraPalabra.charAt(0).toUpperCase() + primeraPalabra.slice(1).toLowerCase();
@@ -1410,6 +1410,50 @@
                     const marca = obtenerMarca(item.modelo);
                     const claseMarca = obtenerClaseMarca(marca);
 
+                    let coloresDisponiblesStr = item.color || "";
+                    let memoriasDisponiblesStr = item.memoria || "";
+
+                    if (item.variantesJson) {
+                        try {
+                            const dataVariantes = typeof item.variantesJson === 'string'
+                                ? JSON.parse(item.variantesJson)
+                                : item.variantesJson;
+                            
+                            if (dataVariantes && dataVariantes.variations && dataVariantes.variations.length > 0) {
+                                const coloresUnicos = new Set();
+                                const memoriasUnicas = new Set();
+
+                                dataVariantes.variations.forEach(v => {
+                                    const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
+                                    const attrColor = allAttrs.find(a => {
+                                        const idUpper = a.id ? a.id.toUpperCase() : "";
+                                        return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
+                                    });
+                                    const attrStorage = allAttrs.find(a => {
+                                        const idUpper = a.id ? a.id.toUpperCase() : "";
+                                        return idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO";
+                                    });
+
+                                    if (attrColor && attrColor.value_name) coloresUnicos.add(attrColor.value_name);
+                                    if (attrStorage && attrStorage.value_name) memoriasUnicas.add(attrStorage.value_name);
+                                });
+
+                                if (coloresUnicos.size > 0) {
+                                    coloresDisponiblesStr = Array.from(coloresUnicos).join(", ");
+                                }
+                                if (memoriasUnicas.size > 0) {
+                                    memoriasDisponiblesStr = Array.from(memoriasUnicas).sort((a,b) => {
+                                        const numA = parseInt(a) || 0;
+                                        const numB = parseInt(b) || 0;
+                                        return numA - numB;
+                                    }).join(", ");
+                                }
+                            }
+                        } catch (err) {
+                            console.warn("Error parseando variantesJson en renderizado de tarjeta:", err);
+                        }
+                    }
+
                     // Etiqueta de entrega inmediata o pedido
                     let badgeEstado = item.entregaInmediata
                         ? `<span class="status-badge status-available">⚡ Disponible</span>`
@@ -1439,8 +1483,8 @@
                                 </div>
                                 <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpio}</h4>
                                 <div class="specs-container">
-                                    ${item.memoria ? `<span class="spec-tag">💾 ${item.memoria}</span>` : ''}
-                                    ${item.color ? `<span class="spec-tag">🎨 ${item.color}</span>` : ''}
+                                    ${memoriasDisponiblesStr ? `<span class="spec-tag">💾 ${memoriasDisponiblesStr}</span>` : ''}
+                                    ${coloresDisponiblesStr ? `<span class="spec-tag">🎨 ${coloresDisponiblesStr}</span>` : ''}
                                 </div>
                                 ${rowContado}
                                 <div class="enganche" data-enganche="${(Math.ceil((item.engancheMinimo || 0) / 10) * 10).toLocaleString('es-MX')}" data-precio="${Math.round(item.precioContado).toLocaleString('es-MX')}">
@@ -2251,58 +2295,95 @@
 
             try {
                 let data = null;
-                if (ML_CACHE_VARIANTES[cleanId]) {
-                data = ML_CACHE_VARIANTES[cleanId];
-            } else {
-                try {
-                    const isProduct = currentMLItemLink && currentMLItemLink.includes("/p/");
+                if (ML_CACHE_VARIANTES[cleanId] && ML_CACHE_VARIANTES[cleanId].variations && ML_CACHE_VARIANTES[cleanId].variations.length > 0) {
+                    data = ML_CACHE_VARIANTES[cleanId];
+                } else {
                     try {
-                        const endpoint = isProduct ? 'products' : 'items';
-                        const res = await fetch(`https://api.mercadolibre.com/${endpoint}/${cleanId}`);
-                        if (res.ok) {
-                            data = await res.json();
+                        const isProduct = currentMLItemLink && currentMLItemLink.includes("/p/");
+                        try {
+                            const endpoint = isProduct ? 'products' : 'items';
+                            const res = await fetch(`https://api.mercadolibre.com/${endpoint}/${cleanId}`);
+                            if (res.ok) {
+                                data = await res.json();
+                            }
+                        } catch (fetchErr) {
+                            console.warn("Direct ML fetch failed, trying via GAS proxy...", fetchErr);
                         }
-                    } catch (fetchErr) {
-                        console.warn("Direct ML fetch failed, trying via GAS proxy...", fetchErr);
-                    }
 
-                    if (!data) {
-                        const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${cleanId}&isProduct=${isProduct}`;
-                        const resProxy = await fetch(proxyUrl);
-                        if (resProxy.ok) {
-                            const rawData = await resProxy.json();
-                            if (rawData && !rawData.error) {
-                                data = rawData;
+                        if (!data) {
+                            const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${cleanId}&isProduct=${isProduct}`;
+                            const resProxy = await fetch(proxyUrl);
+                            if (resProxy.ok) {
+                                const rawData = await resProxy.json();
+                                if (rawData && !rawData.error) {
+                                    data = rawData;
+                                }
                             }
                         }
-                    }
 
-                    if (data) {
-                        ML_CACHE_VARIANTES[cleanId] = data;
+                        if (data) {
+                            ML_CACHE_VARIANTES[cleanId] = data;
+
+                            // Actualizar caché persistente en local para que la tarjeta del catálogo muestre todas las variantes de inmediato
+                            if (data.variations && data.variations.length > 0 && window.equiposCargados) {
+                                let itemActualizado = false;
+                                window.equiposCargados.forEach(eq => {
+                                    let eqCleanId = "";
+                                    if (eq.id && eq.id.startsWith("MLM")) {
+                                        eqCleanId = eq.id;
+                                    } else if (eq.link) {
+                                        const matchLink = eq.link.match(/(MLM\-?\d+)/i);
+                                        if (matchLink) eqCleanId = matchLink[0].replace("-", "").toUpperCase();
+                                    }
+                                    if (eqCleanId === cleanId) {
+                                        eq.variantesJson = data;
+                                        itemActualizado = true;
+                                    }
+                                });
+                                if (itemActualizado) {
+                                    const urlHash = btoa(CONFIG.GOOGLE_SCRIPT_URL).substring(0, 15);
+                                    const cacheKey = "celya_catalogo_cache_" + urlHash;
+                                    localStorage.setItem(cacheKey, JSON.stringify(window.equiposCargados));
+                                    
+                                    // Re-renderizar las tarjetas en segundo plano
+                                    aplicarFiltrosYOrden();
+
+                                    // Enviar asíncronamente las variantes al backend para guardarlas permanentemente en la hoja de cálculo
+                                    fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                                        method: 'POST',
+                                        mode: 'no-cors',
+                                        headers: {
+                                            'Content-Type': 'application/x-www-form-urlencoded'
+                                        },
+                                        body: new URLSearchParams({
+                                            action: 'guardarVariantesProducto',
+                                            id: cleanId,
+                                            variantesJson: JSON.stringify(data)
+                                        })
+                                    }).catch(err => console.warn("Error enviando variantes al backend:", err));
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Error obteniendo variantes vivas desde ML:", e);
                     }
-                } catch (e) {
-                    console.error("Error obteniendo variantes vivas desde ML:", e);
                 }
-            }
 
-            // Restaurar estilos en cualquier caso de finalización de carga
-            if (esCambioVariante) {
-                wrapperColores.style.opacity = "";
-                wrapperColores.style.pointerEvents = "";
-                wrapperStorage.style.opacity = "";
-                wrapperStorage.style.pointerEvents = "";
-            }
+                // Restaurar estilos en cualquier caso de finalización de carga
+                if (esCambioVariante) {
+                    wrapperColores.style.opacity = "";
+                    wrapperColores.style.pointerEvents = "";
+                    wrapperStorage.style.opacity = "";
+                    wrapperStorage.style.pointerEvents = "";
+                }
 
-            if (!data) return;
-
-                // Limpiar selectores previos antes de repintar los reales
-                wrapperColores.innerHTML = "";
-                wrapperStorage.innerHTML = "";
+                if (!data) return;
 
                 // Actualizar el título del producto con el nombre real de Mercado Libre si existe
-                if (data.name) {
-                    document.getElementById('pdp-product-title').innerText = data.name;
-                    document.getElementById('hiddenModelo').value = data.name;
+                const nombreProducto = data.name || data.title;
+                if (nombreProducto) {
+                    document.getElementById('pdp-product-title').innerText = nombreProducto;
+                    document.getElementById('hiddenModelo').value = nombreProducto;
                 }
 
                 // 📸 Pintamos las fotos de la galería si existen (todas las disponibles)
@@ -2331,11 +2412,15 @@
                 }
 
                 if (data.variations && data.variations.length > 0) {
+                    // Limpiar selectores previos antes de repintar los reales
+                    wrapperColores.innerHTML = "";
+                    wrapperStorage.innerHTML = "";
+
                     itemVariationsData = data.variations;
                     contenedor.style.display = "block";
 
                     const coloresUnicos = new Map();
-                    const memoriasUnicas = new Set();
+                    const memoriasUnicas = new Map();
 
                     // Mapeamos todas las variantes reales publicadas por el vendedor con búsqueda flexible de IDs de atributos
                     data.variations.forEach(v => {
@@ -2352,15 +2437,25 @@
                         const nameColor = attrColor ? attrColor.value_name : "Único";
                         const nameStorage = attrStorage ? attrStorage.value_name : null;
 
-                        if (!coloresUnicos.has(nameColor)) {
-                            coloresUnicos.set(nameColor, v.id);
+                        const keyColor = nameColor.trim().toLowerCase();
+                        if (!coloresUnicos.has(keyColor)) {
+                            coloresUnicos.set(keyColor, { id: v.id, name: nameColor });
                         }
-                        if (nameStorage) memoriasUnicas.add(nameStorage);
+
+                        if (nameStorage) {
+                            const keyStorage = nameStorage.trim().toLowerCase();
+                            if (!memoriasUnicas.has(keyStorage)) {
+                                memoriasUnicas.set(keyStorage, nameStorage);
+                            }
+                        }
                     });
 
                     // 🎨 Pintamos los círculos de Colores reales obtenidos
                     let esPrimeroColor = true;
-                    coloresUnicos.forEach((vId, nombreColor) => {
+                    coloresUnicos.forEach((colorObj, keyColor) => {
+                        const nombreColor = colorObj.name;
+                        const vId = colorObj.id;
+
                         const divColor = document.createElement('div');
                         divColor.className = `color-circle ${esPrimeroColor ? 'selected' : ''}`;
                         divColor.title = nombreColor;
@@ -2409,7 +2504,14 @@
                     if (memoriasUnicas.size > 0) {
                         seccionStorage.style.display = "block";
                         let esPrimeroStorage = true;
-                        memoriasUnicas.forEach(storageName => {
+
+                        const sortedStorages = Array.from(memoriasUnicas.values()).sort((a, b) => {
+                            const numA = parseInt(a) || 0;
+                            const numB = parseInt(b) || 0;
+                            return numA - numB;
+                        });
+
+                        sortedStorages.forEach(storageName => {
                             const divStorage = document.createElement('div');
                             divStorage.className = `storage-pill ${esPrimeroStorage ? 'selected' : ''}`;
                             divStorage.innerText = storageName;
@@ -2444,7 +2546,27 @@
 
                     // 🎨 Pintamos los círculos de colores reales obtenidos
                     if (colorPicker && colorPicker.products && colorPicker.products.length > 0) {
+                        const coloresVistos = new Set();
+                        const productosUnicosColores = [];
+                        
+                        // Agregar el seleccionado primero
                         colorPicker.products.forEach(p => {
+                            const isSelected = p.tags && p.tags.includes("selected");
+                            if (isSelected) {
+                                coloresVistos.add(p.picker_label);
+                                productosUnicosColores.push(p);
+                            }
+                        });
+                        
+                        // Agregar el resto sin duplicar
+                        colorPicker.products.forEach(p => {
+                            if (!coloresVistos.has(p.picker_label)) {
+                                coloresVistos.add(p.picker_label);
+                                productosUnicosColores.push(p);
+                            }
+                        });
+
+                        productosUnicosColores.forEach(p => {
                             const nombreColor = p.picker_label;
                             const vId = p.product_id;
                             const isSelected = p.tags && p.tags.includes("selected");
@@ -2495,7 +2617,28 @@
                     // 💾 Pintamos las pastillas de Almacenamiento reales obtenidas
                     if (storagePicker && storagePicker.products && storagePicker.products.length > 0) {
                         seccionStorage.style.display = "block";
+                        
+                        const memoriasVistas = new Set();
+                        const productosUnicosMemoria = [];
+                        
+                        // Agregar el seleccionado primero
                         storagePicker.products.forEach(p => {
+                            const isSelected = p.tags && p.tags.includes("selected");
+                            if (isSelected) {
+                                memoriasVistas.add(p.picker_label);
+                                productosUnicosMemoria.push(p);
+                            }
+                        });
+                        
+                        // Agregar el resto sin duplicar
+                        storagePicker.products.forEach(p => {
+                            if (!memoriasVistas.has(p.picker_label)) {
+                                memoriasVistas.add(p.picker_label);
+                                productosUnicosMemoria.push(p);
+                            }
+                        });
+
+                        productosUnicosMemoria.forEach(p => {
                             const storageName = p.picker_label;
                             const vId = p.product_id;
                             const isSelected = p.tags && p.tags.includes("selected");
