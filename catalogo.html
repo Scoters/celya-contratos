@@ -780,8 +780,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
@@ -792,7 +797,6 @@
         <div style="text-align: center; margin-bottom: 10px;">
             <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo">
         </div>
-        <h1>Créditos Celulares</h1>
         <p>Estrena el smartphone que buscas con pagos semanales a tu medida</p>
     </header>
 
@@ -803,12 +807,6 @@
             <div class="search-wrapper">
                 <input type="text" id="inputBusqueda" placeholder="Ej: Galaxy A06, Moto G24, Xiaomi...">
                 <button type="button" class="btn-buscar" id="btnBuscar" onclick="solicitarBusqueda()">Buscar</button>
-            </div>
-            <div style="margin-top: 20px; text-align: center; border-top: 1px dashed var(--border-color); padding-top: 15px;">
-                <p style="font-size: 14px; color: var(--text-muted); margin: 0 0 10px 0;">✨ ¿El celular que buscas no está en nuestro catálogo? ¡Podemos traértelo bajo pedido especial!</p>
-                <button type="button" onclick="abrirModalPedidoEspecial()" style="background: linear-gradient(135deg, #e67e22, #d35400); color: white; border: none; padding: 10px 24px; font-weight: 700; border-radius: 10px; cursor: pointer; font-size: 14px; box-shadow: 0 4px 6px rgba(230,126,34,0.15); transition: transform 0.2s ease, opacity 0.2s ease;" onmouseover="this.style.opacity='0.95'" onmouseout="this.style.opacity='1'">
-                    📲 Cotizar Pedido Especial de Mercado Libre
-                </button>
             </div>
         </div>
 
@@ -840,6 +838,19 @@
         <div id="contenedorResultados" class="grid-equipos">
             <p style="grid-column: 1/-1; text-align:center; color:var(--text-muted); font-style:italic;">Cargando
                 catálogo oficial...</p>
+        </div>
+
+        <!-- Caja de Pedido Especial al final de la página -->
+        <div class="pedido-especial-box" style="margin-top: 40px; text-align: center; background: var(--bg-light); border: 1.5px dashed var(--border-color); border-radius: 16px; padding: 30px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+            <p style="font-size: 16px; font-weight: 600; color: var(--primary); margin: 0 0 8px 0;">✨ ¿No encontraste el celular que querías?</p>
+            <p style="font-size: 14px; color: var(--text-muted); margin: 0 0 20px 0; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+                ¡No te preocupes! Podemos traerte cualquier modelo de <strong>Samsung, Motorola, Xiaomi u Oppo</strong> de Mercado Libre bajo financiamiento. ¡Cotízalo en segundos!
+            </p>
+            <button type="button" onclick="abrirModalPedidoEspecial()"
+                style="background: linear-gradient(135deg, #e67e22, #d35400); color: white; border: none; padding: 14px 32px; font-weight: 700; border-radius: 12px; cursor: pointer; font-size: 15px; box-shadow: 0 6px 15px rgba(230,126,34,0.25); transition: transform 0.2s ease, opacity 0.2s ease;"
+                onmouseover="this.style.opacity='0.95'; this.style.transform='scale(1.02)';" onmouseout="this.style.opacity='1'; this.style.transform='scale(1)';">
+                📲 Cotizar Pedido Especial de Mercado Libre
+            </button>
         </div>
     </div>
 
@@ -964,35 +975,51 @@
     <div id="modalPedidoEspecial" class="modal-solicitud">
         <div class="modal-content" style="max-width: 650px;">
             <button type="button" class="pdp-close-btn" onclick="cerrarModalPedidoEspecial()">×</button>
-            <h2 style="color: var(--primary); margin-top: 0; font-size: 22px; font-weight: 700; border-bottom: 2px solid var(--accent); padding-bottom: 8px; text-align: left;">✨ Solicitar Pedido Especial CelYa!</h2>
-            <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px; margin-bottom: 20px; text-align: left;">
-                Copia el enlace de cualquier celular <strong>Samsung, Motorola, Xiaomi o Oppo</strong> de Mercado Libre, pégalo aquí abajo y cotizaremos tu enganche y abonos semanales al instante.
+            <h2
+                style="color: var(--primary); margin-top: 0; font-size: 22px; font-weight: 700; border-bottom: 2px solid var(--accent); padding-bottom: 8px; text-align: left;">
+                ✨ Solicitar Pedido Especial CelYa!</h2>
+            <p
+                style="font-size: 13px; color: var(--text-muted); margin-top: 8px; margin-bottom: 20px; text-align: left;">
+                Copia el enlace de cualquier celular <strong>Samsung, Motorola, Xiaomi o Oppo</strong> de Mercado Libre,
+                pégalo aquí abajo y cotizaremos tu enganche y abonos semanales al instante.
             </p>
-            
+
             <div id="pedido-especial-step1">
-                <label style="font-weight: 600; font-size: 14px; text-align: left; display: block;">Pegar Enlace de Mercado Libre:</label>
+                <label style="font-weight: 600; font-size: 14px; text-align: left; display: block;">Pegar Enlace de
+                    Mercado Libre:</label>
                 <div style="display: flex; gap: 10px; margin-top: 5px;">
-                    <input type="text" id="pe-link-input" placeholder="https://articulo.mercadolibre.com.mx/MLM..." style="flex: 1; padding: 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
-                    <button type="button" onclick="consultarPedidoEspecial()" id="pe-btn-consultar" style="background: var(--primary); color: white; border: none; padding: 0 20px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 14px; transition: background 0.2s;">
+                    <input type="text" id="pe-link-input" placeholder="https://articulo.mercadolibre.com.mx/MLM..."
+                        style="flex: 1; padding: 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
+                    <button type="button" onclick="consultarPedidoEspecial()" id="pe-btn-consultar"
+                        style="background: var(--primary); color: white; border: none; padding: 0 20px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 14px; transition: background 0.2s;">
                         🔍 Cotizar
                     </button>
                 </div>
-                <div id="pe-error-msg" style="color: var(--danger); font-size: 13px; font-weight: 600; margin-top: 8px; display: none; text-align: left;"></div>
+                <div id="pe-error-msg"
+                    style="color: var(--danger); font-size: 13px; font-weight: 600; margin-top: 8px; display: none; text-align: left;">
+                </div>
             </div>
 
             <!-- Previsualización del celular cotizado y el formulario -->
-            <div id="pedido-especial-step2" style="display: none; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 20px; max-height: 50vh; overflow-y: auto; text-align: left;">
-                <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 20px; background: var(--bg-light); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">
-                    <img id="pe-preview-foto" src="" style="width: 80px; height: 80px; object-fit: contain; background: white; border-radius: 8px; border: 1px solid var(--border-color);">
+            <div id="pedido-especial-step2"
+                style="display: none; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 20px; max-height: 50vh; overflow-y: auto; text-align: left;">
+                <div
+                    style="display: flex; gap: 15px; align-items: center; margin-bottom: 20px; background: var(--bg-light); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">
+                    <img id="pe-preview-foto" src=""
+                        style="width: 80px; height: 80px; object-fit: contain; background: white; border-radius: 8px; border: 1px solid var(--border-color);">
                     <div>
-                        <h4 id="pe-preview-titulo" style="margin: 0; font-size: 15px; color: var(--primary); font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">Cargando...</h4>
+                        <h4 id="pe-preview-titulo"
+                            style="margin: 0; font-size: 15px; color: var(--primary); font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">
+                            Cargando...</h4>
                         <div style="display: flex; gap: 8px; margin-top: 8px; align-items: baseline;">
                             <span style="font-size: 12px; color: var(--text-muted);">Pago Inicial (Enganche):</span>
-                            <span id="pe-preview-enganche" style="font-size: 18px; font-weight: bold; color: var(--danger);">$0</span>
+                            <span id="pe-preview-enganche"
+                                style="font-size: 18px; font-weight: bold; color: var(--danger);">$0</span>
                         </div>
                         <div style="display: flex; gap: 8px; margin-top: 2px; align-items: baseline;">
                             <span style="font-size: 12px; color: var(--text-muted);">Abono Semanal:</span>
-                            <span id="pe-preview-semanal" style="font-size: 16px; font-weight: bold; color: #00a650;">$0</span>
+                            <span id="pe-preview-semanal"
+                                style="font-size: 16px; font-weight: bold; color: #00a650;">$0</span>
                         </div>
                     </div>
                 </div>
@@ -1000,14 +1027,22 @@
                 <div class="pdp-form-card" style="padding: 15px; margin-top: 0; text-align: left;">
                     <h4 style="margin-top: 0; margin-bottom: 15px;">📋 Rellena tu Solicitud de Crédito</h4>
                     <form id="formPedidoEspecial">
-                        <label style="margin-top: 0; font-weight: 600; font-size: 13px; color: var(--text-main);">Tu Nombre Completo:</label>
-                        <input type="text" id="pe-cliNombre" required placeholder="Ej. Juan Pérez" style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
+                        <label style="margin-top: 0; font-weight: 600; font-size: 13px; color: var(--text-main);">Tu
+                            Nombre Completo:</label>
+                        <input type="text" id="pe-cliNombre" required placeholder="Ej. Juan Pérez"
+                            style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
 
-                        <label style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">Teléfono Celular (WhatsApp):</label>
-                        <input type="tel" id="pe-cliTelefono" required placeholder="10 dígitos" style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
+                        <label
+                            style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">Teléfono
+                            Celular (WhatsApp):</label>
+                        <input type="tel" id="pe-cliTelefono" required placeholder="10 dígitos"
+                            style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
 
-                        <label style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">Sueldo Semanal Libre:</label>
-                        <select id="pe-cliSueldo" style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
+                        <label
+                            style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">Sueldo
+                            Semanal Libre:</label>
+                        <select id="pe-cliSueldo"
+                            style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
                             <option value="Menos de $1,500">Menos de $1,500 semanales</option>
                             <option value="$1,500 a $2,500">$1,500 a $2,500 semanales</option>
                             <option value="$2,500 a $3,500">$2,500 a $3,500 semanales</option>
@@ -1015,22 +1050,32 @@
                             <option value="Más de $5,000">Más de $5,000 semanales</option>
                         </select>
 
-                        <label style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">¿Cuánto pagas de abonos actualmente? (Deudas):</label>
-                        <select id="pe-cliPrestamos" style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
+                        <label
+                            style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">¿Cuánto
+                            pagas de abonos actualmente? (Deudas):</label>
+                        <select id="pe-cliPrestamos"
+                            style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
                             <option value="Nada, no tengo deudas">Nada, no tengo deudas</option>
                             <option value="Menos de $500">Menos de $500</option>
                             <option value="$500 a $1,000">$500 a $1,000</option>
                             <option value="Más de $1,000">Más de $1,000</option>
                         </select>
 
-                        <label style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">Plazo Deseado:</label>
-                        <select id="pe-cliPlazo" onchange="actualizarPreciosPedidoEspecial()" style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
+                        <label
+                            style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">Plazo
+                            Deseado:</label>
+                        <select id="pe-cliPlazo" onchange="actualizarPreciosPedidoEspecial()"
+                            style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
                             <option value="26 Semanas">Plan Rápido (26 Semanas)</option>
                             <option value="52 Semanas">Plan Cómodo (52 Semanas)</option>
                         </select>
 
                         <div style="display: flex; gap: 12px; margin-top: 20px;">
-                            <button type="button" onclick="enviarSolicitudPedidoEspecial()" style="background:#3483fa; color:white; border:none; padding:14px; flex:1; font-weight:bold; border-radius:8px; cursor:pointer; font-size:16px; transition: background 0.2s;" onmouseover="this.style.background='#2968c8'" onmouseout="this.style.background='#3483fa'">📲 Solicitar Crédito Pedido Especial</button>
+                            <button type="button" onclick="enviarSolicitudPedidoEspecial()"
+                                style="background:#3483fa; color:white; border:none; padding:14px; flex:1; font-weight:bold; border-radius:8px; cursor:pointer; font-size:16px; transition: background 0.2s;"
+                                onmouseover="this.style.background='#2968c8'"
+                                onmouseout="this.style.background='#3483fa'">📲 Solicitar Crédito Pedido
+                                Especial</button>
                         </div>
                     </form>
                 </div>
@@ -1043,7 +1088,7 @@
         window.equiposCargados = [];
 
         // Variables globales para Pedido Especial
-        let CONFIG_TASAS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, gananciaContadoFactor: 1.36 }; 
+        let CONFIG_TASAS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, gananciaContadoFactor: 1.36 };
         let pe_data_actual = null;
         let pe_link_actual = "";
 
@@ -1055,7 +1100,7 @@
                     CONFIG_TASAS = data;
                     console.log("Tasas sincronizadas:", CONFIG_TASAS);
                 }
-            } catch(e) {
+            } catch (e) {
                 console.warn("No se pudieron obtener las tasas desde la configuración:", e);
             }
         }
@@ -1414,9 +1459,9 @@
             const inputLink = document.getElementById('pe-link-input').value.trim();
             const errorDiv = document.getElementById('pe-error-msg');
             const btnConsultar = document.getElementById('pe-btn-consultar');
-            
+
             errorDiv.style.display = 'none';
-            
+
             if (!inputLink) {
                 errorDiv.innerText = "Por favor, ingresa un enlace válido.";
                 errorDiv.style.display = 'block';
@@ -1439,7 +1484,7 @@
 
             const cleanId = matchLink[0].replace("-", "").toUpperCase();
             const isProduct = inputLink.includes("/p/");
-            
+
             btnConsultar.innerText = "⏳";
             btnConsultar.disabled = true;
 
@@ -1459,13 +1504,13 @@
                 // Validar la marca
                 const title = rawData.title || "";
                 const titleUpper = title.toUpperCase();
-                const esMarcaFinanciada = 
-                    titleUpper.includes("SAMSUNG") || 
-                    titleUpper.includes("MOTOROLA") || 
-                    titleUpper.includes("MOTO") || 
-                    titleUpper.includes("XIAOMI") || 
-                    titleUpper.includes("REDMI") || 
-                    titleUpper.includes("POCO") || 
+                const esMarcaFinanciada =
+                    titleUpper.includes("SAMSUNG") ||
+                    titleUpper.includes("MOTOROLA") ||
+                    titleUpper.includes("MOTO") ||
+                    titleUpper.includes("XIAOMI") ||
+                    titleUpper.includes("REDMI") ||
+                    titleUpper.includes("POCO") ||
                     titleUpper.includes("OPPO");
 
                 if (!esMarcaFinanciada) {
@@ -2123,8 +2168,8 @@
 
             // 1. Remover colores conocidos (incluyendo variaciones)
             const colores = [
-                "black", "negro", "blue", "azul", "white", "blanco", "green", "verde", "silver", "plata", 
-                "gray", "gris", "gold", "oro", "purple", "morado", "pink", "rosa", "red", "rojo", "light", 
+                "black", "negro", "blue", "azul", "white", "blanco", "green", "verde", "silver", "plata",
+                "gray", "gris", "gold", "oro", "purple", "morado", "pink", "rosa", "red", "rojo", "light",
                 "dark", "sky", "navy", "rose", "violet", "violeta", "lavender", "lavanda", "carbon", "carbono",
                 "claro", "oscuro", "space", "estelar", "celeste", "brillante", "mate"
             ];
@@ -2136,7 +2181,7 @@
             // 2. Remover capacidades de almacenamiento (>= 32gb) pero conservar RAM (< 32gb)
             const regexGb = /(\d+)\s*(gb|tb|ram)\b/gi;
             let matches = [...clean.matchAll(regexGb)];
-            
+
             matches.forEach(match => {
                 const fullMatch = match[0];
                 const numero = parseInt(match[1]);
@@ -2177,9 +2222,14 @@
         // Ejecutar al abrir
         window.onload = cargarPantallaInicial;
     </script>
-    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
-        <div style="width: 50px; height: 50px; border: 5px solid rgba(255, 255, 255, 0.1); border-top: 5px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; box-shadow: 0 0 15px rgba(230, 126, 34, 0.5);"></div>
-        <p style="color: white; margin-top: 15px; font-weight: 600; font-size: 16px; font-family: inherit; letter-spacing: 0.5px;">Actualizando variante...</p>
+    <div id="loadingOverlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
+        <div
+            style="width: 50px; height: 50px; border: 5px solid rgba(255, 255, 255, 0.1); border-top: 5px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; box-shadow: 0 0 15px rgba(230, 126, 34, 0.5);">
+        </div>
+        <p
+            style="color: white; margin-top: 15px; font-weight: 600; font-size: 16px; font-family: inherit; letter-spacing: 0.5px;">
+            Actualizando variante...</p>
     </div>
 </body>
 

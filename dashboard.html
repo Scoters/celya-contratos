@@ -114,6 +114,127 @@
             grid-template-columns: 1fr 1fr;
             gap: 10px;
         }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left; /* O change to 'center' si prefieres todo centrado */
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #2c3e50;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Botón Configuración */
+        .btn-config-trigger {
+            background-color: #34495e;
+            color: white;
+            border: 2px solid #e67e22;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        .btn-config-trigger:hover {
+            background-color: #e67e22;
+            box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3);
+        }
+
+        /* Modal Estilo Pop-up */
+        .modal-celya-config {
+            display: none; 
+            position: fixed; 
+            z-index: 10000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(15, 23, 42, 0.75); /* Oscuro elegante */
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-config-content {
+            background-color: #fff;
+            margin: 8% auto; 
+            padding: 25px 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-top: 5px solid #e67e22;
+            position: relative;
+        }
+
+        .close-config-btn {
+            color: #94a3b8;
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-config-btn:hover {
+            color: #333;
+        }
+
+        .modal-subtitle {
+            color: #64748b;
+            font-size: 13px;
+            margin-top: -8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Inputs del Formulario */
+        .form-group-config {
+            margin-bottom: 16px;
+        }
+        .form-group-config label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #1e293b;
+        }
+        .form-group-config input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .form-group-config input:focus {
+            border-color: #e67e22;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.15);
+        }
+
+        /* Botón Guardar */
+        .btn-save-config {
+            width: 100%;
+            background: linear-gradient(135deg, #ff9f43, #e67e22);
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+        .btn-save-config:hover {
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 
@@ -146,6 +267,12 @@
         </div>
         <h2>💜 CelYa! Ecosistema</h2>
         <p class="subtitulo">Módulo de Cobranza y Administración Global</p>
+
+        <div style="text-align: center; margin-bottom: 20px;">
+            <button id="btn-config-global" class="btn-config-trigger" onclick="abrirModalConfig()">
+                ⚙️ Configuración Global
+            </button>
+        </div>
 
         <h3>💵 Módulo de Cobranza Dinámica</h3>
         <label for="buscarClienteAbono">Buscar Cliente (Nombre o ID):</label>
@@ -208,38 +335,51 @@
                 </tbody>
             </table>
         </div>
+    </div>
 
-        <h3>⚙️ Parámetros Globales del Negocio</h3>
-        <form id="configForm">
-            <div class="grid-config" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                    <label>% Interés Plan Rápido (26v):</label>
-                    <input type="number" id="interesPlanRapido" required placeholder="Ej. 35">
+    <div id="modal-config-negocio" class="modal-celya-config">
+        <div class="modal-config-content">
+            <span class="close-config-btn" onclick="cerrarModalConfig()">&times;</span>
+            
+            <h2>📊 Parámetros Globales del Negocio</h2>
+            <p class="modal-subtitle">Configuración del ecosistema financiero CelYa!</p>
+            
+            <form id="form-config-global">
+                <div class="form-group-config">
+                    <label for="cfg-interes-moratorio">⚠️ Interés Moratorio Semanal (%)</label>
+                    <input type="number" id="cfg-interes-moratorio" name="interesMoratorio" min="0" placeholder="Ej. 5">
                 </div>
-                <div>
-                    <label>% Interés Plan Cómodo (52v):</label>
-                    <input type="number" id="interesPlanComodo" required placeholder="Ej. 50">
-                </div>
-                <div>
-                    <label>Interés Moratorio (%):</label>
-                    <input type="number" id="interes" required>
-                </div>
-                <div>
-                    <label>Horas de Tolerancia:</label>
-                    <input type="number" id="horastol" required>
-                </div>
-                <div>
-                    <label>Semanas de Tolerancia:</label>
-                    <input type="number" id="semanastol" required>
-                </div>
-                <div>
-                    <label>% Ganancia Contado (Fisco/Sobre Pedido):</label>
-                    <input type="number" id="cfgGananciaContado" required placeholder="Ej. 15">
-                </div>
-            </div>
 
-            <button type="button" class="btn-config" id="btnGuardarConfig">💾 Guardar Configuración Global</button>
-        </form>
+                <div class="form-group-config">
+                    <label for="cfg-horas-tolerancia">⏳ Horas de Tolerancia para Pago</label>
+                    <input type="number" id="cfg-horas-tolerancia" name="horasTolerancia" min="0" placeholder="Ej. 48">
+                </div>
+
+                <div class="form-group-config">
+                    <label for="cfg-semanas-rescindir">🚫 Semanas de Retraso para Rescindir Contrato</label>
+                    <input type="number" id="cfg-semanas-rescindir" name="semanasRescindir" min="0" placeholder="Ej. 6">
+                </div>
+
+                <div class="form-group-config">
+                    <label for="cfg-plan-rapido">⚡ Interés Plan Rápido (26 Semanas %)</label>
+                    <input type="number" id="cfg-plan-rapido" name="planRapido" min="0" placeholder="Ej. 66">
+                </div>
+
+                <div class="form-group-config">
+                    <label for="cfg-plan-comodo">🛋️ Interés Plan Cómodo (52 Semanas %)</label>
+                    <input type="number" id="cfg-plan-comodo" name="planComodo" min="0" placeholder="Ej. 90">
+                </div>
+
+                <div class="form-group-config">
+                    <label for="cfg-ganancia-contado">📈 % Ganancia Contado (Fijo / Sobre Pedido)</label>
+                    <input type="number" id="cfg-ganancia-contado" name="gananciaContado" min="0" placeholder="Ej. 36">
+                </div>
+
+                <button type="button" class="btn-save-config" onclick="guardarConfiguracionGlobal()">
+                    💾 Guardar Parámetros
+                </button>
+            </form>
+        </div>
     </div>
 
     <div class="container" style="margin-top: 20px;">
@@ -298,12 +438,12 @@
                     return;
                 }
 
-                document.getElementById('interes').value = datos.config.interes;
-                document.getElementById('horastol').value = datos.config.horastol;
-                document.getElementById('semanastol').value = datos.config.semanastol;
-                document.getElementById('interesPlanComodo').value = datos.config.interesPlanComodo || 45;
-                document.getElementById('interesPlanRapido').value = datos.config.interesPlanRapido || 35;
-                document.getElementById('cfgGananciaContado').value = datos.config.gananciaContado !== undefined ? datos.config.gananciaContado : 15;
+                document.getElementById('cfg-interes-moratorio').value = datos.config.interes;
+                document.getElementById('cfg-horas-tolerancia').value = datos.config.horastol;
+                document.getElementById('cfg-semanas-rescindir').value = datos.config.semanastol;
+                document.getElementById('cfg-plan-comodo').value = datos.config.interesPlanComodo || 45;
+                document.getElementById('cfg-plan-rapido').value = datos.config.interesPlanRapido || 35;
+                document.getElementById('cfg-ganancia-contado').value = datos.config.gananciaContado !== undefined ? datos.config.gananciaContado : 15;
 
                 dbClientesActivos = datos.clientesActivos || [];
                 listaClientesGlobal = dbClientesActivos;
@@ -454,48 +594,80 @@
             });
         });
 
-        document.getElementById('btnGuardarConfig').addEventListener('click', async function () {
-            const btn = document.getElementById('btnGuardarConfig');
-            btn.innerText = "⏳ Guardando...";
-            btn.style.background = "#34495e";
+        // Funciones de apertura y cierre
+        function abrirModalConfig() {
+            document.getElementById('modal-config-negocio').style.display = 'block';
+            cargarParametrosActuales(); // Jalamos los datos en vivo del Excel al abrir
+        }
+
+        function cerrarModalConfig() {
+            document.getElementById('modal-config-negocio').style.display = 'none';
+        }
+
+        // Cargar la configuración actual del Google Sheet en los campos del Pop-up
+        async function cargarParametrosActuales() {
+            try {
+                const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}&action=obtenerConfiguracionActual`);
+                const data = await response.json();
+                
+                if (data.result === 'success') {
+                    document.getElementById('cfg-interes-moratorio').value = data.config.interes || 5;
+                    document.getElementById('cfg-horas-tolerancia').value = data.config.horasTolerancia || 48;
+                    document.getElementById('cfg-semanas-rescindir').value = data.config.semanasTolerancia || 6;
+                    document.getElementById('cfg-plan-rapido').value = data.config.planRapido || 66;
+                    document.getElementById('cfg-plan-comodo').value = data.config.planComodo || 90;
+                    document.getElementById('cfg-ganancia-contado').value = data.config.gananciaContado || 36;
+                }
+            } catch (e) {
+                console.error("Error al cargar la configuración global:", e);
+            }
+        }
+
+        // Enviar los nuevos parámetros de regreso al backend de Google Sheets
+        async function guardarConfiguracionGlobal() {
+            const btn = document.querySelector('.btn-save-config');
             btn.disabled = true;
+            btn.innerText = "⏳ Guardando en Base de Datos...";
+
+            const params = new URLSearchParams();
+            params.append('action', 'actualizarConfiguracionGlobal');
+            params.append('token', CONFIG.API_TOKEN);
+            params.append('interes', document.getElementById('cfg-interes-moratorio').value);
+            params.append('horasTolerancia', document.getElementById('cfg-horas-tolerancia').value);
+            params.append('semanasTolerancia', document.getElementById('cfg-semanas-rescindir').value);
+            params.append('planRapido', document.getElementById('cfg-plan-rapido').value);
+            params.append('planComodo', document.getElementById('cfg-plan-comodo').value);
+            params.append('gananciaContado', document.getElementById('cfg-ganancia-contado').value);
 
             try {
-                const formData = new URLSearchParams();
-                formData.append('action', 'updateConfig');
-                formData.append('token', CONFIG.API_TOKEN);
-                formData.append('interes', document.getElementById('interes').value);
-                formData.append('horastol', document.getElementById('horastol').value);
-                formData.append('semanastol', document.getElementById('semanastol').value);
-                formData.append('interesPlanRapido', document.getElementById('interesPlanRapido').value);
-                formData.append('interesPlanComodo', document.getElementById('interesPlanComodo').value);
-                formData.append('gananciaContado', document.getElementById('cfgGananciaContado').value);
-
-                const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    body: formData.toString(),
+                    body: params.toString(),
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
                 });
-                const data = await res.json();
+                const data = await response.json();
 
                 if (data.result === 'success') {
-                    btn.innerText = "✅ ¡Guardado!";
-                    btn.style.background = "#27ae60";
+                    alert("✅ ¡Parámetros globales actualizados con éxito!");
+                    cerrarModalConfig();
                 } else {
-                    btn.innerText = "⚠️ Error";
-                    btn.style.background = "#c0392b";
+                    alert("❌ Ocurrió un error al guardar la configuración.");
                 }
-            } catch (err) {
-                btn.innerText = "❌ Error de red";
-                btn.style.background = "#c0392b";
+            } catch (error) {
+                alert("🌐 Error de red, verifica la conexión con Google Apps Script.");
             } finally {
-                setTimeout(() => {
-                    btn.innerText = "💾 Guardar Configuración Global";
-                    btn.style.background = "#e67e22";
-                    btn.disabled = false;
-                }, 3500);
+                btn.disabled = false;
+                btn.innerText = "💾 Guardar Parámetros";
             }
-        });
+        }
+
+        // Cerrar si hacen clic fuera del cuadro blanco
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal-config-negocio');
+            if (event.target == modal) {
+                cerrarModalConfig();
+            }
+        }
 
         // --- MOTOR DE BÚSQUEDA VIP EN DASHBOARD ---
         const inputBuscar = document.getElementById('buscarVip');
