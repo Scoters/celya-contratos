@@ -1383,7 +1383,7 @@
                                     ${item.color ? `<span class="spec-tag">🎨 ${item.color}</span>` : ''}
                                 </div>
                                 ${rowContado}
-                                <div class="enganche" data-enganche="${Math.round(item.engancheMinimo).toLocaleString('es-MX')}" data-precio="${Math.round(item.precioContado).toLocaleString('es-MX')}">
+                                <div class="enganche" data-enganche="${(Math.ceil((item.engancheMinimo || 0) / 10) * 10).toLocaleString('es-MX')}" data-precio="${Math.round(item.precioContado).toLocaleString('es-MX')}">
                                     <span>Pago Inicial</span>
                                     Enganche: $${(Math.ceil((item.precioContado * (CONFIG_TASAS.engancheSemanal || 0.165)) / 10) * 10).toLocaleString('es-MX')} MXN
                                 </div>
@@ -1503,7 +1503,7 @@
             document.getElementById('pdp-product-condition').innerText = (esFijo === "true" || esFijo === true) ? "Destacado | Calidad Garantizada CelYa!" : "Nuevo | Envió Rápido";
 
             // Intercambiar tamaño y lugar del precio de contado por el enganche (Pago Inicial)
-            document.getElementById('pdp-enganche-grande').innerText = `$${Math.round(engancheMinimo || 0).toLocaleString('es-MX')} MXN`;
+            document.getElementById('pdp-enganche-grande').innerText = `$${(Math.ceil((engancheMinimo || 0) / 10) * 10).toLocaleString('es-MX')} MXN`;
             document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(precioContado || 0).toLocaleString('es-MX')} MXN</strong>`;
 
             currentMLItemLink = link || "";

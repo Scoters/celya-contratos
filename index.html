@@ -778,7 +778,7 @@
 
             // Si conocemos el precio, aplicamos el porcentaje estricto del Sheets
             if (precioContado > 0 && !esContado) {
-                const selector = document.getElementById('selectorCobro') ? document.getElementById('selectorCobro').value : "";
+                const selector = selectorCobro || "";
                 const partes = selector ? selector.split('|') : [];
                 const frecuencia = partes[0] || "SEMANAL";
                 const factorEngancheMinimo = (frecuencia === "SEMANAL") 
