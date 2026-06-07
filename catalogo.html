@@ -2007,9 +2007,18 @@
             const esFijo = document.getElementById('hiddenEsFijo').value;
             const plazo = document.getElementById('cliPlazo').value;
 
-            if (!nombre || !telefono || !sueldo) {
-                alert("Por favor rellena todos tus datos de contacto e ingresos.");
-                return;
+            const freq = document.getElementById('cliFrecuencia').value;
+
+            if (freq !== "CONTADO") {
+                if (!nombre || !telefono || !sueldo) {
+                    alert("Por favor rellena todos tus datos de contacto e ingresos.");
+                    return;
+                }
+            } else {
+                if (!nombre || !telefono) {
+                    alert("Por favor rellena tus datos de contacto.");
+                    return;
+                }
             }
 
             // Deshabilitar botón para evitar doble envío
@@ -2029,18 +2038,18 @@
                 params.append('action', 'registrarCotizacionPublica');
                 params.append('nombre', nombre);
                 params.append('telefono', telefono);
-                params.append('sueldo', sueldo);
-                params.append('prestamos', prestamos);
-
-                const freq = document.getElementById('cliFrecuencia').value;
+                params.append('sueldo', freq === "CONTADO" ? "" : sueldo);
+                params.append('prestamos', freq === "CONTADO" ? "" : prestamos);
 
                 // Determinar cuota correspondiente al plazo elegido y frecuencia
-                const cuota26 = parseFloat(document.getElementById('hiddenCuota26').value) || 150;
-                const cuota52 = parseFloat(document.getElementById('hiddenCuota52').value) || 100;
-                let cuotaBase = (plazo === "26 Semanas") ? cuota26 : cuota52;
-                
-                if (freq === "QUINCENAL") {
-                    cuotaBase = cuotaBase * 2;
+                let cuotaBase = 0;
+                if (freq !== "CONTADO") {
+                    const cuota26 = parseFloat(document.getElementById('hiddenCuota26').value) || 150;
+                    const cuota52 = parseFloat(document.getElementById('hiddenCuota52').value) || 100;
+                    cuotaBase = (plazo === "26 Semanas") ? cuota26 : cuota52;
+                    if (freq === "QUINCENAL") {
+                        cuotaBase = cuotaBase * 2;
+                    }
                 }
                 params.append('cuota', Math.round(cuotaBase));
 
@@ -2054,7 +2063,9 @@
 
                 // Determinar el texto del plazo según frecuencia
                 let textoPlazoEnvio = "";
-                if (freq === "QUINCENAL") {
+                if (freq === "CONTADO") {
+                    textoPlazoEnvio = "Pago de Contado";
+                } else if (freq === "QUINCENAL") {
                     textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (13 Quincenas)" : "Plan Cómodo (26 Quincenas)";
                 } else {
                     textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (26 Semanas)" : "Plan Cómodo (52 Semanas)";
@@ -2171,15 +2182,14 @@
                 let data = null;
                 const isProduct = currentMLItemLink && currentMLItemLink.includes("/p/");
 
-                if (!isProduct) {
-                    try {
-                        const res = await fetch(`https://api.mercadolibre.com/items/${cleanId}`);
-                        if (res.ok) {
-                            data = await res.json();
-                        }
-                    } catch (fetchErr) {
-                        console.warn("Direct ML fetch failed, trying via GAS proxy...", fetchErr);
+                try {
+                    const endpoint = isProduct ? 'products' : 'items';
+                    const res = await fetch(`https://api.mercadolibre.com/${endpoint}/${cleanId}`);
+                    if (res.ok) {
+                        data = await res.json();
                     }
+                } catch (fetchErr) {
+                    console.warn("Direct ML fetch failed, trying via GAS proxy...", fetchErr);
                 }
 
                 if (!data) {

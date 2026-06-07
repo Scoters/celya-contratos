@@ -514,6 +514,8 @@
                         selectCobro.value = "QUINCENAL|15 Y 30";
                     } else if (preFrecuencia.toUpperCase() === "SEMANAL") {
                         selectCobro.value = "SEMANAL|SABADO";
+                    } else if (preFrecuencia.toUpperCase() === "CONTADO") {
+                        selectCobro.value = "CONTADO|UNICO";
                     }
                     if (typeof procesarAgendaCobro === 'function') {
                         procesarAgendaCobro();
