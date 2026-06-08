@@ -367,6 +367,7 @@
             overflow: hidden;
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             line-height: 1.4;
         }
@@ -995,6 +996,9 @@
                             </label>
                             <div id="ml-storage-wrapper" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
                         </div>
+
+                        <!-- Contenedor dinámico de variantes extras (RAM, Capacidad, etc.) -->
+                        <div id="ml-extra-pickers-container"></div>
                     </div>
 
                     <!-- Formulario de Crédito CelYa! -->
@@ -1097,7 +1101,7 @@
                         style="width: 80px; height: 80px; object-fit: contain; background: white; border-radius: 8px; border: 1px solid var(--border-color);">
                     <div>
                         <h4 id="pe-preview-titulo"
-                            style="margin: 0; font-size: 15px; color: var(--primary); font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">
+                            style="margin: 0; font-size: 15px; color: var(--primary); font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">
                             Cargando...</h4>
                         <div style="display: flex; gap: 8px; margin-top: 8px; align-items: baseline;">
                             <span style="font-size: 12px; color: var(--text-muted);">Pago Inicial (Enganche):</span>
@@ -1413,6 +1417,7 @@
                                     ${item.memoria ? `<span class="spec-tag">💾 ${item.memoria}</span>` : ''}
                                     ${item.color ? `<span class="spec-tag">🎨 ${item.color}</span>` : ''}
                                 </div>
+                                ${item.coloresDisponibles ? `<div style="font-size: 11px; color: #64748b; margin-top: 5px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center;">🎨 <span style="font-weight: 600;">Colores:</span> <span style="color: #475569;">${item.coloresDisponibles}</span></div>` : ''}
                                 ${rowContado}
                                 <div class="enganche" data-enganche="${(Math.ceil((item.engancheMinimo || 0) / 10) * 10).toLocaleString('es-MX')}" data-precio="${Math.round(item.precioContado).toLocaleString('es-MX')}">
                                     <span>Pago Inicial</span>
@@ -2227,6 +2232,8 @@
                 wrapperStorage.innerHTML = "";
                 seccionStorage.style.display = "none";
                 contenedor.style.display = "none";
+                const extraContainer = document.getElementById('ml-extra-pickers-container');
+                if (extraContainer) extraContainer.innerHTML = "";
                 colorSeleccionado = "";
                 almacenamientoSeleccionado = "";
                 colorSeleccionadoGlobal = "";
@@ -2319,6 +2326,18 @@
                     // Intentar obtener la publicación específica (item)
                     data = await fetchMLData(cleanId, isProduct);
 
+                    // Si se obtuvo un item y tiene catalog_product_id, y no tiene variaciones propias,
+                    // es mejor cargar directamente el product parent para poder pintar los selectores (pickers)
+                    if (data && !isProduct && data.catalog_product_id && (!data.variations || data.variations.length === 0)) {
+                        console.log("Item belongs to catalog product, fetching product:", data.catalog_product_id);
+                        const prodData = await fetchMLData(data.catalog_product_id, true);
+                        if (prodData) {
+                            data = prodData;
+                            cleanId = data.catalog_product_id;
+                            isProduct = true;
+                        }
+                    }
+
                     // Si falló (ej. 403 en item) y la URL original era un catálogo /p/, intentar fallback al product ID genérico
                     if (!data && !isProduct && currentMLItemLink && currentMLItemLink.includes("/p/")) {
                         const pMatch = currentMLItemLink.match(/\/p\/(MLM\-?\d+)/i);
@@ -2328,6 +2347,7 @@
                             data = await fetchMLData(parentProductId, true);
                             if (data) {
                                 cleanId = parentProductId;
+                                isProduct = true;
                             }
                         }
                     }
@@ -2468,14 +2488,32 @@
                     }
                 } else if (data.pickers && data.pickers.length > 0) {
                     contenedor.style.display = "block";
+                    seccionStorage.style.display = "none";
+
+                    // Actualizar el precio para productos de catálogo de Mercado Libre (/p/MLM...)
+                    let priceReal = 0;
+                    if (data.price) {
+                        priceReal = data.price;
+                    } else if (data.buy_box_winner && data.buy_box_winner.price) {
+                        priceReal = data.buy_box_winner.price;
+                    }
+
+                    if (priceReal > 0) {
+                        try {
+                            const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
+                            const precioContadoFinal = Math.round(priceReal * gananciaFactor);
+                            const hidden = document.getElementById('hiddenPrecioContado');
+                            if (hidden) hidden.value = precioContadoFinal;
+                            if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
+                            document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(precioContadoFinal || 0).toLocaleString('es-MX')} MXN</strong>`;
+                        } catch (e) {
+                            console.warn('No se pudo fijar precio contado final desde picker producto:', e);
+                        }
+                    }
 
                     const colorPicker = data.pickers.find(p => {
                         const idUpper = p.picker_id.toUpperCase();
                         return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
-                    });
-                    const storagePicker = data.pickers.find(p => {
-                        const idUpper = p.picker_id.toUpperCase();
-                        return idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO";
                     });
 
                     // 🎨 Pintamos los círculos de colores reales obtenidos (Deduplicados)
@@ -2502,14 +2540,12 @@
                         const coloresOrdenados = Array.from(coloresVistos.entries());
                         let targetColorNorm = "";
 
-                        // Primero, ver si alguno de los colores vistos coincide con cleanId
                         for (const [normColor, colorInfo] of coloresOrdenados) {
                             if (colorInfo.id === cleanId) {
                                 targetColorNorm = normColor;
                                 break;
                             }
                         }
-                        // Si no, buscar el que esté seleccionado por la API o coincida con defaultColor
                         if (!targetColorNorm) {
                             for (const [normColor, colorInfo] of coloresOrdenados) {
                                 if (colorInfo.isSelected || normColor === defaultColorNorm) {
@@ -2518,7 +2554,6 @@
                                 }
                             }
                         }
-                        // Si aún no hay, usar el primer color de la lista
                         if (!targetColorNorm && coloresOrdenados.length > 0) {
                             targetColorNorm = coloresOrdenados[0][0];
                         }
@@ -2530,7 +2565,6 @@
                             divColor.title = colorInfo.name;
                             divColor.setAttribute('data-color', colorInfo.name);
 
-                            // Color genérico visual mapping
                             const colorMap = {
                                 "negro": "#1e293b", "black": "#1e293b", "oscuro": "#0f172a",
                                 "blanco": "#ffffff", "white": "#ffffff",
@@ -2562,75 +2596,112 @@
                                 document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
                                 this.classList.add('selected');
                                 currentMLItemLink = `https://www.mercadolibre.com.mx/p/${colorInfo.id}`;
+                                const overlay = document.getElementById('loadingOverlay');
+                                if (overlay) overlay.style.display = 'flex';
                                 cargarVariantesRealesML(colorInfo.id, true);
                             };
                             wrapperColores.appendChild(divColor);
                         });
                     }
 
-                    // 💾 Pintamos las pastillas de Almacenamiento reales obtenidas (Deduplicadas)
-                    if (storagePicker && storagePicker.products && storagePicker.products.length > 0) {
-                        seccionStorage.style.display = "block";
-                        const memoriasVistas = new Map();
+                    // 💾 Pintamos los pickers que no son color (Almacenamiento, RAM, etc.)
+                    const nonColorPickers = data.pickers.filter(p => {
+                        const idUpper = p.picker_id.toUpperCase();
+                        return !(idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO");
+                    });
 
-                        storagePicker.products.forEach(p => {
-                            const normStorage = p.picker_label.trim().toLowerCase();
-                            const isSel = p.tags && p.tags.includes("selected");
-                            const isNoBids = p.tags && p.tags.includes("no-bids");
-                            if (isNoBids && p.product_id !== cleanId) {
-                                return;
-                            }
-                            if (!memoriasVistas.has(normStorage) || isSel) {
-                                memoriasVistas.set(normStorage, {
-                                    id: p.product_id,
-                                    name: p.picker_label,
-                                    isSelected: isSel
-                                });
-                            }
-                        });
+                    const extraContainer = document.getElementById('ml-extra-pickers-container');
+                    if (extraContainer) {
+                        extraContainer.innerHTML = "";
+                        nonColorPickers.forEach(p => {
+                            const sectionDiv = document.createElement('div');
+                            sectionDiv.style.marginBottom = "12px";
 
-                        const defaultMemoriaNorm = defaultMemoria ? defaultMemoria.trim().toLowerCase() : "";
-                        const memoriasOrdenadas = Array.from(memoriasVistas.entries());
-                        let targetMemoriaNorm = "";
-
-                        for (const [normStorage, storageInfo] of memoriasOrdenadas) {
-                            if (storageInfo.id === cleanId) {
-                                targetMemoriaNorm = normStorage;
-                                break;
+                            let pickerLabel = p.picker_name || "Capacidad";
+                            const pIdUpper = p.picker_id.toUpperCase();
+                            if (pIdUpper.includes("RAM")) {
+                                pickerLabel = "Memoria RAM";
+                            } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
+                                pickerLabel = "Capacidad";
                             }
-                        }
-                        if (!targetMemoriaNorm) {
-                            for (const [normStorage, storageInfo] of memoriasOrdenadas) {
-                                if (storageInfo.isSelected || normStorage === defaultMemoriaNorm) {
-                                    targetMemoriaNorm = normStorage;
+
+                            let selectedValName = "-";
+                            const productsList = p.products || [];
+                            const itemsVistos = new Map();
+
+                            productsList.forEach(prod => {
+                                const normLabel = prod.picker_label.trim().toLowerCase();
+                                const isSel = prod.tags && prod.tags.includes("selected");
+                                const isNoBids = prod.tags && prod.tags.includes("no-bids");
+                                if (isNoBids && prod.product_id !== cleanId) {
+                                    return;
+                                }
+                                if (!itemsVistos.has(normLabel) || isSel) {
+                                    itemsVistos.set(normLabel, {
+                                        id: prod.product_id,
+                                        name: prod.picker_label,
+                                        isSelected: isSel
+                                    });
+                                }
+                            });
+
+                            const itemsOrdenados = Array.from(itemsVistos.entries());
+                            let targetItemNorm = "";
+
+                            for (const [normLabel, itemInfo] of itemsOrdenados) {
+                                if (itemInfo.id === cleanId) {
+                                    targetItemNorm = normLabel;
                                     break;
                                 }
                             }
-                        }
-                        if (!targetMemoriaNorm && memoriasOrdenadas.length > 0) {
-                            targetMemoriaNorm = memoriasOrdenadas[0][0];
-                        }
-
-                        memoriasOrdenadas.forEach(([normStorage, storageInfo]) => {
-                            const divStorage = document.createElement('div');
-                            const isSelected = (normStorage === targetMemoriaNorm);
-                            divStorage.className = `storage-pill ${isSelected ? 'selected' : ''}`;
-                            divStorage.innerText = storageInfo.name;
-                            divStorage.setAttribute('data-storage', storageInfo.name);
-
-                            if (isSelected) {
-                                almacenamientoSeleccionado = storageInfo.name;
-                                document.getElementById('memoria-seleccionada-txt').innerText = storageInfo.name;
+                            if (!targetItemNorm) {
+                                for (const [normLabel, itemInfo] of itemsOrdenados) {
+                                    if (itemInfo.isSelected) {
+                                        targetItemNorm = normLabel;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!targetItemNorm && itemsOrdenados.length > 0) {
+                                targetItemNorm = itemsOrdenados[0][0];
                             }
 
-                            divStorage.onclick = function () {
-                                if (storageInfo.id === cleanId) return;
-                                document.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
-                                this.classList.add('selected');
-                                currentMLItemLink = `https://www.mercadolibre.com.mx/p/${storageInfo.id}`;
-                                cargarVariantesRealesML(storageInfo.id, true);
-                            };
-                            wrapperStorage.appendChild(divStorage);
+                            const selectedItem = itemsVistos.get(targetItemNorm);
+                            if (selectedItem) {
+                                selectedValName = selectedItem.name;
+                            }
+
+                            sectionDiv.innerHTML = `
+                                <label style="font-weight: 600; font-size: 14px; color: #1e293b; display: block; margin-bottom: 8px;">
+                                    ${pickerLabel}: <span style="font-weight: 400; color: #64748b;">${selectedValName}</span>
+                                </label>
+                                <div class="pills-wrapper" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+                            `;
+
+                            const pillsWrapper = sectionDiv.querySelector('.pills-wrapper');
+
+                            itemsOrdenados.forEach(([normLabel, itemInfo]) => {
+                                const pill = document.createElement('button');
+                                const isSelected = (normLabel === targetItemNorm);
+                                pill.className = `storage-pill ${isSelected ? 'selected' : ''}`;
+                                pill.type = 'button';
+                                pill.innerText = itemInfo.name;
+
+                                pill.onclick = function () {
+                                    if (itemInfo.id === cleanId) return;
+                                    pillsWrapper.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
+                                    this.classList.add('selected');
+                                    currentMLItemLink = `https://www.mercadolibre.com.mx/p/${itemInfo.id}`;
+
+                                    const overlay = document.getElementById('loadingOverlay');
+                                    if (overlay) overlay.style.display = 'flex';
+
+                                    cargarVariantesRealesML(itemInfo.id, true);
+                                };
+                                pillsWrapper.appendChild(pill);
+                            });
+
+                            extraContainer.appendChild(sectionDiv);
                         });
                     }
                 } else if (data.attributes && data.attributes.length > 0) {
@@ -2654,10 +2725,8 @@
             } catch (e) {
                 console.error("Error obteniendo variantes vivas desde ML:", e);
             } finally {
-                if (esCambioVariante) {
-                    const overlay = document.getElementById('loadingOverlay');
-                    if (overlay) overlay.style.display = 'none';
-                }
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) overlay.style.display = 'none';
             }
         }
 
@@ -2684,9 +2753,12 @@
                 actualizarFotoModalPorVariante(varianteSeleccionada.id);
             }
 
-            if (varianteSeleccionada.prices && varianteSeleccionada.prices.length > 0) {
-                const precioReal = varianteSeleccionada.prices[0].amount || varianteSeleccionada.price || 0;
-                const precioTexto = precioReal ? `Precio: $${precioReal.toLocaleString('es-MX')}` : '';
+            const precioReal = (varianteSeleccionada.prices && varianteSeleccionada.prices.length > 0)
+                ? (varianteSeleccionada.prices[0].amount || varianteSeleccionada.price || 0)
+                : (varianteSeleccionada.price || 0);
+
+            if (precioReal > 0) {
+                const precioTexto = `Precio: $${precioReal.toLocaleString('es-MX')}`;
                 const precioElement = document.getElementById('precio-variant-selected');
                 if (precioElement) {
                     precioElement.innerText = precioTexto;
@@ -2694,11 +2766,13 @@
                 // Calcular y fijar el precio de contado final que usará el modal y el formulario
                 try {
                     const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
-                    const precioContadoFinal = Math.round((precioReal || 0) * gananciaFactor);
+                    const precioContadoFinal = Math.round(precioReal * gananciaFactor);
                     const hidden = document.getElementById('hiddenPrecioContado');
                     if (hidden) hidden.value = precioContadoFinal;
                     // Recalcular enganche/pagos en el PDP con el precio recién fijado
                     if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
+                    // También actualizar el precio de contado mostrado en el modal
+                    document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(precioContadoFinal || 0).toLocaleString('es-MX')} MXN</strong>`;
                 } catch (e) {
                     console.warn('No se pudo fijar precio contado final desde variante:', e);
                 }
