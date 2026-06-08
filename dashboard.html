@@ -739,10 +739,10 @@
                                             </div>
                                             <div style="flex:1;">
                                                 <div style="font-weight:bold;">${it.modelo}</div>
-                                                <div style="font-size:13px; color:#666;">Precio placeholder: $${Number(it.precioPlaceholder).toLocaleString('es-MX')}</div>
+                                                <div style="font-size:13px; color:#666;">Precio final sugerido: $${Number(it.precioPlaceholder).toLocaleString('es-MX')}</div>
                                                 <div style="font-size:13px; color:#666;">Color: ${it.color || '—'} • Memoria: ${it.memoria || '—'}</div>
                                                 <div style="margin-top:6px;">
-                                                    <button style="padding:6px 10px; margin-right:6px; background:#2980b9; color:white; border-radius:4px; border:none; cursor:pointer;" onclick="abrirConvertForm(${it.fila})">✏️ Editar y Convertir</button>
+                                                    <button style="padding:6px 10px; margin-right:6px; background:#2980b9; color:white; border-radius:4px; border:none; cursor:pointer;" onclick="abrirConvertForm(${it.fila}, '${it.modelo.replace(/'/g, "\\'")}', '${(it.color || '').replace(/'/g, "\\'")}', '${(it.memoria || '').replace(/'/g, "\\'")}', ${it.precioPlaceholder || 0})">✏️ Editar y Convertir</button>
                                                 </div>
                                             </div>
                                         `;
@@ -753,18 +753,21 @@
                         }
                 }
 
-                function abrirConvertForm(fila) {
+                function abrirConvertForm(fila, modelo = "", color = "", memoria = "", precioPlaceholder = 0) {
                         const cont = document.getElementById('placeholders-list');
                         // Reemplazamos por formulario simple
                         cont.innerHTML = `
                             <div style="padding:6px;">
                                 <h3 style="margin-top:0;">Convertir Placeholder (fila ${fila})</h3>
+                                <div style="margin-bottom:8px; font-weight:bold; color:#2c3e50;">${modelo}</div>
                                 <label>IMEI nuevo (requerido):</label>
                                 <input id="conv-imei" placeholder="Ej. 990000000000012" />
                                 <label>Color:</label>
-                                <input id="conv-color" placeholder="Ej. Negro" />
+                                <input id="conv-color" value="${color}" placeholder="Ej. Negro" />
                                 <label>Capacidad / Memoria:</label>
-                                <input id="conv-memoria" placeholder="Ej. 128GB" />
+                                <input id="conv-memoria" value="${memoria}" placeholder="Ej. 128GB" />
+                                <label>Precio Venta Final:</label>
+                                <input id="conv-precio" type="number" value="${precioPlaceholder || ''}" placeholder="Ej. 7990" />
                                 <label>Estado:</label>
                                 <select id="conv-estado">
                                     <option value="DISPONIBLE">DISPONIBLE</option>
@@ -785,6 +788,7 @@
                                 const imei = document.getElementById('conv-imei').value.trim();
                                 const color = document.getElementById('conv-color').value.trim();
                                 const memoria = document.getElementById('conv-memoria').value.trim();
+                                const precioFinal = document.getElementById('conv-precio').value.trim();
                                 const estado = document.getElementById('conv-estado').value.trim();
                                 const notas = document.getElementById('conv-notas').value.trim();
 
@@ -797,6 +801,7 @@
                                 params.append('imei', imei);
                                 params.append('color', color);
                                 params.append('memoria', memoria);
+                                params.append('precioFinal', precioFinal);
                                 params.append('estado', estado);
                                 params.append('notas', notas);
 
