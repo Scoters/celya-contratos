@@ -543,6 +543,58 @@
                     if (telInput) telInput.value = preTelefono;
                 }
 
+                const preClientId = urlParams.get('pre_client_id');
+                if (preClientId && preClientId.startsWith("C-Y")) {
+                    document.getElementById('idClienteVisual').value = preClientId;
+                }
+
+                // --- LECTOR DE COTIZACIÓN POR ID DESDE LA HOJA ---
+                const preCotizacionId = urlParams.get('pre_cotizacion_id');
+                if (preCotizacionId) {
+                    try {
+                        const urlCot = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerCotizacion&id=${encodeURIComponent(preCotizacionId)}`;
+                        const resCot = await fetch(urlCot);
+                        const dataCot = await resCot.json();
+                        if (dataCot && dataCot.result === 'success' && dataCot.data) {
+                            const c = dataCot.data;
+                            if (c['id cliente'] && String(c['id cliente']).startsWith("C-Y")) {
+                                document.getElementById('idClienteVisual').value = c['id cliente'];
+                            }
+                            if (c['cliente']) {
+                                document.getElementById('cliente').value = String(c['cliente']).toUpperCase();
+                            }
+                            if (c['whatsapp / teléfono']) {
+                                const telInput = document.querySelector('[name="telefono"]');
+                                if (telInput) telInput.value = c['whatsapp / teléfono'];
+                            }
+                            if (c['plan elegido']) {
+                                const selectPlazo = document.getElementById('plazoSemanas');
+                                if (String(c['plan elegido']).toUpperCase().includes("CÓMODO")) {
+                                    selectPlazo.value = "52";
+                                } else if (String(c['plan elegido']).toUpperCase().includes("RÁPIDO")) {
+                                    selectPlazo.value = "26";
+                                }
+                            }
+                            if (c['frecuencia']) {
+                                const selectCobro = document.getElementById('agendaCobro');
+                                const freqUpper = String(c['frecuencia']).toUpperCase();
+                                if (freqUpper === "QUINCENAL") {
+                                    selectCobro.value = "QUINCENAL|15 Y 30";
+                                } else if (freqUpper === "SEMANAL") {
+                                    selectCobro.value = "SEMANAL|SABADO";
+                                } else if (freqUpper === "CONTADO") {
+                                    selectCobro.value = "CONTADO|UNICO";
+                                }
+                            }
+                            if (typeof procesarAgendaCobro === 'function') {
+                                procesarAgendaCobro();
+                            }
+                        }
+                    } catch (errCot) {
+                        console.error("Error al jalar cotización por ID:", errCot);
+                    }
+                }
+
                 // Disparar cálculo inicial tras pre-llenado
                 if (typeof actualizarFormularioPrecios === 'function') {
                     actualizarFormularioPrecios();
@@ -811,6 +863,11 @@
             try {
                 const formularioElemento = document.getElementById('contratoForm');
                 const sheetData = new URLSearchParams(new FormData(formularioElemento));
+
+                const idClienteVal = document.getElementById('idClienteVisual').value || "";
+                if (idClienteVal && idClienteVal.startsWith("C-Y")) {
+                    sheetData.set('idCliente', idClienteVal);
+                }
 
                 // --- CAPTURA Y CÁLCULO DE VALORES DE PAGO ---
                 const plazoUnidades = parseInt(document.getElementById('plazoSemanas').value) || 0;

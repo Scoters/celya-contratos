@@ -2034,7 +2034,10 @@
             }
 
             const baseUrl = window.location.origin + window.location.pathname.replace('catalogo.html', 'index.html');
-            const prefilledUrl = `${baseUrl}?pre_modelo=${encodeURIComponent(pe_data_actual.title)}&pre_frecuencia=${encodeURIComponent(freq)}&pre_plazo=${encodeURIComponent(plazo === "26 Semanas" ? "26" : "52")}&pre_nombre=${encodeURIComponent(nombre)}&pre_telefono=${encodeURIComponent(telefono)}`;
+            const prefilledUrl = `${baseUrl}?pre_modelo=${encodeURIComponent(pe_data_actual.title)}&pre_frecuencia=${encodeURIComponent(freq)}&pre_plazo=${encodeURIComponent(plazo === "26 Semanas" ? "26" : "52")}&pre_nombre=${encodeURIComponent(nombre)}&pre_telefono=${encodeURIComponent(telefono)}&pre_color=&pre_capacidad=`;
+
+            const planElegidoVal = (freq === "CONTADO") ? "Contado" : (plazo === "26 Semanas" ? "Plan Rápido" : "Plan Cómodo");
+            const frecuenciaVal = (freq === "SEMANAL") ? "Semanal" : ((freq === "QUINCENAL") ? "Quincenal" : "Contado");
 
             try {
                 const params = new URLSearchParams();
@@ -2048,6 +2051,8 @@
                 params.append('plazo', `${textoPlazoEnvio} (PEDIDO ESPECIAL: ${pe_data_actual.title})`);
                 params.append('color', "");
                 params.append('capacidad', "");
+                params.append('planElegido', planElegidoVal);
+                params.append('frecuencia', frecuenciaVal);
                 params.append('linkPrellenado', prefilledUrl);
 
                 const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
@@ -2058,8 +2063,9 @@
                 const data = await res.json();
 
                 if (data.result === 'success') {
+                    const finalLink = data.linkPrellenado || prefilledUrl;
                     if (confirm("¡Tu Solicitud de Pedido Especial ha sido enviada con éxito! Nos pondremos en contacto contigo vía WhatsApp.\n\n¿Deseas abrir el Formulario de Contrato prellenado con estos datos ahora?")) {
-                        window.open(prefilledUrl, '_blank');
+                        window.open(finalLink, '_blank');
                     }
                     cerrarModalPedidoEspecial();
                 } else {
@@ -2155,13 +2161,18 @@
                     textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (26 Semanas)" : "Plan Cómodo (52 Semanas)";
                 }
 
+                const planElegidoVal = (freq === "CONTADO") ? "Contado" : (plazo === "26 Semanas" ? "Plan Rápido" : "Plan Cómodo");
+                const frecuenciaVal = (freq === "SEMANAL") ? "Semanal" : ((freq === "QUINCENAL") ? "Quincenal" : "Contado");
+
                 // Añadimos las especificaciones directo entre paréntesis al lado del modelo
                 params.append('plazo', `${textoPlazoEnvio} (${modelo}${detallesVariante})`);
                 params.append('color', colorSeleccionado || "");
                 params.append('capacidad', almacenamientoSeleccionado || "");
+                params.append('planElegido', planElegidoVal);
+                params.append('frecuencia', frecuenciaVal);
 
                 const baseUrl = window.location.origin + window.location.pathname.replace('catalogo.html', 'index.html');
-                const prefilledUrl = `${baseUrl}?pre_modelo=${encodeURIComponent(modelo)}&pre_frecuencia=${encodeURIComponent(freq)}&pre_plazo=${encodeURIComponent(plazo === "26 Semanas" ? "26" : "52")}&pre_nombre=${encodeURIComponent(nombre)}&pre_telefono=${encodeURIComponent(telefono)}`;
+                const prefilledUrl = `${baseUrl}?pre_modelo=${encodeURIComponent(modelo)}&pre_frecuencia=${encodeURIComponent(freq)}&pre_plazo=${encodeURIComponent(plazo === "26 Semanas" ? "26" : "52")}&pre_nombre=${encodeURIComponent(nombre)}&pre_telefono=${encodeURIComponent(telefono)}&pre_color=${encodeURIComponent(colorSeleccionado || "")}&pre_capacidad=${encodeURIComponent(almacenamientoSeleccionado || "")}`;
                 params.append('linkPrellenado', prefilledUrl);
 
                 const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
@@ -2172,8 +2183,9 @@
                 const data = await res.json();
 
                 if (data.result === 'success') {
+                    const finalLink = data.linkPrellenado || prefilledUrl;
                     if (confirm(`✅ ¡Excelente, ${nombre}!\n\nHemos recibido tu solicitud para el ${modelo}.\n\n¿Deseas abrir el Formulario de Contrato prellenado con estos datos ahora?`)) {
-                        window.open(prefilledUrl, '_blank');
+                        window.open(finalLink, '_blank');
                     }
                     cerrarModal();
                 } else if (data.result === 'rejected') {
