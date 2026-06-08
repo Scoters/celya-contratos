@@ -974,6 +974,10 @@
                         <div style="font-size: 13px; color: #64748b; margin-top: 6px;" id="pdp-contado-chico-texto">
                             Precio de Contado: <strong>$0</strong>
                         </div>
+                        <div id="ml-shipping-warning" style="display: none; margin-top: 10px; padding: 10px 12px; background-color: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; font-size: 13px; color: #b45309; align-items: center; gap: 8px;">
+                            <span style="font-size: 16px;">✈️</span>
+                            <span><strong>Envío Internacional:</strong> Este producto se envía desde el extranjero y <span id="ml-shipping-time-txt" style="font-weight: 600;">llegará pronto</span>.</span>
+                        </div>
                     </div>
 
                     <!-- Variantes Dinámicas -->
@@ -2518,6 +2522,7 @@
 
                     // 🎨 Pintamos los círculos de colores reales obtenidos (Deduplicados)
                     if (colorPicker && colorPicker.products && colorPicker.products.length > 0) {
+                        wrapperColores.innerHTML = "";
                         const coloresVistos = new Map(); // key: lowercase -> { id, name, isSelected }
 
                         colorPicker.products.forEach(p => {
@@ -2721,6 +2726,66 @@
                         defaultMemoria = attrStorage.value_name;
                     }
                     mostrarVariantesFallback();
+                }
+
+                // --- DETECTAR Y MOSTRAR ALERTA DE ENVÍO INTERNACIONAL ---
+                const warningDiv = document.getElementById('ml-shipping-warning');
+                const timeTxt = document.getElementById('ml-shipping-time-txt');
+                if (warningDiv && timeTxt) {
+                    let esInternacional = false;
+                    
+                    if (data.shipping && data.shipping.logistic_type === "remote") {
+                        esInternacional = true;
+                    }
+                    if (data.seller_address && data.seller_address.country && data.seller_address.country.id && data.seller_address.country.id !== "MX") {
+                        esInternacional = true;
+                    }
+                    if (data.tags && (data.tags.includes("cbt_item") || data.tags.includes("imported") || data.tags.includes("international_delivery"))) {
+                        esInternacional = true;
+                    }
+                    
+                    if (esInternacional) {
+                        warningDiv.style.display = "flex";
+                        timeTxt.innerText = "calculando tiempo de entrega...";
+                        
+                        let itemParaEnvio = cleanId;
+                        if (isProduct && data.buy_box_winner && data.buy_box_winner.item_id) {
+                            itemParaEnvio = data.buy_box_winner.item_id;
+                        }
+                        
+                        fetch(`https://api.mercadolibre.com/items/${itemParaEnvio}/shipping_options?zip_code=01000`)
+                            .then(res => res.json())
+                            .then(shipData => {
+                                if (shipData && shipData.options && shipData.options.length > 0) {
+                                    const opt = shipData.options.find(o => o.shipping_method_id === 509045 || o.name.toLowerCase().includes("estándar") || o.name.toLowerCase().includes("normal") || o.display === "always") || shipData.options[0];
+                                    if (opt && opt.estimated_delivery_limit && opt.estimated_delivery_limit.date) {
+                                        const delDate = new Date(opt.estimated_delivery_limit.date);
+                                        const opcionesFecha = { weekday: 'long', day: 'numeric', month: 'long' };
+                                        let fechaFormateada = delDate.toLocaleDateString('es-MX', opcionesFecha);
+                                        fechaFormateada = fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
+                                        
+                                        let prepText = "";
+                                        if (data.sale_terms) {
+                                            const prepTerm = data.sale_terms.find(t => t.id === "MANUFACTURING_TIME");
+                                            if (prepTerm && prepTerm.value_name) {
+                                                prepText = ` (elaboración: ${prepTerm.value_name})`;
+                                            }
+                                        }
+                                        timeTxt.innerText = `llega el ${fechaFormateada}${prepText}`;
+                                    } else {
+                                        timeTxt.innerText = "suele tardar de 7 a 15 días hábiles";
+                                    }
+                                } else {
+                                    timeTxt.innerText = "suele tardar de 7 a 15 días hábiles";
+                                }
+                            })
+                            .catch(err => {
+                                console.warn("Error consultando estimado de envío:", err);
+                                timeTxt.innerText = "suele tardar de 7 a 15 días hábiles";
+                            });
+                    } else {
+                        warningDiv.style.display = "none";
+                    }
                 }
             } catch (e) {
                 console.error("Error obteniendo variantes vivas desde ML:", e);
