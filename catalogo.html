@@ -1482,13 +1482,31 @@
 
                     // Deduplicar, limpiar y ordenar listas de colores y memorias
                     if (listaColores.length > 0) {
-                        listaColores = [...new Set(listaColores)].map(c => c.trim()).filter(Boolean).sort((a, b) => a.localeCompare(b, 'es'));
+                        const uniqueColores = {};
+                        listaColores.forEach(c => {
+                            if (!c) return;
+                            const trimmed = c.trim();
+                            const lower = trimmed.toLowerCase();
+                            if (!uniqueColores[lower]) {
+                                uniqueColores[lower] = trimmed;
+                            }
+                        });
+                        listaColores = Object.values(uniqueColores).sort((a, b) => a.localeCompare(b, 'es'));
                     } else if (item.color) {
                         listaColores = [item.color];
                     }
 
                     if (listaMemorias.length > 0) {
-                        listaMemorias = [...new Set(listaMemorias)].map(m => m.trim()).filter(Boolean).sort((a, b) => {
+                        const uniqueMemorias = {};
+                        listaMemorias.forEach(m => {
+                            if (!m) return;
+                            const trimmed = m.trim();
+                            const lower = trimmed.toLowerCase();
+                            if (!uniqueMemorias[lower]) {
+                                uniqueMemorias[lower] = trimmed;
+                            }
+                        });
+                        listaMemorias = Object.values(uniqueMemorias).sort((a, b) => {
                             const numA = parseInt(a.replace(/\D/g, ''), 10) || 0;
                             const numB = parseInt(b.replace(/\D/g, ''), 10) || 0;
                             return numA - numB;
