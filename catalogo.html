@@ -1426,6 +1426,83 @@
                     modeloLimpioCard = modeloLimpioCard.replace(/\s+/g, " ").trim();
                     modeloLimpioCard = modeloLimpioCard.replace(/^[,\-\s]+|[,\-\s]+$/g, "");
 
+                    // Extraer todas las variantes (Colores y capacidades) desde variantesJson
+                    let listaColores = [];
+                    let listaMemorias = [];
+
+                    if (item.variantesJson) {
+                        try {
+                            const parsed = JSON.parse(item.variantesJson);
+                            if (parsed) {
+                                // Caso A: Estructura de pickers (catalog product /products/)
+                                if (parsed.pickers && parsed.pickers.length > 0) {
+                                    const colorPicker = parsed.pickers.find(p => {
+                                        const idUpper = p.picker_id.toUpperCase();
+                                        return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
+                                    });
+                                    if (colorPicker && colorPicker.products) {
+                                        listaColores = colorPicker.products.map(p => p.picker_label).filter(Boolean);
+                                    }
+
+                                    const storagePicker = parsed.pickers.find(p => {
+                                        const idUpper = p.picker_id.toUpperCase();
+                                        return idUpper.includes("MEMORY") || idUpper.includes("STORAGE") || idUpper.includes("CAPACITY") || idUpper.includes("CAPACIDAD");
+                                    });
+                                    if (storagePicker && storagePicker.products) {
+                                        listaMemorias = storagePicker.products.map(p => p.picker_label).filter(Boolean);
+                                    }
+                                }
+
+                                // Caso B: Estructura de variations (standard item /items/)
+                                if ((!listaColores.length || !listaMemorias.length) && parsed.variations && parsed.variations.length > 0) {
+                                    const coloresSet = new Set();
+                                    const memoriasSet = new Set();
+                                    parsed.variations.forEach(v => {
+                                        const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
+                                        allAttrs.forEach(attr => {
+                                            const idUpper = attr.id.toUpperCase();
+                                            const valueName = attr.value_name ? attr.value_name.trim() : "";
+                                            if (!valueName) return;
+                                            if (idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO") {
+                                                coloresSet.add(valueName);
+                                            }
+                                            if (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO") {
+                                                memoriasSet.add(valueName);
+                                            }
+                                        });
+                                    });
+                                    if (coloresSet.size > 0) listaColores = Array.from(coloresSet);
+                                    if (memoriasSet.size > 0) listaMemorias = Array.from(memoriasSet);
+                                }
+                            }
+                        } catch (e) {
+                            console.warn("Error parsing card variantesJson:", e);
+                        }
+                    }
+
+                    // Deduplicar, limpiar y ordenar listas de colores y memorias
+                    if (listaColores.length > 0) {
+                        listaColores = [...new Set(listaColores)].map(c => c.trim()).filter(Boolean).sort((a, b) => a.localeCompare(b, 'es'));
+                    } else if (item.color) {
+                        listaColores = [item.color];
+                    }
+
+                    if (listaMemorias.length > 0) {
+                        listaMemorias = [...new Set(listaMemorias)].map(m => m.trim()).filter(Boolean).sort((a, b) => {
+                            const numA = parseInt(a.replace(/\D/g, ''), 10) || 0;
+                            const numB = parseInt(b.replace(/\D/g, ''), 10) || 0;
+                            return numA - numB;
+                        });
+                    } else if (item.memoria) {
+                        listaMemorias = [item.memoria];
+                    }
+
+                    // Determinar el texto de colores para la tarjeta
+                    let coloresTexto = item.coloresDisponibles || "";
+                    if (!coloresTexto && listaColores.length > 0) {
+                        coloresTexto = listaColores.join(", ");
+                    }
+
                     // Etiqueta de entrega inmediata o pedido
                     let badgeEstado = item.entregaInmediata
                         ? `<span class="status-badge status-available">⚡ Disponible</span>`
@@ -1458,11 +1535,11 @@
                                 </div>
                                 <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpioCard}</h4>
                                 <div class="specs-container">
-                                    ${item.memoria ? `<span class="spec-tag">💾 ${item.memoria}</span>` : ''}
-                                    ${item.color ? `<span class="spec-tag">🎨 ${item.color}</span>` : ''}
+                                    ${listaMemorias.length > 0 ? `<span class="spec-tag">💾 ${listaMemorias.join(' / ')}</span>` : ''}
+                                    ${listaColores.length > 0 ? `<span class="spec-tag">🎨 ${listaColores.slice(0, 3).join(' / ')}${listaColores.length > 3 ? '...' : ''}</span>` : ''}
                                     ${esReacondicionado ? `<span class="spec-tag" style="background-color: #fffbeb; color: #d97706; border: 1px solid #fef3c7; font-weight: 600;">🔧 Reacondicionado: ${gradoReacondicionado}</span>` : ''}
                                 </div>
-                                ${item.coloresDisponibles ? `<div style="font-size: 11px; color: #64748b; margin-top: 5px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center;">🎨 <span style="font-weight: 600;">Colores:</span> <span style="color: #475569;">${item.coloresDisponibles}</span></div>` : ''}
+                                ${coloresTexto ? `<div style="font-size: 11px; color: #64748b; margin-top: 5px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center;">🎨 <span style="font-weight: 600;">Colores:</span> <span style="color: #475569;">${coloresTexto}</span></div>` : ''}
                                 ${rowContado}
                                 <div class="enganche" data-enganche="${(Math.ceil((item.engancheMinimo || 0) / 10) * 10).toLocaleString('es-MX')}" data-precio="${Math.round(item.precioContado).toLocaleString('es-MX')}">
                                     <span>Pago Inicial</span>
