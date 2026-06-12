@@ -1497,11 +1497,9 @@
                         listaMemorias = [item.memoria];
                     }
 
-                    // Determinar el texto de colores para la tarjeta
-                    let coloresTexto = item.coloresDisponibles || "";
-                    if (!coloresTexto && listaColores.length > 0) {
-                        coloresTexto = listaColores.join(", ");
-                    }
+                    // Determinar el número de colores
+                    const cantColores = listaColores.length;
+                    const textoCantColores = cantColores === 1 ? "1 Color" : `${cantColores} Colores`;
 
                     // Etiqueta de entrega inmediata o pedido
                     let badgeEstado = item.entregaInmediata
@@ -1536,10 +1534,9 @@
                                 <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpioCard}</h4>
                                 <div class="specs-container">
                                     ${listaMemorias.length > 0 ? `<span class="spec-tag">💾 ${listaMemorias.join(' / ')}</span>` : ''}
-                                    ${listaColores.length > 0 ? `<span class="spec-tag">🎨 ${listaColores.slice(0, 3).join(' / ')}${listaColores.length > 3 ? '...' : ''}</span>` : ''}
+                                    ${cantColores > 0 ? `<span class="spec-tag">🎨 ${textoCantColores}</span>` : ''}
                                     ${esReacondicionado ? `<span class="spec-tag" style="background-color: #fffbeb; color: #d97706; border: 1px solid #fef3c7; font-weight: 600;">🔧 Reacondicionado: ${gradoReacondicionado}</span>` : ''}
                                 </div>
-                                ${coloresTexto ? `<div style="font-size: 11px; color: #64748b; margin-top: 5px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center;">🎨 <span style="font-weight: 600;">Colores:</span> <span style="color: #475569;">${coloresTexto}</span></div>` : ''}
                                 ${rowContado}
                                 <div class="enganche" data-enganche="${(Math.ceil((item.engancheMinimo || 0) / 10) * 10).toLocaleString('es-MX')}" data-precio="${Math.round(item.precioContado).toLocaleString('es-MX')}">
                                     <span>Pago Inicial</span>
