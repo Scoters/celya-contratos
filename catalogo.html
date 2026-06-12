@@ -1389,6 +1389,43 @@
                     const marca = obtenerMarca(item.modelo);
                     const claseMarca = obtenerClaseMarca(marca);
 
+                    // Detectar si es reacondicionado y extraer el grado
+                    let esReacondicionado = false;
+                    let gradoReacondicionado = "";
+                    const modeloLower = item.modelo.toLowerCase();
+                    if (modeloLower.includes("reacondicionado")) {
+                        esReacondicionado = true;
+                        if (modeloLower.includes("excelente")) {
+                            gradoReacondicionado = "Excelente";
+                        } else if (modeloLower.includes("bueno")) {
+                            gradoReacondicionado = "Bueno";
+                        } else if (modeloLower.includes("aceptable")) {
+                            gradoReacondicionado = "Aceptable";
+                        } else {
+                            gradoReacondicionado = "Reacondicionado";
+                        }
+                    } else if (item.link && item.link.toLowerCase().includes("reacondicionado")) {
+                        esReacondicionado = true;
+                        if (item.link.toLowerCase().includes("excelente")) {
+                            gradoReacondicionado = "Excelente";
+                        } else if (item.link.toLowerCase().includes("bueno")) {
+                            gradoReacondicionado = "Bueno";
+                        } else if (item.link.toLowerCase().includes("aceptable")) {
+                            gradoReacondicionado = "Aceptable";
+                        } else {
+                            gradoReacondicionado = "Reacondicionado";
+                        }
+                    }
+
+                    // Limpiar el título final para mostrar en la tarjeta (h4)
+                    let modeloLimpioCard = modeloLimpio;
+                    modeloLimpioCard = modeloLimpioCard.replace(/-\s*(excelente|bueno|aceptable)\s*\(reacondicionado\)/gi, "");
+                    modeloLimpioCard = modeloLimpioCard.replace(/-\s*\(reacondicionado\)/gi, "");
+                    modeloLimpioCard = modeloLimpioCard.replace(/\(reacondicionado\)/gi, "");
+                    modeloLimpioCard = modeloLimpioCard.replace(/reacondicionado/gi, "");
+                    modeloLimpioCard = modeloLimpioCard.replace(/\s+/g, " ").trim();
+                    modeloLimpioCard = modeloLimpioCard.replace(/^[,\-\s]+|[,\-\s]+$/g, "");
+
                     // Etiqueta de entrega inmediata o pedido
                     let badgeEstado = item.entregaInmediata
                         ? `<span class="status-badge status-available">⚡ Disponible</span>`
@@ -1406,6 +1443,9 @@
                            </div>`
                         : '';
 
+                    // Escapar comillas simples y dobles para pasar al inline onclick de abrirModalCredito
+                    const modeloOriginalEscapado = item.modelo.replace(/'/g, "").replace(/"/g, "");
+
                     contenedor.innerHTML += `
                         <div class="card-celular">
                             <div>
@@ -1413,13 +1453,14 @@
                                     <span class="brand-badge ${claseMarca}">${marca}</span>
                                     ${badgeEstado}
                                 </div>
-                                <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">
-                                    <img src="${item.foto}" alt="${modeloLimpio}" onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop'">
+                                <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">
+                                    <img src="${item.foto}" alt="${modeloLimpioCard}" onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop'">
                                 </div>
-                                <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpio}</h4>
+                                <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpioCard}</h4>
                                 <div class="specs-container">
                                     ${item.memoria ? `<span class="spec-tag">💾 ${item.memoria}</span>` : ''}
                                     ${item.color ? `<span class="spec-tag">🎨 ${item.color}</span>` : ''}
+                                    ${esReacondicionado ? `<span class="spec-tag" style="background-color: #fffbeb; color: #d97706; border: 1px solid #fef3c7; font-weight: 600;">🔧 Reacondicionado: ${gradoReacondicionado}</span>` : ''}
                                 </div>
                                 ${item.coloresDisponibles ? `<div style="font-size: 11px; color: #64748b; margin-top: 5px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center;">🎨 <span style="font-weight: 600;">Colores:</span> <span style="color: #475569;">${item.coloresDisponibles}</span></div>` : ''}
                                 ${rowContado}
@@ -1539,8 +1580,59 @@
             document.getElementById('hiddenPrecioContado').value = precioContado || 0;
 
             // Set PDP UI fields
-            document.getElementById('pdp-product-title').innerText = modelo;
-            document.getElementById('pdp-product-condition').innerText = (esFijo === "true" || esFijo === true) ? "Destacado | Calidad Garantizada CelYa!" : "Nuevo | Envió Rápido";
+            let cleanModelo = modelo;
+            cleanModelo = cleanModelo.replace(/-\s*(excelente|bueno|aceptable)\s*\(reacondicionado\)/gi, "");
+            cleanModelo = cleanModelo.replace(/-\s*\(reacondicionado\)/gi, "");
+            cleanModelo = cleanModelo.replace(/\(reacondicionado\)/gi, "");
+            cleanModelo = cleanModelo.replace(/reacondicionado/gi, "");
+            cleanModelo = cleanModelo.replace(/\s+/g, " ").trim();
+            cleanModelo = cleanModelo.replace(/^[,\-\s]+|[,\-\s]+$/g, "");
+            document.getElementById('pdp-product-title').innerText = cleanModelo;
+
+            // Detectar si es reacondicionado para el badge inicial
+            let esReacondicionado = false;
+            let gradoReacondicionado = "";
+            const modeloLower = modelo.toLowerCase();
+            if (modeloLower.includes("reacondicionado")) {
+                esReacondicionado = true;
+                if (modeloLower.includes("excelente")) {
+                    gradoReacondicionado = "Excelente";
+                } else if (modeloLower.includes("bueno")) {
+                    gradoReacondicionado = "Bueno";
+                } else if (modeloLower.includes("aceptable")) {
+                    gradoReacondicionado = "Aceptable";
+                }
+            } else if (link && link.toLowerCase().includes("reacondicionado")) {
+                esReacondicionado = true;
+                if (link.toLowerCase().includes("excelente")) {
+                    gradoReacondicionado = "Excelente";
+                } else if (link.toLowerCase().includes("bueno")) {
+                    gradoReacondicionado = "Bueno";
+                } else if (link.toLowerCase().includes("aceptable")) {
+                    gradoReacondicionado = "Aceptable";
+                }
+            }
+
+            const conditionEl = document.getElementById('pdp-product-condition');
+            if (conditionEl) {
+                if (esReacondicionado) {
+                    conditionEl.innerText = gradoReacondicionado ? `Reacondicionado | ${gradoReacondicionado}` : "Reacondicionado";
+                    conditionEl.style.backgroundColor = "#fffbeb";
+                    conditionEl.style.color = "#d97706";
+                    conditionEl.style.border = "1px solid #fef3c7";
+                    conditionEl.style.padding = "4px 8px";
+                    conditionEl.style.borderRadius = "4px";
+                    conditionEl.style.fontWeight = "600";
+                } else {
+                    conditionEl.innerText = (esFijo === "true" || esFijo === true) ? "Destacado | Calidad Garantizada CelYa!" : "Nuevo | Envió Rápido";
+                    conditionEl.style.backgroundColor = "";
+                    conditionEl.style.color = "";
+                    conditionEl.style.border = "";
+                    conditionEl.style.padding = "";
+                    conditionEl.style.borderRadius = "";
+                    conditionEl.style.fontWeight = "";
+                }
+            }
 
             // Intercambiar tamaño y lugar del precio de contado por el enganche (Pago Inicial)
             document.getElementById('pdp-enganche-grande').innerText = `$${(Math.ceil((engancheMinimo || 0) / 10) * 10).toLocaleString('es-MX')} MXN`;
@@ -2375,10 +2467,84 @@
                 wrapperColores.innerHTML = "";
                 wrapperStorage.innerHTML = "";
 
-                // Actualizar el título del producto con el nombre real de Mercado Libre si existe
+                // --- DETECTAR REACONDICIONADO Y GRADO ---
+                let esReacondicionado = false;
+                let gradoReacondicionado = "";
+
+                // 1. Por el título
+                if (data.name && data.name.toLowerCase().includes("reacondicionado")) {
+                    esReacondicionado = true;
+                    if (data.name.toLowerCase().includes("excelente")) {
+                        gradoReacondicionado = "Excelente";
+                    } else if (data.name.toLowerCase().includes("bueno")) {
+                        gradoReacondicionado = "Bueno";
+                    } else if (data.name.toLowerCase().includes("aceptable")) {
+                        gradoReacondicionado = "Aceptable";
+                    }
+                }
+
+                // 2. Por el campo condition
+                if (data.condition === "refurbished") {
+                    esReacondicionado = true;
+                }
+
+                // 3. Por los atributos
+                if (data.attributes && data.attributes.length > 0) {
+                    const gradingAttr = data.attributes.find(a => a.id === "GRADING" || a.name === "Estado del reacondicionado");
+                    if (gradingAttr) {
+                        esReacondicionado = true;
+                        if (gradingAttr.value_name) {
+                            gradoReacondicionado = gradingAttr.value_name;
+                        }
+                    }
+                }
+
+                // 4. Por los pickers
+                if (data.pickers && data.pickers.length > 0) {
+                    const gradingPicker = data.pickers.find(p => p.picker_id === "GRADING");
+                    if (gradingPicker) {
+                        esReacondicionado = true;
+                        const selectedGrading = gradingPicker.products && gradingPicker.products.find(prod => prod.tags && prod.tags.includes("selected"));
+                        if (selectedGrading && selectedGrading.picker_label) {
+                            gradoReacondicionado = selectedGrading.picker_label;
+                        }
+                    }
+                }
+
+                // Actualizar el título del producto con el nombre real de Mercado Libre limpio
                 if (data.name) {
-                    document.getElementById('pdp-product-title').innerText = data.name;
-                    document.getElementById('hiddenModelo').value = data.name;
+                    let cleanName = data.name;
+                    cleanName = cleanName.replace(/-\s*(excelente|bueno|aceptable)\s*\(reacondicionado\)/gi, "");
+                    cleanName = cleanName.replace(/-\s*\(reacondicionado\)/gi, "");
+                    cleanName = cleanName.replace(/\(reacondicionado\)/gi, "");
+                    cleanName = cleanName.replace(/reacondicionado/gi, "");
+                    cleanName = cleanName.replace(/\s+/g, " ").trim();
+                    cleanName = cleanName.replace(/^[,\-\s]+|[,\-\s]+$/g, "");
+                    document.getElementById('pdp-product-title').innerText = cleanName;
+                    document.getElementById('hiddenModelo').value = data.name; // Keep the original name for DB registration
+                }
+
+                // Actualizar badge de condición en el modal
+                const conditionEl = document.getElementById('pdp-product-condition');
+                if (conditionEl) {
+                    if (esReacondicionado) {
+                        conditionEl.innerText = gradoReacondicionado ? `Reacondicionado | ${gradoReacondicionado}` : "Reacondicionado";
+                        conditionEl.style.backgroundColor = "#fffbeb";
+                        conditionEl.style.color = "#d97706";
+                        conditionEl.style.border = "1px solid #fef3c7";
+                        conditionEl.style.padding = "4px 8px";
+                        conditionEl.style.borderRadius = "4px";
+                        conditionEl.style.fontWeight = "600";
+                    } else {
+                        const esFijo = document.getElementById('hiddenEsFijo').value;
+                        conditionEl.innerText = (esFijo === "true" || esFijo === true) ? "Destacado | Calidad Garantizada CelYa!" : "Nuevo | Envió Rápido";
+                        conditionEl.style.backgroundColor = "";
+                        conditionEl.style.color = "";
+                        conditionEl.style.border = "";
+                        conditionEl.style.padding = "";
+                        conditionEl.style.borderRadius = "";
+                        conditionEl.style.fontWeight = "";
+                    }
                 }
 
                 // 📸 Pintamos las fotos de la galería si existen (todas las disponibles)
@@ -2817,6 +2983,10 @@
             if (varianteSeleccionada.id) {
                 actualizarFotoModalPorVariante(varianteSeleccionada.id);
             }
+
+            // Sync selected variant properties to form fields
+            colorSeleccionado = colorSeleccionadoGlobal || "";
+            almacenamientoSeleccionado = memoriaSeleccionadaGlobal || "";
 
             const precioReal = (varianteSeleccionada.prices && varianteSeleccionada.prices.length > 0)
                 ? (varianteSeleccionada.prices[0].amount || varianteSeleccionada.price || 0)
