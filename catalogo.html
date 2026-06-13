@@ -1441,7 +1441,11 @@
                                         return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
                                     });
                                     if (colorPicker && colorPicker.products) {
-                                        listaColores = colorPicker.products.map(p => p.picker_label).filter(Boolean);
+                                        // Filtrar solo colores que realmente tengan stock/ofertas activos
+                                        listaColores = colorPicker.products.filter(p => {
+                                            const tags = p.tags || [];
+                                            return !tags.includes('no-bids') && !tags.includes('no-winner') && !tags.includes('out-of-stock');
+                                        }).map(p => p.picker_label).filter(Boolean);
                                     }
 
                                     const storagePicker = parsed.pickers.find(p => {
@@ -1449,7 +1453,11 @@
                                         return idUpper.includes("MEMORY") || idUpper.includes("STORAGE") || idUpper.includes("CAPACITY") || idUpper.includes("CAPACIDAD");
                                     });
                                     if (storagePicker && storagePicker.products) {
-                                        listaMemorias = storagePicker.products.map(p => p.picker_label).filter(Boolean);
+                                        // Filtrar solo capacidades que realmente tengan stock/ofertas activos
+                                        listaMemorias = storagePicker.products.filter(p => {
+                                            const tags = p.tags || [];
+                                            return !tags.includes('no-bids') && !tags.includes('no-winner') && !tags.includes('out-of-stock');
+                                        }).map(p => p.picker_label).filter(Boolean);
                                     }
                                 }
 
@@ -1458,6 +1466,9 @@
                                     const coloresSet = new Set();
                                     const memoriasSet = new Set();
                                     parsed.variations.forEach(v => {
+                                        // Filtrar variaciones sin stock
+                                        if (v.available_quantity === 0 || v.available_quantity === "0") return;
+
                                         const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
                                         allAttrs.forEach(attr => {
                                             const idUpper = attr.id.toUpperCase();
