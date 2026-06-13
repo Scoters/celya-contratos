@@ -1595,7 +1595,7 @@
                                             if (colorPicker && colorPicker.products) {
                                                 let filteredColorProducts = colorPicker.products.filter(p => {
                                                     const tags = p.tags || [];
-                                                    return !tags.includes('out-of-stock') && !tags.includes('disabled');
+                                                    return !tags.includes('out-of-stock') && !tags.includes('disabled') && !tags.includes('no-bids') && !tags.includes('no-winner');
                                                 });
                                                 
                                                 const targetCap = mem.trim().toLowerCase();
@@ -2571,6 +2571,53 @@
         let colorSeleccionado = "";
         let almacenamientoSeleccionado = "";
         let itemVariationsData = [];
+        function obtenerCodigoColor(nombreColor) {
+            if (!nombreColor || nombreColor.trim() === "" || nombreColor === "-") {
+                return "#94a3b8";
+            }
+            const colorMap = {
+                // Negros, Oscuros, Grises Oscuros
+                "negro": "#1e293b", "black": "#1e293b", "oscuro": "#0f172a", "dark": "#0f172a", "space": "#334155",
+                "titanio": "#78716c", "titanium": "#78716c", "carbono": "#475569", "carbon": "#475569", "grafito": "#3f3f46", "graphite": "#3f3f46",
+                
+                // Blancos, Claros, Plateados
+                "blanco": "#ffffff", "white": "#ffffff", "claro": "#f8fafc", "light": "#f8fafc", "plata": "#cbd5e1", "silver": "#cbd5e1",
+                "cream": "#fef08a", "crema": "#fef08a", "marfil": "#fffbeb", "ivory": "#fffbeb",
+                
+                // Azules y Celestes
+                "azul": "#3b82f6", "blue": "#3b82f6", "celeste": "#60a5fa", "sky": "#60a5fa", "indigo": "#6366f1", "marino": "#1e3a8a",
+                
+                // Verdes
+                "verde": "#10b981", "green": "#10b981", "lima": "#84cc16", "lime": "#84cc16", "menta": "#a7f3d0", "mint": "#a7f3d0",
+                
+                // Rojos y Naranjas
+                "rojo": "#ef4444", "red": "#ef4444", "naranja": "#f97316", "orange": "#f97316", "coral": "#fb7185",
+                
+                // Rosas y Dorados
+                "rosa": "#ec4899", "pink": "#ec4899", "gold": "#f59e0b", "oro": "#f59e0b", "dorado": "#f59e0b", "bronce": "#b45309", "bronze": "#b45309",
+                
+                // Morados y Violetas
+                "violeta": "#8b5cf6", "violet": "#8b5cf6", "purpura": "#a855f7", "purple": "#a855f7", "morado": "#a855f7", "lavanda": "#e9d5ff", "lavender": "#e9d5ff"
+            };
+
+            const nombreLower = nombreColor.toLowerCase().trim();
+            for (const key in colorMap) {
+                if (nombreLower.includes(key)) {
+                    return colorMap[key];
+                }
+            }
+
+            // Generar un color único y agradable basado en el nombre del color
+            let hash = 0;
+            for (let i = 0; i < nombreLower.length; i++) {
+                hash = nombreLower.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            // Convertir hash a HSL para garantizar que sea un color agradable a la vista
+            const h = Math.abs(hash) % 360;
+            const s = 45 + (Math.abs(hash >> 8) % 30); // 45% a 75% de saturación
+            const l = 50 + (Math.abs(hash >> 16) % 20); // 50% a 70% de luminosidad
+            return `hsl(${h}, ${s}%, ${l}%)`;
+        }
 
         async function cargarVariantesRealesML(idProducto, esCambioVariante = false) {
             const contenedor = document.getElementById('ml-dynamic-variants-container');
@@ -2599,13 +2646,11 @@
 
             // 1. Intentar obtener el ID desde el parámetro 'wid' o 'product_trigger_id' (ID de publicación específica) en la URL
             let cleanId = "";
-            let isProduct = false;
 
             if (currentMLItemLink) {
                 const widMatch = currentMLItemLink.match(/(?:wid|product_trigger_id)=([A-Z]*\d+)/i);
                 if (widMatch) {
                     cleanId = widMatch[1].toUpperCase();
-                    isProduct = false;
                 }
             }
 
@@ -2614,7 +2659,6 @@
                 const matchLink = currentMLItemLink.match(/(MLM\-?\d+)/i);
                 if (matchLink) {
                     cleanId = matchLink[0].replace("-", "").toUpperCase();
-                    isProduct = currentMLItemLink.includes("/p/");
                 }
             }
 
@@ -2628,12 +2672,16 @@
                         cleanId = match[0].replace("-", "").toUpperCase();
                     }
                 }
-                isProduct = currentMLItemLink && currentMLItemLink.includes("/p/");
             }
 
             if (!cleanId) {
                 return;
             }
+
+            // Determinar dinámicamente si es un Catalog Product o un Item (Publicación estándar)
+            // Las IDs de catálogo de Mercado Libre (productos) tienen 8 dígitos tras MLM (longitud 11).
+            // Las IDs de publicación (items) tienen 10 dígitos tras MLM (longitud 13).
+            let isProduct = cleanId.startsWith("MLM") && cleanId.length <= 11;
 
             const originalCleanId = cleanId;
 
@@ -2968,9 +3016,7 @@
                         colorPicker.products.forEach(p => {
                             const normColor = p.picker_label.trim().toLowerCase();
                             const isSel = p.tags && p.tags.includes("selected");
-                            const isNoBids = data.isFresh
-                                ? (p.tags && (p.tags.includes("no-bids") || p.tags.includes("no-winner") || p.tags.includes("out-of-stock")))
-                                : (p.tags && (p.tags.includes("out-of-stock") || p.tags.includes("disabled")));
+                            const isNoBids = p.tags && (p.tags.includes("no-bids") || p.tags.includes("no-winner") || p.tags.includes("out-of-stock") || p.tags.includes("disabled"));
                             if (isNoBids && p.product_id !== cleanId) {
                                 return;
                             }
@@ -3012,26 +3058,7 @@
                             divColor.title = colorInfo.name;
                             divColor.setAttribute('data-color', colorInfo.name);
 
-                            const colorMap = {
-                                "negro": "#1e293b", "black": "#1e293b", "oscuro": "#0f172a",
-                                "blanco": "#ffffff", "white": "#ffffff",
-                                "azul": "#3b82f6", "blue": "#3b82f6",
-                                "verde": "#10b981", "green": "#10b981",
-                                "rojo": "#ef4444", "red": "#ef4444",
-                                "rosa": "#ec4899", "pink": "#ec4899",
-                                "amarillo": "#eab308", "yellow": "#eab308",
-                                "gris": "#6b7280", "grey": "#6b7280", "silver": "#cbd5e1", "plata": "#cbd5e1",
-                                "oro": "#f59e0b", "gold": "#f59e0b", "dorado": "#f59e0b"
-                            };
-                            const nombreLower = normColor;
-                            let bgCircleColor = "#94a3b8";
-                            for (const key in colorMap) {
-                                if (nombreLower.includes(key)) {
-                                    bgCircleColor = colorMap[key];
-                                    break;
-                                }
-                            }
-                            divColor.style.backgroundColor = bgCircleColor;
+                            divColor.style.backgroundColor = obtenerCodigoColor(colorInfo.name);
 
                             if (isSelected) {
                                 colorSeleccionado = colorInfo.name;
@@ -3079,9 +3106,7 @@
                             productsList.forEach(prod => {
                                 const normLabel = prod.picker_label.trim().toLowerCase();
                                 const isSel = prod.tags && prod.tags.includes("selected");
-                                const isNoBids = data.isFresh
-                                    ? (prod.tags && (prod.tags.includes("no-bids") || prod.tags.includes("no-winner") || prod.tags.includes("out-of-stock")))
-                                    : (prod.tags && (prod.tags.includes("out-of-stock") || prod.tags.includes("disabled")));
+                                const isNoBids = prod.tags && (prod.tags.includes("no-bids") || prod.tags.includes("no-winner") || prod.tags.includes("out-of-stock") || prod.tags.includes("disabled"));
                                 if (isNoBids && prod.product_id !== cleanId) {
                                     return;
                                 }
@@ -3310,26 +3335,7 @@
                 divColor.title = defaultColor;
                 divColor.setAttribute('data-color', defaultColor);
 
-                const colorMap = {
-                    "negro": "#1e293b", "black": "#1e293b", "oscuro": "#0f172a",
-                    "blanco": "#ffffff", "white": "#ffffff",
-                    "azul": "#3b82f6", "blue": "#3b82f6",
-                    "verde": "#10b981", "green": "#10b981",
-                    "rojo": "#ef4444", "red": "#ef4444",
-                    "rosa": "#ec4899", "pink": "#ec4899",
-                    "amarillo": "#eab308", "yellow": "#eab308",
-                    "gris": "#6b7280", "grey": "#6b7280", "silver": "#cbd5e1", "plata": "#cbd5e1",
-                    "oro": "#f59e0b", "gold": "#f59e0b", "dorado": "#f59e0b"
-                };
-                const nombreLower = defaultColor.toLowerCase();
-                let bgCircleColor = "#94a3b8";
-                for (const key in colorMap) {
-                    if (nombreLower.includes(key)) {
-                        bgCircleColor = colorMap[key];
-                        break;
-                    }
-                }
-                divColor.style.backgroundColor = bgCircleColor;
+                divColor.style.backgroundColor = obtenerCodigoColor(defaultColor);
 
                 colorSeleccionado = defaultColor;
                 document.getElementById('color-seleccionado-txt').innerText = defaultColor;
