@@ -1593,10 +1593,9 @@
                                             }
                                             
                                             if (colorPicker && colorPicker.products) {
-                                                let filteredColorProducts = colorPicker.products.filter(p => {
-                                                    const tags = p.tags || [];
-                                                    return !tags.includes('out-of-stock') && !tags.includes('disabled') && !tags.includes('no-bids') && !tags.includes('no-winner');
-                                                });
+                                                // Use all reported color products to compute the number of distinct colors
+                                                // (don't aggressively exclude by tags here, since card should show available color options)
+                                                let filteredColorProducts = Array.isArray(colorPicker.products) ? colorPicker.products.slice() : [];
                                                 
                                                 const targetCap = mem.trim().toLowerCase();
                                                 filteredColorProducts = filteredColorProducts.filter(p => {
@@ -2644,7 +2643,6 @@
                 wrapperColores.innerHTML = "";
                 wrapperStorage.innerHTML = "";
                 seccionStorage.style.display = "none";
-                contenedor.style.display = "none";
                 const extraContainer = document.getElementById('ml-extra-pickers-container');
                 if (extraContainer) extraContainer.innerHTML = "";
                 colorSeleccionado = "";
@@ -2700,8 +2698,9 @@
                         wrapperStorage.style.pointerEvents = "";
                     }
                     if (contenedor) {
-                        contenedor.style.display = "none";
-                    }
+                            // show fallback instead of hiding everything
+                            try { mostrarVariantesFallback(); } catch (e) {}
+                        }
                 } catch (e) {}
                 return;
             }
