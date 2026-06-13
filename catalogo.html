@@ -1970,6 +1970,19 @@
                                 cleanId = id;
                             }
                             ML_CACHE_VARIANTES[cleanId] = parsed;
+
+                            // Sembrar el mismo objeto de caché para todas las variantes de la familia
+                            if (parsed.pickers && Array.isArray(parsed.pickers)) {
+                                parsed.pickers.forEach(picker => {
+                                    if (picker.products && Array.isArray(picker.products)) {
+                                        picker.products.forEach(p => {
+                                            if (p.product_id && p.product_id !== cleanId) {
+                                                ML_CACHE_VARIANTES[p.product_id] = parsed;
+                                            }
+                                        });
+                                    }
+                                });
+                            }
                         }
                     } catch (e) {
                         console.warn("Error seeding variants cache:", e);
@@ -2746,27 +2759,41 @@
                                 }
                             }
 
-                            if (!freshData && !isProduct && currentMLItemLink && currentMLItemLink.includes("/p/")) {
-                                const pMatch = currentMLItemLink.match(/\/p\/(MLM\-?\d+)/i);
-                                if (pMatch) {
-                                    const parentProductId = pMatch[1].replace("-", "").toUpperCase();
-                                    freshData = await fetchMLData(parentProductId, true);
-                                    if (freshData) {
-                                        cleanId = parentProductId;
-                                        isProduct = true;
-                                    }
-                                }
-                            }
+                             if (!freshData && !isProduct && currentMLItemLink && currentMLItemLink.includes("/p/")) {
+                                 const pMatch = currentMLItemLink.match(/\/p\/(MLM\-?\d+)/i);
+                                 if (pMatch) {
+                                     const parentProductId = pMatch[1].replace("-", "").toUpperCase();
+                                     freshData = await fetchMLData(parentProductId, true);
+                                     if (freshData) {
+                                         cleanId = parentProductId;
+                                         isProduct = true;
+                                     }
+                                 }
+                             }
 
-                            if (freshData) {
-                                freshData.isFresh = true;
-                                ML_CACHE_VARIANTES[originalCleanId] = freshData;
-                                if (cleanId !== originalCleanId) {
-                                    ML_CACHE_VARIANTES[cleanId] = freshData;
-                                }
-                                // Forzar renderizado secundario con los datos actualizados
-                                cargarVariantesRealesML(idProducto, esCambioVariante);
-                            }
+                             if (freshData) {
+                                 freshData.isFresh = true;
+                                 ML_CACHE_VARIANTES[originalCleanId] = freshData;
+                                 if (cleanId !== originalCleanId) {
+                                     ML_CACHE_VARIANTES[cleanId] = freshData;
+                                 }
+
+                                 // Sembrar también para todos los IDs de variantes de la familia en la caché fresca
+                                 if (freshData.pickers && Array.isArray(freshData.pickers)) {
+                                     freshData.pickers.forEach(picker => {
+                                         if (picker.products && Array.isArray(picker.products)) {
+                                             picker.products.forEach(p => {
+                                                 if (p.product_id) {
+                                                     ML_CACHE_VARIANTES[p.product_id] = freshData;
+                                                 }
+                                             });
+                                         }
+                                     });
+                                 }
+
+                                 // Forzar renderizado secundario con los datos actualizados
+                                 cargarVariantesRealesML(idProducto, esCambioVariante);
+                             }
                         } catch (err) {
                             console.error("Error in background fetch:", err);
                         } finally {
