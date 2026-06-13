@@ -1458,7 +1458,7 @@
                                         // Filtrar solo colores que realmente tengan stock/ofertas activos
                                         let filteredColorProducts = colorPicker.products.filter(p => {
                                             const tags = p.tags || [];
-                                            return !tags.includes('no-bids') && !tags.includes('no-winner') && !tags.includes('out-of-stock');
+                                            return !tags.includes('out-of-stock') && !tags.includes('disabled');
                                         });
 
                                         // Si filtramos por la capacidad de la tarjeta, conservar solo los productos con esa capacidad
@@ -1473,7 +1473,7 @@
                                         // Filtrar solo capacidades que realmente tengan stock/ofertas activos
                                         listaMemorias = storagePicker.products.filter(p => {
                                             const tags = p.tags || [];
-                                            return !tags.includes('no-bids') && !tags.includes('no-winner') && !tags.includes('out-of-stock');
+                                            return !tags.includes('out-of-stock') && !tags.includes('disabled');
                                         }).map(p => p.picker_label).filter(Boolean);
                                     }
                                 }
@@ -1594,7 +1594,7 @@
                                             if (colorPicker && colorPicker.products) {
                                                 let filteredColorProducts = colorPicker.products.filter(p => {
                                                     const tags = p.tags || [];
-                                                    return !tags.includes('no-bids') && !tags.includes('no-winner') && !tags.includes('out-of-stock');
+                                                    return !tags.includes('out-of-stock') && !tags.includes('disabled');
                                                 });
                                                 
                                                 const targetCap = mem.trim().toLowerCase();
@@ -2949,8 +2949,8 @@
                         colorPicker.products.forEach(p => {
                             const normColor = p.picker_label.trim().toLowerCase();
                             const isSel = p.tags && p.tags.includes("selected");
-                            const isNoBids = p.tags && p.tags.includes("no-bids");
-                            if (isNoBids && p.product_id !== cleanId) {
+                            const isOut = p.tags && (p.tags.includes("out-of-stock") || p.tags.includes("disabled"));
+                            if (isOut && p.product_id !== cleanId) {
                                 return;
                             }
                             if (!coloresVistos.has(normColor) || isSel) {
@@ -3058,8 +3058,8 @@
                             productsList.forEach(prod => {
                                 const normLabel = prod.picker_label.trim().toLowerCase();
                                 const isSel = prod.tags && prod.tags.includes("selected");
-                                const isNoBids = prod.tags && prod.tags.includes("no-bids");
-                                if (isNoBids && prod.product_id !== cleanId) {
+                                const isOut = prod.tags && (prod.tags.includes("out-of-stock") || prod.tags.includes("disabled"));
+                                if (isOut && prod.product_id !== cleanId) {
                                     return;
                                 }
                                 if (!itemsVistos.has(normLabel) || isSel) {
