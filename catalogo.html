@@ -1440,18 +1440,35 @@
                                         const idUpper = p.picker_id.toUpperCase();
                                         return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
                                     });
-                                    if (colorPicker && colorPicker.products) {
-                                        // Filtrar solo colores que realmente tengan stock/ofertas activos
-                                        listaColores = colorPicker.products.filter(p => {
-                                            const tags = p.tags || [];
-                                            return !tags.includes('no-bids') && !tags.includes('no-winner') && !tags.includes('out-of-stock');
-                                        }).map(p => p.picker_label).filter(Boolean);
-                                    }
-
                                     const storagePicker = parsed.pickers.find(p => {
                                         const idUpper = p.picker_id.toUpperCase();
                                         return idUpper.includes("MEMORY") || idUpper.includes("STORAGE") || idUpper.includes("CAPACITY") || idUpper.includes("CAPACIDAD");
                                     });
+
+                                    // Si la tarjeta especifica una capacidad/memoria por defecto (ej. 128 GB o 256 GB),
+                                    // filtramos los colores para mostrar únicamente los que estén activos para esa capacidad concreta.
+                                    let activeProductIdsForCapacity = [];
+                                    if (storagePicker && storagePicker.products && item.memoria) {
+                                        const targetCap = item.memoria.trim().toLowerCase();
+                                        const matchingProducts = storagePicker.products.filter(p => p.picker_label && p.picker_label.trim().toLowerCase() === targetCap);
+                                        activeProductIdsForCapacity = matchingProducts.map(p => p.product_id).filter(Boolean);
+                                    }
+
+                                    if (colorPicker && colorPicker.products) {
+                                        // Filtrar solo colores que realmente tengan stock/ofertas activos
+                                        let filteredColorProducts = colorPicker.products.filter(p => {
+                                            const tags = p.tags || [];
+                                            return !tags.includes('no-bids') && !tags.includes('no-winner') && !tags.includes('out-of-stock');
+                                        });
+
+                                        // Si filtramos por la capacidad de la tarjeta, conservar solo los productos con esa capacidad
+                                        if (activeProductIdsForCapacity.length > 0) {
+                                            filteredColorProducts = filteredColorProducts.filter(p => activeProductIdsForCapacity.includes(p.product_id));
+                                        }
+
+                                        listaColores = filteredColorProducts.map(p => p.picker_label).filter(Boolean);
+                                    }
+
                                     if (storagePicker && storagePicker.products) {
                                         // Filtrar solo capacidades que realmente tengan stock/ofertas activos
                                         listaMemorias = storagePicker.products.filter(p => {
@@ -1470,12 +1487,33 @@
                                         if (v.available_quantity === 0 || v.available_quantity === "0") return;
 
                                         const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
+
+                                        // Primero ver si esta variación coincide con la memoria de la tarjeta
+                                        let matchesCapacity = true;
+                                        if (item.memoria) {
+                                            const targetCap = item.memoria.trim().toLowerCase();
+                                            const hasMemoryAttr = allAttrs.some(attr => {
+                                                const idUpper = attr.id.toUpperCase();
+                                                return (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO");
+                                            });
+                                            if (hasMemoryAttr) {
+                                                matchesCapacity = allAttrs.some(attr => {
+                                                    const idUpper = attr.id.toUpperCase();
+                                                    const isMemory = (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO");
+                                                    return isMemory && attr.value_name && attr.value_name.trim().toLowerCase() === targetCap;
+                                                });
+                                            }
+                                        }
+
                                         allAttrs.forEach(attr => {
                                             const idUpper = attr.id.toUpperCase();
                                             const valueName = attr.value_name ? attr.value_name.trim() : "";
                                             if (!valueName) return;
+
                                             if (idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO") {
-                                                coloresSet.add(valueName);
+                                                if (matchesCapacity) {
+                                                    coloresSet.add(valueName);
+                                                }
                                             }
                                             if (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO") {
                                                 memoriasSet.add(valueName);
@@ -1526,9 +1564,106 @@
                         listaMemorias = [item.memoria];
                     }
 
-                    // Determinar el número de colores
-                    const cantColores = listaColores.length;
-                    const textoCantColores = cantColores === 1 ? "1 Color" : `${cantColores} Colores`;
+                    // Calcular combinaciones de capacidad + número de colores para mostrarlos de forma separada
+                    const memoriasConColores = [];
+                    if (listaMemorias.length > 0) {
+                        listaMemorias.forEach(mem => {
+                            let coloresParaEstaMem = [];
+                            if (item.variantesJson) {
+                                try {
+                                    const parsed = JSON.parse(item.variantesJson);
+                                    if (parsed) {
+                                        // Caso A: Catalog Product (pickers)
+                                        if (parsed.pickers && parsed.pickers.length > 0) {
+                                            const colorPicker = parsed.pickers.find(p => {
+                                                const idUpper = p.picker_id.toUpperCase();
+                                                return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
+                                            });
+                                            const storagePicker = parsed.pickers.find(p => {
+                                                const idUpper = p.picker_id.toUpperCase();
+                                                return idUpper.includes("MEMORY") || idUpper.includes("STORAGE") || idUpper.includes("CAPACITY") || idUpper.includes("CAPACIDAD");
+                                            });
+                                            
+                                            let activeProductIdsForCapacity = [];
+                                            if (storagePicker && storagePicker.products) {
+                                                const targetCap = mem.trim().toLowerCase();
+                                                const matchingProducts = storagePicker.products.filter(p => p.picker_label && p.picker_label.trim().toLowerCase() === targetCap);
+                                                activeProductIdsForCapacity = matchingProducts.map(p => p.product_id).filter(Boolean);
+                                            }
+                                            
+                                            if (colorPicker && colorPicker.products) {
+                                                let filteredColorProducts = colorPicker.products.filter(p => {
+                                                    const tags = p.tags || [];
+                                                    return !tags.includes('no-bids') && !tags.includes('no-winner') && !tags.includes('out-of-stock');
+                                                });
+                                                if (activeProductIdsForCapacity.length > 0) {
+                                                    filteredColorProducts = filteredColorProducts.filter(p => activeProductIdsForCapacity.includes(p.product_id));
+                                                }
+                                                coloresParaEstaMem = filteredColorProducts.map(p => p.picker_label).filter(Boolean);
+                                            }
+                                        }
+                                        // Caso B: Standard item variations
+                                        else if (parsed.variations && parsed.variations.length > 0) {
+                                            const coloresSet = new Set();
+                                            parsed.variations.forEach(v => {
+                                                if (v.available_quantity === 0 || v.available_quantity === "0") return;
+                                                const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
+                                                
+                                                let matchesCapacity = true;
+                                                const targetCap = mem.trim().toLowerCase();
+                                                const hasMemoryAttr = allAttrs.some(attr => {
+                                                    const idUpper = attr.id.toUpperCase();
+                                                    return (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO");
+                                                });
+                                                if (hasMemoryAttr) {
+                                                    matchesCapacity = allAttrs.some(attr => {
+                                                        const idUpper = attr.id.toUpperCase();
+                                                        const isMemory = (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO");
+                                                        return isMemory && attr.value_name && attr.value_name.trim().toLowerCase() === targetCap;
+                                                    });
+                                                }
+                                                
+                                                if (matchesCapacity) {
+                                                    allAttrs.forEach(attr => {
+                                                        const idUpper = attr.id.toUpperCase();
+                                                        const valueName = attr.value_name ? attr.value_name.trim() : "";
+                                                        if (valueName && (idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO")) {
+                                                            coloresSet.add(valueName);
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                            coloresParaEstaMem = Array.from(coloresSet);
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.warn("Error calculating memory-color mapping:", e);
+                                }
+                            }
+                            
+                            // Deduplicar colores para esta memoria
+                            const uniqueColores = {};
+                            coloresParaEstaMem.forEach(c => {
+                                if (!c) return;
+                                const trimmed = c.trim();
+                                const lower = trimmed.toLowerCase();
+                                if (!uniqueColores[lower]) {
+                                    uniqueColores[lower] = trimmed;
+                                }
+                            });
+                            const finalCantColores = Object.keys(uniqueColores).length;
+                            
+                            memoriasConColores.push({
+                                memoria: mem,
+                                cantColores: finalCantColores > 0 ? finalCantColores : (listaColores.length || 1)
+                            });
+                        });
+                    } else {
+                        memoriasConColores.push({
+                            memoria: item.memoria || "",
+                            cantColores: listaColores.length || 1
+                        });
+                    }
 
                     // Etiqueta de entrega inmediata o pedido
                     let badgeEstado = item.entregaInmediata
@@ -1562,8 +1697,11 @@
                                 </div>
                                 <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpioCard}</h4>
                                 <div class="specs-container">
-                                    ${listaMemorias.length > 0 ? `<span class="spec-tag">💾 ${listaMemorias.join(' / ')}</span>` : ''}
-                                    ${cantColores > 0 ? `<span class="spec-tag">🎨 ${textoCantColores}</span>` : ''}
+                                    ${memoriasConColores.map(mc => {
+                                        if (!mc.memoria) return '';
+                                        const labelColores = mc.cantColores === 1 ? '1 color' : `${mc.cantColores} colores`;
+                                        return `<span class="spec-tag">💾 ${mc.memoria} (${labelColores})</span>`;
+                                    }).join('')}
                                     ${esReacondicionado ? `<span class="spec-tag" style="background-color: #fffbeb; color: #d97706; border: 1px solid #fef3c7; font-weight: 600;">🔧 Reacondicionado: ${gradoReacondicionado}</span>` : ''}
                                 </div>
                                 ${rowContado}
