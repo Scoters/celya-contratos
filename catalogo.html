@@ -1596,9 +1596,23 @@
                                                     const tags = p.tags || [];
                                                     return !tags.includes('no-bids') && !tags.includes('no-winner') && !tags.includes('out-of-stock');
                                                 });
-                                                if (activeProductIdsForCapacity.length > 0) {
-                                                    filteredColorProducts = filteredColorProducts.filter(p => activeProductIdsForCapacity.includes(p.product_id));
-                                                }
+                                                
+                                                const targetCap = mem.trim().toLowerCase();
+                                                filteredColorProducts = filteredColorProducts.filter(p => {
+                                                    // 1. Coincidencia por ID directo
+                                                    if (activeProductIdsForCapacity.includes(p.product_id)) return true;
+                                                    
+                                                    // 2. Coincidencia por nombre de producto
+                                                    if (p.product_name && p.product_name.toLowerCase().includes(targetCap)) return true;
+                                                    
+                                                    // 3. Si es el color de la tarjeta y coincide con la memoria actual
+                                                    if (item.color && p.picker_label && p.picker_label.trim().toLowerCase() === item.color.trim().toLowerCase() && item.memoria && item.memoria.trim().toLowerCase() === targetCap) {
+                                                        return true;
+                                                    }
+                                                    
+                                                    return false;
+                                                });
+                                                
                                                 coloresParaEstaMem = filteredColorProducts.map(p => p.picker_label).filter(Boolean);
                                             }
                                         }
