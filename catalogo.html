@@ -1194,6 +1194,7 @@
         // Variables globales para Pedido Especial
         let CONFIG_TASAS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, gananciaContadoFactor: 1.36, engancheSemanal: 0.165, engancheQuincenal: 0.33 };
         let ML_CACHE_VARIANTES = {};
+        let isFetchingML = {};
         let pe_data_actual = null;
         let pe_link_actual = "";
 
@@ -1458,7 +1459,7 @@
                                         // Filtrar solo colores que realmente tengan stock/ofertas activos
                                         let filteredColorProducts = colorPicker.products.filter(p => {
                                             const tags = p.tags || [];
-                                            return !tags.includes('no-bids') && !tags.includes('no-winner') && !tags.includes('out-of-stock');
+                                            return !tags.includes('out-of-stock') && !tags.includes('disabled');
                                         });
 
                                         // Si filtramos por la capacidad de la tarjeta, conservar solo los productos con esa capacidad
@@ -1473,7 +1474,7 @@
                                         // Filtrar solo capacidades que realmente tengan stock/ofertas activos
                                         listaMemorias = storagePicker.products.filter(p => {
                                             const tags = p.tags || [];
-                                            return !tags.includes('no-bids') && !tags.includes('no-winner') && !tags.includes('out-of-stock');
+                                            return !tags.includes('out-of-stock') && !tags.includes('disabled');
                                         }).map(p => p.picker_label).filter(Boolean);
                                     }
                                 }
@@ -1594,7 +1595,7 @@
                                             if (colorPicker && colorPicker.products) {
                                                 let filteredColorProducts = colorPicker.products.filter(p => {
                                                     const tags = p.tags || [];
-                                                    return !tags.includes('no-bids') && !tags.includes('no-winner') && !tags.includes('out-of-stock');
+                                                    return !tags.includes('out-of-stock') && !tags.includes('disabled');
                                                 });
                                                 
                                                 const targetCap = mem.trim().toLowerCase();
@@ -1944,6 +1945,37 @@
             }
 
             document.getElementById('modalCredito').style.display = 'flex';
+
+            // Sembrar la caché de variantes desde variantesJson si existe para evitar latencia inicial
+            if (window.equiposCargados) {
+                const foundItem = window.equiposCargados.find(x => x.id === id);
+                if (foundItem && foundItem.variantesJson) {
+                    try {
+                        const parsed = JSON.parse(foundItem.variantesJson);
+                        if (parsed && !parsed.error) {
+                            let cleanId = "";
+                            if (link) {
+                                const idMatch = link.match(/(?:wid|product_trigger_id)=([A-Z]*\d+)/i);
+                                if (idMatch) {
+                                    cleanId = idMatch[1].toUpperCase();
+                                }
+                            }
+                            if (!cleanId && link) {
+                                const matchLink = link.match(/(MLM\-?\d+)/i);
+                                if (matchLink) {
+                                    cleanId = matchLink[0].replace("-", "").toUpperCase();
+                                }
+                            }
+                            if (!cleanId) {
+                                cleanId = id;
+                            }
+                            ML_CACHE_VARIANTES[cleanId] = parsed;
+                        }
+                    } catch (e) {
+                        console.warn("Error seeding variants cache:", e);
+                    }
+                }
+            }
 
             // Cargar variantes reales desde Mercado Libre en vivo
             cargarVariantesRealesML(id);
@@ -2603,7 +2635,8 @@
                 return;
             }
 
-            if (esCambioVariante && !(ML_CACHE_VARIANTES[cleanId] && ML_CACHE_VARIANTES[cleanId].isFresh)) {
+            const hasCache = !!ML_CACHE_VARIANTES[cleanId];
+            if (esCambioVariante && !hasCache) {
                 // Agregar feedback de carga para que no sea brusco, pero sin bloquear toda la pantalla
                 wrapperColores.style.opacity = "0.4";
                 wrapperColores.style.pointerEvents = "none";
@@ -2613,73 +2646,84 @@
 
             try {
                 let data = null;
-                if (ML_CACHE_VARIANTES[cleanId] && ML_CACHE_VARIANTES[cleanId].isFresh) {
-                    data = ML_CACHE_VARIANTES[cleanId];
-                } else {
-                    // Función auxiliar de fetch local
-                    async function fetchMLData(id, isProd) {
-                        const endpoint = isProd ? 'products' : 'items';
+                const cache = ML_CACHE_VARIANTES[cleanId];
+                if (cache) {
+                    data = cache;
+                }
+
+                // Si no hay datos frescos y no se está realizando un fetch en segundo plano, iniciarlo
+                if ((!cache || !cache.isFresh) && !isFetchingML[cleanId]) {
+                    isFetchingML[cleanId] = true;
+
+                    // Fetch asíncrono en background
+                    (async () => {
                         try {
-                            const res = await fetch(`https://api.mercadolibre.com/${endpoint}/${id}`);
-                            if (res.ok) {
-                                return await res.json();
+                            // Función auxiliar de fetch local
+                            async function fetchMLData(id, isProd) {
+                                const endpoint = isProd ? 'products' : 'items';
+                                try {
+                                    const res = await fetch(`https://api.mercadolibre.com/${endpoint}/${id}`);
+                                    if (res.ok) {
+                                        return await res.json();
+                                    }
+                                } catch (e) {
+                                    console.warn(`Direct fetch failed for ${id}:`, e);
+                                }
+                                
+                                try {
+                                    const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${id}&isProduct=${isProd}`;
+                                    const resProxy = await fetch(proxyUrl);
+                                    if (resProxy.ok) {
+                                        const rawData = await resProxy.json();
+                                        if (rawData && !rawData.error) {
+                                            return rawData;
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error(`Proxy fetch failed for ${id}:`, e);
+                                }
+                                return null;
                             }
-                        } catch (e) {
-                            console.warn(`Direct fetch failed for ${id}:`, e);
-                        }
-                        
-                        try {
-                            const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${id}&isProduct=${isProd}`;
-                            const resProxy = await fetch(proxyUrl);
-                            if (resProxy.ok) {
-                                const rawData = await resProxy.json();
-                                if (rawData && !rawData.error) {
-                                    return rawData;
+
+                            let freshData = await fetchMLData(cleanId, isProduct);
+
+                            if (freshData && !isProduct && freshData.catalog_product_id && (!freshData.variations || freshData.variations.length === 0)) {
+                                const prodData = await fetchMLData(freshData.catalog_product_id, true);
+                                if (prodData) {
+                                    freshData = prodData;
+                                    cleanId = freshData.catalog_product_id;
+                                    isProduct = true;
                                 }
                             }
-                        } catch (e) {
-                            console.error(`Proxy fetch failed for ${id}:`, e);
-                        }
-                        return null;
-                    }
 
-                    // Intentar obtener la publicación específica (item)
-                    data = await fetchMLData(cleanId, isProduct);
-
-                    // Si se obtuvo un item y tiene catalog_product_id, y no tiene variaciones propias,
-                    // es mejor cargar directamente el product parent para poder pintar los selectores (pickers)
-                    if (data && !isProduct && data.catalog_product_id && (!data.variations || data.variations.length === 0)) {
-                        console.log("Item belongs to catalog product, fetching product:", data.catalog_product_id);
-                        const prodData = await fetchMLData(data.catalog_product_id, true);
-                        if (prodData) {
-                            data = prodData;
-                            cleanId = data.catalog_product_id;
-                            isProduct = true;
-                        }
-                    }
-
-                    // Si falló (ej. 403 en item) y la URL original era un catálogo /p/, intentar fallback al product ID genérico
-                    if (!data && !isProduct && currentMLItemLink && currentMLItemLink.includes("/p/")) {
-                        const pMatch = currentMLItemLink.match(/\/p\/(MLM\-?\d+)/i);
-                        if (pMatch) {
-                            const parentProductId = pMatch[1].replace("-", "").toUpperCase();
-                            console.log("Item fetch failed (403), falling back to parent product:", parentProductId);
-                            data = await fetchMLData(parentProductId, true);
-                            if (data) {
-                                cleanId = parentProductId;
-                                isProduct = true;
+                            if (!freshData && !isProduct && currentMLItemLink && currentMLItemLink.includes("/p/")) {
+                                const pMatch = currentMLItemLink.match(/\/p\/(MLM\-?\d+)/i);
+                                if (pMatch) {
+                                    const parentProductId = pMatch[1].replace("-", "").toUpperCase();
+                                    freshData = await fetchMLData(parentProductId, true);
+                                    if (freshData) {
+                                        cleanId = parentProductId;
+                                        isProduct = true;
+                                    }
+                                }
                             }
-                        }
-                    }
 
-                    if (data) {
-                        data.isFresh = true;
-                        ML_CACHE_VARIANTES[cleanId] = data;
-                    }
+                            if (freshData) {
+                                freshData.isFresh = true;
+                                ML_CACHE_VARIANTES[cleanId] = freshData;
+                                // Forzar renderizado secundario con los datos actualizados
+                                cargarVariantesRealesML(idProducto, esCambioVariante);
+                            }
+                        } catch (err) {
+                            console.error("Error in background fetch:", err);
+                        } finally {
+                            delete isFetchingML[cleanId];
+                        }
+                    })();
                 }
 
                 // Restaurar estilos en cualquier caso de finalización de carga
-                if (esCambioVariante) {
+                if (data && esCambioVariante) {
                     wrapperColores.style.opacity = "";
                     wrapperColores.style.pointerEvents = "";
                     wrapperStorage.style.opacity = "";
@@ -2919,7 +2963,9 @@
                         colorPicker.products.forEach(p => {
                             const normColor = p.picker_label.trim().toLowerCase();
                             const isSel = p.tags && p.tags.includes("selected");
-                            const isNoBids = p.tags && (p.tags.includes("no-bids") || p.tags.includes("no-winner") || p.tags.includes("out-of-stock"));
+                            const isNoBids = data.isFresh
+                                ? (p.tags && (p.tags.includes("no-bids") || p.tags.includes("no-winner") || p.tags.includes("out-of-stock")))
+                                : (p.tags && (p.tags.includes("out-of-stock") || p.tags.includes("disabled")));
                             if (isNoBids && p.product_id !== cleanId) {
                                 return;
                             }
@@ -3028,7 +3074,9 @@
                             productsList.forEach(prod => {
                                 const normLabel = prod.picker_label.trim().toLowerCase();
                                 const isSel = prod.tags && prod.tags.includes("selected");
-                                const isNoBids = prod.tags && (prod.tags.includes("no-bids") || prod.tags.includes("no-winner") || prod.tags.includes("out-of-stock"));
+                                const isNoBids = data.isFresh
+                                    ? (prod.tags && (prod.tags.includes("no-bids") || prod.tags.includes("no-winner") || prod.tags.includes("out-of-stock")))
+                                    : (prod.tags && (prod.tags.includes("out-of-stock") || prod.tags.includes("disabled")));
                                 if (isNoBids && prod.product_id !== cleanId) {
                                     return;
                                 }
