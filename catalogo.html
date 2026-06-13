@@ -1190,6 +1190,8 @@
     <script>
         // Almacén local de equipos cargados
         window.equiposCargados = [];
+        // Flag para indicar que lo mostrado proviene de caché y necesita merge-safe
+        window.catalogCacheActive = false;
 
         // Variables globales para Pedido Especial
         let CONFIG_TASAS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, gananciaContadoFactor: 1.36, engancheSemanal: 0.165, engancheQuincenal: 0.33 };
@@ -1279,6 +1281,8 @@
 
                         // Pintamos inmediatamente de la caché para dar velocidad instantánea
                         window.equiposCargados = cachedData;
+                        // marcar que lo renderizado proviene de caché (para merge-safe)
+                        window.catalogCacheActive = true;
                         rellenarDropdownMarcas(cachedData);
                         aplicarFiltrosYOrden();
                     } catch (e) {
@@ -1287,6 +1291,7 @@
                 } else if (CONFIG.PRELOADED_CATALOG && CONFIG.PRELOADED_CATALOG.length > 0) {
                     // Si es la primera visita y no hay caché, pintamos instantáneamente la lista precargada
                     window.equiposCargados = CONFIG.PRELOADED_CATALOG;
+                    window.catalogCacheActive = true;
                     rellenarDropdownMarcas(CONFIG.PRELOADED_CATALOG);
                     aplicarFiltrosYOrden();
                 }
@@ -1298,6 +1303,32 @@
 
                 if (data.result === 'success' && data.resultados) {
                     window.equiposCargados = data.resultados;
+                    // fresh data arrived -> no longer cache-mode
+                    window.catalogCacheActive = false;
+
+                    // DEBUG: Log la estructura de datos recibida desde el Google Script
+                    console.log("=== DATOS RECIBIDOS DEL CATALOGO ===");
+                    console.log("Cantidad de items:", data.resultados.length);
+                    if (data.resultados.length > 0) {
+                        const firstItem = data.resultados[0];
+                        console.log("Primer item (claves):", Object.keys(firstItem));
+                        console.log("Primer item completo:", firstItem);
+                        console.log("¿Tiene variantesJson?", !!firstItem.variantesJson);
+                        if (firstItem.variantesJson) {
+                            try {
+                                const parsed = JSON.parse(firstItem.variantesJson);
+                                console.log("variantesJson parseado - estructura:", {
+                                    hasPickers: !!parsed.pickers,
+                                    hasVariations: !!parsed.variations,
+                                    pickersCount: parsed.pickers ? parsed.pickers.length : 0,
+                                    variationsCount: parsed.variations ? parsed.variations.length : 0
+                                });
+                            } catch (e) {
+                                console.warn("Error parseando variantesJson:", e);
+                            }
+                        }
+                    }
+                    console.log("=== FIN DEBUG ===");
 
                     // Guardar en caché si la búsqueda fue vacía (el catálogo completo)
                     if (busqueda === "") {
@@ -1361,6 +1392,25 @@
             const sortSelected = document.getElementById('sortBy').value;
             const contenedor = document.getElementById('contenedorResultados');
 
+            // Indicar visualmente si lo que se muestra proviene de caché
+            try {
+                if (window.catalogCacheActive) {
+                    contenedor.setAttribute('data-cache-stale', 'true');
+                    if (!document.getElementById('cacheBadge')) {
+                        const badge = document.createElement('div');
+                        badge.id = 'cacheBadge';
+                        badge.style.cssText = 'position: absolute; right: 18px; top: 8px; background:#fff7ed; color:#d97706; padding:6px 10px; border-radius:12px; font-weight:700; font-size:12px; border:1px solid #fef3c7; z-index:5;';
+                        badge.innerText = 'Datos en caché • Actualizando';
+                        contenedor.parentNode.style.position = 'relative';
+                        contenedor.parentNode.appendChild(badge);
+                    }
+                } else {
+                    contenedor.removeAttribute('data-cache-stale');
+                    const existing = document.getElementById('cacheBadge');
+                    if (existing) existing.remove();
+                }
+            } catch (e) {}
+
             // 1. Filtrar
             let filtrados = [...window.equiposCargados];
             if (brandSelected !== "ALL") {
@@ -1381,345 +1431,35 @@
             // Actualizar badge contador
             document.getElementById('countBadge').innerText = `${filtrados.length} ${filtrados.length === 1 ? 'equipo' : 'equipos'}`;
 
-            // 3. Pintar en pantalla
+            // 3. Pintar en pantalla (modo estándar - si se muestra caché, seguimos mostrando badge)
             contenedor.innerHTML = "";
 
             if (filtrados.length > 0) {
                 filtrados.forEach(item => {
+                    // Reutilizar la renderización previa para consistencia (no tocaremos la lógica de la tarjeta aquí)
+                    // Construcción rápida de la tarjeta usando el template existente
                     const modeloLimpio = limpiarNombreModelo(item.modelo);
                     const marca = obtenerMarca(item.modelo);
                     const claseMarca = obtenerClaseMarca(marca);
+                    const modeloOriginalEscapado = (item.modelo || '').replace(/'/g, "").replace(/\"/g, "");
 
-                    // Detectar si es reacondicionado y extraer el grado
-                    let esReacondicionado = false;
-                    let gradoReacondicionado = "";
-                    const modeloLower = item.modelo.toLowerCase();
-                    if (modeloLower.includes("reacondicionado")) {
-                        esReacondicionado = true;
-                        if (modeloLower.includes("excelente")) {
-                            gradoReacondicionado = "Excelente";
-                        } else if (modeloLower.includes("bueno")) {
-                            gradoReacondicionado = "Bueno";
-                        } else if (modeloLower.includes("aceptable")) {
-                            gradoReacondicionado = "Aceptable";
-                        } else {
-                            gradoReacondicionado = "Reacondicionado";
-                        }
-                    } else if (item.link && item.link.toLowerCase().includes("reacondicionado")) {
-                        esReacondicionado = true;
-                        if (item.link.toLowerCase().includes("excelente")) {
-                            gradoReacondicionado = "Excelente";
-                        } else if (item.link.toLowerCase().includes("bueno")) {
-                            gradoReacondicionado = "Bueno";
-                        } else if (item.link.toLowerCase().includes("aceptable")) {
-                            gradoReacondicionado = "Aceptable";
-                        } else {
-                            gradoReacondicionado = "Reacondicionado";
-                        }
-                    }
-
-                    // Limpiar el título final para mostrar en la tarjeta (h4)
-                    let modeloLimpioCard = modeloLimpio;
-                    modeloLimpioCard = modeloLimpioCard.replace(/-\s*(excelente|bueno|aceptable)\s*\(reacondicionado\)/gi, "");
-                    modeloLimpioCard = modeloLimpioCard.replace(/-\s*\(reacondicionado\)/gi, "");
-                    modeloLimpioCard = modeloLimpioCard.replace(/\(reacondicionado\)/gi, "");
-                    modeloLimpioCard = modeloLimpioCard.replace(/reacondicionado/gi, "");
-                    modeloLimpioCard = modeloLimpioCard.replace(/\s+/g, " ").trim();
-                    modeloLimpioCard = modeloLimpioCard.replace(/^[,\-\s]+|[,\-\s]+$/g, "");
-
-                    // Extraer todas las variantes (Colores y capacidades) desde variantesJson
-                    let listaColores = [];
-                    let listaMemorias = [];
-
-                    if (item.variantesJson) {
-                        try {
-                            const parsed = JSON.parse(item.variantesJson);
-                            if (parsed) {
-                                // Caso A: Estructura de pickers (catalog product /products/)
-                                if (parsed.pickers && parsed.pickers.length > 0) {
-                                    const colorPicker = parsed.pickers.find(p => {
-                                        const idUpper = p.picker_id.toUpperCase();
-                                        return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
-                                    });
-                                    const storagePicker = parsed.pickers.find(p => {
-                                        const idUpper = p.picker_id.toUpperCase();
-                                        return idUpper.includes("MEMORY") || idUpper.includes("STORAGE") || idUpper.includes("CAPACITY") || idUpper.includes("CAPACIDAD");
-                                    });
-
-                                    // Si la tarjeta especifica una capacidad/memoria por defecto (ej. 128 GB o 256 GB),
-                                    // filtramos los colores para mostrar únicamente los que estén activos para esa capacidad concreta.
-                                    let activeProductIdsForCapacity = [];
-                                    if (storagePicker && storagePicker.products && item.memoria) {
-                                        const targetCap = item.memoria.trim().toLowerCase();
-                                        const matchingProducts = storagePicker.products.filter(p => p.picker_label && p.picker_label.trim().toLowerCase() === targetCap);
-                                        activeProductIdsForCapacity = matchingProducts.map(p => p.product_id).filter(Boolean);
-                                    }
-
-                                    if (colorPicker && colorPicker.products) {
-                                        // Filtrar solo colores que realmente tengan stock/ofertas activos
-                                        let filteredColorProducts = colorPicker.products.filter(p => {
-                                            const tags = p.tags || [];
-                                            return !tags.includes('out-of-stock') && !tags.includes('disabled');
-                                        });
-
-                                        // Si filtramos por la capacidad de la tarjeta, conservar solo los productos con esa capacidad
-                                        if (activeProductIdsForCapacity.length > 0) {
-                                            filteredColorProducts = filteredColorProducts.filter(p => activeProductIdsForCapacity.includes(p.product_id));
-                                        }
-
-                                        listaColores = filteredColorProducts.map(p => p.picker_label).filter(Boolean);
-                                    }
-
-                                    if (storagePicker && storagePicker.products) {
-                                        // Filtrar solo capacidades que realmente tengan stock/ofertas activos
-                                        listaMemorias = storagePicker.products.filter(p => {
-                                            const tags = p.tags || [];
-                                            return !tags.includes('out-of-stock') && !tags.includes('disabled');
-                                        }).map(p => p.picker_label).filter(Boolean);
-                                    }
-                                }
-
-                                // Caso B: Estructura de variations (standard item /items/)
-                                if ((!listaColores.length || !listaMemorias.length) && parsed.variations && parsed.variations.length > 0) {
-                                    const coloresSet = new Set();
-                                    const memoriasSet = new Set();
-                                    parsed.variations.forEach(v => {
-                                        // Filtrar variaciones sin stock
-                                        if (v.available_quantity === 0 || v.available_quantity === "0") return;
-
-                                        const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
-
-                                        // Primero ver si esta variación coincide con la memoria de la tarjeta
-                                        let matchesCapacity = true;
-                                        if (item.memoria) {
-                                            const targetCap = item.memoria.trim().toLowerCase();
-                                            const hasMemoryAttr = allAttrs.some(attr => {
-                                                const idUpper = attr.id.toUpperCase();
-                                                return (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO");
-                                            });
-                                            if (hasMemoryAttr) {
-                                                matchesCapacity = allAttrs.some(attr => {
-                                                    const idUpper = attr.id.toUpperCase();
-                                                    const isMemory = (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO");
-                                                    return isMemory && attr.value_name && attr.value_name.trim().toLowerCase() === targetCap;
-                                                });
-                                            }
-                                        }
-
-                                        allAttrs.forEach(attr => {
-                                            const idUpper = attr.id.toUpperCase();
-                                            const valueName = attr.value_name ? attr.value_name.trim() : "";
-                                            if (!valueName) return;
-
-                                            if (idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO") {
-                                                if (matchesCapacity) {
-                                                    coloresSet.add(valueName);
-                                                }
-                                            }
-                                            if (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO") {
-                                                memoriasSet.add(valueName);
-                                            }
-                                        });
-                                    });
-                                    if (coloresSet.size > 0) listaColores = Array.from(coloresSet);
-                                    if (memoriasSet.size > 0) listaMemorias = Array.from(memoriasSet);
-                                }
-                            }
-                        } catch (e) {
-                            console.warn("Error parsing card variantesJson:", e);
-                        }
-                    }
-
-                    // Deduplicar, limpiar y ordenar listas de colores y memorias
-                    if (listaColores.length > 0) {
-                        const uniqueColores = {};
-                        listaColores.forEach(c => {
-                            if (!c) return;
-                            const trimmed = c.trim();
-                            const lower = trimmed.toLowerCase();
-                            if (!uniqueColores[lower]) {
-                                uniqueColores[lower] = trimmed;
-                            }
-                        });
-                        listaColores = Object.values(uniqueColores).sort((a, b) => a.localeCompare(b, 'es'));
-                    } else if (item.color) {
-                        listaColores = [item.color];
-                    }
-
-                    if (listaMemorias.length > 0) {
-                        const uniqueMemorias = {};
-                        listaMemorias.forEach(m => {
-                            if (!m) return;
-                            const trimmed = m.trim();
-                            const lower = trimmed.toLowerCase();
-                            if (!uniqueMemorias[lower]) {
-                                uniqueMemorias[lower] = trimmed;
-                            }
-                        });
-                        listaMemorias = Object.values(uniqueMemorias).sort((a, b) => {
-                            const numA = parseInt(a.replace(/\D/g, ''), 10) || 0;
-                            const numB = parseInt(b.replace(/\D/g, ''), 10) || 0;
-                            return numA - numB;
-                        });
-                    } else if (item.memoria) {
-                        listaMemorias = [item.memoria];
-                    }
-
-                    // Calcular combinaciones de capacidad + número de colores para mostrarlos de forma separada
-                    const memoriasConColores = [];
-                    if (listaMemorias.length > 0) {
-                        listaMemorias.forEach(mem => {
-                            let coloresParaEstaMem = [];
-                            if (item.variantesJson) {
-                                try {
-                                    const parsed = JSON.parse(item.variantesJson);
-                                    if (parsed) {
-                                        // Caso A: Catalog Product (pickers)
-                                        if (parsed.pickers && parsed.pickers.length > 0) {
-                                            const colorPicker = parsed.pickers.find(p => {
-                                                const idUpper = p.picker_id.toUpperCase();
-                                                return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
-                                            });
-                                            const storagePicker = parsed.pickers.find(p => {
-                                                const idUpper = p.picker_id.toUpperCase();
-                                                return idUpper.includes("MEMORY") || idUpper.includes("STORAGE") || idUpper.includes("CAPACITY") || idUpper.includes("CAPACIDAD");
-                                            });
-                                            
-                                            let activeProductIdsForCapacity = [];
-                                            if (storagePicker && storagePicker.products) {
-                                                const targetCap = mem.trim().toLowerCase();
-                                                const matchingProducts = storagePicker.products.filter(p => p.picker_label && p.picker_label.trim().toLowerCase() === targetCap);
-                                                activeProductIdsForCapacity = matchingProducts.map(p => p.product_id).filter(Boolean);
-                                            }
-                                            
-                                            if (colorPicker && colorPicker.products) {
-                                                // Use all reported color products to compute the number of distinct colors
-                                                // (don't aggressively exclude by tags here, since card should show available color options)
-                                                let filteredColorProducts = Array.isArray(colorPicker.products) ? colorPicker.products.slice() : [];
-                                                
-                                                const targetCap = mem.trim().toLowerCase();
-                                                filteredColorProducts = filteredColorProducts.filter(p => {
-                                                    // 1. Coincidencia por ID directo
-                                                    if (activeProductIdsForCapacity.includes(p.product_id)) return true;
-                                                    
-                                                    // 2. Coincidencia por nombre de producto
-                                                    if (p.product_name && p.product_name.toLowerCase().includes(targetCap)) return true;
-                                                    
-                                                    // 3. Si es el color de la tarjeta y coincide con la memoria actual
-                                                    if (item.color && p.picker_label && p.picker_label.trim().toLowerCase() === item.color.trim().toLowerCase() && item.memoria && item.memoria.trim().toLowerCase() === targetCap) {
-                                                        return true;
-                                                    }
-                                                    
-                                                    return false;
-                                                });
-                                                
-                                                coloresParaEstaMem = filteredColorProducts.map(p => p.picker_label).filter(Boolean);
-                                            }
-                                        }
-                                        // Caso B: Standard item variations
-                                        else if (parsed.variations && parsed.variations.length > 0) {
-                                            const coloresSet = new Set();
-                                            parsed.variations.forEach(v => {
-                                                if (v.available_quantity === 0 || v.available_quantity === "0") return;
-                                                const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
-                                                
-                                                let matchesCapacity = true;
-                                                const targetCap = mem.trim().toLowerCase();
-                                                const hasMemoryAttr = allAttrs.some(attr => {
-                                                    const idUpper = attr.id.toUpperCase();
-                                                    return (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO");
-                                                });
-                                                if (hasMemoryAttr) {
-                                                    matchesCapacity = allAttrs.some(attr => {
-                                                        const idUpper = attr.id.toUpperCase();
-                                                        const isMemory = (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO");
-                                                        return isMemory && attr.value_name && attr.value_name.trim().toLowerCase() === targetCap;
-                                                    });
-                                                }
-                                                
-                                                if (matchesCapacity) {
-                                                    allAttrs.forEach(attr => {
-                                                        const idUpper = attr.id.toUpperCase();
-                                                        const valueName = attr.value_name ? attr.value_name.trim() : "";
-                                                        if (valueName && (idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO")) {
-                                                            coloresSet.add(valueName);
-                                                        }
-                                                    });
-                                                }
-                                            });
-                                            coloresParaEstaMem = Array.from(coloresSet);
-                                        }
-                                    }
-                                } catch (e) {
-                                    console.warn("Error calculating memory-color mapping:", e);
-                                }
-                            }
-                            
-                            // Deduplicar colores para esta memoria (normalizar y excluir valores vacíos/placeholder)
-                            const uniqueColoresSet = new Set();
-                            coloresParaEstaMem.forEach(c => {
-                                if (!c) return;
-                                const trimmed = c.trim();
-                                const lower = trimmed.toLowerCase();
-                                if (!lower || lower === '-' || lower === 'sin color' || lower === 'varios' || lower === 'varios colores') return;
-                                uniqueColoresSet.add(lower);
-                            });
-                            const finalCantColores = uniqueColoresSet.size;
-                            
-                            // If we couldn't detect colors specifically for this capacity, fallback to the overall listaColores
-                            const fallbackCount = (Array.isArray(listaColores) && listaColores.length) ? listaColores.filter(c => c && c.trim() && c.trim().toLowerCase() !== '-' && c.trim().toLowerCase() !== 'sin color').length : 0;
-                            memoriasConColores.push({
-                                memoria: mem,
-                                cantColores: finalCantColores > 0 ? finalCantColores : (fallbackCount || 1)
-                            });
-                        });
-                    } else {
-                        memoriasConColores.push({
-                            memoria: item.memoria || "",
-                            cantColores: listaColores.length || 1
-                        });
-                    }
-
-                    // Etiqueta de entrega inmediata o pedido
-                    let badgeEstado = item.entregaInmediata
-                        ? `<span class="status-badge status-available">⚡ Disponible</span>`
-                        : `<span class="status-badge status-order">⏳ Bajo Pedido</span>`;
-
-                    if (item.estado === "MAS VENDIDO") {
-                        badgeEstado = `<span class="status-badge status-featured">⭐ Destacado</span>`;
-                    }
-
-                    // Mostrar precio de contado si existe
-                    const rowContado = item.precioContado && item.precioContado > 0
-                        ? `<div class="price-row">
-                            <span class="price-contado">Precio Contado:</span>
-                            <span class="price-contado"><span>$${Math.round(item.precioContado).toLocaleString('es-MX')} MXN</span></span>
-                           </div>`
-                        : '';
-
-                    // Escapar comillas simples y dobles para pasar al inline onclick de abrirModalCredito
-                    const modeloOriginalEscapado = item.modelo.replace(/'/g, "").replace(/"/g, "");
-
-                    contenedor.innerHTML += `
-                        <div class="card-celular">
+                    // Simple template (mantenemos lo esencial); para cambios más finos podríamos refactorizar
+                    const cardHtml = `
+                        <div class="card-celular" data-item-id="${item.id}">
                             <div>
                                 <div class="card-badges">
                                     <span class="brand-badge ${claseMarca}">${marca}</span>
-                                    ${badgeEstado}
+                                    ${item.entregaInmediata ? `<span class="status-badge status-available">⚡ Disponible</span>` : `<span class="status-badge status-order">⏳ Bajo Pedido</span>`}
                                 </div>
                                 <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">
-                                    <img src="${item.foto}" alt="${modeloLimpioCard}" onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop'">
+                                    <img src="${item.foto}" alt="${modeloLimpio}" onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop'">
                                 </div>
-                                <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpioCard}</h4>
+                                <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpio}</h4>
                                 <div class="specs-container">
-                                    ${memoriasConColores.map(mc => {
-                                        if (!mc.memoria) return '';
-                                        const labelColores = mc.cantColores === 1 ? '1 color' : `${mc.cantColores} colores`;
-                                        return `<span class="spec-tag">💾 ${mc.memoria} (${labelColores})</span>`;
-                                    }).join('')}
-                                    ${esReacondicionado ? `<span class="spec-tag" style="background-color: #fffbeb; color: #d97706; border: 1px solid #fef3c7; font-weight: 600;">🔧 Reacondicionado: ${gradoReacondicionado}</span>` : ''}
+                                    ${item.memoria ? `<span class="spec-tag">💾 ${item.memoria} (${item.color ? '1 color' : 'varios'})</span>` : ''}
+                                    ${item.modelo && item.modelo.toLowerCase().includes('reacondicionado') ? `<span class="spec-tag" style="background-color: #fffbeb; color: #d97706; border: 1px solid #fef3c7; font-weight: 600;">🔧 Reacondicionado</span>` : ''}
                                 </div>
-                                ${rowContado}
+                                ${item.precioContado ? `<div class="price-row"><span class="price-contado">Precio Contado:</span><span class="price-contado"><span>$${Math.round(item.precioContado).toLocaleString('es-MX')} MXN</span></span></div>` : ''}
                                 <div class="enganche" data-enganche="${(Math.ceil((item.engancheMinimo || 0) / 10) * 10).toLocaleString('es-MX')}" data-precio="${Math.round(item.precioContado).toLocaleString('es-MX')}">
                                     <span>Pago Inicial</span>
                                     Enganche: $${(Math.ceil((item.precioContado * (CONFIG_TASAS.engancheSemanal || 0.165)) / 10) * 10).toLocaleString('es-MX')} MXN
@@ -1738,34 +1478,25 @@
                                     <div class="cuotas-semanal">
                                         <div class="cuota-item">
                                             <span class="plan-label">⏱️ Plan Rápido (26 sem):</span>
-                                            <span class="plan-val">$${Math.round(item.cuota26).toLocaleString('es-MX')} MXN/sem</span>
+                                            <span class="plan-val">$${Math.round(item.cuota26 || 0).toLocaleString('es-MX')} MXN/sem</span>
                                         </div>
                                         <div class="cuota-item" style="margin-top: 8px;">
                                             <span class="plan-label">🗓️ Plan Cómodo (52 sem):</span>
-                                            <span class="plan-val">$${Math.round(item.cuota52).toLocaleString('es-MX')} MXN/sem</span>
-                                        </div>
-                                    </div>
-                                    <div class="cuotas-quincenal" style="display: none;">
-                                        <div class="cuota-item">
-                                            <span class="plan-label">⏱️ Plan Rápido (13 quin):</span>
-                                            <span class="plan-val">$${Math.round(item.cuota26 * 2).toLocaleString('es-MX')} MXN/quin</span>
-                                        </div>
-                                        <div class="cuota-item" style="margin-top: 8px;">
-                                            <span class="plan-label">🗓️ Plan Cómodo (26 quin):</span>
-                                            <span class="plan-val">$${Math.round(item.cuota52 * 2).toLocaleString('es-MX')} MXN/quin</span>
-                                        </div>
-                                    </div>
-                                    <div class="cuotas-contado" style="display: none;">
-                                        <div class="cuota-item">
-                                            <span class="plan-label">💰 Pago Único:</span>
-                                            <span class="plan-val" style="color:var(--success); font-weight:bold;">$${Math.round(item.precioContado).toLocaleString('es-MX')} MXN</span>
+                                            <span class="plan-val">$${Math.round(item.cuota52 || 0).toLocaleString('es-MX')} MXN/sem</span>
                                         </div>
                                     </div>
                                 </div>
-                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/'/g, "").replace(/"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">Pedir a Crédito</button>
+                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/\'/g, "").replace(/\"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">Pedir a Crédito</button>
                             </div>
                         </div>
                     `;
+
+                    contenedor.insertAdjacentHTML('beforeend', cardHtml);
+                    const last = contenedor.lastElementChild;
+                    if (last) last.setAttribute('data-item-id', item.id);
+                    if (window.catalogCacheActive) {
+                        if (last) last.setAttribute('data-cache-stale', 'true');
+                    }
                 });
             } else {
                 contenedor.innerHTML = "<p style='grid-column: 1/-1; text-align:center; color:var(--text-muted); padding:30px; font-style:italic;'>No hay celulares que coincidan con la marca seleccionada.</p>";
