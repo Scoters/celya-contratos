@@ -581,6 +581,41 @@
             color: #1e293b;
         }
 
+        /* Loading animation for dynamic variants */
+        .pdp-loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease-in-out;
+            border-radius: 8px;
+        }
+        .pdp-loading-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .pdp-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: pdp-spin 0.8s linear infinite;
+        }
+        @keyframes pdp-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .pdp-layout {
             display: flex;
             flex-direction: row;
@@ -799,24 +834,24 @@
                 box-sizing: border-box;
             }
 
-            /* Botón de Salida Flotante Gigante e Implacable en Mobile */
+            /* Botón de Salida en la Esquina Superior Derecha en Mobile */
             .pdp-close-btn {
-                position: fixed !important;
-                bottom: 25px !important;
-                right: 25px !important;
-                top: auto !important;
+                position: absolute !important;
+                top: 15px !important;
+                right: 15px !important;
+                bottom: auto !important;
                 left: auto !important;
                 z-index: 999999 !important;
                 background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
                 color: white !important;
-                width: 65px !important;
-                height: 65px !important;
+                width: 44px !important;
+                height: 44px !important;
                 border-radius: 50% !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
-                font-size: 36px !important;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+                font-size: 24px !important;
                 line-height: 1 !important;
                 padding: 0 !important;
                 border: none !important;
@@ -982,7 +1017,13 @@
 
                     <!-- Variantes Dinámicas -->
                     <div id="ml-dynamic-variants-container"
-                        style="display: none; border: none; padding: 0; background: none; text-align: left;">
+                        style="display: none; border: none; padding: 0; background: none; text-align: left; position: relative; min-height: 100px;">
+                        
+                        <!-- Overlay de Carga de Variantes -->
+                        <div id="pdp-variants-loading-overlay" class="pdp-loading-overlay">
+                            <div class="pdp-spinner"></div>
+                        </div>
+
                         <div style="margin-bottom: 12px;">
                             <label
                                 style="font-weight: 600; font-size: 14px; color: #1e293b; display: block; margin-bottom: 8px;">
@@ -2405,6 +2446,20 @@
             }
         }
 
+        function mostrarCargandoVariantes() {
+            const overlay = document.getElementById('pdp-variants-loading-overlay');
+            if (overlay) {
+                overlay.classList.add('active');
+            }
+        }
+
+        function ocultarCargandoVariantes() {
+            const overlay = document.getElementById('pdp-variants-loading-overlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+            }
+        }
+
         function buscarPrecioEquivalenteLocal(color, memoria, grading) {
             if (!window.equiposCargados || !window.currentBaseModelName) {
                 logDebugFrontend(`buscarPrecioEquivalenteLocal - Falló pre-condiciones: window.equiposCargados=${!!window.equiposCargados}, window.currentBaseModelName=${window.currentBaseModelName}`);
@@ -2569,6 +2624,7 @@
             if (!cleanId) {
                 // Ensure UI controls are re-enabled if we bail out early
                 try {
+                    ocultarCargandoVariantes();
                     if (wrapperColores) {
                         wrapperColores.style.opacity = "";
                         wrapperColores.style.pointerEvents = "";
@@ -2595,6 +2651,12 @@
             // Determinar si tenemos datos frescos específicos para este ID (no un placeholder de familia sembrado)
             const cache = ML_CACHE_VARIANTES[cleanId];
             const hasSpecificFreshData = cache && cache.isFresh && (cache.id === cleanId || cache.catalog_product_id === cleanId);
+
+            if (!hasSpecificFreshData) {
+                mostrarCargandoVariantes();
+            } else {
+                ocultarCargandoVariantes();
+            }
 
             if (esCambioVariante && !hasSpecificFreshData) {
                 // Agregar feedback de carga para que no sea brusco, pero sin bloquear toda la pantalla
@@ -3470,6 +3532,7 @@
             } catch (e) {
                 console.error("Error obteniendo variantes vivas desde ML:", e);
             } finally {
+                ocultarCargandoVariantes();
                 const overlay = document.getElementById('loadingOverlay');
                 if (overlay) overlay.style.display = 'none';
                 try {
