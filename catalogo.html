@@ -2581,6 +2581,7 @@
         let variantesVivasGlobal = [];
         let colorSeleccionadoGlobal = "";
         let memoriaSeleccionadaGlobal = "";
+        let gradingSeleccionadoGlobal = "";
         let colorSeleccionado = "";
         let almacenamientoSeleccionado = "";
         let itemVariationsData = [];
@@ -2688,6 +2689,20 @@
             }
 
             if (!cleanId) {
+                // Ensure UI controls are re-enabled if we bail out early
+                try {
+                    if (wrapperColores) {
+                        wrapperColores.style.opacity = "";
+                        wrapperColores.style.pointerEvents = "";
+                    }
+                    if (wrapperStorage) {
+                        wrapperStorage.style.opacity = "";
+                        wrapperStorage.style.pointerEvents = "";
+                    }
+                    if (contenedor) {
+                        contenedor.style.display = "none";
+                    }
+                } catch (e) {}
                 return;
             }
 
@@ -2798,6 +2813,18 @@
                             console.error("Error in background fetch:", err);
                         } finally {
                             delete isFetchingML[cleanId];
+                            if (!ML_CACHE_VARIANTES[cleanId]) {
+                                const overlay = document.getElementById('loadingOverlay');
+                                if (overlay) overlay.style.display = 'none';
+                                if (wrapperColores) {
+                                    wrapperColores.style.opacity = "";
+                                    wrapperColores.style.pointerEvents = "";
+                                }
+                                if (wrapperStorage) {
+                                    wrapperStorage.style.opacity = "";
+                                    wrapperStorage.style.pointerEvents = "";
+                                }
+                            }
                         }
                     })();
                 }
@@ -2811,6 +2838,93 @@
                 }
 
                 if (!data) return;
+
+                // Obtener valores seleccionados reales desde pickers o atributos de la variante cargada (basándonos en cleanId)
+                let activeColorVal = "";
+                let activeStorageVal = "";
+                let activeRamVal = "";
+                let activeGradingVal = "";
+
+                if (data.pickers && data.pickers.length > 0) {
+                    data.pickers.forEach(picker => {
+                        const pIdUpper = picker.picker_id.toUpperCase();
+                        // 1. Buscar si el producto activo actual (cleanId) está en el listado de este picker
+                        const matchingProd = picker.products && picker.products.find(p => p.product_id === cleanId);
+                        if (matchingProd) {
+                            const val = matchingProd.picker_label.trim();
+                            if (pIdUpper.includes("COLOR") || pIdUpper === "FINISH" || pIdUpper === "ACABADO") {
+                                activeColorVal = val;
+                            } else if (pIdUpper.includes("RAM")) {
+                                activeRamVal = val;
+                            } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
+                                activeStorageVal = val;
+                            } else if (pIdUpper === "GRADING") {
+                                activeGradingVal = val;
+                            }
+                        }
+                    });
+                }
+
+                // 2. Si no se encontró buscando por cleanId, usar el que tenga tag "selected" en la API
+                if (data.pickers && data.pickers.length > 0) {
+                    data.pickers.forEach(picker => {
+                        const pIdUpper = picker.picker_id.toUpperCase();
+                        const selectedProd = picker.products && picker.products.find(p => p.tags && p.tags.includes("selected"));
+                        if (selectedProd) {
+                            const val = selectedProd.picker_label.trim();
+                            if (!activeColorVal && (pIdUpper.includes("COLOR") || pIdUpper === "FINISH" || pIdUpper === "ACABADO")) {
+                                activeColorVal = val;
+                            } else if (!activeRamVal && pIdUpper.includes("RAM")) {
+                                activeRamVal = val;
+                            } else if (!activeStorageVal && (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY"))) {
+                                activeStorageVal = val;
+                            } else if (!activeGradingVal && pIdUpper === "GRADING") {
+                                activeGradingVal = val;
+                            }
+                        }
+                    });
+                }
+
+                // Fallback a attributes si no se encontró en pickers
+                if (!activeColorVal && data.attributes) {
+                    const attrColor = data.attributes.find(a => {
+                        const idUpper = a.id.toUpperCase();
+                        return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
+                    });
+                    if (attrColor && attrColor.value_name) {
+                        activeColorVal = attrColor.value_name.trim();
+                    }
+                }
+                if (!activeStorageVal && data.attributes) {
+                    const attrStorage = data.attributes.find(a => {
+                        const idUpper = a.id.toUpperCase();
+                        return idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO";
+                    });
+                    if (attrStorage && attrStorage.value_name) {
+                        activeStorageVal = attrStorage.value_name.trim();
+                    }
+                }
+                if (!activeRamVal && data.attributes) {
+                    const attrRam = data.attributes.find(a => {
+                        const idUpper = a.id.toUpperCase();
+                        return idUpper.includes("RAM");
+                    });
+                    if (attrRam && attrRam.value_name) {
+                        activeRamVal = attrRam.value_name.trim();
+                    }
+                }
+                if (!activeGradingVal && data.attributes) {
+                    const attrGrading = data.attributes.find(a => a.id === "GRADING" || a.name === "Estado del reacondicionado");
+                    if (attrGrading && attrGrading.value_name) {
+                        activeGradingVal = attrGrading.value_name.trim();
+                    }
+                }
+
+                // Fallback a variables globales/defaults
+                if (!activeColorVal) activeColorVal = colorSeleccionado || defaultColor || "";
+                if (!activeStorageVal) activeStorageVal = almacenamientoSeleccionado || defaultMemoria || "";
+                // Propagar grading seleccionado a la variable global para que sea considerada al buscar variantes
+                gradingSeleccionadoGlobal = activeGradingVal || gradingSeleccionadoGlobal || "";
 
                 // Limpiar selectores previos antes de repintar los reales
                 wrapperColores.innerHTML = "";
@@ -2853,9 +2967,13 @@
                     const gradingPicker = data.pickers.find(p => p.picker_id === "GRADING");
                     if (gradingPicker) {
                         esReacondicionado = true;
-                        const selectedGrading = gradingPicker.products && gradingPicker.products.find(prod => prod.tags && prod.tags.includes("selected"));
-                        if (selectedGrading && selectedGrading.picker_label) {
-                            gradoReacondicionado = selectedGrading.picker_label;
+                        if (activeGradingVal) {
+                            gradoReacondicionado = activeGradingVal;
+                        } else {
+                            const selectedGrading = gradingPicker.products && gradingPicker.products.find(prod => prod.tags && prod.tags.includes("selected"));
+                            if (selectedGrading && selectedGrading.picker_label) {
+                                gradoReacondicionado = selectedGrading.picker_label;
+                            }
                         }
                     }
                 }
@@ -3030,6 +3148,8 @@
                         }
                     }
 
+
+
                     const colorPicker = data.pickers.find(p => {
                         const idUpper = p.picker_id.toUpperCase();
                         return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
@@ -3056,19 +3176,19 @@
                             }
                         });
 
-                        const defaultColorNorm = defaultColor ? defaultColor.trim().toLowerCase() : "";
+                        const defaultColorNorm = activeColorVal ? activeColorVal.trim().toLowerCase() : "";
                         const coloresOrdenados = Array.from(coloresVistos.entries());
                         let targetColorNorm = "";
 
                         for (const [normColor, colorInfo] of coloresOrdenados) {
-                            if (colorInfo.id === cleanId) {
+                            if (normColor === defaultColorNorm || colorInfo.id === cleanId) {
                                 targetColorNorm = normColor;
                                 break;
                             }
                         }
                         if (!targetColorNorm) {
                             for (const [normColor, colorInfo] of coloresOrdenados) {
-                                if (colorInfo.isSelected || normColor === defaultColorNorm) {
+                                if (colorInfo.isSelected) {
                                     targetColorNorm = normColor;
                                     break;
                                 }
@@ -3093,14 +3213,26 @@
                             }
 
                             divColor.onclick = function () {
-                                if (colorInfo.id === cleanId) return;
-                                document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
-                                this.classList.add('selected');
-                                currentMLItemLink = `https://www.mercadolibre.com.mx/p/${colorInfo.id}`;
-                                const overlay = document.getElementById('loadingOverlay');
-                                if (overlay) overlay.style.display = 'flex';
-                                cargarVariantesRealesML(colorInfo.id, true);
-                            };
+                                    // If this color already maps to the currently loaded variant id, skip reload
+                                    if (colorInfo.id === cleanId) return;
+                                    document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
+                                    this.classList.add('selected');
+                                    colorSeleccionado = colorInfo.name;
+                                    document.getElementById('color-seleccionado-txt').innerText = colorInfo.name;
+                                    currentMLItemLink = `https://www.mercadolibre.com.mx/p/${colorInfo.id}`;
+
+                                    // Show loading state while switching variant
+                                    if (wrapperColores) {
+                                        wrapperColores.style.opacity = "0.4";
+                                        wrapperColores.style.pointerEvents = "none";
+                                    }
+                                    if (wrapperStorage) {
+                                        wrapperStorage.style.opacity = "0.4";
+                                        wrapperStorage.style.pointerEvents = "none";
+                                    }
+
+                                    cargarVariantesRealesML(colorInfo.id, true);
+                                };
                             wrapperColores.appendChild(divColor);
                         });
                     }
@@ -3146,11 +3278,21 @@
                                 }
                             });
 
+                            let activeValForPicker = "";
+                            if (pIdUpper.includes("RAM")) {
+                                activeValForPicker = activeRamVal;
+                            } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
+                                activeValForPicker = activeStorageVal;
+                            } else if (pIdUpper === "GRADING") {
+                                activeValForPicker = activeGradingVal;
+                            }
+
+                            const activeValNorm = activeValForPicker ? activeValForPicker.trim().toLowerCase() : "";
                             const itemsOrdenados = Array.from(itemsVistos.entries());
                             let targetItemNorm = "";
 
                             for (const [normLabel, itemInfo] of itemsOrdenados) {
-                                if (itemInfo.id === cleanId) {
+                                if (normLabel === activeValNorm || itemInfo.id === cleanId) {
                                     targetItemNorm = normLabel;
                                     break;
                                 }
@@ -3189,13 +3331,37 @@
                                 pill.innerText = itemInfo.name;
 
                                 pill.onclick = function () {
-                                    if (itemInfo.id === cleanId) return;
+                                    // Avoid unnecessary reload when clicking the already-active pill, except for GRADING which must re-evaluate price
+                                    if (itemInfo.id === cleanId && pIdUpper !== "GRADING") return;
                                     pillsWrapper.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
                                     this.classList.add('selected');
+
+                                    // If this is a grading picker, store selection so price matching includes it
+                                    if (pIdUpper === "GRADING") {
+                                        gradingSeleccionadoGlobal = itemInfo.name;
+                                        // Also update the condition badge text for immediate feedback
+                                        const conditionEl = document.getElementById('pdp-product-condition');
+                                        if (conditionEl) {
+                                            conditionEl.innerText = `Reacondicionado | ${itemInfo.name}`;
+                                            conditionEl.style.backgroundColor = "#fffbeb";
+                                            conditionEl.style.color = "#d97706";
+                                            conditionEl.style.border = "1px solid #fef3c7";
+                                            conditionEl.style.padding = "4px 8px";
+                                            conditionEl.style.borderRadius = "4px";
+                                            conditionEl.style.fontWeight = "600";
+                                        }
+                                    }
+
                                     currentMLItemLink = `https://www.mercadolibre.com.mx/p/${itemInfo.id}`;
 
-                                    const overlay = document.getElementById('loadingOverlay');
-                                    if (overlay) overlay.style.display = 'flex';
+                                    if (wrapperColores) {
+                                        wrapperColores.style.opacity = "0.4";
+                                        wrapperColores.style.pointerEvents = "none";
+                                    }
+                                    if (wrapperStorage) {
+                                        wrapperStorage.style.opacity = "0.4";
+                                        wrapperStorage.style.pointerEvents = "none";
+                                    }
 
                                     cargarVariantesRealesML(itemInfo.id, true);
                                 };
@@ -3288,6 +3454,18 @@
             } finally {
                 const overlay = document.getElementById('loadingOverlay');
                 if (overlay) overlay.style.display = 'none';
+                try {
+                    if (wrapperColores) {
+                        wrapperColores.style.opacity = "";
+                        wrapperColores.style.pointerEvents = "";
+                    }
+                    if (wrapperStorage) {
+                        wrapperStorage.style.opacity = "";
+                        wrapperStorage.style.pointerEvents = "";
+                    }
+                } catch (e) {
+                    // ignore
+                }
             }
         }
 
@@ -3303,7 +3481,11 @@
                     const idUpper = a.id.toUpperCase();
                     return (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO" || idUpper === "RAM_MEMORY") && a.value_name && a.value_name.trim() === memoriaSeleccionadaGlobal;
                 }) : true;
-                return colorMatch && memoriaMatch;
+                const gradingMatch = gradingSeleccionadoGlobal ? allAttrs.some(a => {
+                    const idUpper = (a.id || '').toString().toUpperCase();
+                    return (idUpper === "GRADING" || a.name === "Estado del reacondicionado") && a.value_name && a.value_name.trim() === gradingSeleccionadoGlobal;
+                }) : true;
+                return colorMatch && memoriaMatch && gradingMatch;
             });
 
             if (!varianteSeleccionada) {
