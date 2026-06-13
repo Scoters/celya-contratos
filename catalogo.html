@@ -1443,6 +1443,37 @@
                     const claseMarca = obtenerClaseMarca(marca);
                     const modeloOriginalEscapado = (item.modelo || '').replace(/'/g, "").replace(/\"/g, "");
 
+                    // Calcular la cantidad exacta de colores y capacidades disponibles
+                    let numColores = 1;
+                    let numCapacidades = 1;
+
+                    if (item.coloresDisponibles) {
+                        const list = item.coloresDisponibles.split(',').map(c => c.trim()).filter(Boolean);
+                        if (list.length > 0) {
+                            numColores = list.length;
+                        }
+                    }
+
+                    let parsedVar = null;
+                    if (item.variantesJson) {
+                        try {
+                            parsedVar = (typeof item.variantesJson === 'string') ? JSON.parse(item.variantesJson) : item.variantesJson;
+                        } catch(e) {}
+                    }
+
+                    if (parsedVar && parsedVar.pickers) {
+                        const colorPicker = parsedVar.pickers.find(p => p.picker_id && (p.picker_id.toUpperCase().includes("COLOR") || p.picker_id === "FINISH" || p.picker_id === "ACABADO"));
+                        if (colorPicker && colorPicker.products) {
+                            const uniqueColors = new Set(colorPicker.products.map(p => p.picker_label.trim().toLowerCase()));
+                            numColores = Math.max(numColores, uniqueColors.size);
+                        }
+                        const memPicker = parsedVar.pickers.find(p => p.picker_id && (p.picker_id.toUpperCase().includes("MEMORY") || p.picker_id.toUpperCase().includes("STORAGE") || p.picker_id.toUpperCase().includes("CAPACITY") || p.picker_id.toUpperCase().includes("CAPACIDAD")));
+                        if (memPicker && memPicker.products) {
+                            const uniqueMems = new Set(memPicker.products.map(p => p.picker_label.trim().toLowerCase()));
+                            numCapacidades = Math.max(numCapacidades, uniqueMems.size);
+                        }
+                    }
+
                     // Simple template (mantenemos lo esencial); para cambios más finos podríamos refactorizar
                     const cardHtml = `
                         <div class="card-celular" data-item-id="${item.id}">
@@ -1456,7 +1487,8 @@
                                 </div>
                                 <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpio}</h4>
                                 <div class="specs-container">
-                                    ${item.memoria ? `<span class="spec-tag">💾 ${item.memoria} (${item.color ? '1 color' : 'varios'})</span>` : ''}
+                                    ${item.memoria ? `<span class="spec-tag">💾 ${item.memoria}${numCapacidades > 1 ? ` (+${numCapacidades - 1} cap.)` : ''}</span>` : ''}
+                                    <span class="spec-tag">🎨 ${numColores} ${numColores === 1 ? 'color' : 'colores'}</span>
                                     ${item.modelo && item.modelo.toLowerCase().includes('reacondicionado') ? `<span class="spec-tag" style="background-color: #fffbeb; color: #d97706; border: 1px solid #fef3c7; font-weight: 600;">🔧 Reacondicionado</span>` : ''}
                                 </div>
                                 ${item.precioContado ? `<div class="price-row"><span class="price-contado">Precio Contado:</span><span class="price-contado"><span>$${Math.round(item.precioContado).toLocaleString('es-MX')} MXN</span></span></div>` : ''}
@@ -1575,6 +1607,7 @@
             cleanModelo = cleanModelo.replace(/\s+/g, " ").trim();
             cleanModelo = cleanModelo.replace(/^[,\-\s]+|[,\-\s]+$/g, "");
             document.getElementById('pdp-product-title').innerText = cleanModelo;
+            window.currentBaseModelName = cleanModelo;
 
             // Detectar si es reacondicionado para el badge inicial
             let esReacondicionado = false;
@@ -2364,6 +2397,120 @@
             return `hsl(${h}, ${s}%, ${l}%)`;
         }
 
+        function logDebugFrontend(mensaje) {
+            console.log("[DEBUG]", mensaje);
+            if (typeof CONFIG !== 'undefined' && CONFIG.GOOGLE_SCRIPT_URL) {
+                fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=registrarLogFrontend&origen=CatalogoHTML&mensaje=${encodeURIComponent(mensaje)}`, { mode: 'no-cors' })
+                    .catch(e => console.warn("No se pudo enviar log al script de Sheets:", e));
+            }
+        }
+
+        function buscarPrecioEquivalenteLocal(color, memoria, grading) {
+            if (!window.equiposCargados || !window.currentBaseModelName) {
+                logDebugFrontend(`buscarPrecioEquivalenteLocal - Falló pre-condiciones: window.equiposCargados=${!!window.equiposCargados}, window.currentBaseModelName=${window.currentBaseModelName}`);
+                return null;
+            }
+            
+            const baseNorm = window.currentBaseModelName.toLowerCase().replace(/[^a-z0-9]/g, "");
+            const colorNorm = color ? color.trim().toLowerCase() : "";
+            const memoriaNorm = memoria ? memoria.trim().toLowerCase().replace(/\s+/g, "") : "";
+            const gradingNorm = grading ? grading.trim().toLowerCase() : "";
+            
+            for (const eq of window.equiposCargados) {
+                if (!eq.modelo) continue;
+                const eqModeloClean = eq.modelo.replace(/-\s*(excelente|bueno|aceptable)\s*\(reacondicionado\)/gi, "")
+                                                .replace(/-\s*\(reacondicionado\)/gi, "")
+                                                .replace(/\(reacondicionado\)/gi, "")
+                                                .replace(/reacondicionado/gi, "")
+                                                .replace(/^[,\-\s]+|[,\-\s]+$/g, "")
+                                                .toLowerCase().replace(/[^a-z0-9]/g, "");
+                                                
+                if (eqModeloClean !== baseNorm && !eqModeloClean.includes(baseNorm) && !baseNorm.includes(eqModeloClean)) {
+                    continue;
+                }
+                
+                let colorMatch = false;
+                if (!colorNorm) {
+                    colorMatch = true;
+                } else {
+                    const eqColor = eq.color ? eq.color.trim().toLowerCase() : "";
+                    const eqModeloLower = eq.modelo.toLowerCase();
+                    colorMatch = (eqColor === colorNorm || eqModeloLower.includes(colorNorm));
+                }
+                
+                let memoriaMatch = false;
+                if (!memoriaNorm) {
+                    memoriaMatch = true;
+                } else {
+                    const eqMemoria = eq.memoria ? eq.memoria.trim().toLowerCase().replace(/\s+/g, "") : "";
+                    const eqModeloLower = eq.modelo.toLowerCase().replace(/\s+/g, "");
+                    memoriaMatch = (eqMemoria === memoriaNorm || eqModeloLower.includes(memoriaNorm));
+                }
+                
+                let gradingMatch = false;
+                if (!gradingNorm) {
+                    gradingMatch = true;
+                } else {
+                    const eqModeloLower = eq.modelo.toLowerCase();
+                    gradingMatch = eqModeloLower.includes(gradingNorm);
+                }
+                
+                if (colorMatch && memoriaMatch && gradingMatch) {
+                    logDebugFrontend(`buscarPrecioEquivalenteLocal - Coincidencia exacta encontrada para ${window.currentBaseModelName} (Color: ${color}, Memoria: ${memoria}, Grading: ${grading}) -> $${eq.precioContado} MXN`);
+                    return eq.precioContado;
+                }
+            }
+            
+            if (gradingNorm) {
+                for (const eq of window.equiposCargados) {
+                    if (!eq.modelo) continue;
+                    const eqModeloClean = eq.modelo.replace(/-\s*(excelente|bueno|aceptable)\s*\(reacondicionado\)/gi, "")
+                                                    .replace(/-\s*\(reacondicionado\)/gi, "")
+                                                    .replace(/\(reacondicionado\)/gi, "")
+                                                    .replace(/reacondicionado/gi, "")
+                                                    .replace(/^[,\-\s]+|[,\-\s]+$/g, "")
+                                                    .toLowerCase().replace(/[^a-z0-9]/g, "");
+                                                    
+                    if (eqModeloClean !== baseNorm && !eqModeloClean.includes(baseNorm) && !baseNorm.includes(eqModeloClean)) {
+                        continue;
+                    }
+                    
+                    let colorMatch = false;
+                    if (!colorNorm) {
+                        colorMatch = true;
+                    } else {
+                        const eqColor = eq.color ? eq.color.trim().toLowerCase() : "";
+                        const eqModeloLower = eq.modelo.toLowerCase();
+                        colorMatch = (eqColor === colorNorm || eqModeloLower.includes(colorNorm));
+                    }
+                    
+                    let memoriaMatch = false;
+                    if (!memoriaNorm) {
+                        memoriaMatch = true;
+                    } else {
+                        const eqMemoria = eq.memoria ? eq.memoria.trim().toLowerCase().replace(/\s+/g, "") : "";
+                        const eqModeloLower = eq.modelo.toLowerCase().replace(/\s+/g, "");
+                        memoriaMatch = (eqMemoria === memoriaNorm || eqModeloLower.includes(memoriaNorm));
+                    }
+                    
+                    if (colorMatch && memoriaMatch) {
+                        let basePrice = eq.precioContado;
+                        let finalPrice = basePrice;
+                        if (gradingNorm === "bueno") {
+                            finalPrice = Math.round(basePrice * 0.90);
+                        } else if (gradingNorm === "aceptable") {
+                            finalPrice = Math.round(basePrice * 0.80);
+                        }
+                        logDebugFrontend(`buscarPrecioEquivalenteLocal - Coincidencia parcial (sin grading) encontrada para ${window.currentBaseModelName} (Color: ${color}, Memoria: ${memoria}) -> Aplicado factor para ${grading}: $${finalPrice} MXN`);
+                        return finalPrice;
+                    }
+                }
+            }
+            
+            logDebugFrontend(`buscarPrecioEquivalenteLocal - No se encontró coincidencia para ${window.currentBaseModelName} (Color: ${color}, Memoria: ${memoria}, Grading: ${grading})`);
+            return null;
+        }
+
         async function cargarVariantesRealesML(idProducto, esCambioVariante = false) {
             const contenedor = document.getElementById('ml-dynamic-variants-container');
             const wrapperColores = document.getElementById('ml-colors-wrapper');
@@ -2381,6 +2528,7 @@
                 almacenamientoSeleccionado = "";
                 colorSeleccionadoGlobal = "";
                 memoriaSeleccionadaGlobal = "";
+                gradingSeleccionadoGlobal = "";
                 itemVariationsData = [];
                 variantesVivasGlobal = [];
 
@@ -2444,8 +2592,11 @@
 
             const originalCleanId = cleanId;
 
-            const hasCache = !!ML_CACHE_VARIANTES[cleanId];
-            if (esCambioVariante && !hasCache) {
+            // Determinar si tenemos datos frescos específicos para este ID (no un placeholder de familia sembrado)
+            const cache = ML_CACHE_VARIANTES[cleanId];
+            const hasSpecificFreshData = cache && cache.isFresh && (cache.id === cleanId || cache.catalog_product_id === cleanId);
+
+            if (esCambioVariante && !hasSpecificFreshData) {
                 // Agregar feedback de carga para que no sea brusco, pero sin bloquear toda la pantalla
                 wrapperColores.style.opacity = "0.4";
                 wrapperColores.style.pointerEvents = "none";
@@ -2455,13 +2606,12 @@
 
             try {
                 let data = null;
-                const cache = ML_CACHE_VARIANTES[cleanId];
                 if (cache) {
                     data = cache;
                 }
 
-                // Si no hay datos frescos y no se está realizando un fetch en segundo plano, iniciarlo
-                if ((!cache || !cache.isFresh) && !isFetchingML[cleanId]) {
+                // Si no hay datos frescos específicos de este ID y no se está realizando un fetch en segundo plano, iniciarlo
+                if (!hasSpecificFreshData && !isFetchingML[cleanId]) {
                     isFetchingML[cleanId] = true;
 
                     // Fetch asíncrono en background
@@ -2519,6 +2669,21 @@
 
                              if (freshData) {
                                  freshData.isFresh = true;
+
+                                 // Preserve GRADING picker and other custom pickers from old cache if missing in freshData
+                                 const oldCache = ML_CACHE_VARIANTES[originalCleanId] || ML_CACHE_VARIANTES[cleanId];
+                                 if (oldCache && oldCache.pickers) {
+                                     if (!freshData.pickers) {
+                                         freshData.pickers = oldCache.pickers;
+                                     } else {
+                                         const oldGrading = oldCache.pickers.find(p => p.picker_id && p.picker_id.toUpperCase() === "GRADING");
+                                         const newGrading = freshData.pickers.find(p => p.picker_id && p.picker_id.toUpperCase() === "GRADING");
+                                         if (oldGrading && !newGrading) {
+                                             freshData.pickers.push(oldGrading);
+                                         }
+                                     }
+                                 }
+
                                  ML_CACHE_VARIANTES[originalCleanId] = freshData;
                                  if (cleanId !== originalCleanId) {
                                      ML_CACHE_VARIANTES[cleanId] = freshData;
@@ -2654,7 +2819,9 @@
                 // Fallback a variables globales/defaults
                 if (!activeColorVal) activeColorVal = colorSeleccionado || defaultColor || "";
                 if (!activeStorageVal) activeStorageVal = almacenamientoSeleccionado || defaultMemoria || "";
-                // Propagar grading seleccionado a la variable global para que sea considerada al buscar variantes
+                
+                colorSeleccionadoGlobal = activeColorVal || colorSeleccionadoGlobal || "";
+                memoriaSeleccionadaGlobal = activeStorageVal || memoriaSeleccionadaGlobal || "";
                 gradingSeleccionadoGlobal = activeGradingVal || gradingSeleccionadoGlobal || "";
 
                 // Limpiar selectores previos antes de repintar los reales
@@ -2665,8 +2832,14 @@
                 let esReacondicionado = false;
                 let gradoReacondicionado = "";
 
+                // Determinar grado reacondicionado prioritariamente por activeGradingVal
+                if (activeGradingVal) {
+                    esReacondicionado = true;
+                    gradoReacondicionado = activeGradingVal;
+                }
+
                 // 1. Por el título
-                if (data.name && data.name.toLowerCase().includes("reacondicionado")) {
+                if (!gradoReacondicionado && data.name && data.name.toLowerCase().includes("reacondicionado")) {
                     esReacondicionado = true;
                     if (data.name.toLowerCase().includes("excelente")) {
                         gradoReacondicionado = "Excelente";
@@ -2683,7 +2856,7 @@
                 }
 
                 // 3. Por los atributos
-                if (data.attributes && data.attributes.length > 0) {
+                if (!gradoReacondicionado && data.attributes && data.attributes.length > 0) {
                     const gradingAttr = data.attributes.find(a => a.id === "GRADING" || a.name === "Estado del reacondicionado");
                     if (gradingAttr) {
                         esReacondicionado = true;
@@ -2700,7 +2873,7 @@
                         esReacondicionado = true;
                         if (activeGradingVal) {
                             gradoReacondicionado = activeGradingVal;
-                        } else {
+                        } else if (!gradoReacondicionado) {
                             const selectedGrading = gradingPicker.products && gradingPicker.products.find(prod => prod.tags && prod.tags.includes("selected"));
                             if (selectedGrading && selectedGrading.picker_label) {
                                 gradoReacondicionado = selectedGrading.picker_label;
@@ -2710,8 +2883,22 @@
                 }
 
                 // Actualizar el título del producto con el nombre real de Mercado Libre limpio
-                if (data.name) {
-                    let cleanName = data.name;
+                let cleanName = "";
+                // Buscar si tenemos el nombre específico para este variant ID en el listado de pickers
+                if (data.pickers) {
+                    for (const picker of data.pickers) {
+                        const matchingP = picker.products && picker.products.find(p => p.product_id === cleanId);
+                        if (matchingP && matchingP.product_name) {
+                            cleanName = matchingP.product_name;
+                            break;
+                        }
+                    }
+                }
+                if (!cleanName && data.name) {
+                    cleanName = data.name;
+                }
+
+                if (cleanName) {
                     cleanName = cleanName.replace(/-\s*(excelente|bueno|aceptable)\s*\(reacondicionado\)/gi, "");
                     cleanName = cleanName.replace(/-\s*\(reacondicionado\)/gi, "");
                     cleanName = cleanName.replace(/\(reacondicionado\)/gi, "");
@@ -2719,7 +2906,7 @@
                     cleanName = cleanName.replace(/\s+/g, " ").trim();
                     cleanName = cleanName.replace(/^[,\-\s]+|[,\-\s]+$/g, "");
                     document.getElementById('pdp-product-title').innerText = cleanName;
-                    document.getElementById('hiddenModelo').value = data.name; // Keep the original name for DB registration
+                    document.getElementById('hiddenModelo').value = data.name || cleanName; // Keep the original name for DB registration
                 }
 
                 // Actualizar badge de condición en el modal
@@ -2746,7 +2933,8 @@
                 }
 
                 // 📸 Pintamos las fotos de la galería si existen (todas las disponibles)
-                if (data.pictures && data.pictures.length > 0) {
+                const isSpecificData = (data.id === cleanId || data.catalog_product_id === cleanId);
+                if (isSpecificData && data.pictures && data.pictures.length > 0) {
                     // Actualizar la foto principal con la primera foto de la nueva galería
                     const primeraFoto = data.pictures[0].secure_url || data.pictures[0].url;
                     document.getElementById('modal-producto-foto').src = primeraFoto;
@@ -2824,7 +3012,15 @@
                                     colorSeleccionadoGlobal = color;
                                     document.getElementById('color-seleccionado-txt').innerText = color;
                                     actualizarPreciosYFotoPorVarianteActual();
-                                    // ensure price recalculation in case data refresh is async
+                                    // Fallback: if actualizarPreciosYFoto didn't update price, use local catalog lookup
+                                    try {
+                                        const localPrice = buscarPrecioEquivalenteLocal(color, memoriaSeleccionadaGlobal, gradingSeleccionadoGlobal);
+                                        if (localPrice && localPrice > 0) {
+                                            const hidden = document.getElementById('hiddenPrecioContado');
+                                            if (hidden) hidden.value = localPrice;
+                                            document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(localPrice).toLocaleString('es-MX')} MXN</strong>`;
+                                        }
+                                    } catch(e) {}
                                     setTimeout(() => { if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP(); }, 350);
                                 };
                                 wrapperColores.appendChild(btn);
@@ -2846,8 +3042,18 @@
                                     wrapperStorage.querySelectorAll('.storage-pill').forEach(b => b.classList.remove('selected'));
                                     this.classList.add('selected');
                                     memoriaSeleccionadaGlobal = memoria;
+                                    almacenamientoSeleccionado = memoria;
                                     document.getElementById('memoria-seleccionada-txt').innerText = memoria;
                                     actualizarPreciosYFotoPorVarianteActual();
+                                    // Fallback: if actualizarPreciosYFoto didn't update price, use local catalog lookup
+                                    try {
+                                        const localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memoria, gradingSeleccionadoGlobal);
+                                        if (localPrice && localPrice > 0) {
+                                            const hidden = document.getElementById('hiddenPrecioContado');
+                                            if (hidden) hidden.value = localPrice;
+                                            document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(localPrice).toLocaleString('es-MX')} MXN</strong>`;
+                                        }
+                                    } catch(e) {}
                                     setTimeout(() => { if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP(); }, 350);
                                 };
                                 wrapperStorage.appendChild(btn);
@@ -2863,10 +3069,41 @@
 
                     // Actualizar el precio para productos de catálogo de Mercado Libre (/p/MLM...)
                     let priceReal = 0;
-                    if (data.price) {
-                        priceReal = data.price;
-                    } else if (data.buy_box_winner && data.buy_box_winner.price) {
-                        priceReal = data.buy_box_winner.price;
+                    if (isSpecificData) {
+                        if (data.price) {
+                            priceReal = data.price;
+                        } else if (data.buy_box_winner && data.buy_box_winner.price) {
+                            priceReal = data.buy_box_winner.price;
+                        }
+                    }
+
+                    // Fallback to local catalog card price lookup matching model, color, memory, and grading
+                    if (priceReal <= 0 || !isSpecificData) {
+                        const localPrice = buscarPrecioEquivalenteLocal(activeColorVal, activeStorageVal, gradingSeleccionadoGlobal);
+                        if (localPrice && localPrice > 0) {
+                            const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
+                            priceReal = localPrice / gananciaFactor;
+                        }
+                    }
+
+                    // Fallback to local catalog card price if we have it loaded in window.equiposCargados
+                    if (priceReal <= 0) {
+                        if (window.equiposCargados) {
+                            const localMatch = window.equiposCargados.find(x => x.id === cleanId);
+                            if (localMatch && localMatch.precioContado > 0) {
+                                const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
+                                priceReal = localMatch.precioContado / gananciaFactor;
+                            }
+                        }
+                    }
+
+                    // Fallback to currently selected/last known price if priceReal is not found or is 0
+                    if (priceReal <= 0) {
+                        const hiddenPrice = parseFloat(document.getElementById('hiddenPrecioContado').value) || 0;
+                        if (hiddenPrice > 0) {
+                            const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
+                            priceReal = hiddenPrice / gananciaFactor;
+                        }
                     }
 
                     if (priceReal > 0) {
@@ -2880,80 +3117,98 @@
                         } catch (e) {
                             console.warn('No se pudo fijar precio contado final desde picker producto:', e);
                         }
+                    } else {
+                        document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>Cargando...</strong>`;
+                        document.getElementById('pdp-enganche-grande').innerText = `Cargando...`;
+                        document.getElementById('pdp-weekly-amount').innerText = `Cargando...`;
                     }
 
-
-
                     const colorPicker = data.pickers.find(p => {
+                        if (!p.picker_id) return false;
                         const idUpper = p.picker_id.toUpperCase();
                         return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
                     });
 
                     // 🎨 Pintamos los círculos de colores reales obtenidos (Deduplicados)
                     if (colorPicker && colorPicker.products && colorPicker.products.length > 0) {
-                        wrapperColores.innerHTML = "";
-                        const coloresVistos = new Map(); // key: lowercase -> { id, name, isSelected }
+                        try {
+                            wrapperColores.innerHTML = "";
+                            const coloresVistos = new Map(); // key: lowercase -> { id, name, isSelected }
 
-                        colorPicker.products.forEach(p => {
-                            const normColor = p.picker_label.trim().toLowerCase();
-                            const isSel = p.tags && p.tags.includes("selected");
-                            const isNoBids = p.tags && (p.tags.includes("no-bids") || p.tags.includes("no-winner") || p.tags.includes("out-of-stock") || p.tags.includes("disabled"));
-                            if (isNoBids && p.product_id !== cleanId) {
-                                return;
-                            }
-                            if (!coloresVistos.has(normColor) || isSel) {
-                                coloresVistos.set(normColor, {
-                                    id: p.product_id,
-                                    name: p.picker_label,
-                                    isSelected: isSel
-                                });
-                            }
-                        });
+                            colorPicker.products.forEach(p => {
+                                if (!p.picker_label) return;
+                                const normColor = p.picker_label.trim().toLowerCase();
+                                const isSel = p.tags && p.tags.includes("selected");
+                                const isNoBids = p.tags && (p.tags.includes("no-bids") || p.tags.includes("no-winner") || p.tags.includes("out-of-stock") || p.tags.includes("disabled"));
+                                if (!coloresVistos.has(normColor) || isSel) {
+                                    coloresVistos.set(normColor, {
+                                        id: p.product_id,
+                                        name: p.picker_label,
+                                        isSelected: isSel
+                                    });
+                                }
+                            });
 
-                        const defaultColorNorm = activeColorVal ? activeColorVal.trim().toLowerCase() : "";
-                        const coloresOrdenados = Array.from(coloresVistos.entries());
-                        let targetColorNorm = "";
+                            const defaultColorNorm = activeColorVal ? activeColorVal.trim().toLowerCase() : "";
+                            const coloresOrdenados = Array.from(coloresVistos.entries());
+                            let targetColorNorm = "";
 
-                        for (const [normColor, colorInfo] of coloresOrdenados) {
-                            if (normColor === defaultColorNorm || colorInfo.id === cleanId) {
-                                targetColorNorm = normColor;
-                                break;
-                            }
-                        }
-                        if (!targetColorNorm) {
                             for (const [normColor, colorInfo] of coloresOrdenados) {
-                                if (colorInfo.isSelected) {
+                                if (normColor === defaultColorNorm || colorInfo.id === cleanId) {
                                     targetColorNorm = normColor;
                                     break;
                                 }
                             }
-                        }
-                        if (!targetColorNorm && coloresOrdenados.length > 0) {
-                            targetColorNorm = coloresOrdenados[0][0];
-                        }
-
-                        coloresOrdenados.forEach(([normColor, colorInfo]) => {
-                            const divColor = document.createElement('div');
-                            const isSelected = (normColor === targetColorNorm);
-                            divColor.className = `color-circle ${isSelected ? 'selected' : ''}`;
-                            divColor.title = colorInfo.name;
-                            divColor.setAttribute('data-color', colorInfo.name);
-
-                            divColor.style.backgroundColor = obtenerCodigoColor(colorInfo.name);
-
-                            if (isSelected) {
-                                colorSeleccionado = colorInfo.name;
-                                document.getElementById('color-seleccionado-txt').innerText = colorInfo.name;
+                            if (!targetColorNorm) {
+                                for (const [normColor, colorInfo] of coloresOrdenados) {
+                                    if (colorInfo.isSelected) {
+                                        targetColorNorm = normColor;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!targetColorNorm && coloresOrdenados.length > 0) {
+                                targetColorNorm = coloresOrdenados[0][0];
                             }
 
-                            divColor.onclick = function () {
+                            coloresOrdenados.forEach(([normColor, colorInfo]) => {
+                                const divColor = document.createElement('div');
+                                const isSelected = (normColor === targetColorNorm);
+                                divColor.className = `color-circle ${isSelected ? 'selected' : ''}`;
+                                divColor.title = colorInfo.name;
+                                divColor.setAttribute('data-color', colorInfo.name);
+
+                                divColor.style.backgroundColor = obtenerCodigoColor(colorInfo.name);
+
+                                if (isSelected) {
+                                    colorSeleccionado = colorInfo.name;
+                                    document.getElementById('color-seleccionado-txt').innerText = colorInfo.name;
+                                }
+
+                                divColor.onclick = function () {
                                     // If this color already maps to the currently loaded variant id, skip reload
                                     if (colorInfo.id === cleanId) return;
                                     document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
                                     this.classList.add('selected');
                                     colorSeleccionado = colorInfo.name;
+                                    colorSeleccionadoGlobal = colorInfo.name;
                                     document.getElementById('color-seleccionado-txt').innerText = colorInfo.name;
                                     currentMLItemLink = `https://www.mercadolibre.com.mx/p/${colorInfo.id}`;
+
+                                    // === IMMEDIATE LOCAL PRICE UPDATE ===
+                                    try {
+                                        const currentMemoria = memoriaSeleccionadaGlobal || almacenamientoSeleccionado || "";
+                                        const currentGrading = gradingSeleccionadoGlobal || "";
+                                        const localPrice = buscarPrecioEquivalenteLocal(colorInfo.name, currentMemoria, currentGrading);
+                                        if (localPrice && localPrice > 0) {
+                                            const hidden = document.getElementById('hiddenPrecioContado');
+                                            if (hidden) hidden.value = localPrice;
+                                            if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
+                                            document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(localPrice).toLocaleString('es-MX')} MXN</strong>`;
+                                        }
+                                    } catch (priceErr) {
+                                        console.warn('Error updating local price on color click:', priceErr);
+                                    }
 
                                     // Show loading state while switching variant
                                     if (wrapperColores) {
@@ -2967,12 +3222,16 @@
 
                                     cargarVariantesRealesML(colorInfo.id, true);
                                 };
-                            wrapperColores.appendChild(divColor);
-                        });
+                                wrapperColores.appendChild(divColor);
+                            });
+                        } catch (err) {
+                            console.error("Error rendering color picker circles:", err);
+                        }
                     }
 
                     // 💾 Pintamos los pickers que no son color (Almacenamiento, RAM, etc.)
                     const nonColorPickers = data.pickers.filter(p => {
+                        if (!p.picker_id) return false;
                         const idUpper = p.picker_id.toUpperCase();
                         return !(idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO");
                     });
@@ -2981,133 +3240,153 @@
                     if (extraContainer) {
                         extraContainer.innerHTML = "";
                         nonColorPickers.forEach(p => {
-                            const sectionDiv = document.createElement('div');
-                            sectionDiv.style.marginBottom = "12px";
+                            try {
+                                const sectionDiv = document.createElement('div');
+                                sectionDiv.style.marginBottom = "12px";
 
-                            let pickerLabel = p.picker_name || "Capacidad";
-                            const pIdUpper = p.picker_id.toUpperCase();
-                            if (pIdUpper.includes("RAM")) {
-                                pickerLabel = "Memoria RAM";
-                            } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
-                                pickerLabel = "Capacidad";
-                            }
-
-                            let selectedValName = "-";
-                            const productsList = p.products || [];
-                            const itemsVistos = new Map();
-
-                            productsList.forEach(prod => {
-                                const normLabel = prod.picker_label.trim().toLowerCase();
-                                const isSel = prod.tags && prod.tags.includes("selected");
-                                const isNoBids = prod.tags && (prod.tags.includes("no-bids") || prod.tags.includes("no-winner") || prod.tags.includes("out-of-stock") || prod.tags.includes("disabled"));
-                                if (isNoBids && prod.product_id !== cleanId) {
-                                    return;
+                                let pickerLabel = p.picker_name || "Capacidad";
+                                const pIdUpper = p.picker_id ? p.picker_id.toUpperCase() : "";
+                                if (pIdUpper.includes("RAM")) {
+                                    pickerLabel = "Memoria RAM";
+                                } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
+                                    pickerLabel = "Capacidad";
                                 }
-                                if (!itemsVistos.has(normLabel) || isSel) {
-                                    itemsVistos.set(normLabel, {
-                                        id: prod.product_id,
-                                        name: prod.picker_label,
-                                        isSelected: isSel
-                                    });
+
+                                let selectedValName = "-";
+                                const productsList = p.products || [];
+                                const itemsVistos = new Map();
+
+                                productsList.forEach(prod => {
+                                    if (!prod.picker_label) return;
+                                    const normLabel = prod.picker_label.trim().toLowerCase();
+                                    const isSel = prod.tags && prod.tags.includes("selected");
+                                    const isNoBids = prod.tags && (prod.tags.includes("no-bids") || prod.tags.includes("no-winner") || prod.tags.includes("out-of-stock") || prod.tags.includes("disabled"));
+                                    if (!itemsVistos.has(normLabel) || isSel) {
+                                        itemsVistos.set(normLabel, {
+                                            id: prod.product_id,
+                                            name: prod.picker_label,
+                                            isSelected: isSel
+                                        });
+                                    }
+                                });
+
+                                let activeValForPicker = "";
+                                if (pIdUpper.includes("RAM")) {
+                                    activeValForPicker = activeRamVal;
+                                } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
+                                    activeValForPicker = activeStorageVal;
+                                } else if (pIdUpper === "GRADING") {
+                                    activeValForPicker = activeGradingVal;
                                 }
-                            });
 
-                            let activeValForPicker = "";
-                            if (pIdUpper.includes("RAM")) {
-                                activeValForPicker = activeRamVal;
-                            } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
-                                activeValForPicker = activeStorageVal;
-                            } else if (pIdUpper === "GRADING") {
-                                activeValForPicker = activeGradingVal;
-                            }
+                                const activeValNorm = activeValForPicker ? activeValForPicker.trim().toLowerCase() : "";
+                                const itemsOrdenados = Array.from(itemsVistos.entries());
+                                let targetItemNorm = "";
 
-                            const activeValNorm = activeValForPicker ? activeValForPicker.trim().toLowerCase() : "";
-                            const itemsOrdenados = Array.from(itemsVistos.entries());
-                            let targetItemNorm = "";
-
-                            for (const [normLabel, itemInfo] of itemsOrdenados) {
-                                if (normLabel === activeValNorm || itemInfo.id === cleanId) {
-                                    targetItemNorm = normLabel;
-                                    break;
-                                }
-                            }
-                            if (!targetItemNorm) {
                                 for (const [normLabel, itemInfo] of itemsOrdenados) {
-                                    if (itemInfo.isSelected) {
+                                    if (normLabel === activeValNorm || itemInfo.id === cleanId) {
                                         targetItemNorm = normLabel;
                                         break;
                                     }
                                 }
-                            }
-                            if (!targetItemNorm && itemsOrdenados.length > 0) {
-                                targetItemNorm = itemsOrdenados[0][0];
-                            }
-
-                            const selectedItem = itemsVistos.get(targetItemNorm);
-                            if (selectedItem) {
-                                selectedValName = selectedItem.name;
-                            }
-
-                            sectionDiv.innerHTML = `
-                                <label style="font-weight: 600; font-size: 14px; color: #1e293b; display: block; margin-bottom: 8px;">
-                                    ${pickerLabel}: <span style="font-weight: 400; color: #64748b;">${selectedValName}</span>
-                                </label>
-                                <div class="pills-wrapper" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
-                            `;
-
-                            const pillsWrapper = sectionDiv.querySelector('.pills-wrapper');
-
-                            itemsOrdenados.forEach(([normLabel, itemInfo]) => {
-                                const pill = document.createElement('button');
-                                const isSelected = (normLabel === targetItemNorm);
-                                pill.className = `storage-pill ${isSelected ? 'selected' : ''}`;
-                                pill.type = 'button';
-                                pill.innerText = itemInfo.name;
-
-                                pill.onclick = function () {
-                                    // Avoid unnecessary reload when clicking the already-active pill, except for GRADING which must re-evaluate price
-                                    if (itemInfo.id === cleanId && pIdUpper !== "GRADING") return;
-                                    pillsWrapper.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
-                                    this.classList.add('selected');
-
-                                    // If this is a grading picker, store selection so price matching includes it
-                                    if (pIdUpper === "GRADING") {
-                                        gradingSeleccionadoGlobal = itemInfo.name;
-                                        // Also update the condition badge text for immediate feedback
-                                        const conditionEl = document.getElementById('pdp-product-condition');
-                                        if (conditionEl) {
-                                            conditionEl.innerText = `Reacondicionado | ${itemInfo.name}`;
-                                            conditionEl.style.backgroundColor = "#fffbeb";
-                                            conditionEl.style.color = "#d97706";
-                                            conditionEl.style.border = "1px solid #fef3c7";
-                                            conditionEl.style.padding = "4px 8px";
-                                            conditionEl.style.borderRadius = "4px";
-                                            conditionEl.style.fontWeight = "600";
+                                if (!targetItemNorm) {
+                                    for (const [normLabel, itemInfo] of itemsOrdenados) {
+                                        if (itemInfo.isSelected) {
+                                            targetItemNorm = normLabel;
+                                            break;
                                         }
-                                        // force re-evaluation after the variant fetch completes
-                                        setTimeout(() => {
-                                            try { actualizarPreciosYFotoPorVarianteActual(); } catch (e) {}
-                                            try { if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP(); } catch (e) {}
-                                        }, 400);
                                     }
+                                }
+                                if (!targetItemNorm && itemsOrdenados.length > 0) {
+                                    targetItemNorm = itemsOrdenados[0][0];
+                                }
 
-                                    currentMLItemLink = `https://www.mercadolibre.com.mx/p/${itemInfo.id}`;
-
-                                    if (wrapperColores) {
-                                        wrapperColores.style.opacity = "0.4";
-                                        wrapperColores.style.pointerEvents = "none";
+                                const selectedItem = itemsVistos.get(targetItemNorm);
+                                if (selectedItem) {
+                                    selectedValName = selectedItem.name;
+                                    if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
+                                        almacenamientoSeleccionado = selectedItem.name;
                                     }
-                                    if (wrapperStorage) {
-                                        wrapperStorage.style.opacity = "0.4";
-                                        wrapperStorage.style.pointerEvents = "none";
-                                    }
+                                }
 
-                                    cargarVariantesRealesML(itemInfo.id, true);
-                                };
-                                pillsWrapper.appendChild(pill);
-                            });
+                                sectionDiv.innerHTML = `
+                                    <label style="font-weight: 600; font-size: 14px; color: #1e293b; display: block; margin-bottom: 8px;">
+                                        ${pickerLabel}: <span style="font-weight: 400; color: #64748b;">${selectedValName}</span>
+                                    </label>
+                                    <div class="pills-wrapper" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+                                `;
 
-                            extraContainer.appendChild(sectionDiv);
+                                const pillsWrapper = sectionDiv.querySelector('.pills-wrapper');
+
+                                itemsOrdenados.forEach(([normLabel, itemInfo]) => {
+                                    const pill = document.createElement('button');
+                                    const isSelected = (normLabel === targetItemNorm);
+                                    pill.className = `storage-pill ${isSelected ? 'selected' : ''}`;
+                                    pill.type = 'button';
+                                    pill.innerText = itemInfo.name;
+
+                                    pill.onclick = function () {
+                                        if (itemInfo.id === cleanId && pIdUpper !== "GRADING") return;
+                                        pillsWrapper.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
+                                        this.classList.add('selected');
+
+                                        // Update corresponding global state variable
+                                        if (pIdUpper === "GRADING") {
+                                            gradingSeleccionadoGlobal = itemInfo.name;
+                                            const conditionEl = document.getElementById('pdp-product-condition');
+                                            if (conditionEl) {
+                                                conditionEl.innerText = `Reacondicionado | ${itemInfo.name}`;
+                                                conditionEl.style.backgroundColor = "#fffbeb";
+                                                conditionEl.style.color = "#d97706";
+                                                conditionEl.style.border = "1px solid #fef3c7";
+                                                conditionEl.style.padding = "4px 8px";
+                                                conditionEl.style.borderRadius = "4px";
+                                                conditionEl.style.fontWeight = "600";
+                                            }
+                                        } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
+                                            memoriaSeleccionadaGlobal = itemInfo.name;
+                                            almacenamientoSeleccionado = itemInfo.name;
+                                        } else if (pIdUpper.includes("RAM")) {
+                                            // RAM update - no price impact but track state
+                                        }
+
+                                        // === IMMEDIATE LOCAL PRICE UPDATE ===
+                                        // Update the price instantly using local catalog data before network fetch
+                                        try {
+                                            const currentColor = colorSeleccionadoGlobal || colorSeleccionado || "";
+                                            const currentMemoria = memoriaSeleccionadaGlobal || almacenamientoSeleccionado || "";
+                                            const currentGrading = gradingSeleccionadoGlobal || "";
+                                            const localPrice = buscarPrecioEquivalenteLocal(currentColor, currentMemoria, currentGrading);
+                                            if (localPrice && localPrice > 0) {
+                                                const hidden = document.getElementById('hiddenPrecioContado');
+                                                if (hidden) hidden.value = localPrice;
+                                                if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
+                                                document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(localPrice).toLocaleString('es-MX')} MXN</strong>`;
+                                            }
+                                        } catch (priceErr) {
+                                            console.warn('Error updating local price on pill click:', priceErr);
+                                        }
+
+                                        currentMLItemLink = `https://www.mercadolibre.com.mx/p/${itemInfo.id}`;
+
+                                        if (wrapperColores) {
+                                            wrapperColores.style.opacity = "0.4";
+                                            wrapperColores.style.pointerEvents = "none";
+                                        }
+                                        if (wrapperStorage) {
+                                            wrapperStorage.style.opacity = "0.4";
+                                            wrapperStorage.style.pointerEvents = "none";
+                                        }
+
+                                        cargarVariantesRealesML(itemInfo.id, true);
+                                    };
+                                    pillsWrapper.appendChild(pill);
+                                });
+
+                                extraContainer.appendChild(sectionDiv);
+                            } catch (err) {
+                                console.error("Error rendering non-color picker:", p, err);
+                            }
                         });
                     }
                 } else if (data.attributes && data.attributes.length > 0) {
