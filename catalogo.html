@@ -1655,21 +1655,22 @@
                                 }
                             }
                             
-                            // Deduplicar colores para esta memoria
-                            const uniqueColores = {};
+                            // Deduplicar colores para esta memoria (normalizar y excluir valores vacíos/placeholder)
+                            const uniqueColoresSet = new Set();
                             coloresParaEstaMem.forEach(c => {
                                 if (!c) return;
                                 const trimmed = c.trim();
                                 const lower = trimmed.toLowerCase();
-                                if (!uniqueColores[lower]) {
-                                    uniqueColores[lower] = trimmed;
-                                }
+                                if (!lower || lower === '-' || lower === 'sin color' || lower === 'varios' || lower === 'varios colores') return;
+                                uniqueColoresSet.add(lower);
                             });
-                            const finalCantColores = Object.keys(uniqueColores).length;
+                            const finalCantColores = uniqueColoresSet.size;
                             
+                            // If we couldn't detect colors specifically for this capacity, fallback to the overall listaColores
+                            const fallbackCount = (Array.isArray(listaColores) && listaColores.length) ? listaColores.filter(c => c && c.trim() && c.trim().toLowerCase() !== '-' && c.trim().toLowerCase() !== 'sin color').length : 0;
                             memoriasConColores.push({
                                 memoria: mem,
-                                cantColores: finalCantColores > 0 ? finalCantColores : (listaColores.length || 1)
+                                cantColores: finalCantColores > 0 ? finalCantColores : (fallbackCount || 1)
                             });
                         });
                     } else {
@@ -3092,6 +3093,8 @@
                                     colorSeleccionadoGlobal = color;
                                     document.getElementById('color-seleccionado-txt').innerText = color;
                                     actualizarPreciosYFotoPorVarianteActual();
+                                    // ensure price recalculation in case data refresh is async
+                                    setTimeout(() => { if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP(); }, 350);
                                 };
                                 wrapperColores.appendChild(btn);
                             });
@@ -3114,6 +3117,7 @@
                                     memoriaSeleccionadaGlobal = memoria;
                                     document.getElementById('memoria-seleccionada-txt').innerText = memoria;
                                     actualizarPreciosYFotoPorVarianteActual();
+                                    setTimeout(() => { if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP(); }, 350);
                                 };
                                 wrapperStorage.appendChild(btn);
                             });
@@ -3349,6 +3353,11 @@
                                             conditionEl.style.borderRadius = "4px";
                                             conditionEl.style.fontWeight = "600";
                                         }
+                                        // force re-evaluation after the variant fetch completes
+                                        setTimeout(() => {
+                                            try { actualizarPreciosYFotoPorVarianteActual(); } catch (e) {}
+                                            try { if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP(); } catch (e) {}
+                                        }, 400);
                                     }
 
                                     currentMLItemLink = `https://www.mercadolibre.com.mx/p/${itemInfo.id}`;
