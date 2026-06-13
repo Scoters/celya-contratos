@@ -1316,7 +1316,7 @@
                         console.log("¿Tiene variantesJson?", !!firstItem.variantesJson);
                         if (firstItem.variantesJson) {
                             try {
-                                const parsed = JSON.parse(firstItem.variantesJson);
+                                const parsed = firstItem.variantesJson; // Asumimos que ya viene parseado del backend
                                 console.log("variantesJson parseado - estructura:", {
                                     hasPickers: !!parsed.pickers,
                                     hasVariations: !!parsed.variations,
@@ -1324,7 +1324,7 @@
                                     variationsCount: parsed.variations ? parsed.variations.length : 0
                                 });
                             } catch (e) {
-                                console.warn("Error parseando variantesJson:", e);
+                                console.warn("Error procesando variantesJson:", e);
                             }
                         }
                     }
@@ -1682,7 +1682,7 @@
                 const foundItem = window.equiposCargados.find(x => x.id === id);
                 if (foundItem && foundItem.variantesJson) {
                     try {
-                        const parsed = JSON.parse(foundItem.variantesJson);
+                        const parsed = foundItem.variantesJson; // Asumimos que ya viene parseado del backend
                         if (parsed && !parsed.error) {
                             let cleanId = "";
                             if (link) {
