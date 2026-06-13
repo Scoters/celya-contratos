@@ -679,6 +679,7 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+            position: relative;
         }
 
         .pdp-condition {
@@ -990,6 +991,11 @@
 
                 <!-- Columna Derecha: Información y Formulario -->
                 <div class="pdp-right-col">
+                    <!-- Overlay de Carga de Variantes -->
+                    <div id="pdp-variants-loading-overlay" class="pdp-loading-overlay">
+                        <div class="pdp-spinner"></div>
+                    </div>
+
                     <div>
                         <span class="pdp-condition" id="pdp-product-condition">Nuevo | +100 vendidos</span>
                         <h2 class="pdp-title" id="pdp-product-title">Cargando modelo...</h2>
@@ -1017,13 +1023,7 @@
 
                     <!-- Variantes Dinámicas -->
                     <div id="ml-dynamic-variants-container"
-                        style="display: none; border: none; padding: 0; background: none; text-align: left; position: relative; min-height: 100px;">
-                        
-                        <!-- Overlay de Carga de Variantes -->
-                        <div id="pdp-variants-loading-overlay" class="pdp-loading-overlay">
-                            <div class="pdp-spinner"></div>
-                        </div>
-
+                        style="display: none; border: none; padding: 0; background: none; text-align: left;">
                         <div style="margin-bottom: 12px;">
                             <label
                                 style="font-weight: 600; font-size: 14px; color: #1e293b; display: block; margin-bottom: 8px;">
@@ -1758,6 +1758,7 @@
                     try {
                         const parsed = foundItem.variantesJson; // Asumimos que ya viene parseado del backend
                         if (parsed && !parsed.error) {
+                            parsed.isFresh = true;
                             let cleanId = "";
                             if (link) {
                                 const idMatch = link.match(/(?:wid|product_trigger_id)=([A-Z]*\d+)/i);
@@ -3202,6 +3203,7 @@
                                 const normColor = p.picker_label.trim().toLowerCase();
                                 const isSel = p.tags && p.tags.includes("selected");
                                 const isNoBids = p.tags && (p.tags.includes("no-bids") || p.tags.includes("no-winner") || p.tags.includes("out-of-stock") || p.tags.includes("disabled"));
+                                if (isNoBids && !isSel) return;
                                 if (!coloresVistos.has(normColor) || isSel) {
                                     coloresVistos.set(normColor, {
                                         id: p.product_id,
@@ -3323,6 +3325,7 @@
                                     const normLabel = prod.picker_label.trim().toLowerCase();
                                     const isSel = prod.tags && prod.tags.includes("selected");
                                     const isNoBids = prod.tags && (prod.tags.includes("no-bids") || prod.tags.includes("no-winner") || prod.tags.includes("out-of-stock") || prod.tags.includes("disabled"));
+                                    if (isNoBids && !isSel) return;
                                     if (!itemsVistos.has(normLabel) || isSel) {
                                         itemsVistos.set(normLabel, {
                                             id: prod.product_id,
