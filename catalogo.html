@@ -2635,6 +2635,8 @@
                 return;
             }
 
+            const originalCleanId = cleanId;
+
             const hasCache = !!ML_CACHE_VARIANTES[cleanId];
             if (esCambioVariante && !hasCache) {
                 // Agregar feedback de carga para que no sea brusco, pero sin bloquear toda la pantalla
@@ -2710,7 +2712,10 @@
 
                             if (freshData) {
                                 freshData.isFresh = true;
-                                ML_CACHE_VARIANTES[cleanId] = freshData;
+                                ML_CACHE_VARIANTES[originalCleanId] = freshData;
+                                if (cleanId !== originalCleanId) {
+                                    ML_CACHE_VARIANTES[cleanId] = freshData;
+                                }
                                 // Forzar renderizado secundario con los datos actualizados
                                 cargarVariantesRealesML(idProducto, esCambioVariante);
                             }
