@@ -3072,12 +3072,11 @@
                 if (cache) {
                     data = cache;
                 }
-                // If we're using a same-family mock, normalize cleanId to the mock's own ID
-                // so all picker product_id lookups resolve correctly
-                if (isSameMockFamily && data && data.id) {
-                    console.log(`[MOCK FAMILY] Normalizing cleanId from ${cleanId} to ${data.id}`);
-                    cleanId = data.id;
-                }
+                // NOTE: We do NOT normalize cleanId to data.id even when isSameMockFamily=true.
+                // Normalizing causes color reversion because the mock's 'selected' tag overrides
+                // the user's actual color choice (e.g., Green → loads 512GB mock → normalized to
+                // 512GB Black root → reverts to Black). The global state variables are the source
+                // of truth for what the user selected.
                 if (data && hasSpecificFreshData) {
                     shouldRestoreUI = true;
                 }
@@ -3273,6 +3272,38 @@
                             });
                         }
                     });
+                }
+
+                // When the user explicitly clicked a COLOR option and the loaded mock has a different
+                // storage selected (e.g., Green forces 512GB on S23), update memoriaSeleccionadaGlobal
+                // to match the loaded storage so auto-redirect doesn't fight it back.
+                if (esCambioVariante && colorSeleccionadoGlobal) {
+                    // Find what storage the loaded mock has as 'selected'
+                    const memPickerForSync = data.pickers && data.pickers.find(p => 
+                        p.picker_id && (p.picker_id.toUpperCase().includes("MEMORY") || 
+                        p.picker_id.toUpperCase().includes("STORAGE") || 
+                        p.picker_id.toUpperCase().includes("CAPACITY"))
+                    );
+                    if (memPickerForSync) {
+                        // Check if cleanId appears in this picker (means we loaded this specific variant)
+                        const cleanIdInMemPicker = memPickerForSync.products && 
+                            memPickerForSync.products.find(p => p.product_id === cleanId);
+                        if (cleanIdInMemPicker) {
+                            // User clicked a specific storage, keep it
+                        } else {
+                            // The loaded mock's storage doesn't match cleanId - this is a color click
+                            // that forced a storage change (change-multiple-pickers). Accept the new storage.
+                            const selectedMemProd = memPickerForSync.products && 
+                                memPickerForSync.products.find(p => p.tags && p.tags.includes("selected"));
+                            if (selectedMemProd && selectedMemProd.picker_label) {
+                                const newStorage = selectedMemProd.picker_label.trim();
+                                if (newStorage !== memoriaSeleccionadaGlobal) {
+                                    console.log(`[COLOR-FORCES-STORAGE] Updating memory from ${memoriaSeleccionadaGlobal} to ${newStorage} because color ${colorSeleccionadoGlobal} requires it.`);
+                                    memoriaSeleccionadaGlobal = newStorage;
+                                }
+                            }
+                        }
+                    }
                 }
 
                 // Auto-redirection to match user's selected attributes
@@ -3505,6 +3536,21 @@
                     if (attrStorage && attrStorage.value_name) {
                         activeStorageVal = attrStorage.value_name.trim();
                     }
+                }
+
+                // === USER SELECTION OVERRIDE ===
+                // When the user explicitly clicked a color or storage option, their choice must win
+                // over what the mock JSON marks as 'selected'. This prevents reversion when a color
+                // (e.g. Green on S23) maps to a different mock family (512GB mock) but the user
+                // is still in the context of their last explicit selection.
+                if (esCambioVariante && colorSeleccionadoGlobal) {
+                    activeColorVal = colorSeleccionadoGlobal;
+                }
+                if (esCambioVariante && memoriaSeleccionadaGlobal) {
+                    activeStorageVal = memoriaSeleccionadaGlobal;
+                }
+                if (esCambioVariante && ramSeleccionadaGlobal) {
+                    activeRamVal = ramSeleccionadaGlobal;
                 }
                 if (!activeRamVal && data.attributes) {
                     const attrRam = data.attributes.find(a => {
