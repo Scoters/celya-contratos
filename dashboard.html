@@ -1274,7 +1274,7 @@
                             // Limpiar caché local del catálogo para obligar a refrescar la base de datos
                             limpiarCacheLocalCatalogo();
                         } else {
-                            alert("⚠️ Error al importar celular: " + (data.message || "Error desconocido"));
+                            alert("⚠️ Error al importar celular: " + (data.error || data.message || "Error desconocido"));
                         }
                     } catch (err) {
                         console.error(err);
