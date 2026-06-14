@@ -3274,33 +3274,88 @@
                     });
                 }
 
-                // When the user explicitly clicked a COLOR option and the loaded mock has a different
-                // storage selected (e.g., Green forces 512GB on S23), update memoriaSeleccionadaGlobal
-                // to match the loaded storage so auto-redirect doesn't fight it back.
-                if (esCambioVariante && colorSeleccionadoGlobal) {
-                    // Find what storage the loaded mock has as 'selected'
-                    const memPickerForSync = data.pickers && data.pickers.find(p => 
-                        p.picker_id && (p.picker_id.toUpperCase().includes("MEMORY") || 
-                        p.picker_id.toUpperCase().includes("STORAGE") || 
+                // === PICKER CROSS-ATTRIBUTE SYNC ===
+                // When a picker selection forces changes to other attributes (change-multiple-pickers),
+                // update the global state to accept those forced changes BEFORE auto-redirect runs.
+                // This prevents auto-redirect from fighting the user's valid selection.
+                //
+                // Examples:
+                //   - S23: Green color (256GB view) → forces 512GB storage → accept 512GB
+                //   - Xiaomi: 12GB RAM (Verde view) → forces Lila color → accept Lila
+                //   - Xiaomi: 512GB storage → may force different color → accept that color
+                if (esCambioVariante && data.pickers) {
+                    const colorPickerSync = data.pickers.find(p => {
+                        if (!p.picker_id) return false;
+                        const u = p.picker_id.toUpperCase();
+                        return u.includes("COLOR") || u === "FINISH" || u === "ACABADO";
+                    });
+                    const memPickerSync = data.pickers.find(p =>
+                        p.picker_id && (p.picker_id.toUpperCase().includes("MEMORY") ||
+                        p.picker_id.toUpperCase().includes("STORAGE") ||
                         p.picker_id.toUpperCase().includes("CAPACITY"))
                     );
-                    if (memPickerForSync) {
-                        // Check if cleanId appears in this picker (means we loaded this specific variant)
-                        const cleanIdInMemPicker = memPickerForSync.products && 
-                            memPickerForSync.products.find(p => p.product_id === cleanId);
-                        if (cleanIdInMemPicker) {
-                            // User clicked a specific storage, keep it
-                        } else {
-                            // The loaded mock's storage doesn't match cleanId - this is a color click
-                            // that forced a storage change (change-multiple-pickers). Accept the new storage.
-                            const selectedMemProd = memPickerForSync.products && 
-                                memPickerForSync.products.find(p => p.tags && p.tags.includes("selected"));
-                            if (selectedMemProd && selectedMemProd.picker_label) {
-                                const newStorage = selectedMemProd.picker_label.trim();
-                                if (newStorage !== memoriaSeleccionadaGlobal) {
-                                    console.log(`[COLOR-FORCES-STORAGE] Updating memory from ${memoriaSeleccionadaGlobal} to ${newStorage} because color ${colorSeleccionadoGlobal} requires it.`);
-                                    memoriaSeleccionadaGlobal = newStorage;
-                                }
+                    const ramPickerSync = data.pickers.find(p =>
+                        p.picker_id && p.picker_id.toUpperCase().includes("RAM")
+                    );
+
+                    // Helper: get picker_label of the 'selected' product in a picker
+                    const getSelectedLabel = (picker) => {
+                        if (!picker || !picker.products) return "";
+                        const sel = picker.products.find(p => p.tags && p.tags.includes("selected"));
+                        return sel ? sel.picker_label.trim() : "";
+                    };
+
+                    // Helper: does cleanId appear in this picker?
+                    const cleanIdInPicker = (picker) =>
+                        !!(picker && picker.products && picker.products.find(p => p.product_id === cleanId));
+
+                    if (colorSeleccionadoGlobal) {
+                        // User clicked COLOR → sync storage/RAM if forced to change
+                        if (memPickerSync && !cleanIdInPicker(memPickerSync)) {
+                            const newStorage = getSelectedLabel(memPickerSync);
+                            if (newStorage && newStorage !== memoriaSeleccionadaGlobal) {
+                                console.log(`[COLOR→STORAGE] ${colorSeleccionadoGlobal} forces storage: ${memoriaSeleccionadaGlobal} → ${newStorage}`);
+                                memoriaSeleccionadaGlobal = newStorage;
+                            }
+                        }
+                        if (ramPickerSync && !cleanIdInPicker(ramPickerSync)) {
+                            const newRam = getSelectedLabel(ramPickerSync);
+                            if (newRam && newRam !== ramSeleccionadaGlobal) {
+                                console.log(`[COLOR→RAM] ${colorSeleccionadoGlobal} forces RAM: ${ramSeleccionadaGlobal} → ${newRam}`);
+                                ramSeleccionadaGlobal = newRam;
+                            }
+                        }
+                    } else if (memoriaSeleccionadaGlobal) {
+                        // User clicked STORAGE → sync color/RAM if forced to change
+                        if (colorPickerSync && !cleanIdInPicker(colorPickerSync)) {
+                            const newColor = getSelectedLabel(colorPickerSync);
+                            if (newColor && !colorsMatch(newColor, colorSeleccionadoGlobal || "")) {
+                                console.log(`[STORAGE→COLOR] ${memoriaSeleccionadaGlobal} forces color: ${colorSeleccionadoGlobal} → ${newColor}`);
+                                colorSeleccionadoGlobal = newColor;
+                            }
+                        }
+                        if (ramPickerSync && !cleanIdInPicker(ramPickerSync)) {
+                            const newRam = getSelectedLabel(ramPickerSync);
+                            if (newRam && newRam !== ramSeleccionadaGlobal) {
+                                console.log(`[STORAGE→RAM] ${memoriaSeleccionadaGlobal} forces RAM: ${ramSeleccionadaGlobal} → ${newRam}`);
+                                ramSeleccionadaGlobal = newRam;
+                            }
+                        }
+                    } else if (ramSeleccionadaGlobal) {
+                        // User clicked RAM → sync color/storage if forced to change
+                        if (colorPickerSync && !cleanIdInPicker(colorPickerSync)) {
+                            const newColor = getSelectedLabel(colorPickerSync);
+                            if (newColor && !colorsMatch(newColor, colorSeleccionadoGlobal || "")) {
+                                console.log(`[RAM→COLOR] ${ramSeleccionadaGlobal} forces color: ${colorSeleccionadoGlobal} → ${newColor}`);
+                                colorSeleccionadoGlobal = newColor;
+                                colorSeleccionado = newColor;
+                            }
+                        }
+                        if (memPickerSync && !cleanIdInPicker(memPickerSync)) {
+                            const newStorage = getSelectedLabel(memPickerSync);
+                            if (newStorage && newStorage !== memoriaSeleccionadaGlobal) {
+                                console.log(`[RAM→STORAGE] ${ramSeleccionadaGlobal} forces storage: ${memoriaSeleccionadaGlobal} → ${newStorage}`);
+                                memoriaSeleccionadaGlobal = newStorage;
                             }
                         }
                     }
