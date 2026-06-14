@@ -3637,11 +3637,13 @@
                     data.pickers.forEach(picker => {
                         const pIdUpper = picker.picker_id.toUpperCase();
                         // 1. Buscar si el producto activo actual (cleanId) está en el listado de este picker
-                        const matchingProd = picker.products && picker.products.find(p => 
-                            p.product_id === cleanId || 
-                            p.product_id === data.id || 
-                            (data.catalog_product_id && p.product_id === data.catalog_product_id)
-                        );
+                        let matchingProd = picker.products && picker.products.find(p => p.product_id === cleanId);
+                        if (!matchingProd) {
+                            matchingProd = picker.products && picker.products.find(p => 
+                                p.product_id === data.id || 
+                                (data.catalog_product_id && p.product_id === data.catalog_product_id)
+                            );
+                        }
                         if (matchingProd) {
                             const val = matchingProd.picker_label.trim();
                             if (pIdUpper.includes("COLOR") || pIdUpper === "FINISH" || pIdUpper === "ACABADO") {
@@ -4133,29 +4135,39 @@
                                 }
                             });
 
-                            const defaultColorNorm = activeColorVal ? obtenerGrupoColor(activeColorVal) : "";
-                            const coloresOrdenados = Array.from(coloresVistos.entries());
-                            let targetColorNorm = "";
+                             const defaultColorNorm = activeColorVal ? obtenerGrupoColor(activeColorVal) : "";
+                             const coloresOrdenados = Array.from(coloresVistos.entries());
+                             let targetColorNorm = "";
 
+                             // Priority 1: Match exactly the cleanId (currently selected variant ID)
                              for (const [normColor, colorInfo] of coloresOrdenados) {
-                                 if (
-                                     normColor === defaultColorNorm || 
-                                     colorInfo.id === cleanId || 
-                                     colorInfo.id === data.id || 
-                                     (data.catalog_product_id && colorInfo.id === data.catalog_product_id)
-                                 ) {
+                                 if (colorInfo.id === cleanId) {
                                      targetColorNorm = normColor;
                                      break;
                                  }
                              }
-                             if (!targetColorNorm) {
+                             // Priority 2: Match the normalized active color name
+                             if (!targetColorNorm && defaultColorNorm) {
                                  for (const [normColor, colorInfo] of coloresOrdenados) {
-                                     if (colorInfo.isSelected) {
+                                     if (normColor === defaultColorNorm) {
                                          targetColorNorm = normColor;
                                          break;
                                      }
                                  }
                              }
+                             // Priority 3: Match the data.id or data.catalog_product_id
+                             if (!targetColorNorm) {
+                                 for (const [normColor, colorInfo] of coloresOrdenados) {
+                                     if (
+                                         colorInfo.id === data.id || 
+                                         (data.catalog_product_id && colorInfo.id === data.catalog_product_id)
+                                     ) {
+                                         targetColorNorm = normColor;
+                                         break;
+                                     }
+                                 }
+                             }
+                             // Priority 4: Fallback to the first color in list
                              if (!targetColorNorm && coloresOrdenados.length > 0) {
                                  targetColorNorm = coloresOrdenados[0][0];
                              }
