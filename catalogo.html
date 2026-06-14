@@ -1523,18 +1523,28 @@
                         } catch(e) {}
                     }
 
+                    let memoriaText = item.memoria || "";
                     if (parsedVar && parsedVar.pickers) {
                         const colorPicker = parsedVar.pickers.find(p => p.picker_id && (p.picker_id.toUpperCase().includes("COLOR") || p.picker_id === "FINISH" || p.picker_id === "ACABADO"));
                         if (colorPicker && colorPicker.products) {
-                            const activeProducts = colorPicker.products.filter(p => !p.tags || (!p.tags.includes("out-of-stock") && !p.tags.includes("disabled")));
-                            const uniqueColors = new Set(activeProducts.map(p => normalizarColorSinGrado(p.picker_label).toLowerCase()));
-                            numColores = Math.max(numColores, uniqueColors.size);
+                            const activeProducts = colorPicker.products.filter(p => !p.tags || !isProductTagOutOfStock(p.tags));
+                            const uniqueColors = new Set(activeProducts.map(p => obtenerGrupoColor(p.picker_label)));
+                            numColores = uniqueColors.size;
                         }
                         const memPicker = parsedVar.pickers.find(p => p.picker_id && (p.picker_id.toUpperCase().includes("MEMORY") || p.picker_id.toUpperCase().includes("STORAGE") || p.picker_id.toUpperCase().includes("CAPACITY") || p.picker_id.toUpperCase().includes("CAPACIDAD")));
                         if (memPicker && memPicker.products) {
-                            const activeProducts = memPicker.products.filter(p => !p.tags || (!p.tags.includes("out-of-stock") && !p.tags.includes("disabled")));
-                            const uniqueMems = new Set(activeProducts.map(p => p.picker_label.trim().toLowerCase()));
-                            numCapacidades = Math.max(numCapacidades, uniqueMems.size);
+                            const activeProducts = memPicker.products.filter(p => !p.tags || !isProductTagOutOfStock(p.tags));
+                            const uniqueMemsList = Array.from(new Set(activeProducts.map(p => p.picker_label.trim()))).sort((a, b) => {
+                                const parseVal = (s) => {
+                                    let v = parseInt(s);
+                                    if (s.toLowerCase().includes('tb')) v *= 1024;
+                                    return v;
+                                };
+                                return parseVal(a) - parseVal(b);
+                            });
+                            if (uniqueMemsList.length > 0) {
+                                memoriaText = uniqueMemsList.join(', ');
+                            }
                         }
                     }
 
@@ -1551,7 +1561,7 @@
                                 </div>
                                 <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpio}</h4>
                                 <div class="specs-container">
-                                    ${item.memoria ? `<span class="spec-tag">💾 ${item.memoria}${numCapacidades > 1 ? ` (+${numCapacidades - 1} cap.)` : ''}</span>` : ''}
+                                    ${memoriaText ? `<span class="spec-tag">💾 ${memoriaText}</span>` : ''}
                                     <span class="spec-tag">🎨 ${numColores} ${numColores === 1 ? 'color' : 'colores'}</span>
                                     ${item.modelo && item.modelo.toLowerCase().includes('reacondicionado') ? `<span class="spec-tag" style="background-color: #fffbeb; color: #d97706; border: 1px solid #fef3c7; font-weight: 600;">🔧 Reacondicionado</span>` : ''}
                                 </div>
@@ -1663,15 +1673,9 @@
             document.getElementById('hiddenPrecioContado').value = precioContado || 0;
 
             // Set PDP UI fields
-            let cleanModelo = modelo;
-            cleanModelo = cleanModelo.replace(/-\s*(excelente|bueno|aceptable)\s*\(reacondicionado\)/gi, "");
-            cleanModelo = cleanModelo.replace(/-\s*\(reacondicionado\)/gi, "");
-            cleanModelo = cleanModelo.replace(/\(reacondicionado\)/gi, "");
-            cleanModelo = cleanModelo.replace(/reacondicionado/gi, "");
-            cleanModelo = cleanModelo.replace(/\s+/g, " ").trim();
-            cleanModelo = cleanModelo.replace(/^[,\-\s]+|[,\-\s]+$/g, "");
+            let cleanModelo = limpiarNombreModelo(modelo);
             document.getElementById('pdp-product-title').innerText = cleanModelo;
-            window.currentBaseModelName = cleanModelo;
+            window.currentBaseModelName = cleanModelo.replace(/\s*\(reacondicionado\)/gi, "").trim();
 
             // Detectar si es reacondicionado para el badge inicial
             let esReacondicionado = false;
@@ -2448,7 +2452,7 @@
             // If color not found by splitting, try to extract color name by matching known color keys
             if (!color) {
                 const colorKeys = [
-                    "negro", "black", "oscuro", "dark", "space", "titanio", "titanium", "carbono", "carbon", "grafito", "graphite",
+                    "negro", "black", "phantom", "oscuro", "dark", "space", "titanio", "titanium", "carbono", "carbon", "grafito", "graphite",
                     "blanco", "white", "claro", "light", "plata", "silver", "cream", "crema", "marfil", "ivory",
                     "azul", "blue", "celeste", "sky", "indigo", "marino",
                     "verde lima", "lima verde", "verde", "green", "lima", "lime", "menta", "mint",
@@ -2494,8 +2498,7 @@
             return Object.values(productMapGlobal).some(prod => {
                 if (prod.isOutOfStock) return false;
                 if (optionType === "color") {
-                    const prodColor = prod.color ? prod.color.toLowerCase().replace(/\s+/g, "") : "";
-                    if (prodColor !== valClean) return false;
+                    if (!colorsMatch(prod.color, optionValue)) return false;
                 } else if (optionType === "memory") {
                     const prodMem = prod.memory ? prod.memory.toLowerCase().replace(/\s+/g, "") : "";
                     if (prodMem !== valClean) return false;
@@ -2510,13 +2513,56 @@
             });
         }
 
+        // S23 Ultra 256GB variant/product IDs mapping to the 256GB catalog file
+        const S23_256_IDS = [
+            "MLM22450448", "MLM2000081133", "MLM2000081129", "MLM2000081131",
+            "MLM2000099736", "MLM2000053257", "MLM2000154314", "MLM2010617844", 
+            "MLM2000076881", "MLM2000176782"
+        ];
+        
+        // S23 Ultra 512GB variant/product IDs mapping to the 512GB catalog file
+        const S23_512_IDS = [
+            "MLM23053436", "MLM2000044997", "MLM2000044995", "MLM2000044993"
+        ];
+
+        // Helper to check local mock JSON files to bypass ML API block/CORS issues
+        function getLocalMockFileForId(id) {
+            if (!id) return null;
+            const idUpper = id.toString().toUpperCase().replace("-", "");
+            
+            if (S23_256_IDS.includes(idUpper)) {
+                return "s23_catalog_product.json";
+            }
+            if (S23_512_IDS.includes(idUpper)) {
+                return "s23_catalog_product_512.json";
+            }
+            return null;
+        }
+
+        // Helper to run fetches with a timeout to prevent loaders from getting stuck on network lag
+        async function fetchWithTimeout(url, options = {}, timeoutMs = 4000) {
+            const controller = new AbortController();
+            const timerId = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    signal: controller.signal
+                });
+                clearTimeout(timerId);
+                return response;
+            } catch (error) {
+                clearTimeout(timerId);
+                throw error;
+            }
+        }
+
         // Check if a specific picker option is available and in stock for the current variant configuration
         function isOptionAvailable(optionType, optionValue) {
             if (!optionValue) return false;
             const valClean = optionValue.toLowerCase().replace(/\s+/g, "");
             
             // Always show the currently selected option to avoid disappearing states
-            if (optionType === "color" && colorSeleccionadoGlobal && colorSeleccionadoGlobal.toLowerCase().replace(/\s+/g, "") === valClean) {
+            if (optionType === "color" && colorSeleccionadoGlobal && colorsMatch(colorSeleccionadoGlobal, optionValue)) {
                 return true;
             }
             if (optionType === "memory" && memoriaSeleccionadaGlobal && memoriaSeleccionadaGlobal.toLowerCase().replace(/\s+/g, "") === valClean) {
@@ -2534,8 +2580,7 @@
 
                 // Verify the product matches the option value under test
                 if (optionType === "color") {
-                    const prodColor = prod.color ? prod.color.toLowerCase().replace(/\s+/g, "") : "";
-                    if (prodColor !== valClean) return false;
+                    if (!colorsMatch(prod.color, optionValue)) return false;
                 } else if (optionType === "memory") {
                     const prodMem = prod.memory ? prod.memory.toLowerCase().replace(/\s+/g, "") : "";
                     if (prodMem !== valClean) return false;
@@ -2547,26 +2592,19 @@
                     if (prodGrad !== valClean) return false;
                 }
 
-                // Verify the product matches all other currently selected specs
+                // Verify the product matches all other currently selected specs (ignoring blank specs to prevent multi-dimensional conflicts)
                 if (optionType !== "color" && colorSeleccionadoGlobal) {
-                    const prodColor = prod.color ? prod.color.toLowerCase().replace(/\s+/g, "") : "";
-                    const selColor = colorSeleccionadoGlobal.toLowerCase().replace(/\s+/g, "");
-                    if (prodColor !== selColor) return false;
+                    if (prod.color && !colorsMatch(prod.color, colorSeleccionadoGlobal)) return false;
                 }
                 if (optionType !== "memory" && memoriaSeleccionadaGlobal) {
                     const prodMem = prod.memory ? prod.memory.toLowerCase().replace(/\s+/g, "") : "";
                     const selMem = memoriaSeleccionadaGlobal.toLowerCase().replace(/\s+/g, "");
-                    if (prodMem !== selMem) return false;
-                }
-                if (optionType !== "ram" && ramSeleccionadaGlobal) {
-                    const prodRam = prod.ram ? prod.ram.toLowerCase().replace(/\s+/g, "") : "";
-                    const selRam = ramSeleccionadaGlobal.toLowerCase().replace(/\s+/g, "");
-                    if (prodRam !== selRam) return false;
+                    if (prodMem && prodMem !== selMem) return false;
                 }
                 if (optionType !== "grading" && gradingSeleccionadoGlobal) {
                     const prodGrad = prod.grading ? prod.grading.toLowerCase().replace(/\s+/g, "") : "";
                     const selGrad = gradingSeleccionadoGlobal.toLowerCase().replace(/\s+/g, "");
-                    if (prodGrad !== selGrad) return false;
+                    if (prodGrad && prodGrad !== selGrad) return false;
                 }
 
                 return true;
@@ -2583,6 +2621,45 @@
                 .trim();
         }
 
+        // Determina si una variante o producto de ML tiene tags de sin stock/no disponible
+        function isProductTagOutOfStock(tags) {
+            if (!tags) return false;
+            return tags.includes("out-of-stock") || 
+                   tags.includes("disabled") || 
+                   tags.includes("no-bids") || 
+                   tags.includes("no-winner");
+        }
+
+        // Obtiene el grupo o familia principal de un color para homologar traducciones
+        function obtenerGrupoColor(colorName) {
+            if (!colorName) return "";
+            const name = colorName.toLowerCase().trim();
+            
+            const groups = {
+                "negro": ["negro", "black", "oscuro", "dark", "space", "carbono", "carbon", "grafito", "graphite", "phantom black"],
+                "blanco": ["blanco", "white", "claro", "light", "plata", "silver"],
+                "crema": ["cream", "crema", "marfil", "ivory", "beige"],
+                "azul": ["azul", "blue", "celeste", "sky", "indigo", "marino"],
+                "verde": ["verde", "green", "lima", "lime", "menta", "mint", "musgo"],
+                "rojo": ["rojo", "red", "naranja", "orange", "coral", "atardecer"],
+                "rosa": ["rosa", "pink", "gold", "oro", "dorado", "bronce", "bronze"],
+                "violeta": ["violeta", "violet", "purpura", "purple", "morado", "lavanda", "lavender"]
+            };
+            
+            for (const canonical in groups) {
+                if (groups[canonical].some(key => name.includes(key))) {
+                    return canonical;
+                }
+            }
+            return name;
+        }
+
+        // Compara si dos etiquetas de color corresponden a la misma familia física
+        function colorsMatch(c1, c2) {
+            if (!c1 || !c2) return false;
+            return obtenerGrupoColor(c1) === obtenerGrupoColor(c2);
+        }
+
         function obtenerCodigoColor(nombreColor) {
             if (!nombreColor || nombreColor.trim() === "" || nombreColor === "-") {
                 return "#94a3b8";
@@ -2595,7 +2672,7 @@
                 
                 // Blancos, Claros, Plateados
                 "blanco": "#ffffff", "white": "#ffffff", "claro": "#f8fafc", "light": "#f8fafc", "plata": "#cbd5e1", "silver": "#cbd5e1",
-                "cream": "#fef08a", "crema": "#fef08a", "marfil": "#fffbeb", "ivory": "#fffbeb",
+                "cream": "#fef08a", "crema": "#fef08a", "marfil": "#fffbeb", "ivory": "#fffbeb", "beige": "#f5f5dc",
                 
                 // Azules y Celestes
                 "azul": "#3b82f6", "blue": "#3b82f6", "celeste": "#60a5fa", "sky": "#60a5fa", "indigo": "#6366f1", "marino": "#1e3a8a",
@@ -2701,9 +2778,9 @@
                 if (!colorNorm) {
                     colorMatch = true;
                 } else {
-                    const eqColor = eq.color ? eq.color.trim().toLowerCase() : "";
+                    const eqColor = eq.color ? eq.color.trim() : "";
                     const eqModeloLower = eq.modelo.toLowerCase();
-                    colorMatch = (eqColor === colorNorm || eqModeloLower.includes(colorNorm));
+                    colorMatch = (eqColor.toLowerCase() === colorNorm || colorsMatch(eqColor, color) || eqModeloLower.includes(colorNorm));
                 }
                 
                 let memoriaMatch = false;
@@ -2748,9 +2825,9 @@
                     if (!colorNorm) {
                         colorMatch = true;
                     } else {
-                        const eqColor = eq.color ? eq.color.trim().toLowerCase() : "";
+                        const eqColor = eq.color ? eq.color.trim() : "";
                         const eqModeloLower = eq.modelo.toLowerCase();
-                        colorMatch = (eqColor === colorNorm || eqModeloLower.includes(colorNorm));
+                        colorMatch = (eqColor.toLowerCase() === colorNorm || colorsMatch(eqColor, color) || eqModeloLower.includes(colorNorm));
                     }
                     
                     let memoriaMatch = false;
@@ -2853,6 +2930,13 @@
                 }
             }
 
+            // Normalize S23 Ultra variant IDs to family roots
+            if (S23_256_IDS.includes(cleanId)) {
+                cleanId = "MLM2000081133";
+            } else if (S23_512_IDS.includes(cleanId)) {
+                cleanId = "MLM2000044997";
+            }
+
             if (!cleanId) {
                 // Ensure UI controls are re-enabled if we bail out early
                 try {
@@ -2933,7 +3017,13 @@
                 }
             }
 
-                        const hasSpecificFreshData = cache && cache.isFresh && (cache.id === cleanId || cache.catalog_product_id === cleanId);
+            const hasSpecificFreshData = cache && cache.isFresh && (
+                cache.id === cleanId || 
+                cache.catalog_product_id === cleanId ||
+                (cache.pickers && cache.pickers.some(picker => 
+                    picker.products && picker.products.some(p => p.product_id === cleanId)
+                ))
+            );
 
             if (!hasSpecificFreshData) {
                 mostrarCargandoVariantes();
@@ -2964,11 +3054,26 @@
                     // Fetch asíncrono en background
                     (async () => {
                         try {
-                            // Función auxiliar de fetch local
+                            // Función auxiliar de fetch local con mock fallback y timeouts
                             async function fetchMLData(id, isProd) {
+                                // Try local mock files first
+                                const localFile = getLocalMockFileForId(id);
+                                if (localFile) {
+                                    try {
+                                        const resLocal = await fetch(localFile);
+                                        if (resLocal.ok) {
+                                            const data = await resLocal.json();
+                                            console.log(`[LOCAL MOCK] Loaded ${localFile} for ID ${id}`);
+                                            return data;
+                                        }
+                                    } catch (err) {
+                                        console.warn(`Local mock fetch failed for ${localFile}:`, err);
+                                    }
+                                }
+
                                 const endpoint = isProd ? 'products' : 'items';
                                 try {
-                                    const res = await fetch(`https://api.mercadolibre.com/${endpoint}/${id}`);
+                                    const res = await fetchWithTimeout(`https://api.mercadolibre.com/${endpoint}/${id}`, {}, 3000);
                                     if (res.ok) {
                                         return await res.json();
                                     }
@@ -2978,7 +3083,7 @@
                                 
                                 try {
                                     const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${id}&isProduct=${isProd}`;
-                                    const resProxy = await fetch(proxyUrl);
+                                    const resProxy = await fetchWithTimeout(proxyUrl, {}, 6000);
                                     if (resProxy.ok) {
                                         const rawData = await resProxy.json();
                                         if (rawData && !rawData.error) {
@@ -3056,21 +3161,19 @@
                              }
                         } catch (err) {
                             console.error("Error in background fetch:", err);
-                            ocultarCargandoVariantes();
                         } finally {
                             delete isFetchingML[cleanId];
-                            if (!ML_CACHE_VARIANTES[cleanId]) {
-                                const overlay = document.getElementById('loadingOverlay');
-                                if (overlay) overlay.style.display = 'none';
-                                if (wrapperColores) {
-                                    wrapperColores.style.opacity = "";
-                                    wrapperColores.style.pointerEvents = "";
-                                }
-                                if (wrapperStorage) {
-                                    wrapperStorage.style.opacity = "";
-                                    wrapperStorage.style.pointerEvents = "";
-                                }
+                            ocultarCargandoVariantes();
+                            if (wrapperColores) {
+                                wrapperColores.style.opacity = "";
+                                wrapperColores.style.pointerEvents = "";
                             }
+                            if (wrapperStorage) {
+                                wrapperStorage.style.opacity = "";
+                                wrapperStorage.style.pointerEvents = "";
+                            }
+                            const overlay = document.getElementById('loadingOverlay');
+                            if (overlay) overlay.style.display = 'none';
                         }
                     })();
                 }
@@ -3104,10 +3207,7 @@
                         if (picker.products) {
                             picker.products.forEach(p => {
                                 if (!p.product_id) return;
-                                const isOutOfStock = p.tags && (
-                                    p.tags.includes("out-of-stock") ||
-                                    p.tags.includes("disabled")
-                                );
+                                const isOutOfStock = p.tags && isProductTagOutOfStock(p.tags);
                                 if (!productMapGlobal[p.product_id]) {
                                     const parsed = parseSpecsFromProductName(p.product_name || p.product_title || "");
                                     productMapGlobal[p.product_id] = {
@@ -3126,7 +3226,7 @@
                                                 productMapGlobal[p.product_id].tags.push(t);
                                             }
                                         });
-                                        const outOfStockFlag = productMapGlobal[p.product_id].tags.includes("out-of-stock") || productMapGlobal[p.product_id].tags.includes("disabled");
+                                        const outOfStockFlag = productMapGlobal[p.product_id].tags && isProductTagOutOfStock(productMapGlobal[p.product_id].tags);
                                         productMapGlobal[p.product_id].isOutOfStock = outOfStockFlag;
                                     }
                                 }
@@ -3629,8 +3729,8 @@
 
                             colorPicker.products.forEach(p => {
                                 if (!p.picker_label) return;
-                                // Normalizar quitando grado para agrupar colores físicos iguales
-                                const normColor = normalizarColorSinGrado(p.picker_label).toLowerCase();
+                                // Normalizar usando el grupo de color para agrupar colores físicos iguales (ej: Negro y Black)
+                                const normColor = obtenerGrupoColor(p.picker_label);
                                 const isSel = p.tags && p.tags.includes("selected");
 
                                 // Only skip if the color has absolutely no stock in the family
@@ -3645,7 +3745,7 @@
                                 }
                             });
 
-                            const defaultColorNorm = activeColorVal ? activeColorVal.trim().toLowerCase() : "";
+                            const defaultColorNorm = activeColorVal ? obtenerGrupoColor(activeColorVal) : "";
                             const coloresOrdenados = Array.from(coloresVistos.entries());
                             let targetColorNorm = "";
 
@@ -3689,11 +3789,18 @@
                                 }
 
                                 divColor.onclick = function () {
+                                     let targetProdId = colorInfo.id;
+                                     if (S23_256_IDS.includes(targetProdId)) {
+                                         targetProdId = "MLM2000081133";
+                                     } else if (S23_512_IDS.includes(targetProdId)) {
+                                         targetProdId = "MLM2000044997";
+                                     }
+
                                      // If this color already maps to the currently loaded variant id, skip reload
                                       if (
-                                          colorInfo.id === cleanId || 
-                                          colorInfo.id === data.id || 
-                                          (data.catalog_product_id && colorInfo.id === data.catalog_product_id)
+                                          targetProdId === cleanId || 
+                                          targetProdId === data.id || 
+                                          (data.catalog_product_id && targetProdId === data.catalog_product_id)
                                       ) {
                                           document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
                                           this.classList.add('selected');
@@ -3701,7 +3808,7 @@
                                       }
 
                                      // Synchronize all global selection variables with the target product's attributes in productMapGlobal
-                                     const targetSpecs = productMapGlobal[colorInfo.id];
+                                     const targetSpecs = productMapGlobal[targetProdId];
                                      if (targetSpecs) {
                                          if (targetSpecs.color) {
                                              colorSeleccionadoGlobal = targetSpecs.color;
@@ -3859,7 +3966,6 @@
                                         almacenamientoSeleccionado = selectedItem.name;
                                     }
                                 }
-
                                 sectionDiv.innerHTML = `
                                     <label style="font-weight: 600; font-size: 14px; color: #1e293b; display: block; margin-bottom: 8px;">
                                         ${pickerLabel}: <span style="font-weight: 400; color: #64748b;">${selectedValName}</span>
@@ -3892,10 +3998,17 @@
                                     }
 
                                     pill.onclick = function () {
+                                         let targetProdId = itemInfo.id;
+                                         if (S23_256_IDS.includes(targetProdId)) {
+                                             targetProdId = "MLM2000081133";
+                                         } else if (S23_512_IDS.includes(targetProdId)) {
+                                             targetProdId = "MLM2000044997";
+                                         }
+
                                          if (
-                                             (itemInfo.id === cleanId || 
-                                              itemInfo.id === data.id || 
-                                              (data.catalog_product_id && itemInfo.id === data.catalog_product_id)) && 
+                                             (targetProdId === cleanId || 
+                                              targetProdId === data.id || 
+                                              (data.catalog_product_id && targetProdId === data.catalog_product_id)) && 
                                              pIdUpper !== "GRADING"
                                          ) {
                                              pillsWrapper.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
@@ -3904,7 +4017,7 @@
                                          }
 
                                          // Synchronize all global selection variables with the target product's attributes in productMapGlobal
-                                         const targetSpecs = productMapGlobal[itemInfo.id];
+                                         const targetSpecs = productMapGlobal[targetProdId];
                                          if (targetSpecs) {
                                              if (targetSpecs.color) {
                                                  colorSeleccionadoGlobal = targetSpecs.color;
@@ -4233,6 +4346,8 @@
             if (!modelo) return "";
             let clean = modelo.trim();
 
+            const isRefurb = /reacondicionado|refurbished|refurb/i.test(modelo);
+
             // 0. Remover fragmentos de reacondicionado y detalles de caja/condición
             clean = clean.replace(/-\s*(excelente|muy\s*bueno|bueno|aceptable|regular)\s*(\(reacondicionado\))?/gi, "");
             clean = clean.replace(/\b(reacondicionado|refurbished|refurb)\b/gi, "");
@@ -4257,23 +4372,9 @@
                 clean = clean.replace(regex, "");
             });
 
-            // 2. Remover capacidades de almacenamiento (>= 32gb) pero conservar RAM (< 32gb)
+            // 2. Remover capacidades de almacenamiento y RAM por completo
             const regexGb = /(\d+)\s*(gb|tb|ram)\b/gi;
-            let matches = [...clean.matchAll(regexGb)];
-
-            matches.forEach(match => {
-                const fullMatch = match[0];
-                const numero = parseInt(match[1]);
-                const unidad = match[2].toLowerCase();
-
-                if (unidad === "ram") {
-                    return;
-                }
-                if (numero >= 32 || unidad === "tb") {
-                    const r = new RegExp(fullMatch, "gi");
-                    clean = clean.replace(r, "");
-                }
-            });
+            clean = clean.replace(regexGb, "");
 
             // Remover palabras conectoras/redundantes
             clean = clean.replace(/\b(con|de|color|ram)\b/gi, "");
@@ -4281,6 +4382,10 @@
             // Limpiar múltiples espacios en blanco y caracteres colgantes
             clean = clean.replace(/\s+/g, " ").trim();
             clean = clean.replace(/^[,\-\s]+|[,\-\s]+$/g, "");
+
+            if (isRefurb) {
+                clean += " (Reacondicionado)";
+            }
 
             return clean;
         }
