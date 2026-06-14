@@ -2952,12 +2952,7 @@
                 }
             }
 
-            // Normalize S23 Ultra variant IDs to family roots
-            if (S23_256_IDS.includes(cleanId)) {
-                cleanId = "MLM2000081133";
-            } else if (S23_512_IDS.includes(cleanId)) {
-                cleanId = "MLM2000044997";
-            }
+            // S23 Ultra variants will resolve to mock files dynamically via getLocalMockFileForId
 
             if (!cleanId) {
                 // Ensure UI controls are re-enabled if we bail out early
@@ -3039,13 +3034,25 @@
                 }
             }
 
-            const hasSpecificFreshData = cache && cache.isFresh && (
+            // If cleanId belongs to the same local mock family as what's already cached, treat as fresh data
+            // (avoids infinite reload loop when picker product_id is not in the mock's own picker list)
+            const isSameMockFamily = cache && cache.isFresh && (() => {
+                const cacheIdUpper = (cache.id || "").toString().toUpperCase();
+                const cleanIdUpper = cleanId.toUpperCase();
+                const cacheIs256 = S23_256_IDS.includes(cacheIdUpper);
+                const cleanIdIs256 = S23_256_IDS.includes(cleanIdUpper);
+                const cacheIs512 = S23_512_IDS.includes(cacheIdUpper);
+                const cleanIdIs512 = S23_512_IDS.includes(cleanIdUpper);
+                return (cacheIs256 && cleanIdIs256) || (cacheIs512 && cleanIdIs512);
+            })();
+
+            const hasSpecificFreshData = isSameMockFamily || (cache && cache.isFresh && (
                 cache.id === cleanId || 
                 cache.catalog_product_id === cleanId ||
                 (cache.pickers && cache.pickers.some(picker => 
                     picker.products && picker.products.some(p => p.product_id === cleanId)
                 ))
-            );
+            ));
 
             if (!hasSpecificFreshData) {
                 mostrarCargandoVariantes();
@@ -3064,6 +3071,12 @@
                 let data = null;
                 if (cache) {
                     data = cache;
+                }
+                // If we're using a same-family mock, normalize cleanId to the mock's own ID
+                // so all picker product_id lookups resolve correctly
+                if (isSameMockFamily && data && data.id) {
+                    console.log(`[MOCK FAMILY] Normalizing cleanId from ${cleanId} to ${data.id}`);
+                    cleanId = data.id;
                 }
                 if (data && hasSpecificFreshData) {
                     shouldRestoreUI = true;
@@ -3277,7 +3290,20 @@
                             if (activeGradingLabel && activeGradingLabel !== targetGradingLabel) {
                                 const targetGradingProd = gradingPicker.products.find(p => p.picker_label && p.picker_label.trim().toLowerCase() === targetGradingLabel);
                                 if (targetGradingProd && targetGradingProd.product_id && targetGradingProd.product_id !== cleanId) {
-                                    redirectId = targetGradingProd.product_id;
+                                    const targetSpecs = productMapGlobal[targetGradingProd.product_id];
+                                    let isCompatible = true;
+                                    if (targetSpecs) {
+                                        if (memoriaSeleccionadaGlobal && targetSpecs.memory) {
+                                            const targetMemClean = targetSpecs.memory.toLowerCase().replace(/\s+/g, "");
+                                            const selectedMemClean = memoriaSeleccionadaGlobal.toLowerCase().replace(/\s+/g, "");
+                                            if (targetMemClean !== selectedMemClean) {
+                                                isCompatible = false;
+                                            }
+                                        }
+                                    }
+                                    if (isCompatible) {
+                                        redirectId = targetGradingProd.product_id;
+                                    }
                                 }
                             }
                         }
@@ -3294,7 +3320,20 @@
                             if (activeMemLabel && activeMemLabel !== targetMemLabel) {
                                 const targetMemProd = memPicker.products.find(p => p.picker_label && p.picker_label.trim().toLowerCase().replace(/\s+/g, "") === targetMemLabel);
                                 if (targetMemProd && targetMemProd.product_id && targetMemProd.product_id !== cleanId) {
-                                    redirectId = targetMemProd.product_id;
+                                    const targetSpecs = productMapGlobal[targetMemProd.product_id];
+                                    let isCompatible = true;
+                                    if (targetSpecs) {
+                                        if (gradingSeleccionadoGlobal && targetSpecs.grading) {
+                                            const targetGradClean = targetSpecs.grading.toLowerCase().trim();
+                                            const selectedGradClean = gradingSeleccionadoGlobal.toLowerCase().trim();
+                                            if (targetGradClean !== selectedGradClean) {
+                                                isCompatible = false;
+                                            }
+                                        }
+                                    }
+                                    if (isCompatible) {
+                                        redirectId = targetMemProd.product_id;
+                                    }
                                 }
                             }
                         }
@@ -3311,7 +3350,68 @@
                             if (activeRamLabel && activeRamLabel !== targetRamLabel) {
                                 const targetRamProd = ramPicker.products.find(p => p.picker_label && p.picker_label.trim().toLowerCase().replace(/\s+/g, "") === targetRamLabel);
                                 if (targetRamProd && targetRamProd.product_id && targetRamProd.product_id !== cleanId) {
-                                    redirectId = targetRamProd.product_id;
+                                    const targetSpecs = productMapGlobal[targetRamProd.product_id];
+                                    let isCompatible = true;
+                                    if (targetSpecs) {
+                                        if (memoriaSeleccionadaGlobal && targetSpecs.memory) {
+                                            const targetMemClean = targetSpecs.memory.toLowerCase().replace(/\s+/g, "");
+                                            const selectedMemClean = memoriaSeleccionadaGlobal.toLowerCase().replace(/\s+/g, "");
+                                            if (targetMemClean !== selectedMemClean) {
+                                                isCompatible = false;
+                                            }
+                                        }
+                                        if (gradingSeleccionadoGlobal && targetSpecs.grading) {
+                                            const targetGradClean = targetSpecs.grading.toLowerCase().trim();
+                                            const selectedGradClean = gradingSeleccionadoGlobal.toLowerCase().trim();
+                                            if (targetGradClean !== selectedGradClean) {
+                                                isCompatible = false;
+                                            }
+                                        }
+                                    }
+                                    if (isCompatible) {
+                                        redirectId = targetRamProd.product_id;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // 4. Check Color if grading, memory and RAM are already matching or not present
+                    if (!redirectId && colorSeleccionadoGlobal) {
+                        const colorPicker = data.pickers.find(p => {
+                            if (!p.picker_id) return false;
+                            const idUpper = p.picker_id.toUpperCase();
+                            return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
+                        });
+                        if (colorPicker) {
+                            const activeColorProduct = colorPicker.products && colorPicker.products.find(p => p.product_id === cleanId);
+                            const activeColorLabel = activeColorProduct ? activeColorProduct.picker_label.trim() : "";
+                            const targetColorLabel = colorSeleccionadoGlobal.trim();
+
+                            if (activeColorLabel && !colorsMatch(activeColorLabel, targetColorLabel)) {
+                                const targetColorProd = colorPicker.products.find(p => p.picker_label && colorsMatch(p.picker_label, targetColorLabel));
+                                if (targetColorProd && targetColorProd.product_id && targetColorProd.product_id !== cleanId) {
+                                    const targetSpecs = productMapGlobal[targetColorProd.product_id];
+                                    let isCompatible = true;
+                                    if (targetSpecs) {
+                                        if (memoriaSeleccionadaGlobal && targetSpecs.memory) {
+                                            const targetMemClean = targetSpecs.memory.toLowerCase().replace(/\s+/g, "");
+                                            const selectedMemClean = memoriaSeleccionadaGlobal.toLowerCase().replace(/\s+/g, "");
+                                            if (targetMemClean !== selectedMemClean) {
+                                                isCompatible = false;
+                                            }
+                                        }
+                                        if (gradingSeleccionadoGlobal && targetSpecs.grading) {
+                                            const targetGradClean = targetSpecs.grading.toLowerCase().trim();
+                                            const selectedGradClean = gradingSeleccionadoGlobal.toLowerCase().trim();
+                                            if (targetGradClean !== selectedGradClean) {
+                                                isCompatible = false;
+                                            }
+                                        }
+                                    }
+                                    if (isCompatible) {
+                                        redirectId = targetColorProd.product_id;
+                                    }
                                 }
                             }
                         }
@@ -3321,7 +3421,6 @@
                         console.log(`[VARIANT AUTO-REDIRECT] Redirecting from ${cleanId} to ${redirectId} to preserve user selections.`);
                         currentMLItemLink = `https://www.mercadolibre.com.mx/p/${redirectId}`;
                         
-                        // Update local price before loading next
                         try {
                             const localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memoriaSeleccionadaGlobal, gradingSeleccionadoGlobal);
                             if (localPrice && localPrice > 0) {
@@ -3547,10 +3646,31 @@
                 }
 
                 // 📸 Pintamos las fotos de la galería si existen (todas las disponibles)
-                const isSpecificData = (data.id === cleanId || data.catalog_product_id === cleanId);
+                const isSpecificData = (data.id === cleanId || data.catalog_product_id === cleanId || (data.pickers && data.pickers.some(picker => picker.products && picker.products.some(p => p.product_id === cleanId))));
                 if (isSpecificData && data.pictures && data.pictures.length > 0) {
-                    // Actualizar la foto principal con la primera foto de la nueva galería
-                    const primeraFoto = data.pictures[0].secure_url || data.pictures[0].url;
+                    // Intenta obtener la foto específica de este color en el picker
+                    let primeraFoto = "";
+                    if (data.pickers) {
+                        const colorPicker = data.pickers.find(p => {
+                            if (!p.picker_id) return false;
+                            const idUpper = p.picker_id.toUpperCase();
+                            return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
+                        });
+                        if (colorPicker && colorPicker.products) {
+                            const activeColorProd = colorPicker.products.find(p => p.product_id === cleanId);
+                            if (activeColorProd) {
+                                if (activeColorProd.picture_id) {
+                                    primeraFoto = `https://http2.mlstatic.com/D_NQ_NP_${activeColorProd.picture_id}-O.jpg`;
+                                } else if (activeColorProd.thumbnail) {
+                                    primeraFoto = activeColorProd.thumbnail.replace("-I.jpg", "-O.jpg");
+                                }
+                            }
+                        }
+                    }
+                    if (!primeraFoto) {
+                        primeraFoto = data.pictures[0].secure_url || data.pictures[0].url;
+                    }
+
                     const imgEl = document.getElementById('modal-producto-foto');
                     if (imgEl && imgEl.getAttribute('src') !== primeraFoto) {
                         imgEl.src = primeraFoto;
@@ -3560,12 +3680,30 @@
                     const thumbsContainer = document.getElementById('pdp-thumbs-container');
                     if (thumbsContainer) {
                         thumbsContainer.innerHTML = "";
-                        const numThumbs = data.pictures.length;
-                        for (let i = 0; i < numThumbs; i++) {
-                            const pic = data.pictures[i];
+                        
+                        // Agregar el thumbnail de la foto de la variante
+                        let firstThumbUrl = primeraFoto;
+                        if (firstThumbUrl) {
                             const imgThumb = document.createElement('img');
-                            imgThumb.src = pic.secure_url || pic.url;
-                            imgThumb.className = `pdp-thumb ${i === 0 ? 'active' : ''}`;
+                            imgThumb.src = firstThumbUrl;
+                            imgThumb.className = "pdp-thumb active";
+                            imgThumb.onclick = function () {
+                                document.querySelectorAll('.pdp-thumb').forEach(t => t.classList.remove('active'));
+                                this.classList.add('active');
+                                document.getElementById('modal-producto-foto').src = this.src;
+                            };
+                            thumbsContainer.appendChild(imgThumb);
+                        }
+
+                        const startIdx = (firstThumbUrl && data.pictures[0] && (data.pictures[0].secure_url === firstThumbUrl || data.pictures[0].url === firstThumbUrl)) ? 1 : 0;
+                        for (let i = startIdx; i < data.pictures.length; i++) {
+                            const pic = data.pictures[i];
+                            const picUrl = pic.secure_url || pic.url;
+                            if (picUrl === firstThumbUrl) continue;
+                            
+                            const imgThumb = document.createElement('img');
+                            imgThumb.src = picUrl;
+                            imgThumb.className = `pdp-thumb ${!firstThumbUrl && i === 0 ? 'active' : ''}`;
                             imgThumb.onclick = function () {
                                 document.querySelectorAll('.pdp-thumb').forEach(t => t.classList.remove('active'));
                                 this.classList.add('active');
@@ -3743,11 +3881,11 @@
                         return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
                     });
 
-                     // 🎨 Pintamos los círculos de colores reales obtenidos (Deduplicados)
+                    // 🎨 Pintamos los círculos de colores reales obtenidos (Deduplicados)
                     if (colorPicker && colorPicker.products && colorPicker.products.length > 0) {
                         try {
                             wrapperColores.innerHTML = "";
-                            const coloresVistos = new Map(); // key: lowercase -> { id, name, isSelected }
+                            const coloresVistos = new Map(); // key: lowercase -> { id, name, isSelected, picture_id, thumbnail }
 
                             colorPicker.products.forEach(p => {
                                 if (!p.picker_label) return;
@@ -3762,7 +3900,9 @@
                                     coloresVistos.set(normColor, {
                                         id: p.product_id,
                                         name: normalizarColorSinGrado(p.picker_label),
-                                        isSelected: isSel
+                                        isSelected: isSel,
+                                        picture_id: p.picture_id || "",
+                                        thumbnail: p.thumbnail || ""
                                     });
                                 }
                             });
@@ -3815,35 +3955,8 @@
                                          return;
                                      }
 
-                                     let targetProdId = colorInfo.id;
-                                     if (S23_256_IDS.includes(targetProdId)) {
-                                         targetProdId = "MLM2000081133";
-                                     } else if (S23_512_IDS.includes(targetProdId)) {
-                                         targetProdId = "MLM2000044997";
-                                     }
-
-
-                                     // Synchronize all global selection variables with the target product's attributes in productMapGlobal
-                                     const targetSpecs = productMapGlobal[colorInfo.id] || productMapGlobal[targetProdId];
-                                     if (targetSpecs) {
-                                         if (targetSpecs.color) {
-                                             colorSeleccionadoGlobal = targetSpecs.color;
-                                             colorSeleccionado = targetSpecs.color;
-                                         }
-                                         if (targetSpecs.memory) {
-                                             memoriaSeleccionadaGlobal = targetSpecs.memory;
-                                             almacenamientoSeleccionado = targetSpecs.memory;
-                                         }
-                                         if (targetSpecs.ram) {
-                                             ramSeleccionadaGlobal = targetSpecs.ram;
-                                         }
-                                         if (targetSpecs.grading) {
-                                             gradingSeleccionadoGlobal = targetSpecs.grading;
-                                         }
-                                     }
-
-                                      // Show loading overlay immediately
-                                      mostrarCargandoVariantes();
+                                    // Show loading overlay immediately
+                                    mostrarCargandoVariantes();
 
                                     document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
                                     this.classList.add('selected');
@@ -3865,6 +3978,36 @@
                                         }
                                     } catch (priceErr) {
                                         console.warn('Error updating local price on color click:', priceErr);
+                                    }
+
+                                    // === IMMEDIATE PHOTO UPDATE ===
+                                    try {
+                                        let newPhotoUrl = "";
+                                        if (colorInfo.picture_id) {
+                                            newPhotoUrl = `https://http2.mlstatic.com/D_NQ_NP_${colorInfo.picture_id}-O.jpg`;
+                                        } else if (colorInfo.thumbnail) {
+                                            newPhotoUrl = colorInfo.thumbnail.replace("-I.jpg", "-O.jpg");
+                                        }
+                                        if (newPhotoUrl) {
+                                            const imgEl = document.getElementById('modal-producto-foto');
+                                            if (imgEl) {
+                                                imgEl.src = newPhotoUrl;
+                                            }
+                                            // Update active thumb too
+                                            const thumbsContainer = document.getElementById('pdp-thumbs-container');
+                                            if (thumbsContainer) {
+                                                thumbsContainer.querySelectorAll('.pdp-thumb').forEach(t => {
+                                                    t.classList.remove('active');
+                                                });
+                                                const firstThumb = thumbsContainer.querySelector('.pdp-thumb');
+                                                if (firstThumb) {
+                                                    firstThumb.src = newPhotoUrl;
+                                                    firstThumb.classList.add('active');
+                                                }
+                                            }
+                                        }
+                                    } catch (photoErr) {
+                                        console.warn('Error updating photo on color click:', photoErr);
                                     }
 
                                     // Show loading state while switching variant
@@ -4014,97 +4157,72 @@
                                     }
 
                                     pill.onclick = function () {
+                                          if (pIdUpper === "GRADING") {
+                                              if (gradingSeleccionadoGlobal && itemInfo.name.toLowerCase().trim() === gradingSeleccionadoGlobal.toLowerCase().trim()) return;
+                                          } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
+                                              if (memoriaSeleccionadaGlobal && itemInfo.name.toLowerCase().trim().replace(/\s+/g, "") === memoriaSeleccionadaGlobal.toLowerCase().trim().replace(/\s+/g, "")) return;
+                                          } else if (pIdUpper.includes("RAM")) {
+                                              if (ramSeleccionadaGlobal && itemInfo.name.toLowerCase().trim().replace(/\s+/g, "") === ramSeleccionadaGlobal.toLowerCase().trim().replace(/\s+/g, "")) return;
+                                          }
+
+                                          // Show loading overlay immediately
+                                          mostrarCargandoVariantes();
+
+                                         pillsWrapper.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
+                                         this.classList.add('selected');
+
+                                         // Update corresponding global state variable
                                          if (pIdUpper === "GRADING") {
-                                             if (gradingSeleccionadoGlobal && itemInfo.name.toLowerCase().trim() === gradingSeleccionadoGlobal.toLowerCase().trim()) return;
+                                             gradingSeleccionadoGlobal = itemInfo.name;
+                                             const conditionEl = document.getElementById('pdp-product-condition');
+                                             if (conditionEl) {
+                                                 conditionEl.innerText = `Reacondicionado | ${itemInfo.name}`;
+                                                 conditionEl.style.backgroundColor = "#fffbeb";
+                                                 conditionEl.style.color = "#d97706";
+                                                 conditionEl.style.border = "1px solid #fef3c7";
+                                                 conditionEl.style.padding = "4px 8px";
+                                                 conditionEl.style.borderRadius = "4px";
+                                                 conditionEl.style.fontWeight = "600";
+                                             }
                                          } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
-                                             if (memoriaSeleccionadaGlobal && itemInfo.name.toLowerCase().trim().replace(/\s+/g, "") === memoriaSeleccionadaGlobal.toLowerCase().trim().replace(/\s+/g, "")) return;
+                                             memoriaSeleccionadaGlobal = itemInfo.name;
+                                             almacenamientoSeleccionado = itemInfo.name;
                                          } else if (pIdUpper.includes("RAM")) {
-                                             if (ramSeleccionadaGlobal && itemInfo.name.toLowerCase().trim().replace(/\s+/g, "") === ramSeleccionadaGlobal.toLowerCase().trim().replace(/\s+/g, "")) return;
+                                             ramSeleccionadaGlobal = itemInfo.name;
                                          }
 
-                                         let targetProdId = itemInfo.id;
-                                         if (S23_256_IDS.includes(targetProdId)) {
-                                             targetProdId = "MLM2000081133";
-                                         } else if (S23_512_IDS.includes(targetProdId)) {
-                                             targetProdId = "MLM2000044997";
+                                         // === IMMEDIATE LOCAL PRICE UPDATE ===
+                                         // Update the price instantly using local catalog data before network fetch
+                                         try {
+                                             const currentColor = colorSeleccionadoGlobal || colorSeleccionado || "";
+                                             const currentMemoria = memoriaSeleccionadaGlobal || almacenamientoSeleccionado || "";
+                                             const currentGrading = gradingSeleccionadoGlobal || "";
+                                             const localPrice = buscarPrecioEquivalenteLocal(currentColor, currentMemoria, currentGrading);
+                                             if (localPrice && localPrice > 0) {
+                                                 const hidden = document.getElementById('hiddenPrecioContado');
+                                                 if (hidden) hidden.value = localPrice;
+                                                 if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
+                                                 document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(localPrice).toLocaleString('es-MX')} MXN</strong>`;
+                                             }
+                                         } catch (priceErr) {
+                                             console.warn('Error updating local price on pill click:', priceErr);
                                          }
 
+                                         currentMLItemLink = `https://www.mercadolibre.com.mx/p/${itemInfo.id}`;
 
-                                         // Synchronize all global selection variables with the target product's attributes in productMapGlobal
-                                         const targetSpecs = productMapGlobal[itemInfo.id] || productMapGlobal[targetProdId];
-                                         if (targetSpecs) {
-                                             if (targetSpecs.color) {
-                                                 colorSeleccionadoGlobal = targetSpecs.color;
-                                                 colorSeleccionado = targetSpecs.color;
+                                         const isTargetCached = !!ML_CACHE_VARIANTES[itemInfo.id];
+                                         if (!isTargetCached) {
+                                             if (wrapperColores) {
+                                                 wrapperColores.style.opacity = "0.4";
+                                                 wrapperColores.style.pointerEvents = "none";
                                              }
-                                             if (targetSpecs.memory) {
-                                                 memoriaSeleccionadaGlobal = targetSpecs.memory;
-                                                 almacenamientoSeleccionado = targetSpecs.memory;
-                                             }
-                                             if (targetSpecs.ram) {
-                                                 ramSeleccionadaGlobal = targetSpecs.ram;
-                                             }
-                                             if (targetSpecs.grading) {
-                                                 gradingSeleccionadoGlobal = targetSpecs.grading;
+                                             if (wrapperStorage) {
+                                                 wrapperStorage.style.opacity = "0.4";
+                                                 wrapperStorage.style.pointerEvents = "none";
                                              }
                                          }
 
-                                         // Show loading overlay immediately
-                                         mostrarCargandoVariantes();
-
-                                        pillsWrapper.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
-                                        this.classList.add('selected');
-
-                                        // Update corresponding global state variable
-                                        if (pIdUpper === "GRADING") {
-                                            gradingSeleccionadoGlobal = itemInfo.name;
-                                            const conditionEl = document.getElementById('pdp-product-condition');
-                                            if (conditionEl) {
-                                                conditionEl.innerText = `Reacondicionado | ${itemInfo.name}`;
-                                                conditionEl.style.backgroundColor = "#fffbeb";
-                                                conditionEl.style.color = "#d97706";
-                                                conditionEl.style.border = "1px solid #fef3c7";
-                                                conditionEl.style.padding = "4px 8px";
-                                                conditionEl.style.borderRadius = "4px";
-                                                conditionEl.style.fontWeight = "600";
-                                            }
-                                        } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
-                                            memoriaSeleccionadaGlobal = itemInfo.name;
-                                            almacenamientoSeleccionado = itemInfo.name;
-                                        }
-
-                                        // === IMMEDIATE LOCAL PRICE UPDATE ===
-                                        // Update the price instantly using local catalog data before network fetch
-                                        try {
-                                            const currentColor = colorSeleccionadoGlobal || colorSeleccionado || "";
-                                            const currentMemoria = memoriaSeleccionadaGlobal || almacenamientoSeleccionado || "";
-                                            const currentGrading = gradingSeleccionadoGlobal || "";
-                                            const localPrice = buscarPrecioEquivalenteLocal(currentColor, currentMemoria, currentGrading);
-                                            if (localPrice && localPrice > 0) {
-                                                const hidden = document.getElementById('hiddenPrecioContado');
-                                                if (hidden) hidden.value = localPrice;
-                                                if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
-                                                document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(localPrice).toLocaleString('es-MX')} MXN</strong>`;
-                                            }
-                                        } catch (priceErr) {
-                                            console.warn('Error updating local price on pill click:', priceErr);
-                                        }
-
-                                        currentMLItemLink = `https://www.mercadolibre.com.mx/p/${itemInfo.id}`;
-
-                                        const isTargetCached = !!ML_CACHE_VARIANTES[itemInfo.id];
-                                        if (!isTargetCached) {
-                                            if (wrapperColores) {
-                                                wrapperColores.style.opacity = "0.4";
-                                                wrapperColores.style.pointerEvents = "none";
-                                            }
-                                            if (wrapperStorage) {
-                                                wrapperStorage.style.opacity = "0.4";
-                                                wrapperStorage.style.pointerEvents = "none";
-                                            }
-                                        }
-
-                                        cargarVariantesRealesML(itemInfo.id, true);
+                                         cargarVariantesRealesML(itemInfo.id, true);
                                     };
                                     pillsWrapper.appendChild(pill);
                                 });
