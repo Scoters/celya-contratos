@@ -888,25 +888,28 @@
                 box-sizing: border-box;
                 padding: 0;
             }
+        }
 
         .color-circle.unavailable {
-            opacity: 0.4;
-            border-style: dashed;
+            opacity: 0.5;
+            border: 2px dashed #dc2626 !important;
+            background-image: linear-gradient(135deg, transparent 45%, #dc2626 45%, #dc2626 55%, transparent 55%) !important;
             cursor: pointer;
         }
         .color-circle.unavailable:hover {
             transform: scale(1.05);
-            opacity: 0.7;
+            opacity: 0.8;
         }
         .storage-pill.unavailable {
-            opacity: 0.4;
-            border-style: dashed;
-            background-color: #f1f5f9;
+            opacity: 0.6;
+            border: 1px dashed #94a3b8 !important;
+            background-color: #f8fafc !important;
+            color: #94a3b8 !important;
             cursor: pointer;
         }
         .storage-pill.unavailable:hover {
-            background-color: #e2e8f0;
-            opacity: 0.7;
+            background-color: #f1f5f9 !important;
+            opacity: 0.8;
         }
 
         @keyframes spin {
@@ -2767,7 +2770,15 @@
             return null;
         }
 
-        async function cargarVariantesRealesML(idProducto, esCambioVariante = false, isAutoRedirect = false) {
+        async function cargarVariantesRealesML(idProducto, esCambioVariante = false, isAutoRedirect = false, isAfterTimeout = false) {
+            if (esCambioVariante && !isAfterTimeout) {
+                mostrarCargandoVariantes();
+                setTimeout(() => {
+                    cargarVariantesRealesML(idProducto, esCambioVariante, isAutoRedirect, true);
+                }, 150);
+                return;
+            }
+
             const contenedor = document.getElementById('ml-dynamic-variants-container');
             const wrapperColores = document.getElementById('ml-colors-wrapper');
             const wrapperStorage = document.getElementById('ml-storage-wrapper');
@@ -2913,12 +2924,10 @@
                 }
             }
 
-            const hasSpecificFreshData = cache && cache.isFresh && (cache.id === cleanId || cache.catalog_product_id === cleanId);
+                        const hasSpecificFreshData = cache && cache.isFresh && (cache.id === cleanId || cache.catalog_product_id === cleanId);
 
             if (!hasSpecificFreshData) {
                 mostrarCargandoVariantes();
-            } else {
-                ocultarCargandoVariantes();
             }
 
             if (esCambioVariante && !hasSpecificFreshData) {
@@ -2929,10 +2938,14 @@
                 wrapperStorage.style.pointerEvents = "none";
             }
 
+            let shouldRestoreUI = false;
             try {
                 let data = null;
                 if (cache) {
                     data = cache;
+                }
+                if (data && hasSpecificFreshData) {
+                    shouldRestoreUI = true;
                 }
 
                 // Si no hay datos frescos específicos de este ID y no se está realizando un fetch en segundo plano, iniciarlo
@@ -3188,6 +3201,7 @@
                             }
                         } catch(e) {}
 
+                        shouldRestoreUI = false;
                         cargarVariantesRealesML(redirectId, true, true);
                         return;
                     }
@@ -3406,7 +3420,11 @@
                 if (isSpecificData && data.pictures && data.pictures.length > 0) {
                     // Actualizar la foto principal con la primera foto de la nueva galería
                     const primeraFoto = data.pictures[0].secure_url || data.pictures[0].url;
-                    document.getElementById('modal-producto-foto').src = primeraFoto;
+                    const imgEl = document.getElementById('modal-producto-foto');
+                    if (imgEl && imgEl.getAttribute('src') !== primeraFoto) {
+                        imgEl.src = primeraFoto;
+                        window.pdpImageLoading = true;
+                    }
 
                     const thumbsContainer = document.getElementById('pdp-thumbs-container');
                     if (thumbsContainer) {
@@ -4041,20 +4059,41 @@
             } catch (e) {
                 console.error("Error obteniendo variantes vivas desde ML:", e);
             } finally {
-                ocultarCargandoVariantes();
-                const overlay = document.getElementById('loadingOverlay');
-                if (overlay) overlay.style.display = 'none';
-                try {
-                    if (wrapperColores) {
-                        wrapperColores.style.opacity = "";
-                        wrapperColores.style.pointerEvents = "";
+                if (shouldRestoreUI) {
+                    const imgElement = document.getElementById('modal-producto-foto');
+                    
+                    const restoreUI = () => {
+                        ocultarCargandoVariantes();
+                        const overlay = document.getElementById('loadingOverlay');
+                        if (overlay) overlay.style.display = 'none';
+                        try {
+                            if (wrapperColores) {
+                                wrapperColores.style.opacity = "";
+                                wrapperColores.style.pointerEvents = "";
+                            }
+                            if (wrapperStorage) {
+                                wrapperStorage.style.opacity = "";
+                                wrapperStorage.style.pointerEvents = "";
+                            }
+                        } catch (e) {
+                            // ignore
+                        }
+                    };
+
+                    if (imgElement && !imgElement.complete && imgElement.src) {
+                        const hideLoader = () => {
+                            restoreUI();
+                            imgElement.removeEventListener('load', hideLoader);
+                            imgElement.removeEventListener('error', hideLoader);
+                        };
+                        imgElement.addEventListener('load', hideLoader);
+                        imgElement.addEventListener('error', hideLoader);
+                        
+                        // Fallback de seguridad de 2 segundos máx
+                        setTimeout(hideLoader, 2000);
+                    } else {
+                        restoreUI();
                     }
-                    if (wrapperStorage) {
-                        wrapperStorage.style.opacity = "";
-                        wrapperStorage.style.pointerEvents = "";
-                    }
-                } catch (e) {
-                    // ignore
                 }
             }
         }
@@ -4171,7 +4210,12 @@
             const variante = itemVariationsData.find(v => v.id === variantId);
             if (variante && variante.picture_ids && variante.picture_ids.length > 0) {
                 const fotoId = variante.picture_ids[0];
-                document.getElementById('modal-producto-foto').src = `https://http2.mlstatic.com/D_NQ_NP_${fotoId}-O.jpg`;
+                const newSrc = `https://http2.mlstatic.com/D_NQ_NP_${fotoId}-O.jpg`;
+                const imgEl = document.getElementById('modal-producto-foto');
+                if (imgEl && imgEl.getAttribute('src') !== newSrc) {
+                    imgEl.src = newSrc;
+                    window.pdpImageLoading = true;
+                }
             }
         }
 
