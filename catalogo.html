@@ -1278,6 +1278,17 @@
         // 🚀 Carga inicial
         async function cargarPantallaInicial() {
             await sincronizarTasas();
+            
+            const inputBusqueda = document.getElementById('inputBusqueda');
+            if (inputBusqueda) {
+                inputBusqueda.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        solicitarBusqueda();
+                    }
+                });
+            }
+
             renderizarCatalogo("");
         }
 
@@ -1292,18 +1303,49 @@
             renderizarCatalogo(query);
         }
 
+        // Funciones auxiliares para el cálculo dinámico de cuotas (alineado con el modal PDP)
+        function calcularCuotaSemanal26(precioContado) {
+            const factorEng = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
+            const factorInt = CONFIG_TASAS.interes26 !== undefined ? CONFIG_TASAS.interes26 : 0.66;
+            const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
+            return Math.round(((precioContado * (1 + factorInt)) - eng) / 26);
+        }
+
+        function calcularCuotaSemanal52(precioContado) {
+            const factorEng = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
+            const factorInt = CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90;
+            const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
+            return Math.round(((precioContado * (1 + factorInt)) - eng) / 52);
+        }
+
+        function calcularCuotaQuincenal13(precioContado) {
+            const factorEng = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+            const factorInt = CONFIG_TASAS.interes26 !== undefined ? CONFIG_TASAS.interes26 : 0.66;
+            const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
+            return Math.round(((precioContado * (1 + factorInt)) - eng) / 13);
+        }
+
+        function calcularCuotaQuincenal26(precioContado) {
+            const factorEng = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+            const factorInt = CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90;
+            const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
+            return Math.round(((precioContado * (1 + factorInt)) - eng) / 26);
+        }
+
         // Extrae la marca del título del modelo de forma inteligente
         function obtenerMarca(modelo) {
+            if (!modelo) return "";
             const m = modelo.trim().toUpperCase();
-            if (m.startsWith("SAMSUNG")) return "Samsung";
-            if (m.startsWith("APPLE") || m.startsWith("IPHONE")) return "Apple";
-            if (m.startsWith("XIAOMI") || m.startsWith("REDMI") || m.startsWith("POCO")) return "Xiaomi";
-            if (m.startsWith("MOTO") || m.startsWith("MOTOROLA")) return "Motorola";
-            if (m.startsWith("OPPO")) return "Oppo";
-            if (m.startsWith("INFINIX")) return "Infinix";
-            if (m.startsWith("HONOR")) return "Honor";
+            if (m.includes("SAMSUNG")) return "Samsung";
+            if (m.includes("APPLE") || m.includes("IPHONE")) return "Apple";
+            if (m.includes("XIAOMI") || m.includes("REDMI") || m.includes("POCO")) return "Xiaomi";
+            if (m.includes("MOTOROLA") || m.includes("MOTO")) return "Motorola";
+            if (m.includes("OPPO")) return "Oppo";
+            if (m.includes("INFINIX")) return "Infinix";
+            if (m.includes("HONOR")) return "Honor";
 
-            const primeraPalabra = modelo.trim().split(" ")[0];
+            const modeloLimpio = modelo.replace(/^(smartphone|celular|teléfono|telefono|reacondicionado)\s+/gi, "").trim();
+            const primeraPalabra = modeloLimpio.split(" ")[0];
             return primeraPalabra.charAt(0).toUpperCase() + primeraPalabra.slice(1).toLowerCase();
         }
 
@@ -1548,7 +1590,54 @@
                         }
                     }
 
-                    // Simple template (mantenemos lo esencial); para cambios más finos podríamos refactorizar
+                    // Extract RAM options dynamically
+                    let ramText = "";
+                    if (parsedVar && parsedVar.pickers) {
+                        const ramPicker = parsedVar.pickers.find(p => p.picker_id && (p.picker_id.toUpperCase().includes("RAM")));
+                        if (ramPicker && ramPicker.products) {
+                            const activeProducts = ramPicker.products.filter(p => !p.tags || !isProductTagOutOfStock(p.tags));
+                            const uniqueRamsList = Array.from(new Set(activeProducts.map(p => p.picker_label.trim()))).sort((a, b) => {
+                                return parseInt(a) - parseInt(b);
+                            });
+                            if (uniqueRamsList.length > 0) {
+                                ramText = uniqueRamsList.join(', ');
+                            }
+                        }
+                    }
+                    if (!ramText && item.modelo) {
+                        const ramRegex = /(\d+\s*GB)\s*RAM/i;
+                        const match = item.modelo.match(ramRegex);
+                        if (match) {
+                            ramText = match[1] + " RAM";
+                        } else {
+                            const doubleMatch = /(\d+)\s*GB\s*\/\s*(\d+)\s*GB/i;
+                            const dMatch = item.modelo.match(doubleMatch);
+                            if (dMatch) {
+                                ramText = dMatch[1] + " GB RAM";
+                            } else {
+                                const allGbMatches = [...item.modelo.matchAll(/(\d+)\s*GB/gi)];
+                                if (allGbMatches.length >= 2) {
+                                    const gbVals = allGbMatches.map(m => ({ text: m[1], val: parseInt(m[1]) })).sort((a, b) => a.val - b.val);
+                                    if (gbVals[0].val < gbVals[1].val) {
+                                        ramText = gbVals[0].text + " GB RAM";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (ramText && !ramText.toUpperCase().includes("RAM")) {
+                        ramText = ramText + " RAM";
+                    }
+
+                    // Dynamically calculate weekly and quincenal payments matching PDP logic
+                    const priceContadoNum = item.precioContado || 0;
+                    const cuotaSem26 = calcularCuotaSemanal26(priceContadoNum);
+                    const cuotaSem52 = calcularCuotaSemanal52(priceContadoNum);
+                    const cuotaQuin13 = calcularCuotaQuincenal13(priceContadoNum);
+                    const cuotaQuin26 = calcularCuotaQuincenal26(priceContadoNum);
+                    const engancheSemanalCalculado = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheSemanal || 0.165)) / 10) * 10;
+
+                    // Simple template
                     const cardHtml = `
                         <div class="card-celular" data-item-id="${item.id}">
                             <div>
@@ -1556,19 +1645,20 @@
                                     <span class="brand-badge ${claseMarca}">${marca}</span>
                                     ${item.estado === "MAS VENDIDO" ? `<span class="status-badge status-featured">⭐ Destacado</span>` : (item.entregaInmediata || item.estado === "DISPONIBLE") ? `<span class="status-badge status-available">⚡ Disponible</span>` : `<span class="status-badge status-order">⏳ Bajo Pedido</span>`}
                                 </div>
-                                <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">
+                                <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheSemanalCalculado}, '${item.color || ""}', '${item.memoria || ""}', this)">
                                     <img src="${item.foto}" alt="${modeloLimpio}" onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop'">
                                 </div>
-                                <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpio}</h4>
+                                <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheSemanalCalculado}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpio}</h4>
                                 <div class="specs-container">
+                                    ${ramText ? `<span class="spec-tag">⚡ ${ramText}</span>` : ''}
                                     ${memoriaText ? `<span class="spec-tag">💾 ${memoriaText}</span>` : ''}
                                     <span class="spec-tag">🎨 ${numColores} ${numColores === 1 ? 'color' : 'colores'}</span>
                                     ${item.modelo && item.modelo.toLowerCase().includes('reacondicionado') ? `<span class="spec-tag" style="background-color: #fffbeb; color: #d97706; border: 1px solid #fef3c7; font-weight: 600;">🔧 Reacondicionado</span>` : ''}
                                 </div>
                                 ${item.precioContado ? `<div class="price-row"><span class="price-contado">Precio Contado:</span><span class="price-contado"><span>$${Math.round(item.precioContado).toLocaleString('es-MX')} MXN</span></span></div>` : ''}
-                                <div class="enganche" data-enganche="${(Math.ceil((item.engancheMinimo || 0) / 10) * 10).toLocaleString('es-MX')}" data-precio="${Math.round(item.precioContado).toLocaleString('es-MX')}">
+                                <div class="enganche" data-enganche="${engancheSemanalCalculado.toLocaleString('es-MX')}" data-precio="${Math.round(item.precioContado).toLocaleString('es-MX')}">
                                     <span>Pago Inicial</span>
-                                    Enganche: $${(Math.ceil((item.precioContado * (CONFIG_TASAS.engancheSemanal || 0.165)) / 10) * 10).toLocaleString('es-MX')} MXN
+                                    Enganche: $${engancheSemanalCalculado.toLocaleString('es-MX')} MXN
                                 </div>
                             </div>
                             <div>
@@ -1584,21 +1674,21 @@
                                     <div class="cuotas-semanal">
                                         <div class="cuota-item">
                                             <span class="plan-label">⏱️ Plan Rápido (26 sem):</span>
-                                            <span class="plan-val">$${Math.round(item.cuota26 || 0).toLocaleString('es-MX')} MXN/sem</span>
+                                            <span class="plan-val">$${cuotaSem26.toLocaleString('es-MX')} MXN/sem</span>
                                         </div>
                                         <div class="cuota-item" style="margin-top: 8px;">
                                             <span class="plan-label">🗓️ Plan Cómodo (52 sem):</span>
-                                            <span class="plan-val">$${Math.round(item.cuota52 || 0).toLocaleString('es-MX')} MXN/sem</span>
+                                            <span class="plan-val">$${cuotaSem52.toLocaleString('es-MX')} MXN/sem</span>
                                         </div>
                                     </div>
                                     <div class="cuotas-quincenal" style="display: none;">
                                         <div class="cuota-item">
                                             <span class="plan-label">⏱️ Plan Rápido (13 quin):</span>
-                                            <span class="plan-val">$${Math.round((item.cuota26 || 0) * 2).toLocaleString('es-MX')} MXN/quin</span>
+                                            <span class="plan-val">$${cuotaQuin13.toLocaleString('es-MX')} MXN/quin</span>
                                         </div>
                                         <div class="cuota-item" style="margin-top: 8px;">
                                             <span class="plan-label">🗓️ Plan Cómodo (26 quin):</span>
-                                            <span class="plan-val">$${Math.round((item.cuota52 || 0) * 2).toLocaleString('es-MX')} MXN/quin</span>
+                                            <span class="plan-val">$${cuotaQuin26.toLocaleString('es-MX')} MXN/quin</span>
                                         </div>
                                     </div>
                                     <div class="cuotas-contado" style="display: none;">
@@ -1608,7 +1698,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/\'/g, "").replace(/\"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">Pedir a Crédito</button>
+                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/\'/g, "").replace(/\"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheSemanalCalculado}, '${item.color || ""}', '${item.memoria || ""}', this)">Pedir a Crédito</button>
                             </div>
                         </div>
                     `;
@@ -1970,6 +2060,9 @@
                 document.getElementById('pdp-weekly-amount').innerText = `$${Math.round(cuotaActiva).toLocaleString('es-MX')} MXN`;
                 document.getElementById('pdp-weekly-term').innerText = `en ${numPagos} pagos ${labelFrecuencia}`;
             }
+
+            document.getElementById('hiddenCuota26').value = calcularCuotaSemanal26(precioContado);
+            document.getElementById('hiddenCuota52').value = calcularCuotaSemanal52(precioContado);
         }
 
         function cerrarModal() {
@@ -2065,6 +2158,10 @@
                 const rawData = await resProxy.json();
                 if (!rawData || rawData.error) {
                     throw new Error(rawData ? rawData.error : "No se recibieron datos.");
+                }
+
+                if (!rawData.title && rawData.name) {
+                    rawData.title = rawData.name;
                 }
 
                 // Validar la marca
@@ -2368,12 +2465,19 @@
                 // Determinar cuota correspondiente al plazo elegido y frecuencia
                 let cuotaBase = 0;
                 if (freq !== "CONTADO") {
-                    const cuota26 = parseFloat(document.getElementById('hiddenCuota26').value) || 150;
-                    const cuota52 = parseFloat(document.getElementById('hiddenCuota52').value) || 100;
-                    cuotaBase = (plazo === "26 Semanas") ? cuota26 : cuota52;
+                    const precioContado = parseFloat(document.getElementById('hiddenPrecioContado').value) || 0;
+                    let numPagos = (plazo === "26 Semanas") ? 26 : 52;
                     if (freq === "QUINCENAL") {
-                        cuotaBase = cuotaBase * 2;
+                        numPagos = numPagos / 2;
                     }
+                    const factorEnganche = (freq === "SEMANAL") 
+                        ? (CONFIG_TASAS.engancheSemanal || 0.165) 
+                        : (CONFIG_TASAS.engancheQuincenal || 0.33);
+                    const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
+
+                    const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
+                    const totalFinanciado = (precioContado * (1 + factorInteres)) - engancheCalculado;
+                    cuotaBase = totalFinanciado / numPagos;
                 }
                 params.append('cuota', Math.round(cuotaBase));
 
@@ -3997,7 +4101,28 @@
                                 // Only skip if the color has absolutely no stock in the family
                                 if (!isOptionInFamily("color", p.picker_label) && !isSel) return;
 
-                                if (!coloresVistos.has(normColor) || isSel) {
+                                const specItem = productMapGlobal[p.product_id];
+                                const isOutOfStock = specItem ? specItem.isOutOfStock : false;
+
+                                const existing = coloresVistos.get(normColor);
+                                let shouldSet = false;
+
+                                if (!existing) {
+                                    shouldSet = true;
+                                } else {
+                                    const existingSpec = productMapGlobal[existing.id];
+                                    const existingOutOfStock = existingSpec ? existingSpec.isOutOfStock : false;
+
+                                    if (isSel) {
+                                        shouldSet = true;
+                                    } else if (existingOutOfStock && !isOutOfStock) {
+                                        if (!existing.isSelected) {
+                                            shouldSet = true;
+                                        }
+                                    }
+                                }
+
+                                if (shouldSet) {
                                     coloresVistos.set(normColor, {
                                         id: p.product_id,
                                         name: normalizarColorSinGrado(p.picker_label),

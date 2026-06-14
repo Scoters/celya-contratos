@@ -769,6 +769,54 @@
         let dbHistorialPagos = [];
         let clienteSeleccionadoActual = null;
 
+        function limpiarNombreModelo(modelo) {
+            if (!modelo) return "";
+            let clean = modelo.trim();
+
+            const isRefurb = /reacondicionado|refurbished|refurb/i.test(modelo);
+
+            // 0. Remover fragmentos de reacondicionado y detalles de caja/condición
+            clean = clean.replace(/-\s*(excelente|muy\s*bueno|bueno|aceptable|regular)\s*(\(reacondicionado\))?/gi, "");
+            clean = clean.replace(/\b(reacondicionado|refurbished|refurb)\b/gi, "");
+            clean = clean.replace(/\b(caja\s*(maltratada|dañada|abierta|original|sellada))\b/gi, "");
+            clean = clean.replace(/\b(dual\s*sim|single\s*sim)\b/gi, "");
+            clean = clean.replace(/\b(desbloqueado|liberado|unlocked)\b/gi, "");
+            clean = clean.replace(/\b(nacional|internacional|global)\b/gi, "");
+
+            // 1. Remover colores conocidos (incluyendo variaciones)
+            const colores = [
+                "black", "negro", "blue", "azul", "white", "blanco", "green", "verde", "silver", "plata",
+                "gray", "gris", "gold", "oro", "purple", "morado", "pink", "rosa", "red", "rojo", "light",
+                "dark", "sky", "navy", "rose", "violet", "violeta", "lavender", "lavanda", "carbon", "carbono",
+                "claro", "oscuro", "space", "estelar", "celeste", "brillante", "mate",
+                "phantom", "cream", "crema", "beige", "coral", "titanium", "titanio",
+                "graphite", "grafito", "burgundy", "borgoña", "midnight", "medianoche",
+                "starlight", "ice", "hielo", "bronze", "bronce", "sand", "arena",
+                "indigo", "teal", "mint", "menta", "lime", "lima", "ivory", "marfil"
+            ];
+            colores.forEach(color => {
+                const regex = new RegExp("\\b" + color + "\\b", "gi");
+                clean = clean.replace(regex, "");
+            });
+
+            // 2. Remover capacidades de almacenamiento y RAM por completo
+            const regexGb = /(\d+)\s*(gb|tb|ram)\b/gi;
+            clean = clean.replace(regexGb, "");
+
+            // Remover palabras conectoras/redundantes
+            clean = clean.replace(/\b(con|de|color|ram)\b/gi, "");
+
+            // Limpiar múltiples espacios en blanco y caracteres colgantes
+            clean = clean.replace(/\s+/g, " ").trim();
+            clean = clean.replace(/^[,\-\s]+|[,\-\s]+$/g, "");
+
+            if (isRefurb) {
+                clean += " (Reacondicionado)";
+            }
+
+            return clean;
+        }
+
         window.onload = async function () {
             try {
                 const urlAutenticada = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}&action=obtenerDatosDashboard`;
@@ -1078,7 +1126,7 @@
                                                 <img src="${it.foto || ''}" style="max-width:100%; max-height:100%; object-fit:contain;" onerror="this.src='https://placehold.co/72x72?text=CelYa';" />
                                             </div>
                                             <div style="flex:1;">
-                                                <div style="font-weight:bold; color:var(--text-primary);">${it.modelo} (${it.cliente})</div>
+                                                <div style="font-weight:bold; color:var(--text-primary);">${limpiarNombreModelo(it.modelo)} (${it.cliente})</div>
                                                 <div style="font-size:13px; color:var(--text-secondary);">Precio Financiado: $${Number(it.precioPlaceholder).toLocaleString('es-MX')}</div>
                                                 <div style="font-size:13px; color:var(--text-secondary);">Color: ${it.color || '—'} • Capacidad: ${it.memoria || '—'}</div>
                                                 <div style="font-size:13px; color:var(--text-secondary);">Plan: ${it.planElegido || '—'} sem • Frecuencia: ${it.frecuencia || '—'}</div>
@@ -1101,7 +1149,7 @@
                         cont.innerHTML = `
                             <div style="padding:6px; text-align:left;">
                                 <h3 style="margin-top:0;">Convertir Cotización a Inventario (fila ${fila})</h3>
-                                <div style="margin-bottom:12px; font-weight:bold; color:var(--text-primary); font-size:16px;">${modelo}</div>
+                                <div style="margin-bottom:12px; font-weight:bold; color:var(--text-primary); font-size:16px;">${limpiarNombreModelo(modelo)}</div>
                                 <label>IMEI nuevo (requerido):</label>
                                 <input id="conv-imei" placeholder="Ej. 990000000000012" />
                                 <label>Color:</label>
