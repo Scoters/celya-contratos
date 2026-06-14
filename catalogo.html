@@ -3824,7 +3824,7 @@
                                       }
 
                                      // Synchronize all global selection variables with the target product's attributes in productMapGlobal
-                                     const targetSpecs = productMapGlobal[targetProdId];
+                                     const targetSpecs = productMapGlobal[colorInfo.id] || productMapGlobal[targetProdId];
                                      if (targetSpecs) {
                                          if (targetSpecs.color) {
                                              colorSeleccionadoGlobal = targetSpecs.color;
@@ -4033,7 +4033,7 @@
                                          }
 
                                          // Synchronize all global selection variables with the target product's attributes in productMapGlobal
-                                         const targetSpecs = productMapGlobal[targetProdId];
+                                         const targetSpecs = productMapGlobal[itemInfo.id] || productMapGlobal[targetProdId];
                                          if (targetSpecs) {
                                              if (targetSpecs.color) {
                                                  colorSeleccionadoGlobal = targetSpecs.color;
