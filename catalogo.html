@@ -888,6 +888,25 @@
                 box-sizing: border-box;
                 padding: 0;
             }
+
+        .color-circle.unavailable {
+            opacity: 0.4;
+            border-style: dashed;
+            cursor: pointer;
+        }
+        .color-circle.unavailable:hover {
+            transform: scale(1.05);
+            opacity: 0.7;
+        }
+        .storage-pill.unavailable {
+            opacity: 0.4;
+            border-style: dashed;
+            background-color: #f1f5f9;
+            cursor: pointer;
+        }
+        .storage-pill.unavailable:hover {
+            background-color: #e2e8f0;
+            opacity: 0.7;
         }
 
         @keyframes spin {
@@ -2403,9 +2422,153 @@
         let colorSeleccionadoGlobal = "";
         let memoriaSeleccionadaGlobal = "";
         let gradingSeleccionadoGlobal = "";
+        let ramSeleccionadaGlobal = "";
         let colorSeleccionado = "";
         let almacenamientoSeleccionado = "";
         let itemVariationsData = [];
+        let productMapGlobal = {};
+
+        // Parse specs (color, memory, ram) from Mercado Libre product names
+        function parseSpecsFromProductName(name) {
+            if (!name) return { color: "", memory: "", ram: "" };
+            
+            // Try to split by " - " first
+            const parts = name.split(" - ");
+            let color = "";
+            if (parts.length >= 2) {
+                color = parts[1].trim();
+            }
+            
+            const lowerName = name.toLowerCase();
+            
+            // If color not found by splitting, try to extract color name by matching known color keys
+            if (!color) {
+                const colorKeys = [
+                    "negro", "black", "oscuro", "dark", "space", "titanio", "titanium", "carbono", "carbon", "grafito", "graphite",
+                    "blanco", "white", "claro", "light", "plata", "silver", "cream", "crema", "marfil", "ivory",
+                    "azul", "blue", "celeste", "sky", "indigo", "marino",
+                    "verde lima", "lima verde", "verde", "green", "lima", "lime", "menta", "mint",
+                    "rojo", "red", "naranja", "orange", "coral",
+                    "rosa", "pink", "gold", "oro", "dorado", "bronce", "bronze",
+                    "violeta", "violet", "purpura", "purple", "morado", "lavanda", "lavender"
+                ];
+                // Sort color keys by length descending to match longer names first
+                const sortedColorKeys = colorKeys.sort((a, b) => b.length - a.length);
+                for (const key of sortedColorKeys) {
+                    if (lowerName.includes(key)) {
+                        color = key.split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+                        break;
+                    }
+                }
+            }
+            
+            const matches = [...lowerName.matchAll(/(\d+)\s*(gb|tb)/gi)];
+            const gbValues = matches.map(m => {
+                let val = parseInt(m[1], 10);
+                if (m[2].toLowerCase() === 'tb') val *= 1024;
+                return { val, original: m[0] };
+            });
+            
+            gbValues.sort((a, b) => b.val - a.val);
+            
+            let memory = "";
+            let ram = "";
+            if (gbValues.length >= 2) {
+                memory = gbValues[0].original.toUpperCase();
+                ram = gbValues[1].original.toUpperCase();
+            } else if (gbValues.length === 1) {
+                memory = gbValues[0].original.toUpperCase();
+            }
+            
+            return { color, memory, ram };
+        }
+
+        // Check if a specific picker option exists in stock for ANY product in the family
+        function isOptionInFamily(optionType, optionValue) {
+            if (!optionValue) return false;
+            const valClean = optionValue.toLowerCase().replace(/\s+/g, "");
+            return Object.values(productMapGlobal).some(prod => {
+                if (prod.isOutOfStock) return false;
+                if (optionType === "color") {
+                    const prodColor = prod.color ? prod.color.toLowerCase().replace(/\s+/g, "") : "";
+                    if (prodColor !== valClean) return false;
+                } else if (optionType === "memory") {
+                    const prodMem = prod.memory ? prod.memory.toLowerCase().replace(/\s+/g, "") : "";
+                    if (prodMem !== valClean) return false;
+                } else if (optionType === "ram") {
+                    const prodRam = prod.ram ? prod.ram.toLowerCase().replace(/\s+/g, "") : "";
+                    if (prodRam !== valClean) return false;
+                } else if (optionType === "grading") {
+                    const prodGrad = prod.grading ? prod.grading.toLowerCase().replace(/\s+/g, "") : "";
+                    if (prodGrad !== valClean) return false;
+                }
+                return true;
+            });
+        }
+
+        // Check if a specific picker option is available and in stock for the current variant configuration
+        function isOptionAvailable(optionType, optionValue) {
+            if (!optionValue) return false;
+            const valClean = optionValue.toLowerCase().replace(/\s+/g, "");
+            
+            // Always show the currently selected option to avoid disappearing states
+            if (optionType === "color" && colorSeleccionadoGlobal && colorSeleccionadoGlobal.toLowerCase().replace(/\s+/g, "") === valClean) {
+                return true;
+            }
+            if (optionType === "memory" && memoriaSeleccionadaGlobal && memoriaSeleccionadaGlobal.toLowerCase().replace(/\s+/g, "") === valClean) {
+                return true;
+            }
+            if (optionType === "ram" && ramSeleccionadaGlobal && ramSeleccionadaGlobal.toLowerCase().replace(/\s+/g, "") === valClean) {
+                return true;
+            }
+            if (optionType === "grading" && gradingSeleccionadoGlobal && gradingSeleccionadoGlobal.toLowerCase().replace(/\s+/g, "") === valClean) {
+                return true;
+            }
+
+            return Object.values(productMapGlobal).some(prod => {
+                if (prod.isOutOfStock) return false;
+
+                // Verify the product matches the option value under test
+                if (optionType === "color") {
+                    const prodColor = prod.color ? prod.color.toLowerCase().replace(/\s+/g, "") : "";
+                    if (prodColor !== valClean) return false;
+                } else if (optionType === "memory") {
+                    const prodMem = prod.memory ? prod.memory.toLowerCase().replace(/\s+/g, "") : "";
+                    if (prodMem !== valClean) return false;
+                } else if (optionType === "ram") {
+                    const prodRam = prod.ram ? prod.ram.toLowerCase().replace(/\s+/g, "") : "";
+                    if (prodRam !== valClean) return false;
+                } else if (optionType === "grading") {
+                    const prodGrad = prod.grading ? prod.grading.toLowerCase().replace(/\s+/g, "") : "";
+                    if (prodGrad !== valClean) return false;
+                }
+
+                // Verify the product matches all other currently selected specs
+                if (optionType !== "color" && colorSeleccionadoGlobal) {
+                    const prodColor = prod.color ? prod.color.toLowerCase().replace(/\s+/g, "") : "";
+                    const selColor = colorSeleccionadoGlobal.toLowerCase().replace(/\s+/g, "");
+                    if (prodColor !== selColor) return false;
+                }
+                if (optionType !== "memory" && memoriaSeleccionadaGlobal) {
+                    const prodMem = prod.memory ? prod.memory.toLowerCase().replace(/\s+/g, "") : "";
+                    const selMem = memoriaSeleccionadaGlobal.toLowerCase().replace(/\s+/g, "");
+                    if (prodMem !== selMem) return false;
+                }
+                if (optionType !== "ram" && ramSeleccionadaGlobal) {
+                    const prodRam = prod.ram ? prod.ram.toLowerCase().replace(/\s+/g, "") : "";
+                    const selRam = ramSeleccionadaGlobal.toLowerCase().replace(/\s+/g, "");
+                    if (prodRam !== selRam) return false;
+                }
+                if (optionType !== "grading" && gradingSeleccionadoGlobal) {
+                    const prodGrad = prod.grading ? prod.grading.toLowerCase().replace(/\s+/g, "") : "";
+                    const selGrad = gradingSeleccionadoGlobal.toLowerCase().replace(/\s+/g, "");
+                    if (prodGrad !== selGrad) return false;
+                }
+
+                return true;
+            });
+        }
+
         function obtenerCodigoColor(nombreColor) {
             if (!nombreColor || nombreColor.trim() === "" || nombreColor === "-") {
                 return "#94a3b8";
@@ -2601,7 +2764,7 @@
             return null;
         }
 
-        async function cargarVariantesRealesML(idProducto, esCambioVariante = false) {
+        async function cargarVariantesRealesML(idProducto, esCambioVariante = false, isAutoRedirect = false) {
             const contenedor = document.getElementById('ml-dynamic-variants-container');
             const wrapperColores = document.getElementById('ml-colors-wrapper');
             const wrapperStorage = document.getElementById('ml-storage-wrapper');
@@ -2619,6 +2782,7 @@
                 colorSeleccionadoGlobal = "";
                 memoriaSeleccionadaGlobal = "";
                 gradingSeleccionadoGlobal = "";
+                ramSeleccionadaGlobal = "";
                 itemVariationsData = [];
                 variantesVivasGlobal = [];
 
@@ -2748,13 +2912,13 @@
 
             const hasSpecificFreshData = cache && cache.isFresh && (cache.id === cleanId || cache.catalog_product_id === cleanId);
 
-            if (!cache) {
+            if (!hasSpecificFreshData) {
                 mostrarCargandoVariantes();
             } else {
                 ocultarCargandoVariantes();
             }
 
-            if (esCambioVariante && !cache) {
+            if (esCambioVariante && !hasSpecificFreshData) {
                 // Agregar feedback de carga para que no sea brusco, pero sin bloquear toda la pantalla
                 wrapperColores.style.opacity = "0.4";
                 wrapperColores.style.pointerEvents = "none";
@@ -2861,10 +3025,13 @@
                                  }
 
                                  // Forzar renderizado secundario con los datos actualizados
-                                 cargarVariantesRealesML(idProducto, esCambioVariante);
+                                 cargarVariantesRealesML(idProducto, esCambioVariante, isAutoRedirect);
+                             } else {
+                                 ocultarCargandoVariantes();
                              }
                         } catch (err) {
                             console.error("Error in background fetch:", err);
+                            ocultarCargandoVariantes();
                         } finally {
                             delete isFetchingML[cleanId];
                             if (!ML_CACHE_VARIANTES[cleanId]) {
@@ -2893,8 +3060,63 @@
 
                 if (!data) return;
 
+                // Populate productMapGlobal with all products in the family from pickers
+                productMapGlobal = {};
+                if (data.pickers) {
+                    data.pickers.forEach(picker => {
+                        const pIdUpper = picker.picker_id ? picker.picker_id.toUpperCase() : "";
+                        let attributeType = "";
+                        if (pIdUpper.includes("COLOR") || pIdUpper === "FINISH" || pIdUpper === "ACABADO") {
+                            attributeType = "color";
+                        } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
+                            attributeType = "memory";
+                        } else if (pIdUpper.includes("RAM")) {
+                            attributeType = "ram";
+                        } else if (pIdUpper === "GRADING") {
+                            attributeType = "grading";
+                        }
+
+                        if (picker.products) {
+                            picker.products.forEach(p => {
+                                if (!p.product_id) return;
+                                const isOutOfStock = p.tags && (
+                                    p.tags.includes("out-of-stock") ||
+                                    p.tags.includes("disabled")
+                                );
+                                if (!productMapGlobal[p.product_id]) {
+                                    const parsed = parseSpecsFromProductName(p.product_name || p.product_title || "");
+                                    productMapGlobal[p.product_id] = {
+                                        id: p.product_id,
+                                        color: parsed.color || "",
+                                        memory: parsed.memory || "",
+                                        ram: parsed.ram || "",
+                                        grading: parsed.grading || "",
+                                        tags: p.tags || [],
+                                        isOutOfStock: isOutOfStock
+                                    };
+                                } else {
+                                    if (p.tags) {
+                                        p.tags.forEach(t => {
+                                            if (!productMapGlobal[p.product_id].tags.includes(t)) {
+                                                productMapGlobal[p.product_id].tags.push(t);
+                                            }
+                                        });
+                                        const outOfStockFlag = productMapGlobal[p.product_id].tags.includes("out-of-stock") || productMapGlobal[p.product_id].tags.includes("disabled");
+                                        productMapGlobal[p.product_id].isOutOfStock = outOfStockFlag;
+                                    }
+                                }
+
+                                // Update specific field from this picker
+                                if (attributeType && p.picker_label) {
+                                    productMapGlobal[p.product_id][attributeType] = p.picker_label.trim();
+                                }
+                            });
+                        }
+                    });
+                }
+
                 // Auto-redirection to match user's selected attributes
-                if (data.pickers && data.pickers.length > 0) {
+                if (!isAutoRedirect && data.pickers && data.pickers.length > 0) {
                     let redirectId = null;
 
                     // 1. Check GRADING (Condition)
@@ -2931,6 +3153,23 @@
                         }
                     }
 
+                    // 3. Check RAM if grading and memory are already matching or not present
+                    if (!redirectId && ramSeleccionadaGlobal) {
+                        const ramPicker = data.pickers.find(p => p.picker_id && p.picker_id.toUpperCase().includes("RAM"));
+                        if (ramPicker) {
+                            const activeRamProduct = ramPicker.products && ramPicker.products.find(p => p.product_id === cleanId);
+                            const activeRamLabel = activeRamProduct ? activeRamProduct.picker_label.trim().toLowerCase().replace(/\s+/g, "") : "";
+                            const targetRamLabel = ramSeleccionadaGlobal.trim().toLowerCase().replace(/\s+/g, "");
+
+                            if (activeRamLabel && activeRamLabel !== targetRamLabel) {
+                                const targetRamProd = ramPicker.products.find(p => p.picker_label && p.picker_label.trim().toLowerCase().replace(/\s+/g, "") === targetRamLabel);
+                                if (targetRamProd && targetRamProd.product_id && targetRamProd.product_id !== cleanId) {
+                                    redirectId = targetRamProd.product_id;
+                                }
+                            }
+                        }
+                    }
+
                     if (redirectId) {
                         console.log(`[VARIANT AUTO-REDIRECT] Redirecting from ${cleanId} to ${redirectId} to preserve user selections.`);
                         currentMLItemLink = `https://www.mercadolibre.com.mx/p/${redirectId}`;
@@ -2946,7 +3185,7 @@
                             }
                         } catch(e) {}
 
-                        cargarVariantesRealesML(redirectId, true);
+                        cargarVariantesRealesML(redirectId, true, true);
                         return;
                     }
                 }
@@ -2961,7 +3200,11 @@
                     data.pickers.forEach(picker => {
                         const pIdUpper = picker.picker_id.toUpperCase();
                         // 1. Buscar si el producto activo actual (cleanId) está en el listado de este picker
-                        const matchingProd = picker.products && picker.products.find(p => p.product_id === cleanId);
+                        const matchingProd = picker.products && picker.products.find(p => 
+                            p.product_id === cleanId || 
+                            p.product_id === data.id || 
+                            (data.catalog_product_id && p.product_id === data.catalog_product_id)
+                        );
                         if (matchingProd) {
                             const val = matchingProd.picker_label.trim();
                             if (pIdUpper.includes("COLOR") || pIdUpper === "FINISH" || pIdUpper === "ACABADO") {
@@ -3036,9 +3279,12 @@
                 if (!activeColorVal) activeColorVal = colorSeleccionado || defaultColor || "";
                 if (!activeStorageVal) activeStorageVal = almacenamientoSeleccionado || defaultMemoria || "";
                 
-                colorSeleccionadoGlobal = activeColorVal || colorSeleccionadoGlobal || "";
-                memoriaSeleccionadaGlobal = activeStorageVal || memoriaSeleccionadaGlobal || "";
-                gradingSeleccionadoGlobal = activeGradingVal || gradingSeleccionadoGlobal || "";
+                colorSeleccionadoGlobal = activeColorVal;
+                colorSeleccionado = activeColorVal;
+                memoriaSeleccionadaGlobal = activeStorageVal;
+                almacenamientoSeleccionado = activeStorageVal;
+                gradingSeleccionadoGlobal = activeGradingVal || "";
+                ramSeleccionadaGlobal = activeRamVal || "";
 
                 // Limpiar selectores previos antes de repintar los reales
                 wrapperColores.innerHTML = "";
@@ -3103,7 +3349,11 @@
                 // Buscar si tenemos el nombre específico para este variant ID en el listado de pickers
                 if (data.pickers) {
                     for (const picker of data.pickers) {
-                        const matchingP = picker.products && picker.products.find(p => p.product_id === cleanId);
+                        const matchingP = picker.products && picker.products.find(p => 
+                            p.product_id === cleanId || 
+                            p.product_id === data.id || 
+                            (data.catalog_product_id && p.product_id === data.catalog_product_id)
+                        );
                         if (matchingP && matchingP.product_name) {
                             cleanName = matchingP.product_name;
                             break;
@@ -3341,7 +3591,7 @@
                         return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
                     });
 
-                    // 🎨 Pintamos los círculos de colores reales obtenidos (Deduplicados)
+                     // 🎨 Pintamos los círculos de colores reales obtenidos (Deduplicados)
                     if (colorPicker && colorPicker.products && colorPicker.products.length > 0) {
                         try {
                             wrapperColores.innerHTML = "";
@@ -3351,12 +3601,10 @@
                                 if (!p.picker_label) return;
                                 const normColor = p.picker_label.trim().toLowerCase();
                                 const isSel = p.tags && p.tags.includes("selected");
-                                const isUnavailable = p.tags && (
-                                    p.tags.includes("out-of-stock") ||
-                                    p.tags.includes("disabled") ||
-                                    p.tags.includes("change-multiple-pickers")
-                                );
-                                if (isUnavailable && !isSel) return;
+
+                                // Only skip if the color has absolutely no stock in the family
+                                if (!isOptionInFamily("color", p.picker_label) && !isSel) return;
+
                                 if (!coloresVistos.has(normColor) || isSel) {
                                     coloresVistos.set(normColor, {
                                         id: p.product_id,
@@ -3370,29 +3618,36 @@
                             const coloresOrdenados = Array.from(coloresVistos.entries());
                             let targetColorNorm = "";
 
-                            for (const [normColor, colorInfo] of coloresOrdenados) {
-                                if (normColor === defaultColorNorm || colorInfo.id === cleanId) {
-                                    targetColorNorm = normColor;
-                                    break;
-                                }
-                            }
-                            if (!targetColorNorm) {
-                                for (const [normColor, colorInfo] of coloresOrdenados) {
-                                    if (colorInfo.isSelected) {
-                                        targetColorNorm = normColor;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (!targetColorNorm && coloresOrdenados.length > 0) {
-                                targetColorNorm = coloresOrdenados[0][0];
-                            }
+                             for (const [normColor, colorInfo] of coloresOrdenados) {
+                                 if (
+                                     normColor === defaultColorNorm || 
+                                     colorInfo.id === cleanId || 
+                                     colorInfo.id === data.id || 
+                                     (data.catalog_product_id && colorInfo.id === data.catalog_product_id)
+                                 ) {
+                                     targetColorNorm = normColor;
+                                     break;
+                                 }
+                             }
+                             if (!targetColorNorm) {
+                                 for (const [normColor, colorInfo] of coloresOrdenados) {
+                                     if (colorInfo.isSelected) {
+                                         targetColorNorm = normColor;
+                                         break;
+                                     }
+                                 }
+                             }
+                             if (!targetColorNorm && coloresOrdenados.length > 0) {
+                                 targetColorNorm = coloresOrdenados[0][0];
+                             }
 
                             coloresOrdenados.forEach(([normColor, colorInfo]) => {
                                 const divColor = document.createElement('div');
                                 const isSelected = (normColor === targetColorNorm);
-                                divColor.className = `color-circle ${isSelected ? 'selected' : ''}`;
-                                divColor.title = colorInfo.name;
+                                const isAvailable = isOptionAvailable("color", colorInfo.name);
+
+                                divColor.className = `color-circle ${isSelected ? 'selected' : ''} ${!isAvailable ? 'unavailable' : ''}`;
+                                divColor.title = colorInfo.name + (!isAvailable ? ' (No disponible en esta combinación)' : '');
                                 divColor.setAttribute('data-color', colorInfo.name);
 
                                 divColor.style.backgroundColor = obtenerCodigoColor(colorInfo.name);
@@ -3403,8 +3658,39 @@
                                 }
 
                                 divColor.onclick = function () {
-                                    // If this color already maps to the currently loaded variant id, skip reload
-                                    if (colorInfo.id === cleanId) return;
+                                     // If this color already maps to the currently loaded variant id, skip reload
+                                      if (
+                                          colorInfo.id === cleanId || 
+                                          colorInfo.id === data.id || 
+                                          (data.catalog_product_id && colorInfo.id === data.catalog_product_id)
+                                      ) {
+                                          document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
+                                          this.classList.add('selected');
+                                          return;
+                                      }
+
+                                     // Synchronize all global selection variables with the target product's attributes in productMapGlobal
+                                     const targetSpecs = productMapGlobal[colorInfo.id];
+                                     if (targetSpecs) {
+                                         if (targetSpecs.color) {
+                                             colorSeleccionadoGlobal = targetSpecs.color;
+                                             colorSeleccionado = targetSpecs.color;
+                                         }
+                                         if (targetSpecs.memory) {
+                                             memoriaSeleccionadaGlobal = targetSpecs.memory;
+                                             almacenamientoSeleccionado = targetSpecs.memory;
+                                         }
+                                         if (targetSpecs.ram) {
+                                             ramSeleccionadaGlobal = targetSpecs.ram;
+                                         }
+                                         if (targetSpecs.grading) {
+                                             gradingSeleccionadoGlobal = targetSpecs.grading;
+                                         }
+                                     }
+
+                                      // Show loading overlay immediately
+                                      mostrarCargandoVariantes();
+
                                     document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
                                     this.classList.add('selected');
                                     colorSeleccionado = colorInfo.name;
@@ -3477,11 +3763,19 @@
                                     if (!prod.picker_label) return;
                                     const normLabel = prod.picker_label.trim().toLowerCase();
                                     const isSel = prod.tags && prod.tags.includes("selected");
-                                    const isUnavailable = prod.tags && (
-                                        prod.tags.includes("out-of-stock") ||
-                                        prod.tags.includes("disabled")
-                                    );
-                                    if (isUnavailable && !isSel) return;
+
+                                    let optionType = "";
+                                    if (pIdUpper.includes("RAM")) {
+                                        optionType = "ram";
+                                    } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
+                                        optionType = "memory";
+                                    } else if (pIdUpper === "GRADING") {
+                                        optionType = "grading";
+                                    }
+                                    
+                                    // Only skip if the option has absolutely no stock in the family
+                                    if (optionType && !isOptionInFamily(optionType, prod.picker_label) && !isSel) return;
+
                                     if (!itemsVistos.has(normLabel) || isSel) {
                                         itemsVistos.set(normLabel, {
                                             id: prod.product_id,
@@ -3504,23 +3798,28 @@
                                 const itemsOrdenados = Array.from(itemsVistos.entries());
                                 let targetItemNorm = "";
 
-                                for (const [normLabel, itemInfo] of itemsOrdenados) {
-                                    if (normLabel === activeValNorm || itemInfo.id === cleanId) {
-                                        targetItemNorm = normLabel;
-                                        break;
-                                    }
-                                }
-                                if (!targetItemNorm) {
-                                    for (const [normLabel, itemInfo] of itemsOrdenados) {
-                                        if (itemInfo.isSelected) {
-                                            targetItemNorm = normLabel;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (!targetItemNorm && itemsOrdenados.length > 0) {
-                                    targetItemNorm = itemsOrdenados[0][0];
-                                }
+                                 for (const [normLabel, itemInfo] of itemsOrdenados) {
+                                     if (
+                                         normLabel === activeValNorm || 
+                                         itemInfo.id === cleanId || 
+                                         itemInfo.id === data.id || 
+                                         (data.catalog_product_id && itemInfo.id === data.catalog_product_id)
+                                     ) {
+                                         targetItemNorm = normLabel;
+                                         break;
+                                     }
+                                 }
+                                 if (!targetItemNorm) {
+                                     for (const [normLabel, itemInfo] of itemsOrdenados) {
+                                         if (itemInfo.isSelected) {
+                                             targetItemNorm = normLabel;
+                                             break;
+                                         }
+                                     }
+                                 }
+                                 if (!targetItemNorm && itemsOrdenados.length > 0) {
+                                     targetItemNorm = itemsOrdenados[0][0];
+                                 }
 
                                 const selectedItem = itemsVistos.get(targetItemNorm);
                                 if (selectedItem) {
@@ -3542,12 +3841,59 @@
                                 itemsOrdenados.forEach(([normLabel, itemInfo]) => {
                                     const pill = document.createElement('button');
                                     const isSelected = (normLabel === targetItemNorm);
-                                    pill.className = `storage-pill ${isSelected ? 'selected' : ''}`;
+                                    
+                                    let optionType = "";
+                                    if (pIdUpper.includes("RAM")) {
+                                        optionType = "ram";
+                                    } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
+                                        optionType = "memory";
+                                    } else if (pIdUpper === "GRADING") {
+                                        optionType = "grading";
+                                    }
+                                    
+                                    const isAvailable = optionType ? isOptionAvailable(optionType, itemInfo.name) : true;
+
+                                    pill.className = `storage-pill ${isSelected ? 'selected' : ''} ${!isAvailable ? 'unavailable' : ''}`;
                                     pill.type = 'button';
                                     pill.innerText = itemInfo.name;
+                                    if (!isAvailable) {
+                                        pill.title = "No disponible en esta combinación";
+                                    }
 
                                     pill.onclick = function () {
-                                        if (itemInfo.id === cleanId && pIdUpper !== "GRADING") return;
+                                         if (
+                                             (itemInfo.id === cleanId || 
+                                              itemInfo.id === data.id || 
+                                              (data.catalog_product_id && itemInfo.id === data.catalog_product_id)) && 
+                                             pIdUpper !== "GRADING"
+                                         ) {
+                                             pillsWrapper.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
+                                             this.classList.add('selected');
+                                             return;
+                                         }
+
+                                         // Synchronize all global selection variables with the target product's attributes in productMapGlobal
+                                         const targetSpecs = productMapGlobal[itemInfo.id];
+                                         if (targetSpecs) {
+                                             if (targetSpecs.color) {
+                                                 colorSeleccionadoGlobal = targetSpecs.color;
+                                                 colorSeleccionado = targetSpecs.color;
+                                             }
+                                             if (targetSpecs.memory) {
+                                                 memoriaSeleccionadaGlobal = targetSpecs.memory;
+                                                 almacenamientoSeleccionado = targetSpecs.memory;
+                                             }
+                                             if (targetSpecs.ram) {
+                                                 ramSeleccionadaGlobal = targetSpecs.ram;
+                                             }
+                                             if (targetSpecs.grading) {
+                                                 gradingSeleccionadoGlobal = targetSpecs.grading;
+                                             }
+                                         }
+
+                                         // Show loading overlay immediately
+                                         mostrarCargandoVariantes();
+
                                         pillsWrapper.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
                                         this.classList.add('selected');
 
@@ -3567,8 +3913,6 @@
                                         } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
                                             memoriaSeleccionadaGlobal = itemInfo.name;
                                             almacenamientoSeleccionado = itemInfo.name;
-                                        } else if (pIdUpper.includes("RAM")) {
-                                            // RAM update - no price impact but track state
                                         }
 
                                         // === IMMEDIATE LOCAL PRICE UPDATE ===

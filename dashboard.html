@@ -7,62 +7,186 @@
     <title>CelYa! - Panel de Control Administrativo</title>
     <script src="config.js?v=2"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-accent: #2c3e50;
+            --primary-color: #9b59b6;
+            --primary-hover: #8e44ad;
+            --accent-orange: #e67e22;
+            --accent-orange-hover: #d35400;
+            --accent-green: #2ecc71;
+            --accent-green-hover: #27ae60;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Outfit', sans-serif;
+            background-color: #0b0f19;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(155, 89, 182, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(230, 126, 34, 0.08) 0px, transparent 50%);
+            color: var(--text-primary);
             padding: 20px;
-            background-color: #2c3e50;
-            color: #333;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dashboard-wrapper {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 20px 30px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+        }
+
+        .header-logo-title {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-logo-title img {
+            max-height: 70px;
+            width: auto;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
+            transition: transform 0.3s ease;
+        }
+
+        .header-logo-title img:hover {
+            transform: scale(1.05);
+        }
+
+        .header-text h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: left;
+        }
+
+        .header-text .subtitulo {
+            margin: 4px 0 0 0;
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: none;
+            letter-spacing: 0;
+            text-align: left;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.25fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .column-left, .column-right {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
         }
 
         .container {
-            max-width: 550px;
-            background: white;
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            margin: 20px auto;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+            margin: 0;
+            width: 100%;
+            box-sizing: border-box;
+            max-width: 100%;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(155, 89, 182, 0.15);
         }
 
         h2 {
             text-align: center;
-            color: #2c3e50;
+            color: var(--text-primary);
             margin-bottom: 5px;
         }
 
         h3 {
-            color: #2c3e50;
-            border-bottom: 2px solid #e67e22;
-            padding-bottom: 5px;
-            margin-top: 25px;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 8px;
+            margin-top: 0;
+            margin-bottom: 20px;
             font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         label {
-            font-weight: bold;
+            font-weight: 500;
             display: block;
             margin-top: 15px;
-            color: #34495e;
-            font-size: 14px;
+            color: var(--text-secondary);
+            font-size: 13px;
         }
 
         input,
         select,
         textarea {
             width: 100%;
-            padding: 12px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 12px 16px;
+            margin-top: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
             box-sizing: border-box;
             font-size: 14px;
-            background: #f9f9f9;
+            background: rgba(15, 23, 42, 0.5);
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.25);
+            background: rgba(15, 23, 42, 0.7);
         }
 
         input[readonly] {
-            background-color: #e9ecef;
-            color: #555;
-            font-weight: bold;
+            background-color: rgba(30, 41, 59, 0.7);
+            color: #cbd5e1;
+            font-weight: 600;
             cursor: not-allowed;
+            border-color: rgba(255, 255, 255, 0.05);
         }
 
         button {
@@ -72,37 +196,78 @@
             padding: 14px;
             margin-top: 20px;
             font-size: 15px;
-            font-weight: bold;
-            border-radius: 4px;
+            font-weight: 600;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: inherit;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
         }
 
         .btn-pago {
-            background: #8e44ad;
+            background: linear-gradient(135deg, #a855f7, #7e22ce);
+            box-shadow: 0 4px 12px rgba(126, 34, 206, 0.3);
         }
 
         .btn-pago:hover {
-            background: #732d91;
+            background: linear-gradient(135deg, #b55fe6, #8b2ad6);
+            box-shadow: 0 6px 18px rgba(126, 34, 206, 0.4);
         }
 
         .btn-config {
-            background: #e67e22;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
         }
 
         .btn-config:hover {
-            background: #d35400;
+            background: linear-gradient(135deg, #fa8231, #f06214);
+            box-shadow: 0 6px 18px rgba(234, 88, 12, 0.4);
+        }
+
+        #btnRegistrarCobro {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+        }
+
+        #btnRegistrarCobro:hover {
+            background: linear-gradient(135deg, #4f92ff, #2563eb);
+            box-shadow: 0 6px 18px rgba(29, 78, 216, 0.4);
+        }
+
+        #btnAgregarCelular {
+            background: linear-gradient(135deg, #10b981, #047857);
+            box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3);
+        }
+
+        #btnAgregarCelular:hover {
+            background: linear-gradient(135deg, #34d399, #059669);
+            box-shadow: 0 6px 18px rgba(4, 120, 87, 0.4);
         }
 
         button:disabled {
-            background: #7f8c8d !important;
+            background: #475569 !important;
             cursor: not-allowed;
+            box-shadow: none !important;
+            transform: none !important;
+            color: #94a3b8;
         }
 
         .subtitulo {
             text-align: center;
             font-size: 13px;
-            color: #7f8c8d;
+            color: var(--text-secondary);
             margin-top: 0;
             margin-bottom: 20px;
             text-transform: uppercase;
@@ -115,35 +280,64 @@
             gap: 10px;
         }
 
+        /* Tables styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-top: 15px;
+        }
+
         th, td {
-            border: 1px solid #ddd;
             padding: 12px;
-            text-align: left; /* O change to 'center' si prefieres todo centrado */
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             vertical-align: middle;
         }
 
         th {
-            background-color: #2c3e50;
-            color: white;
-            font-weight: bold;
+            background-color: rgba(15, 23, 42, 0.8);
+            color: var(--text-primary);
+            font-weight: 600;
         }
 
-        /* Botón Configuración */
+        td {
+            background-color: rgba(30, 41, 59, 0.3);
+            color: #e2e8f0;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Botón Configuración Trigger */
         .btn-config-trigger {
-            background-color: #34495e;
-            color: white;
-            border: 2px solid #e67e22;
+            background-color: rgba(30, 41, 59, 0.8);
+            color: #f8fafc;
+            border: 1px solid rgba(255, 255, 255, 0.15);
             padding: 10px 18px;
             font-size: 14px;
-            font-weight: bold;
-            border-radius: 6px;
+            font-weight: 600;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin: 10px;
+            margin: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: auto;
+            margin-top: 0;
         }
+
         .btn-config-trigger:hover {
-            background-color: #e67e22;
-            box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3);
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
+            transform: translateY(-2px);
         }
 
         /* Modal Estilo Pop-up */
@@ -156,44 +350,49 @@
             width: 100%; 
             height: 100%; 
             overflow: auto; 
-            background-color: rgba(15, 23, 42, 0.75); /* Oscuro elegante */
-            backdrop-filter: blur(4px);
+            background-color: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
         }
 
         .modal-config-content {
-            background-color: #fff;
+            background-color: #1e293b;
+            color: var(--text-primary);
             margin: 8% auto; 
             padding: 25px 30px;
-            border-radius: 12px;
+            border-radius: 16px;
             width: 90%;
             max-width: 480px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            border-top: 5px solid #e67e22;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 5px solid var(--accent-orange);
             position: relative;
         }
 
         .close-config-btn {
-            color: #94a3b8;
+            color: var(--text-secondary);
             position: absolute;
             right: 20px;
             top: 15px;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
+            transition: color 0.2s ease;
         }
+
         .close-config-btn:hover {
-            color: #333;
+            color: var(--text-primary);
         }
 
         .modal-subtitle {
-            color: #64748b;
+            color: var(--text-secondary);
             font-size: 13px;
             margin-top: -8px;
             margin-bottom: 20px;
             text-align: center;
         }
 
-        /* Inputs del Formulario */
+        /* Inputs del Formulario Config */
         .form-group-config {
             margin-bottom: 16px;
         }
@@ -202,20 +401,22 @@
             font-weight: 600;
             margin-bottom: 6px;
             font-size: 13px;
-            color: #1e293b;
+            color: var(--text-primary);
         }
         .form-group-config input {
             width: 100%;
             padding: 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
             box-sizing: border-box;
             font-size: 14px;
+            background: rgba(15, 23, 42, 0.5);
+            color: var(--text-primary);
         }
         .form-group-config input:focus {
-            border-color: #e67e22;
+            border-color: var(--accent-orange);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.15);
+            box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.25);
         }
 
         /* Botón Guardar */
@@ -227,114 +428,282 @@
             padding: 12px;
             font-size: 15px;
             font-weight: bold;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             margin-top: 10px;
-            transition: transform 0.2s;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         .btn-save-config:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(230, 126, 34, 0.4);
+        }
+
+        /* Dynamic classes */
+        #cardDetalleCobro {
+            background: rgba(15, 23, 42, 0.4) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-left: 4px solid #3b82f6 !important;
+            padding: 20px !important;
+            margin-top: 20px !important;
+            border-radius: 12px !important;
+        }
+
+        #badgeAtraso {
+            padding: 6px 12px !important;
+            border-radius: 20px !important;
+            font-weight: 600 !important;
+            font-size: 12px !important;
+            display: inline-block;
+        }
+
+        /* Early settlement container */
+        #cardDetalleCobro > div:last-child {
+            background: rgba(16, 185, 129, 0.1) !important;
+            border: 1px dashed rgba(16, 185, 129, 0.3) !important;
+            border-radius: 8px !important;
+            padding: 15px !important;
+            margin-top: 15px !important;
+        }
+
+        #btnLiquidacionAnticipada {
+            background: linear-gradient(135deg, #10b981, #059669) !important;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-top: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #btnLiquidacionAnticipada:hover {
+            background: linear-gradient(135deg, #34d399, #059669) !important;
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3);
             transform: translateY(-1px);
+        }
+
+        /* VIP search results positioning */
+        .vip-search-container {
+            position: relative;
+        }
+
+        #resultadosVip {
+            background: #1e293b !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-top: none !important;
+            max-height: 200px;
+            overflow-y: auto;
+            border-radius: 0 0 8px 8px !important;
+            position: absolute;
+            left: 30px;
+            right: 30px;
+            z-index: 1000;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        #resultadosVip > div {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            transition: background 0.2s ease;
+            text-align: left;
+        }
+
+        #resultadosVip > div:hover {
+            background: rgba(155, 89, 182, 0.15) !important;
+        }
+
+        /* Placeholders modal lists styling */
+        #placeholders-list > div {
+            background: rgba(15, 23, 42, 0.4) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-radius: 12px !important;
+            padding: 16px !important;
+            margin-bottom: 12px !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            text-align: left;
+        }
+
+        #placeholders-list > div img {
+            border-radius: 8px;
+            background-color: #fff !important;
+            padding: 4px;
+        }
+
+        #placeholders-list > div button {
+            margin-top: 8px !important;
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .dashboard-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+                padding: 20px;
+            }
+            .header-logo-title {
+                flex-direction: column;
+                gap: 10px;
+            }
+            body {
+                padding: 10px;
+            }
         }
     </style>
 </head>
 
 <body>
     <div id="lockscreen-celya"
-        style="position:fixed; top:0; left:0; width:100%; height:100%; background:#2c3e50; z-index:999999; display:flex; justify-content:center; align-items:center; font-family:Arial, sans-serif;">
+        style="position:fixed; top:0; left:0; width:100%; height:100%; background:#0b0f19; z-index:999999; display:flex; justify-content:center; align-items:center; font-family:inherit;">
         <div
-            style="background:white; padding:30px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.3); text-align:center; max-width:360px; width:90%;">
-            <div style="text-align: center; margin-bottom: 15px;">
+            style="background:rgba(30, 41, 59, 0.85); padding:40px; border-radius:16px; box-shadow:0 20px 50px rgba(0,0,0,0.5); text-align:center; max-width:380px; width:90%; border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(16px);">
+            <div style="text-align: center; margin-bottom: 20px;">
                 <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo"
-                    style="max-height: 80px; width: auto;">
+                    style="max-height: 80px; width: auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));">
             </div>
-            <h2 style="color:#2c3e50; margin-bottom:5px; display: none;">CelYa!</h2>
-            <p style="color:#7f8c8d; font-size:14px; margin-top:0; margin-bottom:20px;">Acceso restringido al sistema
-            </p>
+            <h2 style="color:white; margin-bottom:5px; display: none;">CelYa!</h2>
+            <p style="color:#94a3b8; font-size:14px; margin-top:0; margin-bottom:24px;">Acceso restringido al sistema</p>
             <input type="password" id="pass-input-celya" placeholder="Introduce la contraseña"
-                style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box; font-size:16px; text-align:center;">
-            <button id="btn-login-celya"
-                style="width:100%; padding:12px; background:#9b59b6; color:white; border:none; border-radius:4px; font-weight:bold; font-size:16px; cursor:pointer; transition:background 0.3s;">Entrar
-                al Sistema</button>
+                style="width:100%; padding:14px; margin-bottom:15px; border:1px solid rgba(255, 255, 255, 0.12); border-radius:8px; box-sizing:border-box; font-size:16px; text-align:center; background:rgba(15, 23, 42, 0.6); color:white; outline:none; font-family:inherit;">
+            <button id="btn-login-celya" class="btn-pago"
+                style="width:100%; padding:14px; font-weight:bold; font-size:16px; cursor:pointer; margin-top:10px;">Entrar al Sistema</button>
             <p id="error-login-celya"
-                style="color:#c0392b; font-size:14px; margin-top:15px; display:none; font-weight:bold;"></p>
+                style="color:#f87171; font-size:14px; margin-top:15px; display:none; font-weight:bold;"></p>
         </div>
     </div>
 
-    <div class="container">
-        <div style="text-align: center; margin-bottom: 15px;">
-            <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo"
-                style="max-height: 80px; width: auto;">
-        </div>
-        <h2>💜 CelYa! Ecosistema</h2>
-        <p class="subtitulo">Módulo de Cobranza y Administración Global</p>
-
-        <div style="text-align: center; margin-bottom: 20px;">
-            <button id="btn-config-global" class="btn-config-trigger" onclick="abrirModalConfig()">
-                ⚙️ Configuración Global
-            </button>
-        </div>
-
-        <h3>💵 Módulo de Cobranza Dinámica</h3>
-        <label for="buscarClienteAbono">Buscar Cliente (Nombre o ID):</label>
-        <select id="buscarClienteAbono" onchange="cargarDetallesCobranza()">
-            <option value="">-- Selecciona un cliente para cobrar --</option>
-        </select>
-
-        <div id="cardDetalleCobro"
-            style="display:none; background: #f8f9fa; border-left: 5px solid #2980b9; padding: 15px; margin-top: 15px; border-radius: 4px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-weight: bold; color: #2c3e50; font-size: 16px;">Estado del Cliente:</span>
-                <span id="badgeAtraso"
-                    style="padding: 4px 8px; border-radius: 20px; font-weight: bold; font-size: 12px;">0 días de
-                    atraso</span>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-                <div>
-                    <label style="margin:0;">Cuota Regular:</label>
-                    <input type="text" id="infoCuotaRegular" readonly style="background:#e9ecef; font-weight: bold;">
-                </div>
-                <div>
-                    <label style="margin:0; color:#c0392b;">Saldo Pendiente Total:</label>
-                    <input type="text" id="infoSaldoPendiente" readonly
-                        style="background:#fce4d6; color:#c0392b; font-weight: bold;">
+    <div class="dashboard-wrapper">
+        <header class="dashboard-header">
+            <div class="header-logo-title">
+                <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo">
+                <div class="header-text">
+                    <h2>💜 CelYa! Ecosistema</h2>
+                    <p class="subtitulo">Módulo de Cobranza y Administración Global</p>
                 </div>
             </div>
-
-            <div
-                style="margin-top: 15px; background: #e8f8f5; padding: 10px; border-radius: 4px; border: 1px dashed #2ecc71; text-align: center;">
-                <p style="margin: 0 0 8px 0; font-size: 13px; color: #16a085;">¿El cliente quiere liquidar todo el
-                    celular hoy?</p>
-                <button type="button" id="btnLiquidacionAnticipada" onclick="aplicarDescuentoLiquidacion()"
-                    style="background: #2ecc71; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%;">
-                    🚀 Calcular Liquidación con Descuento de Intereses
+            <div class="header-actions">
+                <button id="btn-config-global" class="btn-config-trigger" onclick="abrirModalConfig()">
+                    ⚙️ Configuración Global
                 </button>
             </div>
-        </div>
+        </header>
 
-        <div id="formMontoCobro" style="display: none; margin-top: 15px;">
-            <label for="montoAbono">Monto a Recibir ($):</label>
-            <input type="number" id="montoAbono" placeholder="Mete la cantidad que te va a pagar">
-            <button type="button" id="btnRegistrarCobro"
-                style="background: #2980b9; color:white; width:100%; margin-top:10px; padding:10px; font-weight:bold; border-radius:4px; border:none; cursor:pointer;">
-                📲 Registrar Abono en la Hoja
-            </button>
-        </div>
+        <main class="dashboard-grid">
+            <div class="column-left">
+                <div class="container">
+                    <h3>💵 Módulo de Cobranza Dinámica</h3>
+                    <label for="buscarClienteAbono">Buscar Cliente (Nombre o ID):</label>
+                    <select id="buscarClienteAbono" onchange="cargarDetallesCobranza()">
+                        <option value="">-- Selecciona un cliente para cobrar --</option>
+                    </select>
 
-        <div id="moduloHistorialAbonos" style="display: none; margin-top: 20px;">
-            <h4 style="margin: 0 0 8px 0; color: #34495e; font-size: 14px;">📋 Últimos Abonos Registrados</h4>
-            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
-                <thead>
-                    <tr style="background: #34495e; color: white;">
-                        <th style="padding: 6px;">Fecha</th>
-                        <th style="padding: 6px;">Monto</th>
-                        <th style="padding: 6px;">Cobró</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaHistorialCuerpo">
-                </tbody>
-            </table>
-        </div>
+                    <div id="cardDetalleCobro" style="display:none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: bold; color: var(--text-primary); font-size: 16px;">Estado del Cliente:</span>
+                            <span id="badgeAtraso">0 días de atraso</span>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <div>
+                                <label style="margin:0;">Cuota Regular:</label>
+                                <input type="text" id="infoCuotaRegular" readonly>
+                            </div>
+                            <div>
+                                <label style="margin:0; color:#f87171;">Saldo Pendiente Total:</label>
+                                <input type="text" id="infoSaldoPendiente" readonly style="color:#f87171; font-weight: bold;">
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <p style="margin: 0 0 10px 0; font-size: 13px; color: #34d399; text-align: center;">¿El cliente quiere liquidar todo el celular hoy?</p>
+                            <button type="button" id="btnLiquidacionAnticipada" onclick="aplicarDescuentoLiquidacion()">
+                                🚀 Calcular Liquidación con Descuento de Intereses
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="formMontoCobro" style="display: none; margin-top: 15px;">
+                        <label for="montoAbono">Monto a Recibir ($):</label>
+                        <input type="number" id="montoAbono" placeholder="Mete la cantidad que te va a pagar">
+                        <button type="button" id="btnRegistrarCobro">
+                            📲 Registrar Abono en la Hoja
+                        </button>
+                    </div>
+
+                    <div id="moduloHistorialAbonos" style="display: none;">
+                        <h4>📋 Últimos Abonos Registrados</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Monto</th>
+                                    <th>Cobró</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaHistorialCuerpo">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column-right">
+                <div class="container vip-search-container">
+                    <h3>🌟 Renovación de Contrato VIP</h3>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
+                        Busca un cliente existente para clonar sus datos e INE en un nuevo contrato.
+                    </p>
+
+                    <label for="buscarVip">Buscar Cliente (Nombre o IMEI):</label>
+                    <input type="text" id="buscarVip" placeholder="Escribe para buscar...">
+
+                    <div id="resultadosVip" style="display: none;"></div>
+                </div>
+
+                <div class="container">
+                    <h3>📱 Agregar Celular al Catálogo</h3>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
+                        Pega el enlace de Mercado Libre. Traeremos nombre, foto, precio y especificaciones automáticamente.
+                    </p>
+
+                    <form id="formAgregarCelular">
+                        <label for="nuevoLink">Enlace de Mercado Libre (Se recomienda link de catálogo /p/):</label>
+                        <input type="text" id="nuevoLink" placeholder="https://www.mercadolibre.com.mx/p/MLM..." required>
+
+                        <label for="nuevoImei">IMEI o ID del Celular (Dejar vacío para autogenerar temporal):</label>
+                        <input type="text" id="nuevoImei" placeholder="Ej. 999999000000005">
+
+                        <label for="nuevoEstado">Estado de Disponibilidad:</label>
+                        <select id="nuevoEstado">
+                            <option value="DISPONIBLE">🟢 DISPONIBLE (Entrega inmediata)</option>
+                            <option value="MAS VENDIDO">⭐ DESTACADO (Fila superior / Más vendido)</option>
+                            <option value="BAJO DEMANDA">⏳ BAJO DEMANDA (Sobre pedido)</option>
+                        </select>
+
+                        <button type="button" class="btn-pago" id="btnAgregarCelular">➕ Importar y Agregar al Excel</button>
+                    </form>
+
+                    <div style="margin-top: 15px;">
+                        <button id="btnOpenPlaceholders" class="btn-config">🗂️ Administrar Placeholders (Catalogo)</button>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <div id="modal-config-negocio" class="modal-celya-config">
@@ -389,48 +758,6 @@
                     💾 Guardar Parámetros
                 </button>
             </form>
-        </div>
-    </div>
-
-    <div class="container" style="margin-top: 20px;">
-        <h3>🌟 Renovación de Contrato VIP</h3>
-        <p style="color: #7f8c8d; font-size: 13px; margin-top: -10px;">Busca un cliente existente para clonar sus datos
-            e INE en un nuevo contrato.</p>
-
-        <label for="buscarVip">Buscar Cliente (Nombre o IMEI):</label>
-        <input type="text" id="buscarVip" placeholder="Escribe para buscar..."
-            style="width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;">
-
-        <div id="resultadosVip"
-            style="background: #f8f9fa; border: 1px solid #e2e8f0; border-top: none; max-height: 200px; overflow-y: auto; border-radius: 0 0 4px 4px; display: none;">
-        </div>
-    </div>
-
-    <div class="container" style="margin-top: 20px;">
-        <h3>📱 Agregar Celular al Catálogo</h3>
-        <p style="color: #7f8c8d; font-size: 13px; margin-top: -10px;">Pega el enlace de Mercado Libre. Traeremos
-            nombre, foto, precio y especificaciones automáticamente.</p>
-
-        <form id="formAgregarCelular">
-            <label for="nuevoLink">Enlace de Mercado Libre (Se recomienda link de catálogo /p/):</label>
-            <input type="text" id="nuevoLink" placeholder="https://www.mercadolibre.com.mx/p/MLM..." required>
-
-            <label for="nuevoImei">IMEI o ID del Celular (Dejar vacío para autogenerar temporal):</label>
-            <input type="text" id="nuevoImei" placeholder="Ej. 999999000000005">
-
-            <label for="nuevoEstado">Estado de Disponibilidad:</label>
-            <select id="nuevoEstado">
-                <option value="DISPONIBLE">🟢 DISPONIBLE (Entrega inmediata)</option>
-                <option value="MAS VENDIDO">⭐ DESTACADO (Fila superior / Más vendido)</option>
-                <option value="BAJO DEMANDA">⏳ BAJO DEMANDA (Sobre pedido)</option>
-            </select>
-
-            <button type="button" class="btn-pago" id="btnAgregarCelular"
-                style="background: #27ae60; margin-top: 15px;">➕ Importar y Agregar al Excel</button>
-        </form>
-
-        <div style="margin-top:12px; text-align:center;">
-            <button id="btnOpenPlaceholders" class="btn-config" style="width:100%;">🗂️ Administrar Placeholders (Catalogo)</button>
         </div>
     </div>
 
@@ -711,47 +1038,47 @@
 
                 async function cargarPlaceholders() {
                         const cont = document.getElementById('placeholders-list');
-                        cont.innerHTML = '<div style="padding:14px; text-align:center; color:#666;">Cargando cotizaciones...</div>';
+                        cont.innerHTML = '<div style="padding:14px; text-align:center; color:var(--text-secondary);">Cargando cotizaciones...</div>';
                         try {
                                 const res = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}&action=obtenerCatalogoPublico`);
                                 const data = await res.json();
                                 if (!data.result || data.result !== 'success') {
-                                        cont.innerHTML = '<div style="padding:14px; color:#c0392b;">Error al cargar</div>';
+                                        cont.innerHTML = '<div style="padding:14px; color:#f87171;">Error al cargar</div>';
                                         return;
                                 }
                                 const items = data.resultados || [];
                                 if (items.length === 0) {
-                                        cont.innerHTML = '<div style="padding:14px; color:#7f8c8d;">No hay cotizaciones pendientes en la pestaña Cotizaciones.</div>';
+                                        cont.innerHTML = '<div style="padding:14px; color:var(--text-secondary);">No hay cotizaciones pendientes en la pestaña Cotizaciones.</div>';
                                         return;
                                 }
                                 cont.innerHTML = '';
                                 items.forEach(it => {
                                         const card = document.createElement('div');
-                                        card.style.border = '1px solid #e6e6e6';
-                                        card.style.padding = '10px';
-                                        card.style.margin = '8px';
+                                        card.style.border = '1px solid rgba(255, 255, 255, 0.08)';
+                                        card.style.padding = '16px';
+                                        card.style.margin = '8px 0';
                                         card.style.display = 'flex';
-                                        card.style.gap = '10px';
+                                        card.style.gap = '16px';
                                         card.style.alignItems = 'center';
                                         card.innerHTML = `
-                                            <div style="width:72px; height:72px; background:#fff; border-radius:6px; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+                                            <div style="width:72px; height:72px; background:rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); border-radius:6px; overflow:hidden; display:flex; align-items:center; justify-content:center;">
                                                 <img src="${it.foto || ''}" style="max-width:100%; max-height:100%; object-fit:contain;" onerror="this.src='https://placehold.co/72x72?text=CelYa';" />
                                             </div>
                                             <div style="flex:1;">
-                                                <div style="font-weight:bold;">${it.modelo} (${it.cliente})</div>
-                                                <div style="font-size:13px; color:#666;">Precio Financiado: $${Number(it.precioPlaceholder).toLocaleString('es-MX')}</div>
-                                                <div style="font-size:13px; color:#666;">Color: ${it.color || '—'} • Capacidad: ${it.memoria || '—'}</div>
-                                                <div style="font-size:13px; color:#666;">Plan: ${it.planElegido || '—'} sem • Frecuencia: ${it.frecuencia || '—'}</div>
-                                                <div style="font-size:13px; color:#666;">Crédito: ${it.estadoCredito || '—'} • Fecha: ${it.fecha || '—'}</div>
-                                                <div style="margin-top:6px;">
-                                                    <button style="padding:6px 10px; margin-right:6px; background:#2980b9; color:white; border-radius:4px; border:none; cursor:pointer;" onclick="abrirConvertForm(${it.fila}, '${it.modelo.replace(/'/g, "\\'")}', '${(it.color || '').replace(/'/g, "\\'")}', '${(it.memoria || '').replace(/'/g, "\\'")}', ${it.precioPlaceholder || 0})">✏️ Editar y Convertir</button>
+                                                <div style="font-weight:bold; color:var(--text-primary);">${it.modelo} (${it.cliente})</div>
+                                                <div style="font-size:13px; color:var(--text-secondary);">Precio Financiado: $${Number(it.precioPlaceholder).toLocaleString('es-MX')}</div>
+                                                <div style="font-size:13px; color:var(--text-secondary);">Color: ${it.color || '—'} • Capacidad: ${it.memoria || '—'}</div>
+                                                <div style="font-size:13px; color:var(--text-secondary);">Plan: ${it.planElegido || '—'} sem • Frecuencia: ${it.frecuencia || '—'}</div>
+                                                <div style="font-size:13px; color:var(--text-secondary);">Crédito: ${it.estadoCredito || '—'} • Fecha: ${it.fecha || '—'}</div>
+                                                <div style="margin-top:8px;">
+                                                    <button class="btn-pago" style="padding:8px 14px; margin-right:6px; font-size:13px; width:auto; display:inline-flex; margin-top:0;" onclick="abrirConvertForm(${it.fila}, '${it.modelo.replace(/'/g, "\\'")}', '${(it.color || '').replace(/'/g, "\\'")}', '${(it.memoria || '').replace(/'/g, "\\'")}', ${it.precioPlaceholder || 0})">✏️ Editar y Convertir</button>
                                                 </div>
                                             </div>
                                         `;
                                         cont.appendChild(card);
                                 });
                         } catch (err) {
-                                cont.innerHTML = '<div style="padding:14px; color:#c0392b;">Error de red al cargar placeholders</div>';
+                                cont.innerHTML = '<div style="padding:14px; color:#f87171;">Error de red al cargar placeholders</div>';
                         }
                 }
 
@@ -759,9 +1086,9 @@
                         const cont = document.getElementById('placeholders-list');
                         // Reemplazamos por formulario simple
                         cont.innerHTML = `
-                            <div style="padding:6px;">
+                            <div style="padding:6px; text-align:left;">
                                 <h3 style="margin-top:0;">Convertir Cotización a Inventario (fila ${fila})</h3>
-                                <div style="margin-bottom:8px; font-weight:bold; color:#2c3e50;">${modelo}</div>
+                                <div style="margin-bottom:12px; font-weight:bold; color:var(--text-primary); font-size:16px;">${modelo}</div>
                                 <label>IMEI nuevo (requerido):</label>
                                 <input id="conv-imei" placeholder="Ej. 990000000000012" />
                                 <label>Color:</label>
@@ -778,10 +1105,10 @@
                                     <option value="BAJO DEMANDA">BAJO DEMANDA</option>
                                 </select>
                                 <label>Notas (opcional):</label>
-                                <textarea id="conv-notas" placeholder="Ej. Celular comprado de Mercado Libre para el cliente" style="width:100%; min-height:80px; padding:10px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;"></textarea>
-                                <div style="display:flex; gap:8px; margin-top:10px;">
-                                    <button id="conv-confirm" style="flex:1; background:#27ae60; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer;">✅ Convertir a Inventario</button>
-                                    <button id="conv-cancel" style="flex:1; background:#95a5a6; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer;">Cancelar</button>
+                                <textarea id="conv-notas" placeholder="Ej. Celular comprado de Mercado Libre para el cliente" style="width:100%; min-height:80px; padding:10px; border:1px solid rgba(255, 255, 255, 0.12); border-radius:8px; box-sizing:border-box; background:rgba(15, 23, 42, 0.5); color:white;"></textarea>
+                                <div style="display:flex; gap:8px; margin-top:20px;">
+                                    <button id="conv-confirm" class="btn-pago" style="flex:1; background:linear-gradient(135deg, #10b981, #047857); margin-top:0;">✅ Convertir a Inventario</button>
+                                    <button id="conv-cancel" class="btn-config" style="flex:1; background:linear-gradient(135deg, #64748b, #475569); margin-top:0;">Cancelar</button>
                                 </div>
                             </div>
                         `;
