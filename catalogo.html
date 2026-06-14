@@ -1591,6 +1591,22 @@
                                             <span class="plan-val">$${Math.round(item.cuota52 || 0).toLocaleString('es-MX')} MXN/sem</span>
                                         </div>
                                     </div>
+                                    <div class="cuotas-quincenal" style="display: none;">
+                                        <div class="cuota-item">
+                                            <span class="plan-label">⏱️ Plan Rápido (13 quin):</span>
+                                            <span class="plan-val">$${Math.round((item.cuota26 || 0) * 2).toLocaleString('es-MX')} MXN/quin</span>
+                                        </div>
+                                        <div class="cuota-item" style="margin-top: 8px;">
+                                            <span class="plan-label">🗓️ Plan Cómodo (26 quin):</span>
+                                            <span class="plan-val">$${Math.round((item.cuota52 || 0) * 2).toLocaleString('es-MX')} MXN/quin</span>
+                                        </div>
+                                    </div>
+                                    <div class="cuotas-contado" style="display: none;">
+                                        <div class="cuota-item">
+                                            <span class="plan-label">💵 Precio de Contado:</span>
+                                            <span class="plan-val" style="font-size: 16px; font-weight: 700; color: #10b981;">$${Math.round(item.precioContado || 0).toLocaleString('es-MX')} MXN</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/\'/g, "").replace(/\"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">Pedir a Crédito</button>
                             </div>
