@@ -3156,12 +3156,15 @@
                 return (cacheIs256 && cleanIdIs256) || (cacheIs512 && cleanIdIs512);
             })();
 
-            const hasSpecificFreshData = isSameMockFamily || (cache && cache.isFresh && (
+            const isSpecificCache = cache && cache.isFresh && (
                 cache.id === cleanId || 
-                cache.catalog_product_id === cleanId ||
-                (cache.pickers && cache.pickers.some(picker => 
+                cache.catalog_product_id === cleanId
+            );
+
+            const hasSpecificFreshData = isSameMockFamily || isSpecificCache || (cache && cache.isFresh && (
+                cache.pickers && cache.pickers.some(picker => 
                     picker.products && picker.products.some(p => p.product_id === cleanId)
-                ))
+                )
             ));
 
             if (!hasSpecificFreshData) {
@@ -3192,7 +3195,8 @@
                 }
 
                 // Si no hay datos frescos específicos de este ID y no se está realizando un fetch en segundo plano, iniciarlo
-                if (!hasSpecificFreshData && !isFetchingML[cleanId]) {
+                const needsFetch = !isSameMockFamily && !isSpecificCache;
+                if (needsFetch && !isFetchingML[cleanId]) {
                     isFetchingML[cleanId] = true;
 
                     // Fetch asíncrono en background
@@ -4674,15 +4678,15 @@
                 const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
                 const colorMatch = colorSeleccionadoGlobal ? allAttrs.some(a => {
                     const idUpper = a.id.toUpperCase();
-                    return (idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO") && a.value_name && a.value_name.trim() === colorSeleccionadoGlobal;
+                    return (idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO") && a.value_name && colorsMatch(a.value_name, colorSeleccionadoGlobal);
                 }) : true;
                 const memoriaMatch = memoriaSeleccionadaGlobal ? allAttrs.some(a => {
                     const idUpper = a.id.toUpperCase();
-                    return (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO" || idUpper === "RAM_MEMORY") && a.value_name && a.value_name.trim() === memoriaSeleccionadaGlobal;
+                    return (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO" || idUpper === "RAM_MEMORY") && a.value_name && a.value_name.toLowerCase().replace(/\s+/g, "") === memoriaSeleccionadaGlobal.toLowerCase().replace(/\s+/g, "");
                 }) : true;
                 const gradingMatch = gradingSeleccionadoGlobal ? allAttrs.some(a => {
                     const idUpper = (a.id || '').toString().toUpperCase();
-                    return (idUpper === "GRADING" || a.name === "Estado del reacondicionado") && a.value_name && a.value_name.trim() === gradingSeleccionadoGlobal;
+                    return (idUpper === "GRADING" || a.name === "Estado del reacondicionado") && a.value_name && a.value_name.toLowerCase().trim() === gradingSeleccionadoGlobal.toLowerCase().trim();
                 }) : true;
                 return colorMatch && memoriaMatch && gradingMatch;
             });
