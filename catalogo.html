@@ -1524,12 +1524,14 @@
                     if (parsedVar && parsedVar.pickers) {
                         const colorPicker = parsedVar.pickers.find(p => p.picker_id && (p.picker_id.toUpperCase().includes("COLOR") || p.picker_id === "FINISH" || p.picker_id === "ACABADO"));
                         if (colorPicker && colorPicker.products) {
-                            const uniqueColors = new Set(colorPicker.products.map(p => p.picker_label.trim().toLowerCase()));
+                            const activeProducts = colorPicker.products.filter(p => !p.tags || (!p.tags.includes("out-of-stock") && !p.tags.includes("disabled")));
+                            const uniqueColors = new Set(activeProducts.map(p => p.picker_label.trim().toLowerCase()));
                             numColores = Math.max(numColores, uniqueColors.size);
                         }
                         const memPicker = parsedVar.pickers.find(p => p.picker_id && (p.picker_id.toUpperCase().includes("MEMORY") || p.picker_id.toUpperCase().includes("STORAGE") || p.picker_id.toUpperCase().includes("CAPACITY") || p.picker_id.toUpperCase().includes("CAPACIDAD")));
                         if (memPicker && memPicker.products) {
-                            const uniqueMems = new Set(memPicker.products.map(p => p.picker_label.trim().toLowerCase()));
+                            const activeProducts = memPicker.products.filter(p => !p.tags || (!p.tags.includes("out-of-stock") && !p.tags.includes("disabled")));
+                            const uniqueMems = new Set(activeProducts.map(p => p.picker_label.trim().toLowerCase()));
                             numCapacidades = Math.max(numCapacidades, uniqueMems.size);
                         }
                     }
@@ -1540,7 +1542,7 @@
                             <div>
                                 <div class="card-badges">
                                     <span class="brand-badge ${claseMarca}">${marca}</span>
-                                    ${item.entregaInmediata ? `<span class="status-badge status-available">⚡ Disponible</span>` : `<span class="status-badge status-order">⏳ Bajo Pedido</span>`}
+                                    ${(item.entregaInmediata || item.estado === "MAS VENDIDO" || item.estado === "DISPONIBLE") ? `<span class="status-badge status-available">⚡ Disponible</span>` : `<span class="status-badge status-order">⏳ Bajo Pedido</span>`}
                                 </div>
                                 <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">
                                     <img src="${item.foto}" alt="${modeloLimpio}" onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop'">

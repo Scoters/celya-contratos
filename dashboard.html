@@ -596,7 +596,10 @@
                     <p class="subtitulo">Módulo de Cobranza y Administración Global</p>
                 </div>
             </div>
-            <div class="header-actions">
+            <div class="header-actions" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                <button id="btnOpenPlaceholders" class="btn-config-trigger" style="background: linear-gradient(135deg, #f97316, #ea580c); border: none;">
+                    🗂️ Placeholders
+                </button>
                 <button id="btn-config-global" class="btn-config-trigger" onclick="abrirModalConfig()">
                     ⚙️ Configuración Global
                 </button>
@@ -698,9 +701,7 @@
                         <button type="button" class="btn-pago" id="btnAgregarCelular">➕ Importar y Agregar al Excel</button>
                     </form>
 
-                    <div style="margin-top: 15px;">
-                        <button id="btnOpenPlaceholders" class="btn-config">🗂️ Administrar Placeholders (Catalogo)</button>
-                    </div>
+
                 </div>
             </div>
         </main>
@@ -937,6 +938,18 @@
             });
         });
 
+        function limpiarCacheLocalCatalogo() {
+            try {
+                const urlHash = btoa(CONFIG.GOOGLE_SCRIPT_URL).substring(0, 15);
+                localStorage.removeItem("celya_catalogo_cache_" + urlHash);
+                localStorage.removeItem("celya_catalogo_timestamp_" + urlHash);
+                localStorage.removeItem("celya_catalogo_cache");
+                localStorage.removeItem("celya_catalogo_timestamp");
+            } catch(e) {
+                console.warn("Error al limpiar caché local:", e);
+            }
+        }
+
         // Funciones de apertura y cierre
         function abrirModalConfig() {
             document.getElementById('modal-config-negocio').style.display = 'block';
@@ -1144,6 +1157,7 @@
                                         const d = await resp.json();
                                         if (d.result === 'success') {
                                                 alert('✅ Cotización convertida correctamente a Inventario.');
+                                                limpiarCacheLocalCatalogo();
                                                 cargarPlaceholders();
                                         } else {
                                                 alert('⚠️ Error: ' + (d.message || 'No se pudo convertir'));
@@ -1258,8 +1272,7 @@
                             document.getElementById('formAgregarCelular').reset();
 
                             // Limpiar caché local del catálogo para obligar a refrescar la base de datos
-                            localStorage.removeItem("celya_catalogo_cache");
-                            localStorage.removeItem("celya_catalogo_timestamp");
+                            limpiarCacheLocalCatalogo();
                         } else {
                             alert("⚠️ Error al importar celular: " + (data.message || "Error desconocido"));
                         }
