@@ -2533,12 +2533,18 @@
         const S23_256_IDS = [
             "MLM22450448", "MLM2000081133", "MLM2000081129", "MLM2000081131",
             "MLM2000099736", "MLM2000053257", "MLM2000154314", "MLM2010617844", 
-            "MLM2000076881", "MLM2000176782"
+            "MLM2000076881", "MLM2000176782",
+            // Extracted:
+            "MLM2010735650", "MLM2000159348", "MLM2000111162", "MLM2000075603",
+            "MLM2000060391", "MLM2000068173", "MLM2000020897", "MLM2000016257"
         ];
         
         // S23 Ultra 512GB variant/product IDs mapping to the 512GB catalog file
         const S23_512_IDS = [
-            "MLM23053436", "MLM2000044997", "MLM2000044995", "MLM2000044993"
+            "MLM23053436", "MLM2000044997", "MLM2000044995", "MLM2000044993",
+            // Extracted:
+            "MLM2000087056", "MLM2047056104", "MLM2000100613", "MLM2000118506",
+            "MLM2000061605", "MLM2010734054", "MLM2000034951", "MLM2000085369"
         ];
 
         // Helper to check local mock JSON files to bypass ML API block/CORS issues
@@ -3805,6 +3811,10 @@
                                 }
 
                                 divColor.onclick = function () {
+                                     if (colorSeleccionadoGlobal && colorsMatch(colorInfo.name, colorSeleccionadoGlobal)) {
+                                         return;
+                                     }
+
                                      let targetProdId = colorInfo.id;
                                      if (S23_256_IDS.includes(targetProdId)) {
                                          targetProdId = "MLM2000081133";
@@ -3812,16 +3822,6 @@
                                          targetProdId = "MLM2000044997";
                                      }
 
-                                     // If this color already maps to the currently loaded variant id, skip reload
-                                      if (
-                                          targetProdId === cleanId || 
-                                          targetProdId === data.id || 
-                                          (data.catalog_product_id && targetProdId === data.catalog_product_id)
-                                      ) {
-                                          document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
-                                          this.classList.add('selected');
-                                          return;
-                                      }
 
                                      // Synchronize all global selection variables with the target product's attributes in productMapGlobal
                                      const targetSpecs = productMapGlobal[colorInfo.id] || productMapGlobal[targetProdId];
@@ -4014,6 +4014,14 @@
                                     }
 
                                     pill.onclick = function () {
+                                         if (pIdUpper === "GRADING") {
+                                             if (gradingSeleccionadoGlobal && itemInfo.name.toLowerCase().trim() === gradingSeleccionadoGlobal.toLowerCase().trim()) return;
+                                         } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
+                                             if (memoriaSeleccionadaGlobal && itemInfo.name.toLowerCase().trim().replace(/\s+/g, "") === memoriaSeleccionadaGlobal.toLowerCase().trim().replace(/\s+/g, "")) return;
+                                         } else if (pIdUpper.includes("RAM")) {
+                                             if (ramSeleccionadaGlobal && itemInfo.name.toLowerCase().trim().replace(/\s+/g, "") === ramSeleccionadaGlobal.toLowerCase().trim().replace(/\s+/g, "")) return;
+                                         }
+
                                          let targetProdId = itemInfo.id;
                                          if (S23_256_IDS.includes(targetProdId)) {
                                              targetProdId = "MLM2000081133";
@@ -4021,16 +4029,6 @@
                                              targetProdId = "MLM2000044997";
                                          }
 
-                                         if (
-                                             (targetProdId === cleanId || 
-                                              targetProdId === data.id || 
-                                              (data.catalog_product_id && targetProdId === data.catalog_product_id)) && 
-                                             pIdUpper !== "GRADING"
-                                         ) {
-                                             pillsWrapper.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
-                                             this.classList.add('selected');
-                                             return;
-                                         }
 
                                          // Synchronize all global selection variables with the target product's attributes in productMapGlobal
                                          const targetSpecs = productMapGlobal[itemInfo.id] || productMapGlobal[targetProdId];
