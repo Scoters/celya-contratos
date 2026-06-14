@@ -2720,7 +2720,10 @@
 
                 // Verify the product matches all other currently selected specs (ignoring blank specs to prevent multi-dimensional conflicts)
                 if (optionType !== "color" && colorSeleccionadoGlobal) {
-                    if (prod.color && !colorsMatch(prod.color, colorSeleccionadoGlobal)) return false;
+                    // Decouple color and grading to ensure grading options like Bueno/Aceptable are available for Lavender
+                    if (optionType !== "grading") {
+                        if (prod.color && !colorsMatch(prod.color, colorSeleccionadoGlobal)) return false;
+                    }
                 }
                 if (optionType !== "memory" && memoriaSeleccionadaGlobal) {
                     const prodMem = prod.memory ? prod.memory.toLowerCase().replace(/\s+/g, "") : "";
@@ -2728,9 +2731,12 @@
                     if (prodMem && prodMem !== selMem) return false;
                 }
                 if (optionType !== "grading" && gradingSeleccionadoGlobal) {
-                    const prodGrad = prod.grading ? prod.grading.toLowerCase().replace(/\s+/g, "") : "";
-                    const selGrad = gradingSeleccionadoGlobal.toLowerCase().replace(/\s+/g, "");
-                    if (prodGrad && prodGrad !== selGrad) return false;
+                    // Decouple color and grading: do not filter out color options based on selected grading
+                    if (optionType !== "color") {
+                        const prodGrad = prod.grading ? prod.grading.toLowerCase().replace(/\s+/g, "") : "";
+                        const selGrad = gradingSeleccionadoGlobal.toLowerCase().replace(/\s+/g, "");
+                        if (prodGrad && prodGrad !== selGrad) return false;
+                    }
                 }
 
                 return true;
@@ -3236,6 +3242,27 @@
 
                             let freshData = await fetchMLData(cleanId, isProduct);
 
+                            const isMockId = S23_256_IDS.includes(cleanId) || S23_512_IDS.includes(cleanId);
+                            if (freshData && freshData.id && !isMockId) {
+                                if (freshData.type === "catalog_product" && cleanId !== freshData.id) {
+                                    cleanId = freshData.id;
+                                    isProduct = true;
+                                } else if (freshData.catalog_product_id && cleanId !== freshData.catalog_product_id) {
+                                    const origCatalogId = freshData.catalog_product_id;
+                                    if (!freshData.pickers || freshData.pickers.length === 0) {
+                                        const prodData = await fetchMLData(origCatalogId, true);
+                                        if (prodData) {
+                                            freshData = prodData;
+                                            cleanId = origCatalogId;
+                                            isProduct = true;
+                                        }
+                                    } else {
+                                        cleanId = origCatalogId;
+                                        isProduct = true;
+                                    }
+                                }
+                            }
+
                             if (freshData && !isProduct && freshData.catalog_product_id && (!freshData.variations || freshData.variations.length === 0)) {
                                 const prodData = await fetchMLData(freshData.catalog_product_id, true);
                                 if (prodData) {
@@ -3490,6 +3517,12 @@
                                                 isCompatible = false;
                                             }
                                         }
+                                        // Do not redirect to a grading variant of a different color family
+                                        if (colorSeleccionadoGlobal && targetSpecs.color) {
+                                            if (!colorsMatch(targetSpecs.color, colorSeleccionadoGlobal)) {
+                                                isCompatible = false;
+                                            }
+                                        }
                                     }
                                     if (isCompatible) {
                                         redirectId = targetGradingProd.product_id;
@@ -3712,6 +3745,9 @@
                 }
                 if (esCambioVariante && ramSeleccionadaGlobal) {
                     activeRamVal = ramSeleccionadaGlobal;
+                }
+                if (esCambioVariante && gradingSeleccionadoGlobal) {
+                    activeGradingVal = gradingSeleccionadoGlobal;
                 }
                 if (!activeRamVal && data.attributes) {
                     const attrRam = data.attributes.find(a => {
@@ -4034,14 +4070,17 @@
                     // Prefer local catalog price (with grading factors) as the primary source of truth
                     const localPrice = buscarPrecioEquivalenteLocal(activeColorVal, activeStorageVal, gradingSeleccionadoGlobal);
                     let priceReal = 0;
+                    let priceNeedsGradingFactor = false;
                     if (localPrice && localPrice > 0) {
                         const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
                         priceReal = localPrice / gananciaFactor;
                     } else if (isSpecificData) {
                         if (data.price) {
                             priceReal = data.price;
+                            priceNeedsGradingFactor = true;
                         } else if (data.buy_box_winner && data.buy_box_winner.price) {
                             priceReal = data.buy_box_winner.price;
+                            priceNeedsGradingFactor = true;
                         }
                     }
 
@@ -4052,6 +4091,7 @@
                             if (localMatch && localMatch.precioContado > 0) {
                                 const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
                                 priceReal = localMatch.precioContado / gananciaFactor;
+                                priceNeedsGradingFactor = true;
                             }
                         }
                     }
@@ -4063,6 +4103,12 @@
                             const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
                             priceReal = hiddenPrice / gananciaFactor;
                         }
+                    }
+
+                    // Apply grading factor if using mock/fallback base price (which represents Excelente condition)
+                    if (priceNeedsGradingFactor && gradingSeleccionadoGlobal) {
+                        const factor = obtenerFactorGrading(gradingSeleccionadoGlobal);
+                        priceReal = priceReal * factor;
                     }
 
                     if (priceReal > 0) {
