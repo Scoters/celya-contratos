@@ -892,8 +892,7 @@
 
         .color-circle.unavailable {
             opacity: 0.5;
-            border: 2px dashed #dc2626 !important;
-            background-image: linear-gradient(135deg, transparent 45%, #dc2626 45%, #dc2626 55%, transparent 55%) !important;
+            border: 2px dashed #94a3b8 !important;
             cursor: pointer;
         }
         .color-circle.unavailable:hover {
@@ -1528,7 +1527,7 @@
                         const colorPicker = parsedVar.pickers.find(p => p.picker_id && (p.picker_id.toUpperCase().includes("COLOR") || p.picker_id === "FINISH" || p.picker_id === "ACABADO"));
                         if (colorPicker && colorPicker.products) {
                             const activeProducts = colorPicker.products.filter(p => !p.tags || (!p.tags.includes("out-of-stock") && !p.tags.includes("disabled")));
-                            const uniqueColors = new Set(activeProducts.map(p => p.picker_label.trim().toLowerCase()));
+                            const uniqueColors = new Set(activeProducts.map(p => normalizarColorSinGrado(p.picker_label).toLowerCase()));
                             numColores = Math.max(numColores, uniqueColors.size);
                         }
                         const memPicker = parsedVar.pickers.find(p => p.picker_id && (p.picker_id.toUpperCase().includes("MEMORY") || p.picker_id.toUpperCase().includes("STORAGE") || p.picker_id.toUpperCase().includes("CAPACITY") || p.picker_id.toUpperCase().includes("CAPACIDAD")));
@@ -1545,7 +1544,7 @@
                             <div>
                                 <div class="card-badges">
                                     <span class="brand-badge ${claseMarca}">${marca}</span>
-                                    ${(item.entregaInmediata || item.estado === "MAS VENDIDO" || item.estado === "DISPONIBLE") ? `<span class="status-badge status-available">⚡ Disponible</span>` : `<span class="status-badge status-order">⏳ Bajo Pedido</span>`}
+                                    ${item.estado === "MAS VENDIDO" ? `<span class="status-badge status-featured">⭐ Destacado</span>` : (item.entregaInmediata || item.estado === "DISPONIBLE") ? `<span class="status-badge status-available">⚡ Disponible</span>` : `<span class="status-badge status-order">⏳ Bajo Pedido</span>`}
                                 </div>
                                 <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${Math.round(item.cuota26)}, ${Math.round(item.cuota52)}, '${item.link || ""}', ${item.precioContado || 0}, ${item.engancheMinimo || 0}, '${item.color || ""}', '${item.memoria || ""}', this)">
                                     <img src="${item.foto}" alt="${modeloLimpio}" onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop'">
@@ -2572,6 +2571,16 @@
 
                 return true;
             });
+        }
+
+        // Normaliza un nombre de color quitando sufijos de grado de reacondicionado
+        // Ej: "Phantom Black - Excelente" → "Phantom Black"
+        function normalizarColorSinGrado(colorLabel) {
+            if (!colorLabel) return "";
+            return colorLabel
+                .replace(/\s*-\s*(excelente|muy\s*bueno|bueno|aceptable|regular)\s*(\(reacondicionado\))?/gi, "")
+                .replace(/\s*\(reacondicionado\)/gi, "")
+                .trim();
         }
 
         function obtenerCodigoColor(nombreColor) {
@@ -3620,7 +3629,8 @@
 
                             colorPicker.products.forEach(p => {
                                 if (!p.picker_label) return;
-                                const normColor = p.picker_label.trim().toLowerCase();
+                                // Normalizar quitando grado para agrupar colores físicos iguales
+                                const normColor = normalizarColorSinGrado(p.picker_label).toLowerCase();
                                 const isSel = p.tags && p.tags.includes("selected");
 
                                 // Only skip if the color has absolutely no stock in the family
@@ -3629,7 +3639,7 @@
                                 if (!coloresVistos.has(normColor) || isSel) {
                                     coloresVistos.set(normColor, {
                                         id: p.product_id,
-                                        name: p.picker_label,
+                                        name: normalizarColorSinGrado(p.picker_label),
                                         isSelected: isSel
                                     });
                                 }
@@ -4223,12 +4233,24 @@
             if (!modelo) return "";
             let clean = modelo.trim();
 
+            // 0. Remover fragmentos de reacondicionado y detalles de caja/condición
+            clean = clean.replace(/-\s*(excelente|muy\s*bueno|bueno|aceptable|regular)\s*(\(reacondicionado\))?/gi, "");
+            clean = clean.replace(/\b(reacondicionado|refurbished|refurb)\b/gi, "");
+            clean = clean.replace(/\b(caja\s*(maltratada|dañada|abierta|original|sellada))\b/gi, "");
+            clean = clean.replace(/\b(dual\s*sim|single\s*sim)\b/gi, "");
+            clean = clean.replace(/\b(desbloqueado|liberado|unlocked)\b/gi, "");
+            clean = clean.replace(/\b(nacional|internacional|global)\b/gi, "");
+
             // 1. Remover colores conocidos (incluyendo variaciones)
             const colores = [
                 "black", "negro", "blue", "azul", "white", "blanco", "green", "verde", "silver", "plata",
                 "gray", "gris", "gold", "oro", "purple", "morado", "pink", "rosa", "red", "rojo", "light",
                 "dark", "sky", "navy", "rose", "violet", "violeta", "lavender", "lavanda", "carbon", "carbono",
-                "claro", "oscuro", "space", "estelar", "celeste", "brillante", "mate"
+                "claro", "oscuro", "space", "estelar", "celeste", "brillante", "mate",
+                "phantom", "cream", "crema", "beige", "coral", "titanium", "titanio",
+                "graphite", "grafito", "burgundy", "borgoña", "midnight", "medianoche",
+                "starlight", "ice", "hielo", "bronze", "bronce", "sand", "arena",
+                "indigo", "teal", "mint", "menta", "lime", "lima", "ivory", "marfil"
             ];
             colores.forEach(color => {
                 const regex = new RegExp("\\b" + color + "\\b", "gi");
