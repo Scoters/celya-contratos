@@ -1146,7 +1146,7 @@
                                         `;
                                         const btn = card.querySelector('.btn-convertir-trigger');
                                         btn.addEventListener('click', function () {
-                                                abrirConvertForm(it.fila, it.modelo, it.color, it.memoria, it.precioPlaceholder, it.precioContado, it.planElegido);
+                                                abrirConvertForm(it.fila, it.modelo, it.color, it.memoria, it.precioPlaceholder, it.precioContado, it.planElegido, it.link);
                                         });
                                         cont.appendChild(card);
                                 });
@@ -1155,7 +1155,7 @@
                         }
                 }
 
-                function abrirConvertForm(fila, modelo = "", color = "", memoria = "", precioPlaceholder = 0, precioContado = 0, planElegido = "") {
+                function abrirConvertForm(fila, modelo = "", color = "", memoria = "", precioPlaceholder = 0, precioContado = 0, planElegido = "", link = "") {
                         const rate26Input = document.getElementById('cfg-plan-rapido');
                         const rate52Input = document.getElementById('cfg-plan-comodo');
                         const rate26 = rate26Input ? (parseFloat(rate26Input.value) || 66) : 66;
@@ -1164,6 +1164,40 @@
 
                         if (!precioContado && precioPlaceholder) {
                             precioContado = Math.round(precioPlaceholder / factor);
+                        }
+
+                        let mlmId = "";
+                        if ((!precioContado || precioContado === 0) && link) {
+                            const match = link.match(/(MLM\-?\d+)/i);
+                            if (match) mlmId = match[0].replace("-", "").toUpperCase();
+                        }
+                        if (mlmId) {
+                            setTimeout(async () => {
+                                try {
+                                    const previewEl = document.getElementById('conv-precio-financiado-preview');
+                                    if (previewEl) previewEl.innerText = "🔍 Consultando precio original en Mercado Libre...";
+                                    
+                                    const mlUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}&action=obtenerVariantesML&id=${mlmId}`;
+                                    const resp = await fetch(mlUrl);
+                                    const mlData = await resp.json();
+                                    if (mlData && mlData.price) {
+                                        const precioCosto = parseFloat(mlData.price) || 0;
+                                        const ganVal = parseFloat(document.getElementById('cfg-ganancia-contado').value) || 15;
+                                        const factorContado = 1 + (ganVal / 100);
+                                        const precioContadoCalculado = Math.round(precioCosto * factorContado);
+                                        
+                                        const inputPrecio = document.getElementById('conv-precio');
+                                        if (inputPrecio && !inputPrecio.value) {
+                                            inputPrecio.value = precioContadoCalculado;
+                                            inputPrecio.dispatchEvent(new Event('input'));
+                                        }
+                                    } else {
+                                        if (previewEl) previewEl.innerText = "⚠️ No se pudo obtener precio automático de Mercado Libre.";
+                                    }
+                                } catch (e) {
+                                    console.error("Error al obtener precio de ML:", e);
+                                }
+                            }, 50);
                         }
 
                         const cont = document.getElementById('placeholders-list');
