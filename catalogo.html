@@ -3177,7 +3177,7 @@
                 } else {
                     const eqMemoria = eq.memoria ? eq.memoria.trim().toLowerCase().replace(/\s+/g, "") : "";
                     const eqModeloLower = eq.modelo.toLowerCase().replace(/\s+/g, "");
-                    memoriaMatch = (eqMemoria === memoriaNorm || eqModeloLower.includes(memoriaNorm));
+                    memoriaMatch = (eqMemoria === memoriaNorm || memoriesMatch(eq.memoria || "", memoria) || eqModeloLower.includes(memoriaNorm));
                 }
                 
                 let gradingMatch = false;
@@ -3217,7 +3217,7 @@
                     } else {
                         const eqMemoria = eq.memoria ? eq.memoria.trim().toLowerCase().replace(/\s+/g, "") : "";
                         const eqModeloLower = eq.modelo.toLowerCase().replace(/\s+/g, "");
-                        memoriaMatch = (eqMemoria === memoriaNorm || eqModeloLower.includes(memoriaNorm));
+                        memoriaMatch = (eqMemoria === memoriaNorm || memoriesMatch(eq.memoria || "", memoria) || eqModeloLower.includes(memoriaNorm));
                     }
                     
                     if (colorMatch && memoriaMatch) {
