@@ -6160,8 +6160,7 @@
         
         // Cargar tema guardado o preferencia del sistema
         const savedTheme = localStorage.getItem('celya-theme');
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const useDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
+        const useDark = savedTheme === 'dark';
         
         if (useDark) {
             document.body.classList.add('dark-theme');
