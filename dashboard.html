@@ -1224,6 +1224,19 @@
                                     Precio Financiado Estimado: $${Number(precioPlaceholder).toLocaleString('es-MX')} (Plan ${planElegido || '—'} sem)
                                 </div>
 
+                                <div style="margin-top: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="conv-es-importacion" style="width: auto; margin: 0; cursor: pointer;" />
+                                    <label for="conv-es-importacion" style="margin: 0; font-weight: normal; cursor: pointer;">✈️ ¿Es de Importación?</label>
+                                </div>
+
+                                <div id="conv-importacion-container" style="display: none; margin-bottom: 15px; background: rgba(230, 126, 34, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed rgba(230, 126, 34, 0.3);">
+                                    <label style="margin-top: 0; display: block; font-weight: 600; margin-bottom: 4px;">Costo de Importación Estimado (Mercado Libre):</label>
+                                    <input id="conv-costo-importacion" type="number" placeholder="Ej. 1022" style="width: 100%; padding: 10px; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; box-sizing: border-box; background: rgba(15, 23, 42, 0.5); color: white;" />
+                                    <div style="font-size:12px; color:var(--text-secondary); margin-top: 6px;">
+                                        El costo de importación se sumará al precio de contado para ajustar el financiamiento automáticamente.
+                                    </div>
+                                </div>
+
                                 <label>Estado:</label>
                                 <select id="conv-estado">
                                     <option value="siendo pagado" selected>siendo pagado</option>
@@ -1248,6 +1261,33 @@
                             const preview = Math.round(val * factor);
                             document.getElementById('conv-precio-financiado-preview').innerText = 
                                 `Precio Financiado Estimado: $${preview.toLocaleString('es-MX')} (Plan ${planElegido || '—'} sem)`;
+                        });
+
+                        // Lógica de Importación Dinámica
+                        const chkImport = document.getElementById('conv-es-importacion');
+                        const containerImport = document.getElementById('conv-importacion-container');
+                        const inputImport = document.getElementById('conv-costo-importacion');
+                        const inputPrecio = document.getElementById('conv-precio');
+                        
+                        let precioBase = parseFloat(inputPrecio.value.replace(/[\$,]/g, "")) || 0;
+
+                        chkImport.addEventListener('change', function() {
+                            if (this.checked) {
+                                containerImport.style.display = 'block';
+                                precioBase = parseFloat(inputPrecio.value.replace(/[\$,]/g, "")) || 0;
+                                inputImport.focus();
+                            } else {
+                                containerImport.style.display = 'none';
+                                inputImport.value = '';
+                                inputPrecio.value = precioBase;
+                                inputPrecio.dispatchEvent(new Event('input'));
+                            }
+                        });
+
+                        inputImport.addEventListener('input', function() {
+                            const costo = parseFloat(this.value) || 0;
+                            inputPrecio.value = Math.round(precioBase + costo);
+                            inputPrecio.dispatchEvent(new Event('input'));
                         });
 
                         document.getElementById('conv-cancel').addEventListener('click', cargarPlaceholders);
