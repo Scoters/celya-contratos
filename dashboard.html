@@ -1140,10 +1140,14 @@
                                                 <div style="font-size:13px; color:var(--text-secondary);">Plan: ${it.planElegido || '—'} sem • Frecuencia: ${it.frecuencia || '—'}</div>
                                                 <div style="font-size:13px; color:var(--text-secondary);">Crédito: ${it.estadoCredito || '—'} • Fecha: ${it.fecha || '—'}</div>
                                                 <div style="margin-top:8px;">
-                                                    <button class="btn-pago" style="padding:8px 14px; margin-right:6px; font-size:13px; width:auto; display:inline-flex; margin-top:0;" onclick="abrirConvertForm(${it.fila}, '${it.modelo.replace(/'/g, "\\'")}', '${(it.color || '').replace(/'/g, "\\'")}', '${(it.memoria || '').replace(/'/g, "\\'")}', ${it.precioPlaceholder || 0})">✏️ Editar y Convertir</button>
+                                                    <button class="btn-convertir-trigger btn-pago" style="padding:8px 14px; margin-right:6px; font-size:13px; width:auto; display:inline-flex; margin-top:0;">✏️ Editar y Convertir</button>
                                                 </div>
                                             </div>
                                         `;
+                                        const btn = card.querySelector('.btn-convertir-trigger');
+                                        btn.addEventListener('click', function () {
+                                                abrirConvertForm(it.fila, it.modelo, it.color, it.memoria, it.precioPlaceholder);
+                                        });
                                         cont.appendChild(card);
                                 });
                         } catch (err) {

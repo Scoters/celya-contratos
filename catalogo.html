@@ -2997,13 +2997,10 @@
                 .trim();
         }
 
-        // Determina si una variante o producto de ML tiene tags de sin stock/no disponible
         function isProductTagOutOfStock(tags) {
             if (!tags) return false;
             return tags.includes("out-of-stock") || 
-                   tags.includes("disabled") || 
-                   tags.includes("no-bids") || 
-                   tags.includes("no-winner");
+                   tags.includes("disabled");
         }
 
         // Obtiene el grupo o familia principal de un color para homologar traducciones
