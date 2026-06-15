@@ -475,7 +475,7 @@
                 const data = await res.json();
 
                 if (data.error) {
-                    alert("Error de Seguridad en Servidor: " + data.error);
+                    toast("Error de seguridad en servidor: " + data.error, 'error');
                     return;
                 }
 
@@ -737,7 +737,7 @@
                     .then(data => {
                         if (data && data.existe) {
                             const comprador = data.cliente ? data.cliente.toString().toUpperCase() : "DESCONOCIDO";
-                            alert(`🚨 ¡ATENCIÓN! Este celular (IMEI) ya fue vendido a: ${comprador}.\nElige otro equipo.`);
+                            toast(`Este celular (IMEI) ya fue vendido a: <strong>${comprador}</strong>. Elige otro equipo.`, 'error', '\u26d4 IMEI Duplicado');
                             selectDisp.style.background = "#f8d7da"; // Color rojo de error
                             selectDisp.style.color = "#721c24";
                             btnSubmit.disabled = true; // Congela el botón
@@ -844,14 +844,14 @@
                 const engancheIngresado = parseFloat(document.getElementById('monto').value.replace(/[\$,]/g, "")) || 0;
 
                 if (engancheIngresado < engancheMinimoObligatorio) {
-                    alert(`⛔ CANDADO CELYA! DE ENGANCHE\n\nEl enganche mínimo obligatorio configurado en Sheets para este equipo (Frecuencia ${frecuencia}) es de $${engancheMinimoObligatorio.toLocaleString('es-MX')}.\n\nIngresado por el chofer: $${engancheIngresado.toLocaleString('es-MX')}.\n\nNo se puede registrar la venta con un monto menor.`);
+                    toast(`Enganche m\u00ednimo para <strong>${frecuencia}</strong>: <strong>$${engancheMinimoObligatorio.toLocaleString('es-MX')}</strong><br>Ingresado: $${engancheIngresado.toLocaleString('es-MX')}`, 'error', '\u26d4 Candado de Enganche CelYa!');
                     return;
                 }
             } else if (!esContado) {
                 // Validación de seguridad para celulares express de Mercado Libre (Placeholder)
                 const engancheIngresado = parseFloat(document.getElementById('monto').value.replace(/[\$,]/g, "")) || 0;
                 if (engancheIngresado <= 0) {
-                    alert("⛔ ERROR: Debes ingresar el enganche recolectado para procesar este pedido especial de Mercado Libre.");
+                    toast('Debes ingresar el enganche recolectado para procesar este pedido especial.', 'error', '\u26d4 Enganche requerido');
                     return;
                 }
             }
@@ -1023,6 +1023,58 @@
                 }
             }
         })();
+    </script>
+    <!-- ═══════════════════════ TOAST SYSTEM ═══════════════════════ -->
+    <div id="toast-container" style="
+        position: fixed; top: 24px; right: 24px; z-index: 99999;
+        display: flex; flex-direction: column; gap: 12px; pointer-events: none;
+    "></div>
+    <style>
+        @keyframes toastIn  { from { opacity:0; transform:translateX(110%); } to { opacity:1; transform:translateX(0); } }
+        @keyframes toastOut { from { opacity:1; transform:translateX(0);    } to { opacity:0; transform:translateX(110%); } }
+        @keyframes toastBar { from { width:100%; } to { width:0%; } }
+        .celya-toast {
+            min-width: 300px; max-width: 420px; border-radius: 14px;
+            padding: 16px 20px 20px; box-shadow: 0 8px 32px rgba(0,0,0,.22);
+            font-family: 'Inter', sans-serif; font-size: 14px; color: #fff;
+            pointer-events: all; position: relative; overflow: hidden;
+            animation: toastIn .35s cubic-bezier(.22,1,.36,1) forwards;
+        }
+        .celya-toast.hide { animation: toastOut .3s ease forwards; }
+        .celya-toast-bar {
+            position: absolute; bottom: 0; left: 0; height: 3px;
+            background: rgba(255,255,255,.45);
+            animation: toastBar var(--dur) linear forwards;
+        }
+        .celya-toast-icon { font-size: 22px; flex-shrink: 0; }
+        .celya-toast-body { display: flex; align-items: flex-start; gap: 12px; }
+        .celya-toast-title { font-weight: 700; font-size: 15px; margin-bottom: 3px; }
+        .celya-toast-msg   { opacity: .88; line-height: 1.4; }
+    </style>
+    <script>
+    function toast(msg, type, title) {
+        type  = type  || 'info';
+        title = title || { success:'Listo', error:'Error', warning:'Atenci\u00f3n', info:'Info' }[type];
+        const bg = { success:'linear-gradient(135deg,#16a34a,#15803d)',
+                     error:  'linear-gradient(135deg,#dc2626,#b91c1c)',
+                     warning:'linear-gradient(135deg,#d97706,#b45309)',
+                     info:   'linear-gradient(135deg,#2563eb,#1d4ed8)' }[type];
+        const icon = { success:'\u2705', error:'\u26d4', warning:'\u26a0\ufe0f', info:'\u2139\ufe0f' }[type];
+        const dur = 4200;
+        const el = document.createElement('div');
+        el.className = 'celya-toast';
+        el.style.cssText += 'background:' + bg;
+        el.style.setProperty('--dur', dur + 'ms');
+        el.innerHTML = '<div class="celya-toast-body">'
+            + '<span class="celya-toast-icon">' + icon + '</span>'
+            + '<div><div class="celya-toast-title">' + title + '</div>'
+            + '<div class="celya-toast-msg">' + msg + '</div></div></div>'
+            + '<div class="celya-toast-bar"></div>';
+        document.getElementById('toast-container').appendChild(el);
+        const remove = () => { el.classList.add('hide'); setTimeout(() => el.remove(), 320); };
+        const tid = setTimeout(remove, dur);
+        el.addEventListener('click', () => { clearTimeout(tid); remove(); });
+    }
     </script>
 </body>
 

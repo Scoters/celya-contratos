@@ -829,7 +829,7 @@
                 const datos = await respuesta.json();
 
                 if (datos.error) {
-                    alert("Error de Panel: " + datos.error);
+                    toast('Error al cargar el panel: ' + datos.error, 'error');
                     return;
                 }
 
@@ -948,7 +948,7 @@
                 if (!clienteSeleccionadoActual) return;
                 const monto = document.getElementById('montoAbono').value;
                 if (!monto || parseFloat(monto) <= 0) {
-                    alert("Por favor ingresa un monto válido");
+                    toast('Por favor ingresa un monto válido.', 'warning');
                     return;
                 }
 
@@ -977,15 +977,15 @@
                     const data = await res.json();
 
                     if (data.result === 'success') {
-                        alert("✅ Abono registrado exitosamente");
+                        toast('Abono registrado exitosamente.', 'success', 'Abono guardado');
                         location.reload();
                     } else {
-                        alert("⚠️ Error al registrar abono: " + (data.message || "Error desconocido"));
+                        toast('Error al registrar abono: ' + (data.message || 'Error desconocido'), 'error');
                         btn.innerText = originalText;
                         btn.disabled = false;
                     }
                 } catch (err) {
-                    alert("❌ Error de red al registrar abono");
+                    toast('Error de red al registrar abono.', 'error');
                     btn.innerText = originalText;
                     btn.disabled = false;
                 }
@@ -1064,13 +1064,13 @@
                 const data = await response.json();
 
                 if (data.result === 'success') {
-                    alert("✅ ¡Parámetros globales actualizados con éxito!");
+                    toast('Parámetros globales actualizados con éxito.', 'success', 'Configuración guardada');
                     cerrarModalConfig();
                 } else {
-                    alert("❌ Ocurrió un error al guardar la configuración.");
+                    toast('Ocurrió un error al guardar la configuración.', 'error');
                 }
             } catch (error) {
-                alert("🌐 Error de red, verifica la conexión con Google Apps Script.");
+                toast('Error de red. Verifica la conexión con Google Apps Script.', 'error');
             } finally {
                 btn.disabled = false;
                 btn.innerText = "💾 Guardar Parámetros";
@@ -1191,7 +1191,7 @@
                                 const estado = document.getElementById('conv-estado').value.trim();
                                 const notas = document.getElementById('conv-notas').value.trim();
 
-                                if (!imei) { alert('IMEI es requerido'); return; }
+                                if (!imei) { toast('IMEI es requerido.', 'warning'); return; }
 
                                 const params = new URLSearchParams();
                                 params.append('action', 'convertirPlaceholderAInventario');
@@ -1212,14 +1212,14 @@
                                         });
                                         const d = await resp.json();
                                         if (d.result === 'success') {
-                                                alert('✅ Cotización convertida correctamente a Inventario.');
+                                                toast('Cotización convertida correctamente a Inventario.', 'success', 'Conversión exitosa');
                                                 limpiarCacheLocalCatalogo();
                                                 cargarPlaceholders();
                                         } else {
-                                                alert('⚠️ Error: ' + (d.message || 'No se pudo convertir'));
+                                                toast('Error: ' + (d.message || 'No se pudo convertir'), 'error');
                                         }
                                 } catch (err) {
-                                        alert('❌ Error de red al convertir placeholder');
+                                        toast('Error de red al convertir placeholder.', 'error');
                                 }
                         });
                 }
@@ -1300,7 +1300,7 @@
                     const estado = document.getElementById('nuevoEstado').value;
 
                     if (!link) {
-                        alert("⚠️ Por favor introduce el enlace de Mercado Libre.");
+                        toast('Por favor introduce el enlace de Mercado Libre.', 'warning');
                         return;
                     }
 
@@ -1324,17 +1324,17 @@
                         const data = await res.json();
 
                         if (data.result === 'success') {
-                            alert(`✅ Celular agregado con éxito!\n\nModelo: ${data.modelo}\nPrecio de Mercado Libre: $${data.precioContado.toLocaleString('es-MX')}\nIMEI asignado: ${data.imei}`);
+                            toast(`Modelo: <strong>${data.modelo}</strong><br>Precio ML: $${data.precioContado.toLocaleString('es-MX')}<br>IMEI: ${data.imei}`, 'success', '¡Celular agregado con éxito!');
                             document.getElementById('formAgregarCelular').reset();
 
                             // Limpiar caché local del catálogo para obligar a refrescar la base de datos
                             limpiarCacheLocalCatalogo();
                         } else {
-                            alert("⚠️ Error al importar celular: " + (data.error || data.message || "Error desconocido"));
+                            toast('Error al importar celular: ' + (data.error || data.message || 'Error desconocido'), 'error');
                         }
                     } catch (err) {
                         console.error(err);
-                        alert("❌ Error de comunicación con la base de datos.");
+                        toast('Error de comunicación con la base de datos.', 'error');
                     } finally {
                         btnAgregar.innerText = originalText;
                         btnAgregar.disabled = false;
@@ -1405,6 +1405,58 @@
                 }
             }
         })();
+    </script>
+    <!-- ═══════════════════════ TOAST SYSTEM ═══════════════════════ -->
+    <div id="toast-container" style="
+        position: fixed; top: 24px; right: 24px; z-index: 99999;
+        display: flex; flex-direction: column; gap: 12px; pointer-events: none;
+    "></div>
+    <style>
+        @keyframes toastIn  { from { opacity:0; transform:translateX(110%); } to { opacity:1; transform:translateX(0); } }
+        @keyframes toastOut { from { opacity:1; transform:translateX(0);    } to { opacity:0; transform:translateX(110%); } }
+        @keyframes toastBar { from { width:100%; } to { width:0%; } }
+        .celya-toast {
+            min-width: 300px; max-width: 420px; border-radius: 14px;
+            padding: 16px 20px 20px; box-shadow: 0 8px 32px rgba(0,0,0,.22);
+            font-family: 'Inter', sans-serif; font-size: 14px; color: #fff;
+            pointer-events: all; position: relative; overflow: hidden;
+            animation: toastIn .35s cubic-bezier(.22,1,.36,1) forwards;
+        }
+        .celya-toast.hide { animation: toastOut .3s ease forwards; }
+        .celya-toast-bar {
+            position: absolute; bottom: 0; left: 0; height: 3px;
+            background: rgba(255,255,255,.45);
+            animation: toastBar var(--dur) linear forwards;
+        }
+        .celya-toast-icon { font-size: 22px; flex-shrink: 0; }
+        .celya-toast-body { display: flex; align-items: flex-start; gap: 12px; }
+        .celya-toast-title { font-weight: 700; font-size: 15px; margin-bottom: 3px; }
+        .celya-toast-msg   { opacity: .88; line-height: 1.4; }
+    </style>
+    <script>
+    function toast(msg, type, title) {
+        type  = type  || 'info';
+        title = title || { success:'Listo', error:'Error', warning:'Atenci\u00f3n', info:'Info' }[type];
+        const bg = { success:'linear-gradient(135deg,#16a34a,#15803d)',
+                     error:  'linear-gradient(135deg,#dc2626,#b91c1c)',
+                     warning:'linear-gradient(135deg,#d97706,#b45309)',
+                     info:   'linear-gradient(135deg,#2563eb,#1d4ed8)' }[type];
+        const icon = { success:'\u2705', error:'\u26d4', warning:'\u26a0\ufe0f', info:'\u2139\ufe0f' }[type];
+        const dur = 4200;
+        const el = document.createElement('div');
+        el.className = 'celya-toast';
+        el.style.cssText += 'background:' + bg;
+        el.style.setProperty('--dur', dur + 'ms');
+        el.innerHTML = '<div class="celya-toast-body">'
+            + '<span class="celya-toast-icon">' + icon + '</span>'
+            + '<div><div class="celya-toast-title">' + title + '</div>'
+            + '<div class="celya-toast-msg">' + msg + '</div></div></div>'
+            + '<div class="celya-toast-bar"></div>';
+        document.getElementById('toast-container').appendChild(el);
+        const remove = () => { el.classList.add('hide'); setTimeout(() => el.remove(), 320); };
+        const tid = setTimeout(remove, dur);
+        el.addEventListener('click', () => { clearTimeout(tid); remove(); });
+    }
     </script>
 </body>
 

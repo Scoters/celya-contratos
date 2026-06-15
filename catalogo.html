@@ -995,6 +995,9 @@
     <div id="modalCredito" class="modal-solicitud">
         <div class="modal-content">
             <button type="button" class="pdp-close-btn" onclick="cerrarModal()">×</button>
+
+            <!-- Panel de éxito/error in-modal -->
+            <div id="modalCredito-resultado" style="display:none; position:absolute; inset:0; border-radius:inherit; z-index:20; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 30px; gap:18px;"></div>
             
             <!-- Overlay de Carga de Variantes -->
             <div id="pdp-variants-loading-overlay" class="pdp-loading-overlay">
@@ -1133,6 +1136,9 @@
     <div id="modalPedidoEspecial" class="modal-solicitud">
         <div class="modal-content" style="max-width: 650px;">
             <button type="button" class="pdp-close-btn" onclick="cerrarModalPedidoEspecial()">×</button>
+
+            <!-- Panel de éxito in-modal -->
+            <div id="modalPE-resultado" style="display:none; position:absolute; inset:0; border-radius:inherit; z-index:20; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 30px; gap:18px;"></div>
             <h2
                 style="color: var(--primary); margin-top: 0; font-size: 22px; font-weight: 700; border-bottom: 2px solid var(--accent); padding-bottom: 8px; text-align: left;">
                 ✨ Solicitar Pedido Especial CelYa!</h2>
@@ -2336,7 +2342,7 @@
             const freq = document.getElementById('pe-cliFrecuencia').value;
 
             if (!nombre || !telefono || !sueldo) {
-                alert("Por favor rellena todos tus datos de contacto e ingresos.");
+                toast('Por favor rellena todos tus datos de contacto e ingresos.', 'warning');
                 return;
             }
 
@@ -2410,17 +2416,14 @@
                 const data = await res.json();
 
                 if (data.result === 'success') {
-                    const finalLink = data.linkPrellenado || prefilledUrl;
-                    if (confirm("¡Tu Solicitud de Pedido Especial ha sido enviada con éxito! Nos pondremos en contacto contigo vía WhatsApp.\n\n¿Deseas abrir el Formulario de Contrato prellenado con estos datos ahora?")) {
-                        window.open(finalLink, '_blank');
-                    }
-                    cerrarModalPedidoEspecial();
+                    showModalResult('modalPE-resultado', true, `¡Tu solicitud ha sido enviada con éxito!`, `Nos pondremos en contacto contigo vía WhatsApp 📲`, cerrarModalPedidoEspecial);
+
                 } else {
-                    alert("Ocurrió un error al enviar tu solicitud: " + (data.error || "Reintenta más tarde."));
+                    toast('Error al enviar la solicitud: ' + (data.error || 'Reintenta más tarde.'), 'error');
                 }
             } catch (err) {
                 console.error(err);
-                alert("Error de red. Por favor, reintenta enviar la solicitud.");
+                toast('Error de red. Por favor, reintenta enviar la solicitud.', 'error');
             } finally {
                 isSubmitting = false;
                 if (btn) {
@@ -2448,12 +2451,12 @@
 
             if (freq !== "CONTADO") {
                 if (!nombre || !telefono || !sueldo) {
-                    alert("Por favor rellena todos tus datos de contacto e ingresos.");
+                    toast('Por favor rellena todos tus datos de contacto e ingresos.', 'warning');
                     return;
                 }
             } else {
                 if (!nombre || !telefono) {
-                    alert("Por favor rellena tus datos de contacto.");
+                    toast('Por favor rellena tus datos de contacto.', 'warning');
                     return;
                 }
             }
@@ -2549,19 +2552,16 @@
                 const data = await res.json();
 
                 if (data.result === 'success') {
-                    const finalLink = data.linkPrellenado || prefilledUrl;
-                    if (confirm(`✅ ¡Excelente, ${nombre}!\n\nHemos recibido tu solicitud para el ${modelo}.\n\n¿Deseas abrir el Formulario de Contrato prellenado con estos datos ahora?`)) {
-                        window.open(finalLink, '_blank');
-                    }
-                    cerrarModal();
+                    showModalResult('modalCredito-resultado', true, `¡Solicitud enviada con éxito!`, `Hemos recibido tu solicitud para el <strong>${escapeHTMLFront(modelo)}</strong>.<br>Te contactaremos vía WhatsApp 📲`, cerrarModal);
+
                 } else if (data.result === 'rejected') {
-                    alert(`⚠️ Hola ${nombre}, gracias por tu interés.\n\nPor el momento, de acuerdo a nuestras políticas de riesgo vigentes, no es posible autorizar tu solicitud en este momento.\n\nTe invitamos a volver a intentar en 30 días.`);
+                    showModalResult('modalCredito-resultado', false, `No fue posible autorizar tu solicitud`, `Por el momento no podemos procesar tu solicitud de acuerdo a nuestras políticas de riesgo.<br><br>Te invitamos a intentar en 30 días.`, cerrarModal);
                     cerrarModal();
                 } else {
-                    alert("Ocurrió un detalle al guardar la solicitud.");
+                    toast('Ocurrió un detalle al guardar la solicitud.', 'error');
                 }
             } catch (e) {
-                alert("Error de red, intenta más tarde.");
+                toast('Error de red, intenta más tarde.', 'error');
             } finally {
                 isSubmitting = false;
                 if (btn) {
@@ -5170,5 +5170,85 @@
             Actualizando variante...</p>
     </div>
 </body>
+    <!-- ═════════════════════ TOAST + MODAL RESULT SYSTEM ═════════════════════ -->
+    <div id="toast-container" style="
+        position: fixed; top: 24px; right: 24px; z-index: 99999;
+        display: flex; flex-direction: column; gap: 12px; pointer-events: none;
+    "></div>
+    <style>
+        @keyframes toastIn  { from { opacity:0; transform:translateX(110%); } to { opacity:1; transform:translateX(0); } }
+        @keyframes toastOut { from { opacity:1; transform:translateX(0);    } to { opacity:0; transform:translateX(110%); } }
+        @keyframes toastBar { from { width:100%; } to { width:0%; } }
+        @keyframes modalResultIn { from { opacity:0; transform:scale(.92); } to { opacity:1; transform:scale(1); } }
+        .celya-toast {
+            min-width: 300px; max-width: 420px; border-radius: 14px;
+            padding: 16px 20px 20px; box-shadow: 0 8px 32px rgba(0,0,0,.22);
+            font-family: 'Inter', sans-serif; font-size: 14px; color: #fff;
+            pointer-events: all; position: relative; overflow: hidden;
+            animation: toastIn .35s cubic-bezier(.22,1,.36,1) forwards;
+        }
+        .celya-toast.hide { animation: toastOut .3s ease forwards; }
+        .celya-toast-bar {
+            position: absolute; bottom: 0; left: 0; height: 3px;
+            background: rgba(255,255,255,.45);
+            animation: toastBar var(--dur) linear forwards;
+        }
+        .celya-toast-icon { font-size: 22px; flex-shrink: 0; }
+        .celya-toast-body { display: flex; align-items: flex-start; gap: 12px; }
+        .celya-toast-title { font-weight: 700; font-size: 15px; margin-bottom: 3px; }
+        .celya-toast-msg   { opacity: .88; line-height: 1.4; }
+        .modal-result-inner {
+            animation: modalResultIn .4s cubic-bezier(.22,1,.36,1) forwards;
+            display: flex; flex-direction: column; align-items: center; gap: 18px;
+        }
+        .modal-result-icon { font-size: 64px; line-height: 1; }
+        .modal-result-title { font-size: 22px; font-weight: 800; margin: 0; }
+        .modal-result-msg   { font-size: 15px; opacity: .88; line-height: 1.5; max-width: 380px; }
+    </style>
+    <script>
+    /* ---- Toast ---- */
+    function escapeHTMLFront(t) {
+        return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    function toast(msg, type, title) {
+        type  = type  || 'info';
+        title = title || { success:'Listo', error:'Error', warning:'Atenci\u00f3n', info:'Info' }[type];
+        const bg = { success:'linear-gradient(135deg,#16a34a,#15803d)',
+                     error:  'linear-gradient(135deg,#dc2626,#b91c1c)',
+                     warning:'linear-gradient(135deg,#d97706,#b45309)',
+                     info:   'linear-gradient(135deg,#2563eb,#1d4ed8)' }[type];
+        const icon = { success:'\u2705', error:'\u26d4', warning:'\u26a0\ufe0f', info:'\u2139\ufe0f' }[type];
+        const dur = 4200;
+        const el = document.createElement('div');
+        el.className = 'celya-toast';
+        el.style.cssText += 'background:' + bg;
+        el.style.setProperty('--dur', dur + 'ms');
+        el.innerHTML = '<div class="celya-toast-body">'
+            + '<span class="celya-toast-icon">' + icon + '</span>'
+            + '<div><div class="celya-toast-title">' + title + '</div>'
+            + '<div class="celya-toast-msg">' + msg + '</div></div></div>'
+            + '<div class="celya-toast-bar"></div>';
+        document.getElementById('toast-container').appendChild(el);
+        const remove = () => { el.classList.add('hide'); setTimeout(() => el.remove(), 320); };
+        const tid = setTimeout(remove, dur);
+        el.addEventListener('click', () => { clearTimeout(tid); remove(); });
+    }
+    /* ---- Modal Result Panel ---- */
+    function showModalResult(panelId, isSuccess, title, msg, closeFn) {
+        const panel = document.getElementById(panelId);
+        if (!panel) { toast(msg, isSuccess ? 'success' : 'error', title); if (closeFn) setTimeout(closeFn, 2200); return; }
+        const bg = isSuccess
+            ? 'linear-gradient(160deg, #064e3b 0%, #065f46 50%, #047857 100%)'
+            : 'linear-gradient(160deg, #7f1d1d 0%, #991b1b 50%, #b91c1c 100%)';
+        const icon = isSuccess ? '\u2705' : '\u274c';
+        panel.style.cssText += 'background:' + bg + '; display:flex; border-radius:inherit;';
+        panel.innerHTML = '<div class="modal-result-inner">'
+            + '<div class="modal-result-icon">' + icon + '</div>'
+            + '<p class="modal-result-title" style="color:#fff">' + title + '</p>'
+            + '<p class="modal-result-msg" style="color:rgba(255,255,255,.88);text-align:center">' + msg + '</p>'
+            + '</div>';
+        setTimeout(() => { panel.style.display = 'none'; panel.innerHTML = ''; if (closeFn) closeFn(); }, 3200);
+    }
+    </script>
 
 </html>
