@@ -3146,7 +3146,7 @@
             return "excelente";
         }
 
-        function buscarPrecioEquivalenteLocal(color, memoria, grading) {
+        function buscarPrecioEquivalenteLocal(color, memoria, grading, ignoreGroupedSpecs = false) {
             if (!window.equiposCargados || !window.currentBaseModelName) {
                 logDebugFrontend(`buscarPrecioEquivalenteLocal - Falló pre-condiciones: window.equiposCargados=${!!window.equiposCargados}, window.currentBaseModelName=${window.currentBaseModelName}`);
                 return null;
@@ -3170,7 +3170,11 @@
                 } else {
                     const eqColor = eq.color ? eq.color.trim() : "";
                     const eqModeloLower = eq.modelo.toLowerCase();
-                    colorMatch = (eqColor.toLowerCase() === colorNorm || colorsMatch(eqColor, color) || eqModeloLower.includes(colorNorm));
+                    if (ignoreGroupedSpecs && eqColor.includes(",")) {
+                        colorMatch = false;
+                    } else {
+                        colorMatch = (eqColor.toLowerCase() === colorNorm || colorsMatch(eqColor, color) || eqModeloLower.includes(colorNorm));
+                    }
                 }
                 
                 let memoriaMatch = false;
@@ -3179,7 +3183,11 @@
                 } else {
                     const eqMemoria = eq.memoria ? eq.memoria.trim().toLowerCase().replace(/\s+/g, "") : "";
                     const eqModeloLower = eq.modelo.toLowerCase().replace(/\s+/g, "");
-                    memoriaMatch = (eqMemoria === memoriaNorm || memoriesMatch(eq.memoria || "", memoria) || eqModeloLower.includes(memoriaNorm));
+                    if (ignoreGroupedSpecs && eqMemoria.includes(",")) {
+                        memoriaMatch = false;
+                    } else {
+                        memoriaMatch = (eqMemoria === memoriaNorm || memoriesMatch(eq.memoria || "", memoria) || eqModeloLower.includes(memoriaNorm));
+                    }
                 }
                 
                 let gradingMatch = false;
@@ -3210,7 +3218,11 @@
                     } else {
                         const eqColor = eq.color ? eq.color.trim() : "";
                         const eqModeloLower = eq.modelo.toLowerCase();
-                        colorMatch = (eqColor.toLowerCase() === colorNorm || colorsMatch(eqColor, color) || eqModeloLower.includes(colorNorm));
+                        if (ignoreGroupedSpecs && eqColor.includes(",")) {
+                            colorMatch = false;
+                        } else {
+                            colorMatch = (eqColor.toLowerCase() === colorNorm || colorsMatch(eqColor, color) || eqModeloLower.includes(colorNorm));
+                        }
                     }
                     
                     let memoriaMatch = false;
@@ -3219,7 +3231,11 @@
                     } else {
                         const eqMemoria = eq.memoria ? eq.memoria.trim().toLowerCase().replace(/\s+/g, "") : "";
                         const eqModeloLower = eq.modelo.toLowerCase().replace(/\s+/g, "");
-                        memoriaMatch = (eqMemoria === memoriaNorm || memoriesMatch(eq.memoria || "", memoria) || eqModeloLower.includes(memoriaNorm));
+                        if (ignoreGroupedSpecs && eqMemoria.includes(",")) {
+                            memoriaMatch = false;
+                        } else {
+                            memoriaMatch = (eqMemoria === memoriaNorm || memoriesMatch(eq.memoria || "", memoria) || eqModeloLower.includes(memoriaNorm));
+                        }
                     }
                     
                     if (colorMatch && memoriaMatch) {
@@ -4279,7 +4295,7 @@
                         currentMLItemLink = `https://www.mercadolibre.com.mx/p/${redirectId}`;
                         
                         try {
-                            const localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memoriaSeleccionadaGlobal, gradingSeleccionadoGlobal);
+                            const localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memoriaSeleccionadaGlobal, gradingSeleccionadoGlobal, true);
                             if (localPrice && localPrice > 0) {
                                 const hidden = document.getElementById('hiddenPrecioContado');
                                 if (hidden) hidden.value = localPrice;
@@ -4541,7 +4557,7 @@
                                     actualizarPreciosYFotoPorVarianteActual();
                                     // Fallback: if actualizarPreciosYFoto didn't update price, use local catalog lookup
                                     try {
-                                        const localPrice = buscarPrecioEquivalenteLocal(color, memoriaSeleccionadaGlobal, gradingSeleccionadoGlobal);
+                                        const localPrice = buscarPrecioEquivalenteLocal(color, memoriaSeleccionadaGlobal, gradingSeleccionadoGlobal, true);
                                         if (localPrice && localPrice > 0) {
                                             const hidden = document.getElementById('hiddenPrecioContado');
                                             if (hidden) hidden.value = localPrice;
@@ -4574,7 +4590,7 @@
                                     actualizarPreciosYFotoPorVarianteActual();
                                     // Fallback: if actualizarPreciosYFoto didn't update price, use local catalog lookup
                                     try {
-                                        const localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memoria, gradingSeleccionadoGlobal);
+                                        const localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memoria, gradingSeleccionadoGlobal, true);
                                         if (localPrice && localPrice > 0) {
                                             const hidden = document.getElementById('hiddenPrecioContado');
                                             if (hidden) hidden.value = localPrice;
@@ -4596,19 +4612,29 @@
 
                     // Actualizar el precio para productos de catálogo de Mercado Libre (/p/MLM...)
                     // Prefer local catalog price (with grading factors) as the primary source of truth
-                    const localPrice = buscarPrecioEquivalenteLocal(activeColorVal, activeStorageVal, gradingSeleccionadoGlobal);
+                    let localPrice = buscarPrecioEquivalenteLocal(activeColorVal, activeStorageVal, gradingSeleccionadoGlobal, true);
                     let priceReal = 0;
                     let priceNeedsGradingFactor = false;
                     if (localPrice && localPrice > 0) {
                         const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
                         priceReal = localPrice / gananciaFactor;
-                    } else if (isSpecificData) {
-                        if (data.price) {
-                            priceReal = data.price;
-                            priceNeedsGradingFactor = true;
-                        } else if (data.buy_box_winner && data.buy_box_winner.price) {
-                            priceReal = data.buy_box_winner.price;
-                            priceNeedsGradingFactor = true;
+                    } else {
+                        if (isSpecificData) {
+                            if (data.price) {
+                                priceReal = data.price;
+                                priceNeedsGradingFactor = true;
+                            } else if (data.buy_box_winner && data.buy_box_winner.price) {
+                                priceReal = data.buy_box_winner.price;
+                                priceNeedsGradingFactor = true;
+                            }
+                        }
+                        // Fallback to grouped local price if live price is 0
+                        if (priceReal <= 0) {
+                            localPrice = buscarPrecioEquivalenteLocal(activeColorVal, activeStorageVal, gradingSeleccionadoGlobal, false);
+                            if (localPrice && localPrice > 0) {
+                                const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
+                                priceReal = localPrice / gananciaFactor;
+                            }
                         }
                     }
 
@@ -4793,7 +4819,7 @@
                                     try {
                                         const currentMemoria = memoriaSeleccionadaGlobal || almacenamientoSeleccionado || "";
                                         const currentGrading = gradingSeleccionadoGlobal || "";
-                                        const localPrice = buscarPrecioEquivalenteLocal(colorInfo.name, currentMemoria, currentGrading);
+                                        const localPrice = buscarPrecioEquivalenteLocal(colorInfo.name, currentMemoria, currentGrading, true);
                                         if (localPrice && localPrice > 0) {
                                             const hidden = document.getElementById('hiddenPrecioContado');
                                             if (hidden) hidden.value = localPrice;
@@ -5048,10 +5074,10 @@
                                          // === IMMEDIATE LOCAL PRICE UPDATE ===
                                          // Update the price instantly using local catalog data before network fetch
                                          try {
-                                             const currentColor = colorSeleccionadoGlobal || colorSeleccionado || "";
-                                             const currentMemoria = memoriaSeleccionadaGlobal || almacenamientoSeleccionado || "";
-                                             const currentGrading = gradingSeleccionadoGlobal || "";
-                                             const localPrice = buscarPrecioEquivalenteLocal(currentColor, currentMemoria, currentGrading);
+                                              const currentColor = colorSeleccionadoGlobal || colorSeleccionado || "";
+                                              const currentMemoria = memoriaSeleccionadaGlobal || almacenamientoSeleccionado || "";
+                                              const currentGrading = gradingSeleccionadoGlobal || "";
+                                              const localPrice = buscarPrecioEquivalenteLocal(currentColor, currentMemoria, currentGrading, true);
                                              if (localPrice && localPrice > 0) {
                                                  const hidden = document.getElementById('hiddenPrecioContado');
                                                  if (hidden) hidden.value = localPrice;
@@ -5220,7 +5246,7 @@
             almacenamientoSeleccionado = memoriaSeleccionadaGlobal || "";
 
             // Prefer local catalog price (with grading factors) as the primary source of truth
-            const localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memoriaSeleccionadaGlobal, gradingSeleccionadoGlobal);
+            let localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memoriaSeleccionadaGlobal, gradingSeleccionadoGlobal, true);
             let precioReal = 0;
             if (localPrice && localPrice > 0) {
                 const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
@@ -5229,6 +5255,15 @@
                 precioReal = (varianteSeleccionada.prices && varianteSeleccionada.prices.length > 0)
                     ? (varianteSeleccionada.prices[0].amount || varianteSeleccionada.price || 0)
                     : (varianteSeleccionada.price || 0);
+                
+                // Fallback to grouped local price if live price is 0
+                if (precioReal <= 0) {
+                    localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memoriaSeleccionadaGlobal, gradingSeleccionadoGlobal, false);
+                    if (localPrice && localPrice > 0) {
+                        const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
+                        precioReal = localPrice / gananciaFactor;
+                    }
+                }
             }
 
             if (precioReal > 0) {
