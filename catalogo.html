@@ -209,6 +209,12 @@
             color: #fbbf24;
         }
 
+        body.dark-theme #pe-import-warning {
+            background-color: rgba(217, 119, 6, 0.1) !important;
+            border-color: rgba(217, 119, 6, 0.2) !important;
+            color: #fbbf24 !important;
+        }
+
         body.dark-theme .reconditioned-tag {
             background-color: rgba(217, 119, 6, 0.1) !important;
             color: #fbbf24 !important;
@@ -1774,6 +1780,14 @@
                     </div>
                 </div>
 
+                <!-- Alerta de Producto de Importación -->
+                <div id="pe-import-warning" style="display: none; margin-bottom: 20px; padding: 12px; border-radius: 10px; background-color: #fffbeb; border: 1px solid #fef3c7; color: #b45309; font-size: 13px; line-height: 1.5; gap: 8px; align-items: flex-start; text-align: left;">
+                    <span style="font-size: 18px; line-height: 1;">⚠️</span>
+                    <div>
+                        <strong>Producto de Importación:</strong> Esta publicación de Mercado Libre tiene costos de importación estimados. Al enviar la solicitud, un asesor de CelYa! calculará el costo de importación real y se pondrá en contacto contigo para ajustar tu enganche y abonos.
+                    </div>
+                </div>
+
                 <div class="pdp-form-card" style="padding: 15px; margin-top: 0; text-align: left;">
                     <h4 style="margin-top: 0; margin-bottom: 15px;">📋 Rellena tu Solicitud de Crédito</h4>
                     <form id="formPedidoEspecial">
@@ -2950,6 +2964,30 @@
                 document.getElementById('pe-preview-titulo').innerText = title;
                 const picUrl = rawData.pictures && rawData.pictures.length > 0 ? (rawData.pictures[0].secure_url || rawData.pictures[0].url) : "";
                 document.getElementById('pe-preview-foto').src = picUrl || "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop";
+
+                // --- DETECTAR SI ES PRODUCTO DE IMPORTACIÓN (CBT) ---
+                let esImportacion = false;
+                if (rawData.shipping && (rawData.shipping.logistic_type === "remote" || (rawData.shipping.tags && (rawData.shipping.tags.includes("cbt_fulfillment") || rawData.shipping.tags.includes("cbt"))))) {
+                    esImportacion = true;
+                }
+                if (rawData.seller_address && rawData.seller_address.country && rawData.seller_address.country.id && rawData.seller_address.country.id !== "MX") {
+                    esImportacion = true;
+                }
+                if (rawData.tags && (rawData.tags.includes("cbt_item") || rawData.tags.includes("imported") || rawData.tags.includes("international_delivery"))) {
+                    esImportacion = true;
+                }
+                if (rawData.buy_box_winner && rawData.buy_box_winner.shipping && (rawData.buy_box_winner.shipping.logistic_type === "remote" || (rawData.buy_box_winner.shipping.tags && (rawData.buy_box_winner.shipping.tags.includes("cbt_fulfillment") || rawData.buy_box_winner.shipping.tags.includes("cbt"))))) {
+                    esImportacion = true;
+                }
+
+                const peWarning = document.getElementById('pe-import-warning');
+                if (peWarning) {
+                    if (esImportacion) {
+                        peWarning.style.display = "flex";
+                    } else {
+                        peWarning.style.display = "none";
+                    }
+                }
 
                 // Mostrar paso 2
                 document.getElementById('pedido-especial-step2').style.display = 'block';
