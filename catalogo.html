@@ -221,6 +221,12 @@
             border-color: rgba(217, 119, 6, 0.2) !important;
         }
 
+        body.dark-theme .status-import {
+            background-color: rgba(225, 29, 72, 0.15) !important;
+            color: #fda4af !important;
+            border-color: rgba(225, 29, 72, 0.3) !important;
+        }
+
         body.dark-theme .frecuencia-toggle {
             background: var(--bg-page);
         }
@@ -499,6 +505,12 @@
             background-color: #fef08a;
             color: #854d0e;
             border: 1px solid #facc15;
+        }
+
+        .status-import {
+            background-color: #ffe4e6;
+            color: #e11d48;
+            border: 1px solid #fda4af;
         }
 
         .card-celular .img-container {
@@ -2339,6 +2351,7 @@
                                 <div class="card-badges">
                                     <span class="brand-badge ${claseMarca}">${marca}</span>
                                     ${item.estado === "MAS VENDIDO" ? `<span class="status-badge status-featured">⭐ Destacado</span>` : (item.entregaInmediata || item.estado === "DISPONIBLE") ? `<span class="status-badge status-available">⚡ Disponible</span>` : `<span class="status-badge status-order">⏳ Bajo Pedido</span>`}
+                                    ${(item.esImportacion === true || item.esImportacion === 'true') ? `<span class="status-badge status-import">✈️ Importación</span>` : ''}
                                 </div>
                                 <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheComodoCalculado}, '${item.color || ""}', '${item.memoria || ""}', this)">
                                     <img src="${item.foto}" alt="${modeloLimpio}" onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop'">
@@ -5742,6 +5755,11 @@
                         esInternacional = true;
                     }
                     if (data.tags && (data.tags.includes("cbt_item") || data.tags.includes("imported") || data.tags.includes("international_delivery"))) {
+                        esInternacional = true;
+                    }
+
+                    const foundItem = window.equiposCargados ? window.equiposCargados.find(x => x.id === idProducto || (data && x.id === data.id)) : null;
+                    if (foundItem && (foundItem.esImportacion === true || foundItem.esImportacion === 'true')) {
                         esInternacional = true;
                     }
                     
