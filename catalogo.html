@@ -2560,7 +2560,7 @@
                 const data = await res.json();
 
                 if (data.result === 'success') {
-                    showModalResult('modalCredito-resultado', true, `¡Solicitud enviada con éxito!`, `Hemos recibido tu solicitud para el <strong>${escapeHTMLFront(modelo)}</strong>.<br>Te contactaremos vía WhatsApp 📲`, cerrarModal, 7000);
+                    showModalResult('modalCredito-resultado', true, `¡Solicitud enviada con éxito!`, `Hemos recibido tu solicitud para el <strong>${escapeHTMLFront(limpiarNombreModelo(modelo))}</strong>.<br>Te contactaremos vía WhatsApp 📲`, cerrarModal, 7000);
 
                 } else if (data.result === 'rejected') {
                     showModalResult('modalCredito-resultado', false, `No fue posible autorizar tu solicitud`, `Por el momento no podemos procesar tu solicitud de acuerdo a nuestras políticas de riesgo.<br><br>Te invitamos a intentar en 30 días.`, cerrarModal, 7000);

@@ -1324,7 +1324,7 @@
                         const data = await res.json();
 
                         if (data.result === 'success') {
-                            toast(`Modelo: <strong>${data.modelo}</strong><br>Precio ML: $${data.precioContado.toLocaleString('es-MX')}<br>IMEI: ${data.imei}`, 'success', '¡Celular agregado con éxito!');
+                            toast(`Modelo: <strong>${limpiarNombreModelo(data.modelo)}</strong><br>Precio ML: $${data.precioContado.toLocaleString('es-MX')}<br>IMEI: ${data.imei}`, 'success', '¡Celular agregado con éxito!');
                             document.getElementById('formAgregarCelular').reset();
 
                             // Limpiar caché local del catálogo para obligar a refrescar la base de datos
