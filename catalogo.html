@@ -4870,6 +4870,10 @@
                                         document.getElementById('pdp-weekly-amount').innerText = `Bajo Pedido`;
                                         document.getElementById('pdp-weekly-term').innerText = `Consultar precio con asesor`;
                                         ocultarCargandoVariantes();
+                                        const _overlay = document.getElementById('loadingOverlay');
+                                        if (_overlay) _overlay.style.display = 'none';
+                                        if (wrapperColores) { wrapperColores.style.opacity = ""; wrapperColores.style.pointerEvents = ""; }
+                                        if (wrapperStorage) { wrapperStorage.style.opacity = ""; wrapperStorage.style.pointerEvents = ""; }
                                     }
                                 };
                                 wrapperColores.appendChild(divColor);
@@ -4923,7 +4927,9 @@
                                     }
                                     
                                     // Only skip if the option has absolutely no stock in the family
-                                    if (optionType && !isOptionInFamily(optionType, prod.picker_label) && !isSel) return;
+                                    // BUT allow options from other catalog IDs (they'll be "Bajo Pedido")
+                                    const isFromDifferentCatalog = prod.product_id && cleanId && prod.product_id.toUpperCase() !== cleanId.toUpperCase();
+                                    if (optionType && !isFromDifferentCatalog && !isOptionInFamily(optionType, prod.picker_label) && !isSel) return;
 
                                     if (!itemsVistos.has(normLabel) || isSel) {
                                         itemsVistos.set(normLabel, {
@@ -5024,7 +5030,9 @@
                                         optionType = "grading";
                                     }
                                     
-                                    const isAvailable = optionType ? isOptionAvailable(optionType, itemInfo.name) : true;
+                                    // Options from different catalogs are always "available" (they'll show as "Bajo Pedido" on click)
+                                    const isCrossCatalog = itemInfo.id && cleanId && itemInfo.id.toUpperCase() !== cleanId.toUpperCase();
+                                    const isAvailable = isCrossCatalog ? true : (optionType ? isOptionAvailable(optionType, itemInfo.name) : true);
 
                                     pill.className = `storage-pill ${isSelected ? 'selected' : ''} ${!isAvailable ? 'unavailable' : ''}`;
                                     pill.type = 'button';
@@ -5114,8 +5122,12 @@
                                              // Update the picker label to show the new selection
                                              const labelSpan = sectionDiv.querySelector('label span');
                                              if (labelSpan) labelSpan.innerText = itemInfo.name;
-                                             // Hide loading overlay
+                                             // Hide loading overlay and restore picker interactivity
                                              ocultarCargandoVariantes();
+                                             const _overlay = document.getElementById('loadingOverlay');
+                                             if (_overlay) _overlay.style.display = 'none';
+                                             if (wrapperColores) { wrapperColores.style.opacity = ""; wrapperColores.style.pointerEvents = ""; }
+                                             if (wrapperStorage) { wrapperStorage.style.opacity = ""; wrapperStorage.style.pointerEvents = ""; }
                                          }
                                     };
                                     pillsWrapper.appendChild(pill);
