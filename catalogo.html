@@ -2103,10 +2103,18 @@
         window.addEventListener('click', function (event) {
             const modal = document.getElementById('modalCredito');
             if (event.target === modal) {
+                const resPanel = document.getElementById('modalCredito-resultado');
+                if (resPanel && resPanel.style.display === 'flex') {
+                    return; // Ignorar clic si se está mostrando el resultado
+                }
                 cerrarModal();
             }
             const peModal = document.getElementById('modalPedidoEspecial');
             if (event.target === peModal) {
+                const resPanelPE = document.getElementById('modalPE-resultado');
+                if (resPanelPE && resPanelPE.style.display === 'flex') {
+                    return; // Ignorar clic si se está mostrando el resultado
+                }
                 cerrarModalPedidoEspecial();
             }
         });
@@ -2556,7 +2564,6 @@
 
                 } else if (data.result === 'rejected') {
                     showModalResult('modalCredito-resultado', false, `No fue posible autorizar tu solicitud`, `Por el momento no podemos procesar tu solicitud de acuerdo a nuestras políticas de riesgo.<br><br>Te invitamos a intentar en 30 días.`, cerrarModal);
-                    cerrarModal();
                 } else {
                     toast('Ocurrió un detalle al guardar la solicitud.', 'error');
                 }
@@ -5236,18 +5243,54 @@
     /* ---- Modal Result Panel ---- */
     function showModalResult(panelId, isSuccess, title, msg, closeFn) {
         const panel = document.getElementById(panelId);
-        if (!panel) { toast(msg, isSuccess ? 'success' : 'error', title); if (closeFn) setTimeout(closeFn, 2200); return; }
+        if (!panel) { 
+            toast(msg, isSuccess ? 'success' : 'error', title); 
+            if (closeFn) setTimeout(closeFn, 2200); 
+            return; 
+        }
+        
+        const parent = panel.parentElement;
+        
+        // Guardar los estilos de visualización originales de todos los hermanos (para restaurarlos después)
+        const siblings = Array.from(parent.children).filter(child => child !== panel);
+        const originalDisplays = siblings.map(child => {
+            return {
+                element: child,
+                display: child.style.display
+            };
+        });
+        
+        // Ocultar todos los hermanos de forma que el alto del modal se ajuste solo al resultado
+        siblings.forEach(child => {
+            child.style.display = 'none';
+        });
+        
+        // Desplazar scroll al inicio del modal
+        parent.scrollTop = 0;
+        
         const bg = isSuccess
-            ? 'linear-gradient(160deg, #064e3b 0%, #065f46 50%, #047857 100%)'
-            : 'linear-gradient(160deg, #7f1d1d 0%, #991b1b 50%, #b91c1c 100%)';
-        const icon = isSuccess ? '\u2705' : '\u274c';
-        panel.style.cssText += 'background:' + bg + '; display:flex; border-radius:inherit;';
-        panel.innerHTML = '<div class="modal-result-inner">'
-            + '<div class="modal-result-icon">' + icon + '</div>'
-            + '<p class="modal-result-title" style="color:#fff">' + title + '</p>'
-            + '<p class="modal-result-msg" style="color:rgba(255,255,255,.88);text-align:center">' + msg + '</p>'
+            ? 'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)'
+            : 'linear-gradient(135deg, #7f1d1d 0%, #991b1b 50%, #b91c1c 100%)';
+        const icon = isSuccess ? '✅' : '❌';
+        
+        // Re-estilizar el contenedor del panel en flujo normal de HTML (no absolute inset:0)
+        panel.style.cssText = 'background:' + bg + '; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:50px 30px; gap:20px; border-radius:inherit; min-height:280px; box-sizing:border-box; width:100%;';
+        
+        panel.innerHTML = '<div class="modal-result-inner" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; width:100%;">'
+            + '<div class="modal-result-icon" style="font-size: 54px; margin-bottom: 8px;">' + icon + '</div>'
+            + '<h3 class="modal-result-title" style="color:#fff; font-size:22px; font-weight:700; margin:0; font-family:\'Inter\',sans-serif;">' + title + '</h3>'
+            + '<p class="modal-result-msg" style="color:rgba(255,255,255,.9); text-align:center; font-size:15px; margin:0; line-height:1.6; max-width:400px; font-family:\'Inter\',sans-serif;">' + msg + '</p>'
             + '</div>';
-        setTimeout(() => { panel.style.display = 'none'; panel.innerHTML = ''; if (closeFn) closeFn(); }, 3200);
+            
+        setTimeout(() => { 
+            panel.style.display = 'none'; 
+            panel.innerHTML = ''; 
+            // Restaurar displays originales de los hermanos
+            originalDisplays.forEach(item => {
+                item.element.style.display = item.display;
+            });
+            if (closeFn) closeFn(); 
+        }, 4000);
     }
     </script>
 
