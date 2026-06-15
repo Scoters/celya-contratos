@@ -1454,7 +1454,8 @@
                         formData.append('link', link);
                         formData.append('imei', imei);
                         formData.append('estado', estado);
-                        if (esImport && costoImport) {
+                        formData.append('esImportacion', esImport ? 'true' : 'false');
+                        if (costoImport) {
                             formData.append('costoImportacion', costoImport);
                         }
 
