@@ -698,6 +698,16 @@
                             <option value="BAJO DEMANDA">⏳ BAJO DEMANDA (Sobre pedido)</option>
                         </select>
 
+                        <div style="margin-top: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="nuevo-es-importacion" style="width: auto; margin: 0; cursor: pointer;" />
+                            <label for="nuevo-es-importacion" style="margin: 0; font-weight: normal; cursor: pointer; color: var(--text-main);">✈️ ¿Es de Importación?</label>
+                        </div>
+
+                        <div id="nuevo-importacion-container" style="display: none; margin-bottom: 15px; background: rgba(230, 126, 34, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed rgba(230, 126, 34, 0.3);">
+                            <label style="margin-top: 0; display: block; font-weight: 600; margin-bottom: 4px; color: var(--text-main);">Costo de Importación Estimado (Mercado Libre):</label>
+                            <input id="nuevo-costo-importacion" type="number" placeholder="Ej. 1022" style="width: 100%; padding: 10px; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; box-sizing: border-box; background: rgba(15, 23, 42, 0.5); color: white;" />
+                        </div>
+
                         <button type="button" class="btn-pago" id="btnAgregarCelular">➕ Importar y Agregar al Excel</button>
                     </form>
 
@@ -1404,11 +1414,29 @@
             });
             // --- AGREGAR CELULAR AL CATÁLOGO ---
             const btnAgregar = document.getElementById('btnAgregarCelular');
+            const chkNuevoImport = document.getElementById('nuevo-es-importacion');
+            const containerNuevoImport = document.getElementById('nuevo-importacion-container');
+            const inputNuevoImport = document.getElementById('nuevo-costo-importacion');
+
+            if (chkNuevoImport && containerNuevoImport) {
+                chkNuevoImport.addEventListener('change', function() {
+                    if (this.checked) {
+                        containerNuevoImport.style.display = 'block';
+                        if (inputNuevoImport) inputNuevoImport.focus();
+                    } else {
+                        containerNuevoImport.style.display = 'none';
+                        if (inputNuevoImport) inputNuevoImport.value = '';
+                    }
+                });
+            }
+
             if (btnAgregar) {
                 btnAgregar.addEventListener('click', async function () {
                     const link = document.getElementById('nuevoLink').value.trim();
                     const imei = document.getElementById('nuevoImei').value.trim();
                     const estado = document.getElementById('nuevoEstado').value;
+                    const esImport = chkNuevoImport ? chkNuevoImport.checked : false;
+                    const costoImport = (esImport && inputNuevoImport) ? inputNuevoImport.value.trim() : "";
 
                     if (!link) {
                         toast('Por favor introduce el enlace de Mercado Libre.', 'warning');
@@ -1426,6 +1454,9 @@
                         formData.append('link', link);
                         formData.append('imei', imei);
                         formData.append('estado', estado);
+                        if (esImport && costoImport) {
+                            formData.append('costoImportacion', costoImport);
+                        }
 
                         const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
                             method: 'POST',
@@ -1437,6 +1468,7 @@
                         if (data.result === 'success') {
                             toast(`Modelo: <strong>${limpiarNombreModelo(data.modelo)}</strong><br>Precio ML: $${data.precioContado.toLocaleString('es-MX')}<br>IMEI: ${data.imei}`, 'success', '¡Celular agregado con éxito!');
                             document.getElementById('formAgregarCelular').reset();
+                            if (containerNuevoImport) containerNuevoImport.style.display = 'none';
 
                             // Limpiar caché local del catálogo para obligar a refrescar la base de datos
                             limpiarCacheLocalCatalogo();
