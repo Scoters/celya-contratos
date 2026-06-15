@@ -23,12 +23,12 @@
             --border-color: #e2e8f0;
             --text-main: #1e293b;
             --text-muted: #64748b;
-            
+
             --bg-header: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
             --text-header: #0f172a;
             --border-header: #e2e8f0;
             --shadow-header: rgba(15, 23, 42, 0.04);
-            
+
             --bg-input: #ffffff;
             --text-input: #1e293b;
             --bg-toggle: #f1f5f9;
@@ -43,18 +43,23 @@
             --primary-hover: #475569;
             --accent: #f97316;
             --accent-gradient: linear-gradient(135deg, #fb923c, #f97316);
-            --bg-page: #18181b;       /* Zinc 900 (Gris oscuro/medio) */
-            --bg-card: #27272a;       /* Zinc 800 (Gris medio card) */
+            --bg-page: #18181b;
+            /* Zinc 900 (Gris oscuro/medio) */
+            --bg-card: #27272a;
+            /* Zinc 800 (Gris medio card) */
             --bg-light: #27272a;
-            --border-color: #3f3f46;  /* Zinc 700 border */
-            --text-main: #f4f4f5;     /* Zinc 100 text */
-            --text-muted: #a1a1aa;    /* Zinc 400 muted */
-            
+            --border-color: #3f3f46;
+            /* Zinc 700 border */
+            --text-main: #f4f4f5;
+            /* Zinc 100 text */
+            --text-muted: #a1a1aa;
+            /* Zinc 400 muted */
+
             --bg-header: linear-gradient(180deg, #27272a 0%, #18181b 100%);
             --text-header: #f4f4f5;
             --border-header: #3f3f46;
             --shadow-header: rgba(0, 0, 0, 0.2);
-            
+
             --bg-input: #18181b;
             --text-input: #f4f4f5;
             --bg-toggle: #18181b;
@@ -90,7 +95,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-size: 15px;
             z-index: 50;
@@ -99,7 +104,7 @@
 
         .theme-toggle-btn:hover {
             transform: scale(1.08) rotate(15deg);
-            box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
             border-color: var(--accent);
         }
 
@@ -179,7 +184,7 @@
         }
 
         body.dark-theme header img {
-            filter: invert(1) drop-shadow(0 4px 6px rgba(255,255,255,0.08));
+            filter: invert(1) drop-shadow(0 4px 6px rgba(255, 255, 255, 0.08));
         }
 
         body.dark-theme .card-celular .enganche {
@@ -193,10 +198,12 @@
             border-color: var(--border-color);
             color: var(--text-main);
         }
+
         body.dark-theme .storage-pill:hover {
             background: var(--primary-light);
             border-color: var(--text-muted);
         }
+
         body.dark-theme .storage-pill.selected {
             border-color: var(--accent);
             background-color: rgba(230, 126, 34, 0.15);
@@ -256,7 +263,9 @@
             color: #b45309;
         }
 
-        input, textarea, select {
+        input,
+        textarea,
+        select {
             user-select: text;
             -webkit-user-select: text;
         }
@@ -294,7 +303,7 @@
         .freq-btn.active {
             background: white;
             color: var(--primary);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         header {
@@ -311,7 +320,7 @@
             max-height: 72px;
             margin-bottom: 6px;
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.06));
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.06));
         }
 
         header img:hover {
@@ -781,10 +790,12 @@
             transition: opacity 0.2s ease-in-out;
             border-radius: 16px;
         }
+
         .pdp-loading-overlay.active {
             opacity: 1;
             pointer-events: auto;
         }
+
         .pdp-spinner {
             width: 40px;
             height: 40px;
@@ -793,9 +804,15 @@
             border-radius: 50%;
             animation: pdp-spin 0.8s linear infinite;
         }
+
         @keyframes pdp-spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .pdp-layout {
@@ -1054,7 +1071,8 @@
                 transition: transform 0.2s, background-color 0.2s;
             }
 
-            .pdp-close-btn:hover, .pdp-close-btn:active {
+            .pdp-close-btn:hover,
+            .pdp-close-btn:active {
                 background: #1e293b !important;
                 transform: scale(1.1);
                 color: white !important;
@@ -1089,10 +1107,12 @@
             border: 2px dashed #94a3b8 !important;
             cursor: pointer;
         }
+
         .color-circle.unavailable:hover {
             transform: scale(1.05);
             opacity: 0.8;
         }
+
         .storage-pill.unavailable {
             opacity: 0.6;
             border: 1px dashed #94a3b8 !important;
@@ -1100,6 +1120,7 @@
             color: #94a3b8 !important;
             cursor: pointer;
         }
+
         .storage-pill.unavailable:hover {
             background-color: #f1f5f9 !important;
             opacity: 0.8;
@@ -1130,7 +1151,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 50;
             outline: none;
@@ -1139,7 +1160,7 @@
 
         .menu-toggle-btn:hover {
             transform: scale(1.08);
-            box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
             border-color: var(--accent);
         }
 
@@ -1172,7 +1193,7 @@
             height: 100%;
             background: var(--bg-card);
             border-right: 1px solid var(--border-color);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             z-index: 1100;
             transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
@@ -1193,11 +1214,11 @@
 
         .sidebar-logo img {
             max-height: 40px;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.04));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.04));
         }
 
         body.dark-theme .sidebar-logo img {
-            filter: invert(1) drop-shadow(0 2px 4px rgba(255,255,255,0.08));
+            filter: invert(1) drop-shadow(0 2px 4px rgba(255, 255, 255, 0.08));
         }
 
         .sidebar-close-btn {
@@ -1335,8 +1356,15 @@
         }
 
         @keyframes fadeInTab {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Footer Styles */
@@ -1369,11 +1397,11 @@
         .footer-logo {
             max-height: 50px;
             margin-bottom: 15px;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.04));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.04));
         }
 
         body.dark-theme .footer-logo {
-            filter: invert(1) drop-shadow(0 2px 4px rgba(255,255,255,0.08));
+            filter: invert(1) drop-shadow(0 2px 4px rgba(255, 255, 255, 0.08));
         }
 
         .footer-brand p {
@@ -1437,14 +1465,17 @@
             header img {
                 max-height: 52px !important;
             }
+
             .menu-toggle-btn {
                 left: 12px !important;
                 top: 12px !important;
             }
+
             .theme-toggle-btn {
                 right: 12px !important;
                 top: 12px !important;
             }
+
             .celya-footer {
                 padding: 30px 15px 15px 15px !important;
             }
@@ -1479,7 +1510,8 @@
                 </li>
                 <li class="menu-divider"></li>
                 <li>
-                    <a href="javascript:void(0)" onclick="cerrarMenuLateral(); abrirModalPedidoEspecial()" class="special-menu-item">
+                    <a href="javascript:void(0)" onclick="cerrarMenuLateral(); abrirModalPedidoEspecial()"
+                        class="special-menu-item">
                         <span class="menu-icon">✨</span> Cotizar Pedido Especial
                     </a>
                 </li>
@@ -1487,14 +1519,16 @@
         </div>
         <div class="sidebar-footer">
             <p>© 2026 CelYa! • Todos los derechos reservados.</p>
-            <p class="sidebar-disclaimer">Este sitio y los dispositivos están protegidos por software MDM para fines de financiamiento.</p>
+            <p class="sidebar-disclaimer">Este sitio y los dispositivos están protegidos por software MDM para fines de
+                financiamiento.</p>
         </div>
     </div>
 
     <header>
         <!-- Botón de Menú Hamburguesa -->
         <button id="menu-toggle" class="menu-toggle-btn" aria-label="Abrir menú" onclick="abrirMenuLateral()">
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"
+                stroke-linecap="round" stroke-linejoin="round">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
                 <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -1508,7 +1542,8 @@
         </button>
 
         <div style="text-align: center; margin-bottom: 6px;">
-            <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo" style="cursor: pointer;" onclick="window.location.reload();">
+            <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo"
+                style="cursor: pointer;" onclick="window.location.reload();">
         </div>
         <p style="margin-bottom: 10px;">Estrena el smartphone que buscas con pagos semanales/quincenales a tu medida</p>
 
@@ -1577,21 +1612,29 @@
     <footer class="celya-footer">
         <div class="footer-container">
             <div class="footer-brand">
-                <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa! Logo" class="footer-logo">
-                <p>El camino más rápido y confiable para estrenar tu smartphone a crédito con pagos semanales y quincenales a tu medida.</p>
+                <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa! Logo"
+                    class="footer-logo">
+                <p>El camino más rápido y confiable para estrenar tu smartphone a crédito con pagos semanales y
+                    quincenales a tu medida.</p>
             </div>
             <div class="footer-links-group">
                 <h4 class="footer-title">Información y Ayuda</h4>
                 <ul class="footer-links">
-                    <li><a href="javascript:void(0)" onclick="abrirModalInfoLegal('faq')">Preguntas Frecuentes (FAQ)</a></li>
-                    <li><a href="javascript:void(0)" onclick="abrirModalInfoLegal('terminos')">Términos y Condiciones</a></li>
-                    <li><a href="javascript:void(0)" onclick="abrirModalPedidoEspecial()">Cotizar Pedido Especial</a></li>
+                    <li><a href="javascript:void(0)" onclick="abrirModalInfoLegal('faq')">Preguntas Frecuentes (FAQ)</a>
+                    </li>
+                    <li><a href="javascript:void(0)" onclick="abrirModalInfoLegal('terminos')">Términos y
+                            Condiciones</a></li>
+                    <li><a href="javascript:void(0)" onclick="abrirModalPedidoEspecial()">Cotizar Pedido Especial</a>
+                    </li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
             <p>© 2026 CelYa! • Todos los derechos reservados.</p>
-            <p class="footer-disclaimer">El dispositivo adquirido cuenta con software de gestión MDM (Mobile Device Management) instalado de fábrica para fines de financiamiento. El enganche no es reembolsable excepto por fallas de fábrica validadas técnicamente. El bloqueo automático de pantalla se aplica tras un retraso mayor a 48 horas en el abono.</p>
+            <p class="footer-disclaimer">El dispositivo adquirido cuenta con software de gestión MDM (Mobile Device
+                Management) instalado de fábrica para fines de financiamiento. El enganche no es reembolsable excepto
+                por fallas de fábrica validadas técnicamente. El bloqueo automático de pantalla se aplica tras un
+                retraso mayor a 48 horas en el abono.</p>
         </div>
     </footer>
 
@@ -1601,8 +1644,10 @@
             <button type="button" class="pdp-close-btn" onclick="cerrarModal()">×</button>
 
             <!-- Panel de éxito/error in-modal -->
-            <div id="modalCredito-resultado" style="display:none; position:absolute; inset:0; border-radius:inherit; z-index:20; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 30px; gap:18px;"></div>
-            
+            <div id="modalCredito-resultado"
+                style="display:none; position:absolute; inset:0; border-radius:inherit; z-index:20; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 30px; gap:18px;">
+            </div>
+
             <!-- Overlay de Carga de Variantes -->
             <div id="pdp-variants-loading-overlay" class="pdp-loading-overlay">
                 <div class="pdp-spinner"></div>
@@ -1637,15 +1682,19 @@
 
                         <div class="pdp-weekly-payments">
                             <span style="font-size: 24px;" id="pdp-weekly-amount">$0</span>
-                            <span id="pdp-weekly-term" style="font-size: 14px; font-weight: normal; color: var(--text-muted);">en
+                            <span id="pdp-weekly-term"
+                                style="font-size: 14px; font-weight: normal; color: var(--text-muted);">en
                                 -- pagos semanales</span>
                         </div>
-                        <div style="font-size: 13px; color: var(--text-muted); margin-top: 6px;" id="pdp-contado-chico-texto">
+                        <div style="font-size: 13px; color: var(--text-muted); margin-top: 6px;"
+                            id="pdp-contado-chico-texto">
                             Precio de Contado: <strong>$0</strong>
                         </div>
-                        <div id="ml-shipping-warning" style="display: none; margin-top: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; align-items: center; gap: 8px;">
+                        <div id="ml-shipping-warning"
+                            style="display: none; margin-top: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; align-items: center; gap: 8px;">
                             <span style="font-size: 16px;">✈️</span>
-                            <span><strong>Envío Internacional:</strong> Este producto se envía desde el extranjero y <span id="ml-shipping-time-txt" style="font-weight: 600;">llegará pronto</span>.</span>
+                            <span><strong>Envío Internacional:</strong> Este producto se envía desde el extranjero y
+                                <span id="ml-shipping-time-txt" style="font-weight: 600;">llegará pronto</span>.</span>
                         </div>
                     </div>
 
@@ -1693,7 +1742,8 @@
                             <input type="tel" id="cliTelefono" required placeholder="Ej. 667 123 4567">
 
                             <div id="seccionPreguntasCredito">
-                                <label id="lbl-cliSueldo" style="margin-top: 10px;">¿Cuánto ganas libres a la semana? (Ingresos):</label>
+                                <label id="lbl-cliSueldo" style="margin-top: 10px;">¿Cuánto ganas libres a la semana?
+                                    (Ingresos):</label>
                                 <select id="cliSueldo">
                                     <option value="Menos de $1,500">Menos de $1,500</option>
                                     <option value="$1,500 a $3,000">$1,500 a $3,000</option>
@@ -1701,7 +1751,8 @@
                                     <option value="Más de $5,000">Más de $5,000</option>
                                 </select>
 
-                                <label id="lbl-cliPrestamos" style="margin-top: 10px;">¿Cuánto pagas de abonos actualmente a la semana? (Deudas activas):</label>
+                                <label id="lbl-cliPrestamos" style="margin-top: 10px;">¿Cuánto pagas de abonos
+                                    actualmente a la semana? (Deudas activas):</label>
                                 <select id="cliPrestamos">
                                     <option value="Nada, no tengo deudas">Nada, no tengo deudas</option>
                                     <option value="Menos de $500">Menos de $500</option>
@@ -1742,7 +1793,9 @@
             <button type="button" class="pdp-close-btn" onclick="cerrarModalPedidoEspecial()">×</button>
 
             <!-- Panel de éxito in-modal -->
-            <div id="modalPE-resultado" style="display:none; position:absolute; inset:0; border-radius:inherit; z-index:20; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 30px; gap:18px;"></div>
+            <div id="modalPE-resultado"
+                style="display:none; position:absolute; inset:0; border-radius:inherit; z-index:20; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 30px; gap:18px;">
+            </div>
             <h2
                 style="color: var(--primary); margin-top: 0; font-size: 22px; font-weight: 700; border-bottom: 2px solid var(--accent); padding-bottom: 8px; text-align: left;">
                 ✨ Solicitar Pedido Especial CelYa!</h2>
@@ -1793,10 +1846,13 @@
                 </div>
 
                 <!-- Alerta de Producto de Importación -->
-                <div id="pe-import-warning" style="display: none; margin-bottom: 20px; padding: 12px; border-radius: 10px; background-color: #fffbeb; border: 1px solid #fef3c7; color: #b45309; font-size: 13px; line-height: 1.5; gap: 8px; align-items: flex-start; text-align: left;">
+                <div id="pe-import-warning"
+                    style="display: none; margin-bottom: 20px; padding: 12px; border-radius: 10px; background-color: #fffbeb; border: 1px solid #fef3c7; color: #b45309; font-size: 13px; line-height: 1.5; gap: 8px; align-items: flex-start; text-align: left;">
                     <span style="font-size: 18px; line-height: 1;">⚠️</span>
                     <div>
-                        <strong>Producto de Importación:</strong> Esta publicación de Mercado Libre tiene costos de importación estimados. Al enviar la solicitud, un asesor de CelYa! calculará el costo de importación real y se pondrá en contacto contigo para ajustar tu enganche y abonos.
+                        <strong>Producto de Importación:</strong> Esta publicación de Mercado Libre tiene costos de
+                        importación estimados. Al enviar la solicitud, un asesor de CelYa! calculará el costo de
+                        importación real y se pondrá en contacto contigo para ajustar tu enganche y abonos.
                     </div>
                 </div>
 
@@ -1838,7 +1894,8 @@
                         </select>
 
                         <label
-                            style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">Frecuencia de Pago:</label>
+                            style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">Frecuencia
+                            de Pago:</label>
                         <select id="pe-cliFrecuencia" onchange="actualizarPlazosYPreciosPedidoEspecial()"
                             style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
                             <option value="SEMANAL">Semanal (Cada Semana)</option>
@@ -1871,57 +1928,97 @@
     <div id="modalInfoLegal" class="modal-solicitud">
         <div class="modal-content" style="max-width: 800px;">
             <button type="button" class="pdp-close-btn" onclick="cerrarModalInfoLegal()">×</button>
-            
+
             <!-- Tabs del Modal -->
             <div class="info-tabs">
-                <button type="button" id="tab-faq" class="info-tab active" onclick="switchInfoTab('faq')">❓ Preguntas Frecuentes (FAQ)</button>
-                <button type="button" id="tab-terminos" class="info-tab" onclick="switchInfoTab('terminos')">⚖️ Términos y Condiciones</button>
+                <button type="button" id="tab-faq" class="info-tab active" onclick="switchInfoTab('faq')">❓ Preguntas
+                    Frecuentes (FAQ)</button>
+                <button type="button" id="tab-terminos" class="info-tab" onclick="switchInfoTab('terminos')">⚖️ Términos
+                    y Condiciones</button>
             </div>
 
             <!-- Contenido de FAQ -->
             <div id="info-content-faq" class="info-tab-content active">
-                <h2 style="color: var(--primary); margin-top: 0; font-size: 22px; font-weight: 700; border-bottom: 2px solid var(--accent); padding-bottom: 8px; text-align: left;">BIENVENIDO A CELYA! – PREGUNTAS FRECUENTES (FAQ)</h2>
-                <div class="faq-list" style="margin-top: 20px; display: flex; flex-direction: column; gap: 20px; text-align: left;">
+                <h2
+                    style="color: var(--primary); margin-top: 0; font-size: 22px; font-weight: 700; border-bottom: 2px solid var(--accent); padding-bottom: 8px; text-align: left;">
+                    BIENVENIDO A CELYA! – PREGUNTAS FRECUENTES (FAQ)</h2>
+                <div class="faq-list"
+                    style="margin-top: 20px; display: flex; flex-direction: column; gap: 20px; text-align: left;">
                     <div class="faq-item">
-                        <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin: 0 0 8px 0;">1. ¿Pueden acceder a mi información personal o ver mis fotos con el software de bloqueo?</h3>
+                        <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin: 0 0 8px 0;">1.
+                            ¿Pueden acceder a mi información personal o ver mis fotos con el software de bloqueo?</h3>
                         <p style="font-size: 14px; color: var(--text-muted); margin: 0; line-height: 1.6;">
-                            <strong>Respuesta:</strong> Absolutamente NO. En CelYa! respetamos al 100% tu privacidad. El software de administración que se instala en el equipo únicamente tiene acceso a funciones de seguridad del sistema operativo (como el rastreo por GPS en caso de robo o extravío, alertas de pago y el bloqueo remoto de la pantalla por adeudo). El sistema no puede ver tus fotos, leer tus mensajes de WhatsApp, acceder a tus contraseñas ni revisar tu información personal. Tu privacidad está completamente protegida.
+                            <strong>Respuesta:</strong> Absolutamente NO. En CelYa! respetamos al 100% tu privacidad. El
+                            software de administración que se instala en el equipo únicamente tiene acceso a funciones
+                            de seguridad del sistema operativo (como el rastreo por GPS en caso de robo o extravío,
+                            alertas de pago y el bloqueo remoto de la pantalla por adeudo). El sistema no puede ver tus
+                            fotos, leer tus mensajes de WhatsApp, acceder a tus contraseñas ni revisar tu información
+                            personal. Tu privacidad está completamente protegida.
                         </p>
                     </div>
                     <div class="faq-item">
-                        <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin: 0 0 8px 0;">2. ¿Cuál es la política de devoluciones de CelYa!?</h3>
+                        <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin: 0 0 8px 0;">2.
+                            ¿Cuál es la política de devoluciones de CelYa!?</h3>
                         <p style="font-size: 14px; color: var(--text-muted); margin: 0; line-height: 1.6;">
-                            <strong>Respuesta:</strong> Queremos que estés feliz con tu equipo. Te permitimos devolver el celular de forma gratuita hasta 30 días después de haberlo recibido, siempre y cuando cumplas estrictamente con los siguientes requisitos:
+                            <strong>Respuesta:</strong> Queremos que estés feliz con tu equipo. Te permitimos devolver
+                            el celular de forma gratuita hasta 30 días después de haberlo recibido, siempre y cuando
+                            cumplas estrictamente con los siguientes requisitos:
                         </p>
-                        <ul style="font-size: 14px; color: var(--text-muted); margin: 8px 0 0 0; padding-left: 20px; line-height: 1.6;">
-                            <li><strong>Estado impecable:</strong> El equipo debe estar en perfectas condiciones, sin marcas de uso, rayones o golpes, incluyendo todos sus accesorios, manuales y empaque original. El equipo debe verse y sentirse totalmente nuevo.</li>
-                            <li><strong>Sin bloqueos personales:</strong> Debes entregar el celular restaurado a sus valores de fábrica y completamente desvinculado de tus cuentas personales (como iCloud, Google, Samsung Account o contraseñas de seguridad).</li>
-                            <li><strong>El Enganche:</strong> Ten en cuenta que el enganche NO es reembolsable, a menos que la devolución sea estrictamente por un fallo de fábrica comprobable y el equipo no presente daños por mal uso.</li>
-                            <li><strong>Proceso de revisión:</strong> Una vez que recibamos el paquete en nuestro centro de atención, el equipo pasará por una revisión técnica. Si todo está en orden, procesaremos tu reembolso en un plazo aproximado de 3 días hábiles.</li>
+                        <ul
+                            style="font-size: 14px; color: var(--text-muted); margin: 8px 0 0 0; padding-left: 20px; line-height: 1.6;">
+                            <li><strong>Estado impecable:</strong> El equipo debe estar en perfectas condiciones, sin
+                                marcas de uso, rayones o golpes, incluyendo todos sus accesorios, manuales y empaque
+                                original. El equipo debe verse y sentirse totalmente nuevo.</li>
+                            <li><strong>Sin bloqueos personales:</strong> Debes entregar el celular restaurado a sus
+                                valores de fábrica y completamente desvinculado de tus cuentas personales (como iCloud,
+                                Google, Samsung Account o contraseñas de seguridad).</li>
+                            <li><strong>El Enganche:</strong> Ten en cuenta que el enganche NO es reembolsable, a menos
+                                que la devolución sea estrictamente por un fallo de fábrica comprobable y el equipo no
+                                presente daños por mal uso.</li>
+                            <li><strong>Proceso de revisión:</strong> Una vez que recibamos el paquete en nuestro centro
+                                de atención, el equipo pasará por una revisión técnica. Si todo está en orden,
+                                procesaremos tu reembolso en un plazo aproximado de 3 días hábiles.</li>
                         </ul>
                     </div>
                     <div class="faq-item">
-                        <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin: 0 0 8px 0;">3. ¿Qué pasa si me retraso en mi pago semanal?</h3>
+                        <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin: 0 0 8px 0;">3. ¿Qué
+                            pasa si me retraso en mi pago semanal?</h3>
                         <p style="font-size: 14px; color: var(--text-muted); margin: 0; line-height: 1.6;">
-                            <strong>Respuesta:</strong> El sistema otorga un periodo de gracia de 48 horas después de tu fecha límite para registrar tu abono. Si pasadas esas 48 horas el pago no se ha reflejado, el sistema procederá a bloquear automáticamente la pantalla del celular. En cuanto realices tu pago y envíes el comprobante, el equipo se desbloqueará de forma remota en unos pocos minutos para que sigas usándolo con normalidad.
+                            <strong>Respuesta:</strong> El sistema otorga un periodo de gracia de 48 horas después de tu
+                            fecha límite para registrar tu abono. Si pasadas esas 48 horas el pago no se ha reflejado,
+                            el sistema procederá a bloquear automáticamente la pantalla del celular. En cuanto realices
+                            tu pago y envíes el comprobante, el equipo se desbloqueará de forma remota en unos pocos
+                            minutos para que sigas usándolo con normalidad.
                         </p>
                     </div>
                     <div class="faq-item">
-                        <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin: 0 0 8px 0;">4. Si el teléfono se me cae, se rompe o me lo roban, ¿tengo que seguir pagando?</h3>
+                        <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin: 0 0 8px 0;">4. Si
+                            el teléfono se me cae, se rompe o me lo roban, ¿tengo que seguir pagando?</h3>
                         <p style="font-size: 14px; color: var(--text-muted); margin: 0; line-height: 1.6;">
-                            <strong>Respuesta:</strong> Sí. Al adquirir el equipo bajo un esquema de financiamiento, adquieres el compromiso de liquidar el valor total del celular. El robo, extravío o daño físico (como pantallas rotas o daño por agua) son responsabilidad del usuario y no suspenden ni cancelan las mensualidades o semanalidades acordadas.
+                            <strong>Respuesta:</strong> Sí. Al adquirir el equipo bajo un esquema de financiamiento,
+                            adquieres el compromiso de liquidar el valor total del celular. El robo, extravío o daño
+                            físico (como pantallas rotas o daño por agua) son responsabilidad del usuario y no suspenden
+                            ni cancelan las mensualidades o semanalidades acordadas.
                         </p>
                     </div>
                     <div class="faq-item">
-                        <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin: 0 0 8px 0;">5. ¿Qué pasa cuando termine de pagar el celular por completo?</h3>
+                        <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin: 0 0 8px 0;">5. ¿Qué
+                            pasa cuando termine de pagar el celular por completo?</h3>
                         <p style="font-size: 14px; color: var(--text-muted); margin: 0; line-height: 1.6;">
-                            <strong>Respuesta:</strong> ¡Felicidades, el equipo ya es 100% tuyo! En un plazo máximo de 24 horas hábiles después de recibir tu último pago, nuestro equipo retirará el software de administración de forma remota y definitiva. El celular quedará completamente libre de cualquier restricción o vínculo con CelYa!.
+                            <strong>Respuesta:</strong> ¡Felicidades, el equipo ya es 100% tuyo! En un plazo máximo de
+                            24 horas hábiles después de recibir tu último pago, nuestro equipo retirará el software de
+                            administración de forma remota y definitiva. El celular quedará completamente libre de
+                            cualquier restricción o vínculo con CelYa!.
                         </p>
                     </div>
                     <div class="faq-item">
-                        <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin: 0 0 8px 0;">6. ¿Pueden adelantar pagos o liquidar mi deuda antes de tiempo?</h3>
+                        <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin: 0 0 8px 0;">6.
+                            ¿Pueden adelantar pagos o liquidar mi deuda antes de tiempo?</h3>
                         <p style="font-size: 14px; color: var(--text-muted); margin: 0; line-height: 1.6;">
-                            <strong>Respuesta:</strong> ¡Claro que sí! Puedes dar abonos más altos de lo acordado o liquidar el saldo total de tu equipo en el momento que tú quieras. Hacer esto no tiene ninguna penalización; al contrario, te ayuda a liberar tu equipo mucho más rápido del software de bloqueo.
+                            <strong>Respuesta:</strong> ¡Claro que sí! Puedes dar abonos más altos de lo acordado o
+                            liquidar el saldo total de tu equipo en el momento que tú quieras. Hacer esto no tiene
+                            ninguna penalización; al contrario, te ayuda a liberar tu equipo mucho más rápido del
+                            software de bloqueo.
                         </p>
                     </div>
                 </div>
@@ -1929,21 +2026,52 @@
 
             <!-- Contenido de Términos y Condiciones -->
             <div id="info-content-terminos" class="info-tab-content">
-                <h2 style="color: var(--primary); margin-top: 0; font-size: 22px; font-weight: 700; border-bottom: 2px solid var(--accent); padding-bottom: 8px; text-align: left;">⚖️ TÉRMINOS Y CONDICIONES DE FINANCIAMIENTO – CELYA!</h2>
-                <div class="terms-content" style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px; text-align: left; font-size: 14px; color: var(--text-muted); line-height: 1.6;">
-                    <p>El presente documento establece las condiciones legales bajo las cuales CelYa! otorga el financiamiento del dispositivo celular descrito en la nota de venta adjunta. Al realizar el pago del enganche y firmar de conformidad, el Cliente acepta sujetarse a las siguientes cláusulas:</p>
-                    
-                    <p><strong>PRIMERA: Propiedad del Equipo</strong><br>El dispositivo celular es propiedad legal e instructiva de CelYa! hasta que el Cliente haya liquidado el 100% del valor financiado y sus abonos correspondientes. Una vez liquidada la cuenta en su totalidad, CelYa! removerá el software de bloqueo de forma remota y definitiva en un lapso no mayor a 24 horas hábiles, otorgando la propiedad total y definitiva al Cliente.</p>
-                    
-                    <p><strong>SEGUNDA: Software de Gestión y Bloqueo por Impago</strong><br>El Cliente acepta y consiente de manera expresa que el dispositivo cuenta con un software de gestión y seguridad MDM (Mobile Device Management) instalado de fábrica. En caso de presentar un retraso mayor a 48 horas en su abono semanal, el sistema procederá al bloqueo automático de la pantalla del dispositivo, inhabilitando su uso (excepto para llamadas de emergencia y contacto con soporte) hasta que el saldo vencido sea liquidado en su totalidad.</p>
-                    
-                    <p><strong>TERCERA: Intento de Saboteo o Modificación del Sistema</strong><br>Queda estrictamente prohibido intentar remover, alterar, formatear, desinstalar o burlar el software de bloqueo instalado por CelYa!. Cualquier intento de alteración del sistema operativo, vulneración del MDM, rooteo o "flasheo" del equipo será considerado una violación grave al contrato. Esto provocará la rescisión inmediata del financiamiento, el bloqueo permanente del dispositivo por seguridad y la exigencia inmediata del pago total del adeudo restante.</p>
-                    
-                    <p><strong>CUARTA: Robo, Extravío o Daño Material</strong><br>Al ser un esquema de financiamiento de compra, el robo, pérdida, extravío o daño total/parcial del equipo por parte del Cliente no lo exime de su responsabilidad de pago. El Cliente se compromete y obliga a liquidar el saldo restante del equipo bajo los mismos plazos semanales acordados, independientemente del estado, posesión o existencia del dispositivo.</p>
-                    
-                    <p><strong>QUINTA: Política de Enganches y Devoluciones</strong><br>El Cliente tiene derecho a solicitar la devolución del equipo dentro de los primeros 30 días posteriores a la entrega, obligándose a devolverlo en condiciones estéticas de fábrica (sin marcas de uso, rayones o golpes), con su empaque original intacto, manuales y accesorios completos, y completamente libre de cuentas personales (Google, iCloud, Samsung, etc.).</p>
-                    
-                    <p>El enganche entregado NO es reembolsable bajo ninguna circunstancia, con la única excepción de que el dispositivo presente un fallo de software o hardware de fábrica que sea debidamente diagnosticado y validado por nuestro equipo técnico y que no pueda ser reparado o sustituido.</p>
+                <h2
+                    style="color: var(--primary); margin-top: 0; font-size: 22px; font-weight: 700; border-bottom: 2px solid var(--accent); padding-bottom: 8px; text-align: left;">
+                    ⚖️ TÉRMINOS Y CONDICIONES DE FINANCIAMIENTO – CELYA!</h2>
+                <div class="terms-content"
+                    style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px; text-align: left; font-size: 14px; color: var(--text-muted); line-height: 1.6;">
+                    <p>El presente documento establece las condiciones legales bajo las cuales CelYa! otorga el
+                        financiamiento del dispositivo celular descrito en la nota de venta adjunta. Al realizar el pago
+                        del enganche y firmar de conformidad, el Cliente acepta sujetarse a las siguientes cláusulas:
+                    </p>
+
+                    <p><strong>PRIMERA: Propiedad del Equipo</strong><br>El dispositivo celular es propiedad legal e
+                        instructiva de CelYa! hasta que el Cliente haya liquidado el 100% del valor financiado y sus
+                        abonos correspondientes. Una vez liquidada la cuenta en su totalidad, CelYa! removerá el
+                        software de bloqueo de forma remota y definitiva en un lapso no mayor a 24 horas hábiles,
+                        otorgando la propiedad total y definitiva al Cliente.</p>
+
+                    <p><strong>SEGUNDA: Software de Gestión y Bloqueo por Impago</strong><br>El Cliente acepta y
+                        consiente de manera expresa que el dispositivo cuenta con un software de gestión y seguridad MDM
+                        (Mobile Device Management) instalado de fábrica. En caso de presentar un retraso mayor a 48
+                        horas en su abono semanal, el sistema procederá al bloqueo automático de la pantalla del
+                        dispositivo, inhabilitando su uso (excepto para llamadas de emergencia y contacto con soporte)
+                        hasta que el saldo vencido sea liquidado en su totalidad.</p>
+
+                    <p><strong>TERCERA: Intento de Saboteo o Modificación del Sistema</strong><br>Queda estrictamente
+                        prohibido intentar remover, alterar, formatear, desinstalar o burlar el software de bloqueo
+                        instalado por CelYa!. Cualquier intento de alteración del sistema operativo, vulneración del
+                        MDM, rooteo o "flasheo" del equipo será considerado una violación grave al contrato. Esto
+                        provocará la rescisión inmediata del financiamiento, el bloqueo permanente del dispositivo por
+                        seguridad y la exigencia inmediata del pago total del adeudo restante.</p>
+
+                    <p><strong>CUARTA: Robo, Extravío o Daño Material</strong><br>Al ser un esquema de financiamiento de
+                        compra, el robo, pérdida, extravío o daño total/parcial del equipo por parte del Cliente no lo
+                        exime de su responsabilidad de pago. El Cliente se compromete y obliga a liquidar el saldo
+                        restante del equipo bajo los mismos plazos semanales acordados, independientemente del estado,
+                        posesión o existencia del dispositivo.</p>
+
+                    <p><strong>QUINTA: Política de Enganches y Devoluciones</strong><br>El Cliente tiene derecho a
+                        solicitar la devolución del equipo dentro de los primeros 30 días posteriores a la entrega,
+                        obligándose a devolverlo en condiciones estéticas de fábrica (sin marcas de uso, rayones o
+                        golpes), con su empaque original intacto, manuales y accesorios completos, y completamente libre
+                        de cuentas personales (Google, iCloud, Samsung, etc.).</p>
+
+                    <p>El enganche entregado NO es reembolsable bajo ninguna circunstancia, con la única excepción de
+                        que el dispositivo presente un fallo de software o hardware de fábrica que sea debidamente
+                        diagnosticado y validado por nuestro equipo técnico y que no pueda ser reparado o sustituido.
+                    </p>
                 </div>
             </div>
         </div>
@@ -1978,10 +2106,10 @@
         // 🚀 Carga inicial
         async function cargarPantallaInicial() {
             await sincronizarTasas();
-            
+
             const inputBusqueda = document.getElementById('inputBusqueda');
             if (inputBusqueda) {
-                inputBusqueda.addEventListener('keydown', function(event) {
+                inputBusqueda.addEventListener('keydown', function (event) {
                     if (event.key === 'Enter') {
                         event.preventDefault();
                         solicitarBusqueda();
@@ -2220,7 +2348,7 @@
                     const existing = document.getElementById('cacheBadge');
                     if (existing) existing.remove();
                 }
-            } catch (e) {}
+            } catch (e) { }
 
             // 1. Filtrar
             let filtrados = [...window.equiposCargados];
@@ -2269,7 +2397,7 @@
                     if (item.variantesJson) {
                         try {
                             parsedVar = (typeof item.variantesJson === 'string') ? JSON.parse(item.variantesJson) : item.variantesJson;
-                        } catch(e) {}
+                        } catch (e) { }
                     }
 
                     let memoriaText = item.memoria || "";
@@ -2381,21 +2509,21 @@
                                 <div class="cuotas">
                                     <div class="cuotas-semanal">
                                         <div class="cuota-item">
-                                            <span class="plan-label">⏱️ Plan Rápido (26 sem):</span>
+                                            <span class="plan-label">⏱️ Plan Rápido (26 semanas):</span>
                                             <span class="plan-val">$${cuotaSem26.toLocaleString('es-MX')} MXN/sem</span>
                                         </div>
                                         <div class="cuota-item" style="margin-top: 8px;">
-                                            <span class="plan-label">🗓️ Plan Cómodo (52 sem):</span>
+                                            <span class="plan-label">🗓️ Plan Cómodo (52 semanas):</span>
                                             <span class="plan-val">$${cuotaSem52.toLocaleString('es-MX')} MXN/sem</span>
                                         </div>
                                     </div>
                                     <div class="cuotas-quincenal" style="display: none;">
                                         <div class="cuota-item">
-                                            <span class="plan-label">⏱️ Plan Rápido (13 quin):</span>
+                                            <span class="plan-label">⏱️ Plan Rápido (13 quincenas):</span>
                                             <span class="plan-val">$${cuotaQuin13.toLocaleString('es-MX')} MXN/quin</span>
                                         </div>
                                         <div class="cuota-item" style="margin-top: 8px;">
-                                            <span class="plan-label">🗓️ Plan Cómodo (26 quin):</span>
+                                            <span class="plan-label">🗓️ Plan Cómodo (26 quincenas):</span>
                                             <span class="plan-val">$${cuotaQuin26.toLocaleString('es-MX')} MXN/quin</span>
                                         </div>
                                     </div>
@@ -2763,8 +2891,8 @@
             } else {
                 const factorEnganche = (plazo === "52 Semanas")
                     ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
-                    : ((freq === "SEMANAL") 
-                        ? (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165) 
+                    : ((freq === "SEMANAL")
+                        ? (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165)
                         : (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33));
                 const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
 
@@ -2830,7 +2958,7 @@
         });
 
         // Cerrar modales o menú lateral al presionar la tecla Escape
-        document.addEventListener('keydown', function(event) {
+        document.addEventListener('keydown', function (event) {
             if (event.key === 'Escape') {
                 cerrarModal();
                 cerrarModalPedidoEspecial();
@@ -3104,15 +3232,15 @@
             // Matemática
             const factorEnganche = (plazo === "52 Semanas")
                 ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
-                : ((freq === "SEMANAL") 
-                    ? (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165) 
+                : ((freq === "SEMANAL")
+                    ? (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165)
                     : (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33));
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
 
             const enganche = Math.ceil((precioContado * factorEnganche) / 10) * 10;
             const totalFinanciado = (precioContado * (1 + factorInteres)) - enganche;
-            
+
             let cuota = totalFinanciado / numPagos;
             let labelFrecuencia = "/sem";
 
@@ -3159,8 +3287,8 @@
             const precioContado = basePrice * CONFIG_TASAS.gananciaContadoFactor;
             const factorEnganche = (plazo === "52 Semanas")
                 ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
-                : ((freq === "SEMANAL") 
-                    ? (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165) 
+                : ((freq === "SEMANAL")
+                    ? (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165)
                     : (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33));
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
@@ -3168,7 +3296,7 @@
 
             const enganche = Math.ceil((precioContado * factorEnganche) / 10) * 10;
             const totalFinanciado = (precioContado * (1 + factorInteres)) - enganche;
-            
+
             let cuota = totalFinanciado / numPagos;
 
             if (freq === "QUINCENAL") {
@@ -3286,8 +3414,8 @@
                     }
                     const factorEnganche = (plazo === "52 Semanas")
                         ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
-                        : ((freq === "SEMANAL") 
-                            ? (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165) 
+                        : ((freq === "SEMANAL")
+                            ? (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165)
                             : (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33));
                     const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
 
@@ -3381,16 +3509,16 @@
         // Parse specs (color, memory, ram) from Mercado Libre product names
         function parseSpecsFromProductName(name) {
             if (!name) return { color: "", memory: "", ram: "", grading: "" };
-            
+
             // Try to split by " - " first
             const parts = name.split(" - ");
             let color = "";
             if (parts.length >= 2) {
                 color = parts[1].trim();
             }
-            
+
             const lowerName = name.toLowerCase();
-            
+
             // If color not found by splitting, try to extract color name by matching known color keys
             if (!color) {
                 const colorKeys = [
@@ -3412,16 +3540,16 @@
                     }
                 }
             }
-            
+
             const matches = [...lowerName.matchAll(/(\d+)\s*(gb|tb)/gi)];
             const gbValues = matches.map(m => {
                 let val = parseInt(m[1], 10);
                 if (m[2].toLowerCase() === 'tb') val *= 1024;
                 return { val, original: m[0] };
             });
-            
+
             gbValues.sort((a, b) => b.val - a.val);
-            
+
             let memory = "";
             let ram = "";
             if (gbValues.length >= 2) {
@@ -3435,7 +3563,7 @@
             if (lowerName.includes("excelente")) grading = "Excelente";
             else if (lowerName.includes("bueno")) grading = "Bueno";
             else if (lowerName.includes("aceptable")) grading = "Aceptable";
-            
+
             return { color, memory, ram, grading };
         }
 
@@ -3462,13 +3590,13 @@
         // S23 Ultra 256GB variant/product IDs mapping to the 256GB catalog file
         const S23_256_IDS = [
             "MLM22450448", "MLM2000081133", "MLM2000081129", "MLM2000081131",
-            "MLM2000099736", "MLM2000053257", "MLM2000154314", "MLM2010617844", 
+            "MLM2000099736", "MLM2000053257", "MLM2000154314", "MLM2010617844",
             "MLM2000076881", "MLM2000176782",
             // Extracted:
             "MLM2010735650", "MLM2000159348", "MLM2000111162", "MLM2000075603",
             "MLM2000060391", "MLM2000068173", "MLM2000020897", "MLM2000016257"
         ];
-        
+
         // S23 Ultra 512GB variant/product IDs mapping to the 512GB catalog file
         const S23_512_IDS = [
             "MLM23053436", "MLM2000044997", "MLM2000044995", "MLM2000044993",
@@ -3481,7 +3609,7 @@
         function getLocalMockFileForId(id) {
             if (!id) return null;
             const idUpper = id.toString().toUpperCase().replace("-", "");
-            
+
             if (S23_256_IDS.includes(idUpper)) {
                 return "s23_catalog_product.json";
             }
@@ -3512,7 +3640,7 @@
         function isOptionAvailable(optionType, optionValue) {
             if (!optionValue) return false;
             const valClean = optionValue.toLowerCase().replace(/\s+/g, "");
-            
+
             // Always show the currently selected option to avoid disappearing states
             if (optionType === "color" && colorSeleccionadoGlobal && colorsMatch(colorSeleccionadoGlobal, optionValue)) {
                 return true;
@@ -3547,7 +3675,7 @@
                     // Colors are never constrained by other selected specs to prevent gray borders on available colors
                     return true;
                 }
-                
+
                 if (optionType === "memory") {
                     // Memory is constrained by selected Color and RAM
                     if (colorSeleccionadoGlobal && !colorsMatch(prod.color, colorSeleccionadoGlobal)) return false;
@@ -3559,7 +3687,7 @@
                     }
                     return true;
                 }
-                
+
                 if (optionType === "ram") {
                     // RAM is constrained by selected Color and Memory
                     if (colorSeleccionadoGlobal && !colorsMatch(prod.color, colorSeleccionadoGlobal)) return false;
@@ -3571,7 +3699,7 @@
                     }
                     return true;
                 }
-                
+
                 if (optionType === "grading") {
                     // Grading is constrained by selected Color, Memory and RAM
                     if (colorSeleccionadoGlobal && !colorsMatch(prod.color, colorSeleccionadoGlobal)) return false;
@@ -3596,15 +3724,15 @@
 
         function isProductTagOutOfStock(tags) {
             if (!tags) return false;
-            return tags.includes("out-of-stock") || 
-                   tags.includes("disabled");
+            return tags.includes("out-of-stock") ||
+                tags.includes("disabled");
         }
 
         // Obtiene el grupo o familia principal de un color para homologar traducciones
         function obtenerGrupoColor(colorName) {
             if (!colorName) return "";
             const name = colorName.toLowerCase().trim();
-            
+
             const groups = {
                 "negro": ["negro", "black", "oscuro", "dark", "space", "carbono", "carbon", "grafito", "graphite", "phantom black"],
                 "blanco": ["blanco", "white", "claro", "light", "plata", "silver"],
@@ -3616,7 +3744,7 @@
                 "violeta": ["violeta", "violet", "purpura", "púrpura", "purple", "morado", "lavanda", "lavender", "lila", "lilac"],
                 "gris": ["gris", "grey", "gray", "plata", "silver"]
             };
-            
+
             for (const canonical in groups) {
                 if (groups[canonical].some(key => name.includes(key))) {
                     return canonical;
@@ -3630,7 +3758,7 @@
             if (!c1 || !c2) return false;
             const list1 = c1.split(',').map(s => s.trim().toLowerCase());
             const list2 = c2.split(',').map(s => s.trim().toLowerCase());
-            return list1.some(val1 => 
+            return list1.some(val1 =>
                 list2.some(val2 => obtenerGrupoColor(val1) === obtenerGrupoColor(val2))
             );
         }
@@ -3660,23 +3788,23 @@
                 "negro": "#1e293b", "black": "#1e293b", "oscuro": "#0f172a", "dark": "#0f172a", "space": "#334155",
                 "titanio": "#78716c", "titanium": "#78716c", "carbono": "#475569", "carbon": "#475569", "grafito": "#3f3f46", "graphite": "#3f3f46",
                 "gris": "#94a3b8", "gray": "#94a3b8",
-                
+
                 // Blancos, Claros, Plateados
                 "blanco": "#ffffff", "white": "#ffffff", "claro": "#f8fafc", "light": "#f8fafc", "plata": "#cbd5e1", "silver": "#cbd5e1",
                 "cream": "#fef08a", "crema": "#fef08a", "marfil": "#fffbeb", "ivory": "#fffbeb", "beige": "#f5f5dc",
-                
+
                 // Azules y Celestes
                 "azul": "#3b82f6", "blue": "#3b82f6", "celeste": "#60a5fa", "sky": "#60a5fa", "indigo": "#6366f1", "marino": "#1e3a8a",
-                
+
                 // Verdes
                 "verde": "#10b981", "green": "#10b981", "lima": "#84cc16", "lime": "#84cc16", "menta": "#a7f3d0", "mint": "#a7f3d0",
-                
+
                 // Rojos y Naranjas
                 "rojo": "#ef4444", "red": "#ef4444", "naranja": "#f97316", "orange": "#f97316", "coral": "#fb7185",
-                
+
                 // Rosas y Dorados
                 "rosa": "#ec4899", "pink": "#ec4899", "gold": "#f59e0b", "oro": "#f59e0b", "dorado": "#f59e0b", "bronce": "#b45309", "bronze": "#b45309",
-                
+
                 // Morados y Violetas
                 "violeta": "#8b5cf6", "violet": "#8b5cf6", "purpura": "#a855f7", "púrpura": "#a855f7", "purple": "#a855f7", "morado": "#a855f7", "lavanda": "#e9d5ff", "lavender": "#e9d5ff",
                 "lila": "#d8b4fe", "lilac": "#d8b4fe"
@@ -3746,19 +3874,19 @@
                 logDebugFrontend(`buscarPrecioEquivalenteLocal - Falló pre-condiciones: window.equiposCargados=${!!window.equiposCargados}, window.currentBaseModelName=${window.currentBaseModelName}`);
                 return null;
             }
-            
+
             const baseNorm = window.currentBaseModelName.toLowerCase().replace(/[^a-z0-9]/g, "");
             const colorNorm = color ? color.trim().toLowerCase() : "";
             const memoriaNorm = memoria ? memoria.trim().toLowerCase().replace(/\s+/g, "") : "";
             const gradingNorm = grading ? grading.trim().toLowerCase() : "";
-            
+
             // Loop 1: Exact matches (including condition/grading if present in sheet item title)
             for (const eq of window.equiposCargados) {
                 if (!eq.modelo) continue;
                 if (!baseModelsMatch(eq.modelo, window.currentBaseModelName)) {
                     continue;
                 }
-                
+
                 let colorMatch = false;
                 if (!colorNorm) {
                     colorMatch = true;
@@ -3771,7 +3899,7 @@
                         colorMatch = (eqColor.toLowerCase() === colorNorm || colorsMatch(eqColor, color) || eqModeloLower.includes(colorNorm));
                     }
                 }
-                
+
                 let memoriaMatch = false;
                 if (!memoriaNorm) {
                     memoriaMatch = true;
@@ -3784,7 +3912,7 @@
                         memoriaMatch = (eqMemoria === memoriaNorm || memoriesMatch(eq.memoria || "", memoria) || eqModeloLower.includes(memoriaNorm));
                     }
                 }
-                
+
                 let gradingMatch = false;
                 if (!gradingNorm) {
                     gradingMatch = true;
@@ -3792,13 +3920,13 @@
                     const eqModeloLower = eq.modelo.toLowerCase();
                     gradingMatch = eqModeloLower.includes(gradingNorm);
                 }
-                
+
                 if (colorMatch && memoriaMatch && gradingMatch) {
                     logDebugFrontend(`buscarPrecioEquivalenteLocal - Coincidencia exacta encontrada para ${window.currentBaseModelName} (Color: ${color}, Memoria: ${memoria}, Grading: ${grading}) -> $${eq.precioContado} MXN`);
                     return eq.precioContado;
                 }
             }
-            
+
             // Loop 2: Partial matches (fallback to calculate relative prices based on grading factors)
             if (gradingNorm) {
                 for (const eq of window.equiposCargados) {
@@ -3806,7 +3934,7 @@
                     if (!baseModelsMatch(eq.modelo, window.currentBaseModelName)) {
                         continue;
                     }
-                    
+
                     let colorMatch = false;
                     if (!colorNorm) {
                         colorMatch = true;
@@ -3819,7 +3947,7 @@
                             colorMatch = (eqColor.toLowerCase() === colorNorm || colorsMatch(eqColor, color) || eqModeloLower.includes(colorNorm));
                         }
                     }
-                    
+
                     let memoriaMatch = false;
                     if (!memoriaNorm) {
                         memoriaMatch = true;
@@ -3832,27 +3960,27 @@
                             memoriaMatch = (eqMemoria === memoriaNorm || memoriesMatch(eq.memoria || "", memoria) || eqModeloLower.includes(memoriaNorm));
                         }
                     }
-                    
+
                     if (colorMatch && memoriaMatch) {
                         const basePrice = eq.precioContado;
                         const targetFactor = obtenerFactorGrading(gradingNorm);
                         const sheetGrading = obtenerGradingDeModelo(eq.modelo);
                         const sheetFactor = obtenerFactorGrading(sheetGrading);
                         const finalPrice = Math.round(basePrice * (targetFactor / sheetFactor));
-                        
+
                         logDebugFrontend(`buscarPrecioEquivalenteLocal - Coincidencia parcial (sin grading) encontrada para ${window.currentBaseModelName} (Color: ${color}, Memoria: ${memoria}) -> Aplicado factor de ${sheetGrading} (${sheetFactor}) a ${gradingNorm} (${targetFactor}): $${finalPrice} MXN`);
                         return finalPrice;
                     }
                 }
             }
-            
+
             logDebugFrontend(`buscarPrecioEquivalenteLocal - No se encontró coincidencia para ${window.currentBaseModelName} (Color: ${color}, Memoria: ${memoria}, Grading: ${grading})`);
             return null;
         }
 
         function baseModelsMatch(m1, m2) {
             if (!m1 || !m2) return false;
-            
+
             const clean = (str) => {
                 let s = limpiarNombreModelo(str).toLowerCase();
                 // Remove brand names to allow matching between "Xiaomi Redmi..." and "Redmi..."
@@ -3861,17 +3989,17 @@
                 s = s.replace(/reacondicionado/gi, "");
                 return s.replace(/[^a-z0-9]/g, "");
             };
-            
+
             const c1 = clean(m1);
             const c2 = clean(m2);
-            
+
             return c1 === c2 || c1.includes(c2) || c2.includes(c1);
         }
         function isSpecMatchingLoadedProduct(cleanId, specType, specValue) {
             if (!cleanId || !specValue) return false;
             const prod = productMapGlobal[cleanId];
             if (!prod) return true; // Fallback to true if product is not in map
-            
+
             if (specType === "color") {
                 return !prod.color || colorsMatch(prod.color, specValue);
             }
@@ -3962,7 +4090,7 @@
                         if (item.variantesJson) {
                             let parsedVar = item.variantesJson;
                             if (typeof parsedVar === 'string') {
-                                try { parsedVar = JSON.parse(parsedVar); } catch(e) {}
+                                try { parsedVar = JSON.parse(parsedVar); } catch (e) { }
                             }
                             if (parsedVar && (parsedVar.id === cleanId || parsedVar.catalog_product_id === cleanId)) {
                                 return true;
@@ -3986,7 +4114,7 @@
                                 parsed.isFresh = true;
                                 ML_CACHE_VARIANTES[cleanId] = parsed;
                                 cache = parsed;
-                                
+
                                 // Sembrar el mismo objeto de caché para todas las variantes de la familia
                                 if (parsed.pickers && Array.isArray(parsed.pickers)) {
                                     parsed.pickers.forEach(picker => {
@@ -4000,7 +4128,7 @@
                                     });
                                 }
                             }
-                        } catch(e) {
+                        } catch (e) {
                             console.warn("Error parsing status/seeding variants cache:", e);
                         }
                     }
@@ -4020,12 +4148,12 @@
             })();
 
             const isSpecificCache = cache && cache.isFresh && (
-                cache.id === cleanId || 
+                cache.id === cleanId ||
                 cache.catalog_product_id === cleanId
             );
 
             const hasSpecificFreshData = isSameMockFamily || isSpecificCache || (cache && cache.isFresh && (
-                cache.pickers && cache.pickers.some(picker => 
+                cache.pickers && cache.pickers.some(picker =>
                     picker.products && picker.products.some(p => p.product_id === cleanId)
                 )
             ));
@@ -4051,10 +4179,10 @@
                         wrapperStorage.style.pointerEvents = "";
                     }
                     if (contenedor) {
-                            // show fallback instead of hiding everything
-                            try { mostrarVariantesFallback(); } catch (e) {}
-                        }
-                } catch (e) {}
+                        // show fallback instead of hiding everything
+                        try { mostrarVariantesFallback(); } catch (e) { }
+                    }
+                } catch (e) { }
                 return;
             }
 
@@ -4131,7 +4259,7 @@
                                 } catch (e) {
                                     console.warn(`Direct fetch failed for ${id}:`, e);
                                 }
-                                
+
                                 try {
                                     const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${id}&isProduct=${isProd}`;
                                     const resProxy = await fetchWithTimeout(proxyUrl, {}, 6000);
@@ -4205,58 +4333,58 @@
                                 }
                             }
 
-                             if (!freshData && !isProduct && currentMLItemLink && currentMLItemLink.includes("/p/")) {
-                                 const pMatch = currentMLItemLink.match(/\/p\/(MLM\-?\d+)/i);
-                                 if (pMatch) {
-                                     const parentProductId = pMatch[1].replace("-", "").toUpperCase();
-                                     freshData = await fetchMLData(parentProductId, true);
-                                     if (freshData) {
-                                         cleanId = parentProductId;
-                                         isProduct = true;
-                                     }
-                                 }
-                             }
+                            if (!freshData && !isProduct && currentMLItemLink && currentMLItemLink.includes("/p/")) {
+                                const pMatch = currentMLItemLink.match(/\/p\/(MLM\-?\d+)/i);
+                                if (pMatch) {
+                                    const parentProductId = pMatch[1].replace("-", "").toUpperCase();
+                                    freshData = await fetchMLData(parentProductId, true);
+                                    if (freshData) {
+                                        cleanId = parentProductId;
+                                        isProduct = true;
+                                    }
+                                }
+                            }
 
-                             if (freshData) {
-                                 freshData.isFresh = true;
+                            if (freshData) {
+                                freshData.isFresh = true;
 
-                                 // Preserve GRADING picker and other custom pickers from old cache if missing in freshData
-                                 const oldCache = ML_CACHE_VARIANTES[originalCleanId] || ML_CACHE_VARIANTES[cleanId];
-                                 if (oldCache && oldCache.pickers) {
-                                     if (!freshData.pickers) {
-                                         freshData.pickers = oldCache.pickers;
-                                     } else {
-                                         const oldGrading = oldCache.pickers.find(p => p.picker_id && p.picker_id.toUpperCase() === "GRADING");
-                                         const newGrading = freshData.pickers.find(p => p.picker_id && p.picker_id.toUpperCase() === "GRADING");
-                                         if (oldGrading && !newGrading) {
-                                             freshData.pickers.push(oldGrading);
-                                         }
-                                     }
-                                 }
+                                // Preserve GRADING picker and other custom pickers from old cache if missing in freshData
+                                const oldCache = ML_CACHE_VARIANTES[originalCleanId] || ML_CACHE_VARIANTES[cleanId];
+                                if (oldCache && oldCache.pickers) {
+                                    if (!freshData.pickers) {
+                                        freshData.pickers = oldCache.pickers;
+                                    } else {
+                                        const oldGrading = oldCache.pickers.find(p => p.picker_id && p.picker_id.toUpperCase() === "GRADING");
+                                        const newGrading = freshData.pickers.find(p => p.picker_id && p.picker_id.toUpperCase() === "GRADING");
+                                        if (oldGrading && !newGrading) {
+                                            freshData.pickers.push(oldGrading);
+                                        }
+                                    }
+                                }
 
-                                 ML_CACHE_VARIANTES[originalCleanId] = freshData;
-                                 if (cleanId !== originalCleanId) {
-                                     ML_CACHE_VARIANTES[cleanId] = freshData;
-                                 }
+                                ML_CACHE_VARIANTES[originalCleanId] = freshData;
+                                if (cleanId !== originalCleanId) {
+                                    ML_CACHE_VARIANTES[cleanId] = freshData;
+                                }
 
-                                 // Sembrar también para todos los IDs de variantes de la familia en la caché fresca
-                                 if (freshData.pickers && Array.isArray(freshData.pickers)) {
-                                     freshData.pickers.forEach(picker => {
-                                         if (picker.products && Array.isArray(picker.products)) {
-                                             picker.products.forEach(p => {
-                                                 if (p.product_id) {
-                                                     ML_CACHE_VARIANTES[p.product_id] = freshData;
-                                                 }
-                                             });
-                                         }
-                                     });
-                                 }
+                                // Sembrar también para todos los IDs de variantes de la familia en la caché fresca
+                                if (freshData.pickers && Array.isArray(freshData.pickers)) {
+                                    freshData.pickers.forEach(picker => {
+                                        if (picker.products && Array.isArray(picker.products)) {
+                                            picker.products.forEach(p => {
+                                                if (p.product_id) {
+                                                    ML_CACHE_VARIANTES[p.product_id] = freshData;
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
 
-                                 // Forzar renderizado secundario con los datos actualizados
-                                 cargarVariantesRealesML(idProducto, esCambioVariante, isAutoRedirect, false, clickSource);
-                             } else {
-                                 ocultarCargandoVariantes();
-                             }
+                                // Forzar renderizado secundario con los datos actualizados
+                                cargarVariantesRealesML(idProducto, esCambioVariante, isAutoRedirect, false, clickSource);
+                            } else {
+                                ocultarCargandoVariantes();
+                            }
                         } catch (err) {
                             console.error("Error in background fetch:", err);
                         } finally {
@@ -4289,12 +4417,12 @@
                 // Populate productMapGlobal by merging pickers from the active response, 
                 // all matching local catalog rows, and all matching cache entries to ensure we have full stock status.
                 productMapGlobal = {};
-                
+
                 const familyPayloads = new Set();
                 if (data) familyPayloads.add(data);
-                
+
                 const currentCatalogId = data.catalog_product_id;
-                
+
                 // 1. Merge from ML_CACHE_VARIANTES
                 Object.values(ML_CACHE_VARIANTES).forEach(cachedVal => {
                     if (!cachedVal || !cachedVal.pickers) return;
@@ -4304,14 +4432,14 @@
                     } else if (cachedVal.id === cleanId || (cachedVal.catalog_product_id && cachedVal.catalog_product_id === cleanId)) {
                         belongs = true;
                     } else {
-                        const hasShared = cachedVal.pickers.some(pkr => 
+                        const hasShared = cachedVal.pickers.some(pkr =>
                             pkr.products && pkr.products.some(p => p.product_id === cleanId)
                         );
                         if (hasShared) belongs = true;
                     }
                     if (belongs) familyPayloads.add(cachedVal);
                 });
-                
+
                 // 2. Merge from window.equiposCargados (matching base model)
                 if (window.equiposCargados && window.currentBaseModelName) {
                     console.log(`[DEBUG-ALL-ROWS] Listing all rows in equiposCargados:`);
@@ -4349,7 +4477,7 @@
                             if (eq.variantesJson) {
                                 let parsed = eq.variantesJson;
                                 if (typeof parsed === 'string') {
-                                    try { parsed = JSON.parse(parsed); } catch(e) {}
+                                    try { parsed = JSON.parse(parsed); } catch (e) { }
                                 }
                                 if (parsed && parsed.pickers) {
                                     familyPayloads.add(parsed);
@@ -4358,7 +4486,7 @@
                         }
                     });
                 }
-                
+
                 // 3. Populate productMapGlobal from all gathered payloads
                 familyPayloads.forEach(payload => {
                     if (!payload.pickers) return;
@@ -4436,8 +4564,8 @@
                     });
                     const memPickerSync = data.pickers.find(p =>
                         p.picker_id && (p.picker_id.toUpperCase().includes("MEMORY") ||
-                        p.picker_id.toUpperCase().includes("STORAGE") ||
-                        p.picker_id.toUpperCase().includes("CAPACITY"))
+                            p.picker_id.toUpperCase().includes("STORAGE") ||
+                            p.picker_id.toUpperCase().includes("CAPACITY"))
                     );
                     const ramPickerSync = data.pickers.find(p =>
                         p.picker_id && p.picker_id.toUpperCase().includes("RAM")
@@ -4518,8 +4646,8 @@
                         // 1. Buscar si el producto activo actual (cleanId) está en el listado de este picker
                         let matchingProd = picker.products && picker.products.find(p => p.product_id === cleanId);
                         if (!matchingProd) {
-                            matchingProd = picker.products && picker.products.find(p => 
-                                p.product_id === data.id || 
+                            matchingProd = picker.products && picker.products.find(p =>
+                                p.product_id === data.id ||
                                 (data.catalog_product_id && p.product_id === data.catalog_product_id)
                             );
                         }
@@ -4633,7 +4761,7 @@
                 // Fallback a variables globales/defaults
                 if (!activeColorVal) activeColorVal = colorSeleccionado || defaultColor || "";
                 if (!activeStorageVal) activeStorageVal = almacenamientoSeleccionado || defaultMemoria || "";
-                
+
                 colorSeleccionadoGlobal = activeColorVal;
                 colorSeleccionado = activeColorVal;
                 memoriaSeleccionadaGlobal = activeStorageVal;
@@ -4650,13 +4778,13 @@
                     if (activeProductState && activeProductState.isOutOfStock) {
                         let bestProduct = null;
                         let bestScore = -1;
-                        
+
                         // Extract current active values from pickers as fallback if global selections are empty
                         let currentActiveColor = "";
                         let currentActiveMemory = "";
                         let currentActiveRam = "";
                         let currentActiveGrading = "";
-                        
+
                         if (data.pickers) {
                             data.pickers.forEach(picker => {
                                 const pIdUpper = picker.picker_id ? picker.picker_id.toUpperCase() : "";
@@ -4675,17 +4803,17 @@
                                 }
                             });
                         }
-                        
+
                         const selColor = colorSeleccionadoGlobal || currentActiveColor || "";
                         const selMem = memoriaSeleccionadaGlobal || currentActiveMemory || "";
                         const selRam = ramSeleccionadaGlobal || currentActiveRam || "";
                         const selGrad = gradingSeleccionadoGlobal || currentActiveGrading || "";
-                        
+
                         Object.values(productMapGlobal).forEach(prod => {
                             if (prod.isOutOfStock) return;
-                            
+
                             let score = 0;
-                            
+
                             if (clickSource === "color") {
                                 if (prod.color && colorsMatch(prod.color, selColor)) score += 100;
                                 if (prod.memory && memoriesMatch(prod.memory, selMem)) score += 10;
@@ -4712,17 +4840,17 @@
                                 if (prod.ram && ramsMatch(prod.ram, selRam)) score += 10;
                                 if (prod.grading && prod.grading.toLowerCase().replace(/\s+/g, "") === selGrad.toLowerCase().replace(/\s+/g, "")) score += 5;
                             }
-                            
+
                             if (score > bestScore) {
                                 bestScore = score;
                                 bestProduct = prod;
                             }
                         });
-                        
+
                         if (bestProduct && bestProduct.id !== cleanId) {
                             redirectId = bestProduct.id;
                             console.log(`[OUT-OF-STOCK REDIRECT] Selected variant ${cleanId} is out of stock. Redirecting to best in-stock variant ${redirectId} with score ${bestScore} based on clickSource: ${clickSource}`);
-                            
+
                             // Synchronize global selections to match the redirected in-stock variant specs
                             if (bestProduct.color) {
                                 colorSeleccionadoGlobal = bestProduct.color;
@@ -4888,7 +5016,7 @@
                     if (redirectId) {
                         console.log(`[VARIANT AUTO-REDIRECT] Redirecting from ${cleanId} to ${redirectId} to preserve user selections.`);
                         currentMLItemLink = `https://www.mercadolibre.com.mx/p/${redirectId}`;
-                        
+
                         try {
                             const localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memoriaSeleccionadaGlobal, gradingSeleccionadoGlobal, true);
                             if (localPrice && localPrice > 0) {
@@ -4897,7 +5025,7 @@
                                 if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
                                 document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(localPrice).toLocaleString('es-MX')} MXN</strong>`;
                             }
-                        } catch(e) {}
+                        } catch (e) { }
 
                         shouldRestoreUI = false;
                         cargarVariantesRealesML(redirectId, true, true, false, clickSource);
@@ -4970,9 +5098,9 @@
                 // Buscar si tenemos el nombre específico para este variant ID en el listado de pickers
                 if (data.pickers) {
                     for (const picker of data.pickers) {
-                        const matchingP = picker.products && picker.products.find(p => 
-                            p.product_id === cleanId || 
-                            p.product_id === data.id || 
+                        const matchingP = picker.products && picker.products.find(p =>
+                            p.product_id === cleanId ||
+                            p.product_id === data.id ||
                             (data.catalog_product_id && p.product_id === data.catalog_product_id)
                         );
                         if (matchingP && matchingP.product_name) {
@@ -5036,7 +5164,7 @@
                             // If not found (e.g., loaded Black-Bueno while Beige is selected),
                             // fall back to matching by the user's selected color
                             if (!activeColorProd && colorSeleccionadoGlobal) {
-                                activeColorProd = colorPicker.products.find(p => 
+                                activeColorProd = colorPicker.products.find(p =>
                                     p.picker_label && colorsMatch(p.picker_label, colorSeleccionadoGlobal)
                                 );
                             }
@@ -5062,7 +5190,7 @@
                     const thumbsContainer = document.getElementById('pdp-thumbs-container');
                     if (thumbsContainer) {
                         thumbsContainer.innerHTML = "";
-                        
+
                         // Agregar el thumbnail de la foto de la variante
                         let firstThumbUrl = primeraFoto;
                         if (firstThumbUrl) {
@@ -5082,7 +5210,7 @@
                             const pic = data.pictures[i];
                             const picUrl = pic.secure_url || pic.url;
                             if (picUrl === firstThumbUrl) continue;
-                            
+
                             const imgThumb = document.createElement('img');
                             imgThumb.src = picUrl;
                             imgThumb.className = `pdp-thumb ${!firstThumbUrl && i === 0 ? 'active' : ''}`;
@@ -5144,7 +5272,7 @@
                                 btn.innerText = color;
                                 if (color === colorSeleccionadoGlobal) btn.classList.add('selected');
 
-                                btn.onclick = function() {
+                                btn.onclick = function () {
                                     wrapperColores.querySelectorAll('.color-pill').forEach(b => b.classList.remove('selected'));
                                     this.classList.add('selected');
                                     colorSeleccionadoGlobal = color;
@@ -5158,7 +5286,7 @@
                                             if (hidden) hidden.value = localPrice;
                                             document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(localPrice).toLocaleString('es-MX')} MXN</strong>`;
                                         }
-                                    } catch(e) {}
+                                    } catch (e) { }
                                     setTimeout(() => { if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP(); }, 350);
                                 };
                                 wrapperColores.appendChild(btn);
@@ -5176,7 +5304,7 @@
                                 btn.innerText = memoria;
                                 if (memoria === memoriaSeleccionadaGlobal) btn.classList.add('selected');
 
-                                btn.onclick = function() {
+                                btn.onclick = function () {
                                     wrapperStorage.querySelectorAll('.storage-pill').forEach(b => b.classList.remove('selected'));
                                     this.classList.add('selected');
                                     memoriaSeleccionadaGlobal = memoria;
@@ -5191,7 +5319,7 @@
                                             if (hidden) hidden.value = localPrice;
                                             document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(localPrice).toLocaleString('es-MX')} MXN</strong>`;
                                         }
-                                    } catch(e) {}
+                                    } catch (e) { }
                                     setTimeout(() => { if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP(); }, 350);
                                 };
                                 wrapperStorage.appendChild(btn);
@@ -5342,42 +5470,42 @@
                                 }
                             });
 
-                             const defaultColorNorm = activeColorVal ? obtenerGrupoColor(activeColorVal) : "";
-                             const coloresOrdenados = Array.from(coloresVistos.entries());
-                             let targetColorNorm = "";
+                            const defaultColorNorm = activeColorVal ? obtenerGrupoColor(activeColorVal) : "";
+                            const coloresOrdenados = Array.from(coloresVistos.entries());
+                            let targetColorNorm = "";
 
-                             // Priority 1: Match exactly the cleanId (currently selected variant ID)
-                             for (const [normColor, colorInfo] of coloresOrdenados) {
-                                 if (colorInfo.id === cleanId) {
-                                     targetColorNorm = normColor;
-                                     break;
-                                 }
-                             }
-                             // Priority 2: Match the normalized active color name
-                             if (!targetColorNorm && defaultColorNorm) {
-                                 for (const [normColor, colorInfo] of coloresOrdenados) {
-                                     if (normColor === defaultColorNorm) {
-                                         targetColorNorm = normColor;
-                                         break;
-                                     }
-                                 }
-                             }
-                             // Priority 3: Match the data.id or data.catalog_product_id
-                             if (!targetColorNorm) {
-                                 for (const [normColor, colorInfo] of coloresOrdenados) {
-                                     if (
-                                         colorInfo.id === data.id || 
-                                         (data.catalog_product_id && colorInfo.id === data.catalog_product_id)
-                                     ) {
-                                         targetColorNorm = normColor;
-                                         break;
-                                     }
-                                 }
-                             }
-                             // Priority 4: Fallback to the first color in list
-                             if (!targetColorNorm && coloresOrdenados.length > 0) {
-                                 targetColorNorm = coloresOrdenados[0][0];
-                             }
+                            // Priority 1: Match exactly the cleanId (currently selected variant ID)
+                            for (const [normColor, colorInfo] of coloresOrdenados) {
+                                if (colorInfo.id === cleanId) {
+                                    targetColorNorm = normColor;
+                                    break;
+                                }
+                            }
+                            // Priority 2: Match the normalized active color name
+                            if (!targetColorNorm && defaultColorNorm) {
+                                for (const [normColor, colorInfo] of coloresOrdenados) {
+                                    if (normColor === defaultColorNorm) {
+                                        targetColorNorm = normColor;
+                                        break;
+                                    }
+                                }
+                            }
+                            // Priority 3: Match the data.id or data.catalog_product_id
+                            if (!targetColorNorm) {
+                                for (const [normColor, colorInfo] of coloresOrdenados) {
+                                    if (
+                                        colorInfo.id === data.id ||
+                                        (data.catalog_product_id && colorInfo.id === data.catalog_product_id)
+                                    ) {
+                                        targetColorNorm = normColor;
+                                        break;
+                                    }
+                                }
+                            }
+                            // Priority 4: Fallback to the first color in list
+                            if (!targetColorNorm && coloresOrdenados.length > 0) {
+                                targetColorNorm = coloresOrdenados[0][0];
+                            }
 
                             coloresOrdenados.forEach(([normColor, colorInfo]) => {
                                 const divColor = document.createElement('div');
@@ -5396,9 +5524,9 @@
                                 }
 
                                 divColor.onclick = function () {
-                                     if (colorSeleccionadoGlobal && colorsMatch(colorInfo.name, colorSeleccionadoGlobal)) {
-                                         return;
-                                     }
+                                    if (colorSeleccionadoGlobal && colorsMatch(colorInfo.name, colorSeleccionadoGlobal)) {
+                                        return;
+                                    }
 
                                     // Show loading overlay immediately
                                     mostrarCargandoVariantes();
@@ -5534,7 +5662,7 @@
                                             return;
                                         }
                                     }
-                                    
+
                                     // Only skip if the option has absolutely no stock in the family
                                     if (optionType && !isOptionInFamily(optionType, prod.picker_label) && !isSel) return;
 
@@ -5560,53 +5688,53 @@
                                 const itemsOrdenados = Array.from(itemsVistos.entries());
                                 let targetItemNorm = "";
 
-                                 // Priority 1: Match the normalized active value name (user selection / active variant value)
-                                 if (activeValNorm) {
-                                     for (const [normLabel, itemInfo] of itemsOrdenados) {
-                                         if (normLabel === activeValNorm) {
-                                             targetItemNorm = normLabel;
-                                             break;
-                                         }
-                                     }
-                                 }
-                                 
-                                 // Priority 2: Match the cleanId (currently selected variant ID)
-                                 if (!targetItemNorm) {
-                                     for (const [normLabel, itemInfo] of itemsOrdenados) {
-                                         if (itemInfo.id === cleanId) {
-                                             targetItemNorm = normLabel;
-                                             break;
-                                         }
-                                     }
-                                 }
-                                 
-                                 // Priority 3: Match the data.id or data.catalog_product_id
-                                 if (!targetItemNorm) {
-                                     for (const [normLabel, itemInfo] of itemsOrdenados) {
-                                         if (
-                                             itemInfo.id === data.id || 
-                                             (data.catalog_product_id && itemInfo.id === data.catalog_product_id)
-                                         ) {
-                                             targetItemNorm = normLabel;
-                                             break;
-                                         }
-                                     }
-                                 }
-                                 
-                                 // Priority 4: Fallback to the first selected item in picker products
-                                 if (!targetItemNorm) {
-                                     for (const [normLabel, itemInfo] of itemsOrdenados) {
-                                         if (itemInfo.isSelected) {
-                                             targetItemNorm = normLabel;
-                                             break;
-                                         }
-                                     }
-                                 }
-                                 
-                                 // Priority 5: Fallback to the first item in the ordered list
-                                 if (!targetItemNorm && itemsOrdenados.length > 0) {
-                                     targetItemNorm = itemsOrdenados[0][0];
-                                 }
+                                // Priority 1: Match the normalized active value name (user selection / active variant value)
+                                if (activeValNorm) {
+                                    for (const [normLabel, itemInfo] of itemsOrdenados) {
+                                        if (normLabel === activeValNorm) {
+                                            targetItemNorm = normLabel;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // Priority 2: Match the cleanId (currently selected variant ID)
+                                if (!targetItemNorm) {
+                                    for (const [normLabel, itemInfo] of itemsOrdenados) {
+                                        if (itemInfo.id === cleanId) {
+                                            targetItemNorm = normLabel;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // Priority 3: Match the data.id or data.catalog_product_id
+                                if (!targetItemNorm) {
+                                    for (const [normLabel, itemInfo] of itemsOrdenados) {
+                                        if (
+                                            itemInfo.id === data.id ||
+                                            (data.catalog_product_id && itemInfo.id === data.catalog_product_id)
+                                        ) {
+                                            targetItemNorm = normLabel;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // Priority 4: Fallback to the first selected item in picker products
+                                if (!targetItemNorm) {
+                                    for (const [normLabel, itemInfo] of itemsOrdenados) {
+                                        if (itemInfo.isSelected) {
+                                            targetItemNorm = normLabel;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // Priority 5: Fallback to the first item in the ordered list
+                                if (!targetItemNorm && itemsOrdenados.length > 0) {
+                                    targetItemNorm = itemsOrdenados[0][0];
+                                }
 
                                 const selectedItem = itemsVistos.get(targetItemNorm);
                                 if (selectedItem) {
@@ -5627,7 +5755,7 @@
                                 itemsOrdenados.forEach(([normLabel, itemInfo]) => {
                                     const pill = document.createElement('button');
                                     const isSelected = (normLabel === targetItemNorm);
-                                    
+
                                     let optionType = "";
                                     if (pIdUpper.includes("RAM")) {
                                         optionType = "ram";
@@ -5636,7 +5764,7 @@
                                     } else if (pIdUpper === "GRADING") {
                                         optionType = "grading";
                                     }
-                                    
+
                                     const isAvailable = optionType ? isOptionAvailable(optionType, itemInfo.name) : true;
 
                                     pill.className = `storage-pill ${isSelected ? 'selected' : ''} ${!isAvailable ? 'unavailable' : ''}`;
@@ -5647,72 +5775,72 @@
                                     }
 
                                     pill.onclick = function () {
-                                          if (pIdUpper === "GRADING") {
-                                              if (gradingSeleccionadoGlobal && itemInfo.name.toLowerCase().trim() === gradingSeleccionadoGlobal.toLowerCase().trim()) return;
-                                          } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
-                                              if (memoriaSeleccionadaGlobal && itemInfo.name.toLowerCase().trim().replace(/\s+/g, "") === memoriaSeleccionadaGlobal.toLowerCase().trim().replace(/\s+/g, "")) return;
-                                          } else if (pIdUpper.includes("RAM")) {
-                                              if (ramSeleccionadaGlobal && itemInfo.name.toLowerCase().trim().replace(/\s+/g, "") === ramSeleccionadaGlobal.toLowerCase().trim().replace(/\s+/g, "")) return;
-                                          }
+                                        if (pIdUpper === "GRADING") {
+                                            if (gradingSeleccionadoGlobal && itemInfo.name.toLowerCase().trim() === gradingSeleccionadoGlobal.toLowerCase().trim()) return;
+                                        } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
+                                            if (memoriaSeleccionadaGlobal && itemInfo.name.toLowerCase().trim().replace(/\s+/g, "") === memoriaSeleccionadaGlobal.toLowerCase().trim().replace(/\s+/g, "")) return;
+                                        } else if (pIdUpper.includes("RAM")) {
+                                            if (ramSeleccionadaGlobal && itemInfo.name.toLowerCase().trim().replace(/\s+/g, "") === ramSeleccionadaGlobal.toLowerCase().trim().replace(/\s+/g, "")) return;
+                                        }
 
-                                          // Show loading overlay immediately
-                                          mostrarCargandoVariantes();
+                                        // Show loading overlay immediately
+                                        mostrarCargandoVariantes();
 
-                                         pillsWrapper.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
-                                         this.classList.add('selected');
+                                        pillsWrapper.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
+                                        this.classList.add('selected');
 
-                                         // Update corresponding global state variable
-                                         if (pIdUpper === "GRADING") {
-                                             gradingSeleccionadoGlobal = itemInfo.name;
-                                             const conditionEl = document.getElementById('pdp-product-condition');
-                                             if (conditionEl) {
-                                                 conditionEl.innerText = `Reacondicionado | ${itemInfo.name}`;
-                                                 conditionEl.style.backgroundColor = "#fffbeb";
-                                                 conditionEl.style.color = "#d97706";
-                                                 conditionEl.style.border = "1px solid #fef3c7";
-                                                 conditionEl.style.padding = "4px 8px";
-                                                 conditionEl.style.borderRadius = "4px";
-                                                 conditionEl.style.fontWeight = "600";
-                                             }
-                                         } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
-                                             memoriaSeleccionadaGlobal = itemInfo.name;
-                                             almacenamientoSeleccionado = itemInfo.name;
-                                         } else if (pIdUpper.includes("RAM")) {
-                                             ramSeleccionadaGlobal = itemInfo.name;
-                                         }
+                                        // Update corresponding global state variable
+                                        if (pIdUpper === "GRADING") {
+                                            gradingSeleccionadoGlobal = itemInfo.name;
+                                            const conditionEl = document.getElementById('pdp-product-condition');
+                                            if (conditionEl) {
+                                                conditionEl.innerText = `Reacondicionado | ${itemInfo.name}`;
+                                                conditionEl.style.backgroundColor = "#fffbeb";
+                                                conditionEl.style.color = "#d97706";
+                                                conditionEl.style.border = "1px solid #fef3c7";
+                                                conditionEl.style.padding = "4px 8px";
+                                                conditionEl.style.borderRadius = "4px";
+                                                conditionEl.style.fontWeight = "600";
+                                            }
+                                        } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
+                                            memoriaSeleccionadaGlobal = itemInfo.name;
+                                            almacenamientoSeleccionado = itemInfo.name;
+                                        } else if (pIdUpper.includes("RAM")) {
+                                            ramSeleccionadaGlobal = itemInfo.name;
+                                        }
 
-                                         // === IMMEDIATE LOCAL PRICE UPDATE ===
-                                         // Update the price instantly using local catalog data before network fetch
-                                         try {
-                                              const currentColor = colorSeleccionadoGlobal || colorSeleccionado || "";
-                                              const currentMemoria = memoriaSeleccionadaGlobal || almacenamientoSeleccionado || "";
-                                              const currentGrading = gradingSeleccionadoGlobal || "";
-                                              const localPrice = buscarPrecioEquivalenteLocal(currentColor, currentMemoria, currentGrading, true);
-                                             if (localPrice && localPrice > 0) {
-                                                 const hidden = document.getElementById('hiddenPrecioContado');
-                                                 if (hidden) hidden.value = localPrice;
-                                                 if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
-                                                 document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(localPrice).toLocaleString('es-MX')} MXN</strong>`;
-                                             }
-                                         } catch (priceErr) {
-                                             console.warn('Error updating local price on pill click:', priceErr);
-                                         }
+                                        // === IMMEDIATE LOCAL PRICE UPDATE ===
+                                        // Update the price instantly using local catalog data before network fetch
+                                        try {
+                                            const currentColor = colorSeleccionadoGlobal || colorSeleccionado || "";
+                                            const currentMemoria = memoriaSeleccionadaGlobal || almacenamientoSeleccionado || "";
+                                            const currentGrading = gradingSeleccionadoGlobal || "";
+                                            const localPrice = buscarPrecioEquivalenteLocal(currentColor, currentMemoria, currentGrading, true);
+                                            if (localPrice && localPrice > 0) {
+                                                const hidden = document.getElementById('hiddenPrecioContado');
+                                                if (hidden) hidden.value = localPrice;
+                                                if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
+                                                document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(localPrice).toLocaleString('es-MX')} MXN</strong>`;
+                                            }
+                                        } catch (priceErr) {
+                                            console.warn('Error updating local price on pill click:', priceErr);
+                                        }
 
-                                         currentMLItemLink = `https://www.mercadolibre.com.mx/p/${itemInfo.id}`;
+                                        currentMLItemLink = `https://www.mercadolibre.com.mx/p/${itemInfo.id}`;
 
-                                         const isTargetCached = !!ML_CACHE_VARIANTES[itemInfo.id];
-                                         if (!isTargetCached) {
-                                             if (wrapperColores) {
-                                                 wrapperColores.style.opacity = "0.4";
-                                                 wrapperColores.style.pointerEvents = "none";
-                                             }
-                                             if (wrapperStorage) {
-                                                 wrapperStorage.style.opacity = "0.4";
-                                                 wrapperStorage.style.pointerEvents = "none";
-                                             }
-                                         }
+                                        const isTargetCached = !!ML_CACHE_VARIANTES[itemInfo.id];
+                                        if (!isTargetCached) {
+                                            if (wrapperColores) {
+                                                wrapperColores.style.opacity = "0.4";
+                                                wrapperColores.style.pointerEvents = "none";
+                                            }
+                                            if (wrapperStorage) {
+                                                wrapperStorage.style.opacity = "0.4";
+                                                wrapperStorage.style.pointerEvents = "none";
+                                            }
+                                        }
 
-                                         cargarVariantesRealesML(itemInfo.id, true, false, false, optionType);
+                                        cargarVariantesRealesML(itemInfo.id, true, false, false, optionType);
                                     };
                                     pillsWrapper.appendChild(pill);
                                 });
@@ -5747,7 +5875,7 @@
                 const timeTxt = document.getElementById('ml-shipping-time-txt');
                 if (warningDiv && timeTxt) {
                     let esInternacional = false;
-                    
+
                     if (data.shipping && data.shipping.logistic_type === "remote") {
                         esInternacional = true;
                     }
@@ -5762,16 +5890,16 @@
                     if (foundItem && (foundItem.esImportacion === true || foundItem.esImportacion === 'true')) {
                         esInternacional = true;
                     }
-                    
+
                     if (esInternacional) {
                         warningDiv.style.display = "flex";
                         timeTxt.innerText = "calculando tiempo de entrega...";
-                        
+
                         let itemParaEnvio = cleanId;
                         if (isProduct && data.buy_box_winner && data.buy_box_winner.item_id) {
                             itemParaEnvio = data.buy_box_winner.item_id;
                         }
-                        
+
                         fetch(`https://api.mercadolibre.com/items/${itemParaEnvio}/shipping_options?zip_code=01000`)
                             .then(res => res.json())
                             .then(shipData => {
@@ -5782,7 +5910,7 @@
                                         const opcionesFecha = { weekday: 'long', day: 'numeric', month: 'long' };
                                         let fechaFormateada = delDate.toLocaleDateString('es-MX', opcionesFecha);
                                         fechaFormateada = fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
-                                        
+
                                         let prepText = "";
                                         if (data.sale_terms) {
                                             const prepTerm = data.sale_terms.find(t => t.id === "MANUFACTURING_TIME");
@@ -5870,7 +5998,7 @@
                 precioReal = (varianteSeleccionada.prices && varianteSeleccionada.prices.length > 0)
                     ? (varianteSeleccionada.prices[0].amount || varianteSeleccionada.price || 0)
                     : (varianteSeleccionada.price || 0);
-                
+
                 // Fallback to grouped local price if live price is 0
                 if (precioReal <= 0) {
                     localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memoriaSeleccionadaGlobal, gradingSeleccionadoGlobal, false);
@@ -6033,54 +6161,149 @@
             Actualizando variante...</p>
     </div>
 </body>
-    <!-- ═════════════════════ TOAST + MODAL RESULT SYSTEM ═════════════════════ -->
-    <div id="toast-container" style="
+<!-- ═════════════════════ TOAST + MODAL RESULT SYSTEM ═════════════════════ -->
+<div id="toast-container" style="
         position: fixed; top: 24px; right: 24px; z-index: 99999;
         display: flex; flex-direction: column; gap: 12px; pointer-events: none;
     "></div>
-    <style>
-        @keyframes toastIn  { from { opacity:0; transform:translateX(110%); } to { opacity:1; transform:translateX(0); } }
-        @keyframes toastOut { from { opacity:1; transform:translateX(0);    } to { opacity:0; transform:translateX(110%); } }
-        @keyframes toastBar { from { width:100%; } to { width:0%; } }
-        @keyframes modalResultIn { from { opacity:0; transform:scale(.92); } to { opacity:1; transform:scale(1); } }
-        .celya-toast {
-            min-width: 300px; max-width: 420px; border-radius: 14px;
-            padding: 16px 20px 20px; box-shadow: 0 8px 32px rgba(0,0,0,.22);
-            font-family: 'Inter', sans-serif; font-size: 14px; color: #fff;
-            pointer-events: all; position: relative; overflow: hidden;
-            animation: toastIn .35s cubic-bezier(.22,1,.36,1) forwards;
+<style>
+    @keyframes toastIn {
+        from {
+            opacity: 0;
+            transform: translateX(110%);
         }
-        .celya-toast.hide { animation: toastOut .3s ease forwards; }
-        .celya-toast-bar {
-            position: absolute; bottom: 0; left: 0; height: 3px;
-            background: rgba(255,255,255,.45);
-            animation: toastBar var(--dur) linear forwards;
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
         }
-        .celya-toast-icon { font-size: 22px; flex-shrink: 0; }
-        .celya-toast-body { display: flex; align-items: flex-start; gap: 12px; }
-        .celya-toast-title { font-weight: 700; font-size: 15px; margin-bottom: 3px; }
-        .celya-toast-msg   { opacity: .88; line-height: 1.4; }
-        .modal-result-inner {
-            animation: modalResultIn .4s cubic-bezier(.22,1,.36,1) forwards;
-            display: flex; flex-direction: column; align-items: center; gap: 18px;
+    }
+
+    @keyframes toastOut {
+        from {
+            opacity: 1;
+            transform: translateX(0);
         }
-        .modal-result-icon { font-size: 64px; line-height: 1; }
-        .modal-result-title { font-size: 22px; font-weight: 800; margin: 0; }
-        .modal-result-msg   { font-size: 15px; opacity: .88; line-height: 1.5; max-width: 380px; }
-    </style>
-    <script>
+
+        to {
+            opacity: 0;
+            transform: translateX(110%);
+        }
+    }
+
+    @keyframes toastBar {
+        from {
+            width: 100%;
+        }
+
+        to {
+            width: 0%;
+        }
+    }
+
+    @keyframes modalResultIn {
+        from {
+            opacity: 0;
+            transform: scale(.92);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .celya-toast {
+        min-width: 300px;
+        max-width: 420px;
+        border-radius: 14px;
+        padding: 16px 20px 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, .22);
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        color: #fff;
+        pointer-events: all;
+        position: relative;
+        overflow: hidden;
+        animation: toastIn .35s cubic-bezier(.22, 1, .36, 1) forwards;
+    }
+
+    .celya-toast.hide {
+        animation: toastOut .3s ease forwards;
+    }
+
+    .celya-toast-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: rgba(255, 255, 255, .45);
+        animation: toastBar var(--dur) linear forwards;
+    }
+
+    .celya-toast-icon {
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+
+    .celya-toast-body {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .celya-toast-title {
+        font-weight: 700;
+        font-size: 15px;
+        margin-bottom: 3px;
+    }
+
+    .celya-toast-msg {
+        opacity: .88;
+        line-height: 1.4;
+    }
+
+    .modal-result-inner {
+        animation: modalResultIn .4s cubic-bezier(.22, 1, .36, 1) forwards;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .modal-result-icon {
+        font-size: 64px;
+        line-height: 1;
+    }
+
+    .modal-result-title {
+        font-size: 22px;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .modal-result-msg {
+        font-size: 15px;
+        opacity: .88;
+        line-height: 1.5;
+        max-width: 380px;
+    }
+</style>
+<script>
     /* ---- Toast ---- */
     function escapeHTMLFront(t) {
-        return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return String(t || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
     function toast(msg, type, title) {
-        type  = type  || 'info';
-        title = title || { success:'Listo', error:'Error', warning:'Atenci\u00f3n', info:'Info' }[type];
-        const bg = { success:'linear-gradient(135deg,#16a34a,#15803d)',
-                     error:  'linear-gradient(135deg,#dc2626,#b91c1c)',
-                     warning:'linear-gradient(135deg,#d97706,#b45309)',
-                     info:   'linear-gradient(135deg,#2563eb,#1d4ed8)' }[type];
-        const icon = { success:'\u2705', error:'\u26d4', warning:'\u26a0\ufe0f', info:'\u2139\ufe0f' }[type];
+        type = type || 'info';
+        title = title || { success: 'Listo', error: 'Error', warning: 'Atenci\u00f3n', info: 'Info' }[type];
+        const bg = {
+            success: 'linear-gradient(135deg,#16a34a,#15803d)',
+            error: 'linear-gradient(135deg,#dc2626,#b91c1c)',
+            warning: 'linear-gradient(135deg,#d97706,#b45309)',
+            info: 'linear-gradient(135deg,#2563eb,#1d4ed8)'
+        }[type];
+        const icon = { success: '\u2705', error: '\u26d4', warning: '\u26a0\ufe0f', info: '\u2139\ufe0f' }[type];
         const dur = 4200;
         const el = document.createElement('div');
         el.className = 'celya-toast';
@@ -6099,15 +6322,15 @@
     /* ---- Modal Result Panel ---- */
     function showModalResult(panelId, isSuccess, title, msg, closeFn, duration) {
         const panel = document.getElementById(panelId);
-        if (!panel) { 
-            toast(msg, isSuccess ? 'success' : 'error', title); 
-            if (closeFn) setTimeout(closeFn, 2200); 
-            return; 
+        if (!panel) {
+            toast(msg, isSuccess ? 'success' : 'error', title);
+            if (closeFn) setTimeout(closeFn, 2200);
+            return;
         }
-        
+
         duration = duration || 4000;
         const parent = panel.parentElement;
-        
+
         // Guardar los estilos de visualización originales de todos los hermanos (para restaurarlos después)
         const siblings = Array.from(parent.children).filter(child => child !== panel);
         const originalDisplays = siblings.map(child => {
@@ -6116,52 +6339,52 @@
                 display: child.style.display
             };
         });
-        
+
         // Ocultar todos los hermanos de forma que el alto del modal se ajuste solo al resultado
         siblings.forEach(child => {
             child.style.display = 'none';
         });
-        
+
         // Desplazar scroll al inicio del modal
         parent.scrollTop = 0;
-        
+
         const bg = isSuccess
             ? 'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)'
             : 'linear-gradient(135deg, #7f1d1d 0%, #991b1b 50%, #b91c1c 100%)';
         const icon = isSuccess ? '✅' : '❌';
-        
+
         // Re-estilizar el contenedor del panel en flujo normal de HTML (no absolute inset:0)
         panel.style.cssText = 'background:' + bg + '; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:50px 30px; gap:20px; border-radius:inherit; min-height:280px; box-sizing:border-box; width:100%;';
-        
+
         panel.innerHTML = '<div class="modal-result-inner" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; width:100%;">'
             + '<div class="modal-result-icon" style="font-size: 54px; margin-bottom: 8px;">' + icon + '</div>'
             + '<h3 class="modal-result-title" style="color:#fff; font-size:22px; font-weight:700; margin:0; font-family:\'Inter\',sans-serif;">' + title + '</h3>'
             + '<p class="modal-result-msg" style="color:rgba(255,255,255,.9); text-align:center; font-size:15px; margin:0; line-height:1.6; max-width:400px; font-family:\'Inter\',sans-serif;">' + msg + '</p>'
             + '</div>';
-            
-        setTimeout(() => { 
-            panel.style.display = 'none'; 
-            panel.innerHTML = ''; 
+
+        setTimeout(() => {
+            panel.style.display = 'none';
+            panel.innerHTML = '';
             // Restaurar displays originales de los hermanos
             originalDisplays.forEach(item => {
                 item.element.style.display = item.display;
             });
-            if (closeFn) closeFn(); 
+            if (closeFn) closeFn();
         }, duration);
     }
-    
+
     // Tema Oscuro / Claro Inicialización y Eventos
-    (function() {
+    (function () {
         const btn = document.getElementById('theme-toggle');
         if (!btn) return;
-        
+
         const sunIcon = btn.querySelector('.theme-icon-sun');
         const moonIcon = btn.querySelector('.theme-icon-moon');
-        
+
         // Cargar tema guardado o preferencia del sistema
         const savedTheme = localStorage.getItem('celya-theme');
         const useDark = savedTheme === 'dark';
-        
+
         if (useDark) {
             document.body.classList.add('dark-theme');
             sunIcon.style.display = 'none';
@@ -6171,11 +6394,11 @@
             sunIcon.style.display = 'inline-block';
             moonIcon.style.display = 'none';
         }
-        
+
         btn.addEventListener('click', () => {
             const isDark = document.body.classList.toggle('dark-theme');
             localStorage.setItem('celya-theme', isDark ? 'dark' : 'light');
-            
+
             if (isDark) {
                 sunIcon.style.display = 'none';
                 moonIcon.style.display = 'inline-block';
@@ -6187,9 +6410,9 @@
             }
         });
     })();
-    
+
     // Control de la barra de búsqueda auto-expandible en el header
-    (function() {
+    (function () {
         const input = document.getElementById('inputBusqueda');
         const wrapper = document.querySelector('.header-search-wrapper');
         const clearBtn = document.getElementById('clearSearchBtn');
@@ -6209,16 +6432,16 @@
         input.addEventListener('focus', updateState);
         input.addEventListener('blur', updateState);
 
-        window.clearSearch = function() {
+        window.clearSearch = function () {
             input.value = "";
             updateState();
             solicitarBusqueda();
             input.focus();
         };
-        
+
         // Inicializar por si ya tiene valor
         updateState();
     })();
-    </script>
+</script>
 
 </html>
