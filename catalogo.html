@@ -4676,6 +4676,18 @@
                                 if (!isOptionInFamily("color", p.picker_label) && !isSel) return;
 
                                 const specItem = productMapGlobal[p.product_id];
+                                if (specItem && !isSel) {
+                                    if (memoriaSeleccionadaGlobal && specItem.memory && !memoriesMatch(specItem.memory, memoriaSeleccionadaGlobal)) {
+                                        return;
+                                    }
+                                    if (ramSeleccionadaGlobal && specItem.ram && !ramsMatch(specItem.ram, ramSeleccionadaGlobal)) {
+                                        return;
+                                    }
+                                    if (gradingSeleccionadoGlobal && specItem.grading && specItem.grading.toLowerCase().trim() !== gradingSeleccionadoGlobal.toLowerCase().trim()) {
+                                        return;
+                                    }
+                                }
+
                                 const isOutOfStock = specItem ? specItem.isOutOfStock : false;
 
                                 const existing = coloresVistos.get(normColor);
@@ -4870,6 +4882,11 @@
                                     if (!prod.picker_label) return;
                                     const normLabel = prod.picker_label.trim().toLowerCase();
                                     const isSel = prod.tags && prod.tags.includes("selected");
+
+                                    // Simplificar y ocultar opciones que pertenezcan a otro catálogo de Mercado Libre
+                                    if (prod.product_id && cleanId && prod.product_id.toUpperCase() !== cleanId.toUpperCase() && !isSel) {
+                                        return;
+                                    }
 
                                     let optionType = "";
                                     if (pIdUpper.includes("RAM")) {
