@@ -1150,6 +1150,7 @@
             top: 0;
             left: -320px;
             width: 320px;
+            max-width: 85%;
             height: 100%;
             background: var(--bg-card);
             border-right: 1px solid var(--border-color);
@@ -1273,6 +1274,13 @@
             border-bottom: 2px solid var(--border-color);
             margin-bottom: 20px;
             padding-bottom: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .info-tabs::-webkit-scrollbar {
+            display: none;
         }
 
         .info-tab {
@@ -1285,6 +1293,8 @@
             cursor: pointer;
             border-radius: 8px;
             transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .info-tab:hover {
@@ -1403,6 +1413,23 @@
         .footer-disclaimer {
             font-size: 11px;
             opacity: 0.8;
+        }
+
+        @media (max-width: 480px) {
+            header img {
+                max-height: 52px !important;
+            }
+            .menu-toggle-btn {
+                left: 12px !important;
+                top: 12px !important;
+            }
+            .theme-toggle-btn {
+                right: 12px !important;
+                top: 12px !important;
+            }
+            .celya-footer {
+                padding: 30px 15px 15px 15px !important;
+            }
         }
     </style>
 </head>
