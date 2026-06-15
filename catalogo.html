@@ -75,13 +75,13 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* Botón de cambio de tema */
+        /* Botones del header */
         .theme-toggle-btn {
             position: absolute;
-            top: 20px;
+            top: 15px;
             right: 20px;
-            width: 42px;
-            height: 42px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -90,17 +90,92 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 16px;
+            font-size: 15px;
             z-index: 50;
             outline: none;
         }
 
         .theme-toggle-btn:hover {
             transform: scale(1.08) rotate(15deg);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.1);
             border-color: var(--accent);
+        }
+
+        .header-search-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .header-search-wrapper {
+            position: relative;
+            width: 320px;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+        }
+
+        /* Cuando está enfocado el input o tiene texto, se agranda */
+        .header-search-wrapper:focus-within,
+        .header-search-wrapper.has-text {
+            width: 600px;
+            max-width: 90%;
+        }
+
+        .header-search-wrapper input {
+            width: 100%;
+            padding: 10px 40px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 24px;
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+            background: var(--bg-input);
+            color: var(--text-input);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .header-search-wrapper input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.15);
+        }
+
+        .header-search-wrapper .search-icon {
+            position: absolute;
+            left: 14px;
+            color: var(--text-muted);
+            font-size: 15px;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .header-search-wrapper .search-icon:hover {
+            transform: scale(1.15);
+            color: var(--accent);
+        }
+
+        .header-search-wrapper .clear-search-btn {
+            position: absolute;
+            right: 14px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .header-search-wrapper .clear-search-btn:hover {
+            color: var(--danger);
         }
 
         body.dark-theme header img {
@@ -177,17 +252,18 @@
         }
 
         header {
-            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-            color: #0f172a;
+            background: var(--bg-header);
+            color: var(--text-header);
             text-align: center;
-            padding: 45px 20px;
-            border-bottom: 1px solid #e2e8f0;
-            box-shadow: 0 4px 30px rgba(15, 23, 42, 0.04);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-header);
+            box-shadow: 0 4px 30px var(--shadow-header);
+            position: relative;
         }
 
         header img {
-            max-height: 90px;
-            margin-bottom: 12px;
+            max-height: 56px;
+            margin-bottom: 4px;
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.06));
         }
@@ -198,15 +274,15 @@
 
         header h1 {
             margin: 0;
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 700;
             letter-spacing: -0.5px;
         }
 
         header p {
-            margin: 8px 0 0 0;
-            color: #475569;
-            font-size: 16px;
+            margin: 4px 0 0 0;
+            color: var(--text-muted);
+            font-size: 14px;
             font-weight: 400;
             max-width: 600px;
             margin-left: auto;
@@ -220,67 +296,7 @@
             box-sizing: border-box;
         }
 
-        .buscador-box {
-            background: var(--bg-card);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border-color);
-            margin-bottom: 30px;
-        }
 
-        .buscador-box h3 {
-            margin: 0 0 15px 0;
-            font-weight: 600;
-            color: var(--primary);
-            font-size: 18px;
-        }
-
-        .search-wrapper {
-            display: flex;
-            gap: 12px;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .search-wrapper input {
-            flex: 1;
-            padding: 14px 20px;
-            border: 1.5px solid var(--border-color);
-            border-radius: 12px;
-            font-size: 16px;
-            font-family: inherit;
-            outline: none;
-            background: var(--bg-input);
-            color: var(--text-input);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .search-wrapper input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(230, 126, 34, 0.15);
-        }
-
-        .btn-buscar {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0 30px;
-            font-weight: 600;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 16px;
-            font-family: inherit;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-        }
-
-        .btn-buscar:hover {
-            background: var(--primary-light);
-        }
-
-        .btn-buscar:active {
-            transform: scale(0.98);
-        }
 
         /* Toolbar para Ordenar y Filtrar */
         .controls-bar {
@@ -1039,21 +1055,22 @@
             <span class="theme-icon-moon" style="display:none;">🌙</span>
         </button>
 
-        <div style="text-align: center; margin-bottom: 10px;">
+        <div style="text-align: center; margin-bottom: 6px;">
             <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo" style="cursor: pointer;" onclick="window.location.reload();">
         </div>
-        <p>Estrena el smartphone que buscas con pagos semanales/quincenales a tu medida</p>
+        <p style="margin-bottom: 10px;">Estrena el smartphone que buscas con pagos semanales/quincenales a tu medida</p>
+
+        <!-- Barra de búsqueda compacta y auto-expandible -->
+        <div class="header-search-container">
+            <div class="header-search-wrapper">
+                <span class="search-icon" id="searchIcon" onclick="solicitarBusqueda()" title="Buscar">🔍</span>
+                <input type="text" id="inputBusqueda" placeholder="Buscar celular...">
+                <button type="button" class="clear-search-btn" id="clearSearchBtn" onclick="clearSearch()">×</button>
+            </div>
+        </div>
     </header>
 
     <div class="container">
-
-        <div class="buscador-box">
-            <h3>🔍 ¿Buscas un modelo específico?</h3>
-            <div class="search-wrapper">
-                <input type="text" id="inputBusqueda" placeholder="Ej: Galaxy A06, Moto G24, Xiaomi...">
-                <button type="button" class="btn-buscar" id="btnBuscar" onclick="solicitarBusqueda()">Buscar</button>
-            </div>
-        </div>
 
         <!-- Barra de Controles (Ordenar y Filtrar) -->
         <div class="controls-bar">
@@ -1482,9 +1499,12 @@
         async function renderizarCatalogo(busqueda) {
             const contenedor = document.getElementById('contenedorResultados');
             const btn = document.getElementById('btnBuscar');
-
-            btn.innerText = "⏳";
-            btn.disabled = true;
+            if (btn) {
+                btn.innerText = "⏳";
+                btn.disabled = true;
+            }
+            const searchIcon = document.getElementById('searchIcon');
+            if (searchIcon) searchIcon.innerText = "⏳";
 
             // Clave de caché única según la URL del script para evitar datos stale si cambia de URL
             const urlHash = btoa(CONFIG.GOOGLE_SCRIPT_URL).substring(0, 15);
@@ -1576,8 +1596,12 @@
                     contenedor.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:var(--danger); padding:30px; font-weight:600;'>Error de comunicación con la base de datos.</p>";
                 }
             } finally {
-                btn.innerText = "Buscar";
-                btn.disabled = false;
+                if (btn) {
+                    btn.innerText = "Buscar";
+                    btn.disabled = false;
+                }
+                const searchIcon = document.getElementById('searchIcon');
+                if (searchIcon) searchIcon.innerText = "🔍";
             }
         }
 
@@ -5404,6 +5428,7 @@
                 item.element.style.display = item.display;
             });
             if (closeFn) closeFn(); 
+        }, duration);
     }
     
     // Tema Oscuro / Claro Inicialización y Eventos
@@ -5443,6 +5468,38 @@
                 toast('Tema claro activado', 'info', 'Tema');
             }
         });
+    })();
+    
+    // Control de la barra de búsqueda auto-expandible en el header
+    (function() {
+        const input = document.getElementById('inputBusqueda');
+        const wrapper = document.querySelector('.header-search-wrapper');
+        const clearBtn = document.getElementById('clearSearchBtn');
+        if (!input || !wrapper) return;
+
+        function updateState() {
+            if (input.value.trim() !== "") {
+                wrapper.classList.add('has-text');
+                if (clearBtn) clearBtn.style.display = 'flex';
+            } else {
+                wrapper.classList.remove('has-text');
+                if (clearBtn) clearBtn.style.display = 'none';
+            }
+        }
+
+        input.addEventListener('input', updateState);
+        input.addEventListener('focus', updateState);
+        input.addEventListener('blur', updateState);
+
+        window.clearSearch = function() {
+            input.value = "";
+            updateState();
+            solicitarBusqueda();
+            input.focus();
+        };
+        
+        // Inicializar por si ya tiene valor
+        updateState();
     })();
     </script>
 
