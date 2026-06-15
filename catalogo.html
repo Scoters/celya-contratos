@@ -2236,6 +2236,17 @@
             const plazo = document.getElementById('cliPlazo').value; // "26 Semanas" o "52 Semanas"
             const precioContado = parseFloat(document.getElementById('hiddenPrecioContado').value) || 0;
 
+            // Si es "Bajo Pedido", mostrar texto especial en lugar de calcular precios
+            if (esBajoPedidoGlobal) {
+                document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong style="color:#d97706;">Bajo Pedido 📋</strong>`;
+                document.getElementById('pdp-enganche-grande').innerText = `Bajo Pedido`;
+                document.getElementById('pdp-weekly-amount').innerText = `Bajo Pedido`;
+                document.getElementById('pdp-weekly-term').innerText = `Consultar precio con asesor`;
+                document.getElementById('hiddenCuota26').value = 0;
+                document.getElementById('hiddenCuota52').value = 0;
+                return;
+            }
+
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
             let labelFrecuencia = "semanales";
 
@@ -2287,6 +2298,7 @@
             almacenamientoSeleccionado = "";
             itemVariationsData = [];
             currentMLItemLink = "";
+            esBajoPedidoGlobal = false;
         }
 
         // Cerrar modal al hacer clic en el fondo oscuro exterior
@@ -2722,7 +2734,8 @@
                 const frecuenciaVal = (freq === "SEMANAL") ? "Semanal" : ((freq === "QUINCENAL") ? "Quincenal" : "Contado");
 
                 // Añadimos las especificaciones directo entre paréntesis al lado del modelo
-                params.append('plazo', `${textoPlazoEnvio} (${modelo}${detallesVariante})`);
+                const bajoPedidoTag = esBajoPedidoGlobal ? "⚠️ BAJO PEDIDO: " : "";
+                params.append('plazo', `${bajoPedidoTag}${textoPlazoEnvio} (${modelo}${detallesVariante})`);
                 params.append('color', colorSeleccionado || "");
                 params.append('capacidad', almacenamientoSeleccionado || "");
                 params.append('planElegido', planElegidoVal);
@@ -2780,6 +2793,7 @@
         let almacenamientoSeleccionado = "";
         let itemVariationsData = [];
         let productMapGlobal = {};
+        let esBajoPedidoGlobal = false;
 
         // Parse specs (color, memory, ram) from Mercado Libre product names
         function parseSpecsFromProductName(name) {
@@ -3294,6 +3308,7 @@
                 memoriaSeleccionadaGlobal = "";
                 gradingSeleccionadoGlobal = "";
                 ramSeleccionadaGlobal = "";
+                esBajoPedidoGlobal = false;
                 itemVariationsData = [];
                 variantesVivasGlobal = [];
 
@@ -4788,15 +4803,17 @@
                                     currentMLItemLink = `https://www.mercadolibre.com.mx/p/${colorInfo.id}`;
 
                                     // === IMMEDIATE LOCAL PRICE UPDATE ===
+                                    let _colorLocalPrice = null;
                                     try {
                                         const currentMemoria = memoriaSeleccionadaGlobal || almacenamientoSeleccionado || "";
                                         const currentGrading = gradingSeleccionadoGlobal || "";
-                                        const localPrice = buscarPrecioEquivalenteLocal(colorInfo.name, currentMemoria, currentGrading);
-                                        if (localPrice && localPrice > 0) {
+                                        _colorLocalPrice = buscarPrecioEquivalenteLocal(colorInfo.name, currentMemoria, currentGrading);
+                                        if (_colorLocalPrice && _colorLocalPrice > 0) {
+                                            esBajoPedidoGlobal = false;
                                             const hidden = document.getElementById('hiddenPrecioContado');
-                                            if (hidden) hidden.value = localPrice;
+                                            if (hidden) hidden.value = _colorLocalPrice;
                                             if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
-                                            document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(localPrice).toLocaleString('es-MX')} MXN</strong>`;
+                                            document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(_colorLocalPrice).toLocaleString('es-MX')} MXN</strong>`;
                                         }
                                     } catch (priceErr) {
                                         console.warn('Error updating local price on color click:', priceErr);
@@ -4832,17 +4849,28 @@
                                         console.warn('Error updating photo on color click:', photoErr);
                                     }
 
-                                    // Show loading state while switching variant
-                                    if (wrapperColores) {
-                                        wrapperColores.style.opacity = "0.4";
-                                        wrapperColores.style.pointerEvents = "none";
+                                    if (_colorLocalPrice && _colorLocalPrice > 0) {
+                                        // Normal flow - load variant from ML
+                                        if (wrapperColores) {
+                                            wrapperColores.style.opacity = "0.4";
+                                            wrapperColores.style.pointerEvents = "none";
+                                        }
+                                        if (wrapperStorage) {
+                                            wrapperStorage.style.opacity = "0.4";
+                                            wrapperStorage.style.pointerEvents = "none";
+                                        }
+                                        cargarVariantesRealesML(colorInfo.id, true, false, false, 'color');
+                                    } else {
+                                        // No local price for this color - show "Bajo Pedido"
+                                        esBajoPedidoGlobal = true;
+                                        const hidden = document.getElementById('hiddenPrecioContado');
+                                        if (hidden) hidden.value = 0;
+                                        document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong style="color:#d97706;">Bajo Pedido 📋</strong>`;
+                                        document.getElementById('pdp-enganche-grande').innerText = `Bajo Pedido`;
+                                        document.getElementById('pdp-weekly-amount').innerText = `Bajo Pedido`;
+                                        document.getElementById('pdp-weekly-term').innerText = `Consultar precio con asesor`;
+                                        ocultarCargandoVariantes();
                                     }
-                                    if (wrapperStorage) {
-                                        wrapperStorage.style.opacity = "0.4";
-                                        wrapperStorage.style.pointerEvents = "none";
-                                    }
-
-                                    cargarVariantesRealesML(colorInfo.id, true, false, false, 'color');
                                 };
                                 wrapperColores.appendChild(divColor);
                             });
@@ -4883,10 +4911,7 @@
                                     const normLabel = prod.picker_label.trim().toLowerCase();
                                     const isSel = prod.tags && prod.tags.includes("selected");
 
-                                    // Simplificar y ocultar opciones que pertenezcan a otro catálogo de Mercado Libre
-                                    if (prod.product_id && cleanId && prod.product_id.toUpperCase() !== cleanId.toUpperCase() && !isSel) {
-                                        return;
-                                    }
+                                    // (Permitir todas las opciones de capacidad/RAM aunque pertenezcan a otro catálogo - se manejarán como "Bajo Pedido")
 
                                     let optionType = "";
                                     if (pIdUpper.includes("RAM")) {
@@ -5043,38 +5068,55 @@
                                              ramSeleccionadaGlobal = itemInfo.name;
                                          }
 
-                                         // === IMMEDIATE LOCAL PRICE UPDATE ===
-                                         // Update the price instantly using local catalog data before network fetch
+                                         // === LOCAL PRICE CHECK: BAJO PEDIDO LOGIC ===
+                                         const currentColor = colorSeleccionadoGlobal || colorSeleccionado || "";
+                                         const currentMemoria = memoriaSeleccionadaGlobal || almacenamientoSeleccionado || "";
+                                         const currentGrading = gradingSeleccionadoGlobal || "";
+                                         let localPrice = null;
                                          try {
-                                             const currentColor = colorSeleccionadoGlobal || colorSeleccionado || "";
-                                             const currentMemoria = memoriaSeleccionadaGlobal || almacenamientoSeleccionado || "";
-                                             const currentGrading = gradingSeleccionadoGlobal || "";
-                                             const localPrice = buscarPrecioEquivalenteLocal(currentColor, currentMemoria, currentGrading);
-                                             if (localPrice && localPrice > 0) {
-                                                 const hidden = document.getElementById('hiddenPrecioContado');
-                                                 if (hidden) hidden.value = localPrice;
-                                                 if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
-                                                 document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(localPrice).toLocaleString('es-MX')} MXN</strong>`;
-                                             }
+                                             localPrice = buscarPrecioEquivalenteLocal(currentColor, currentMemoria, currentGrading);
                                          } catch (priceErr) {
-                                             console.warn('Error updating local price on pill click:', priceErr);
+                                             console.warn('Error checking local price on pill click:', priceErr);
                                          }
 
-                                         currentMLItemLink = `https://www.mercadolibre.com.mx/p/${itemInfo.id}`;
+                                         if (localPrice && localPrice > 0) {
+                                             // Local price found - proceed normally
+                                             esBajoPedidoGlobal = false;
+                                             const hidden = document.getElementById('hiddenPrecioContado');
+                                             if (hidden) hidden.value = localPrice;
+                                             if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
+                                             document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(localPrice).toLocaleString('es-MX')} MXN</strong>`;
 
-                                         const isTargetCached = !!ML_CACHE_VARIANTES[itemInfo.id];
-                                         if (!isTargetCached) {
-                                             if (wrapperColores) {
-                                                 wrapperColores.style.opacity = "0.4";
-                                                 wrapperColores.style.pointerEvents = "none";
+                                             currentMLItemLink = `https://www.mercadolibre.com.mx/p/${itemInfo.id}`;
+
+                                             const isTargetCached = !!ML_CACHE_VARIANTES[itemInfo.id];
+                                             if (!isTargetCached) {
+                                                 if (wrapperColores) {
+                                                     wrapperColores.style.opacity = "0.4";
+                                                     wrapperColores.style.pointerEvents = "none";
+                                                 }
+                                                 if (wrapperStorage) {
+                                                     wrapperStorage.style.opacity = "0.4";
+                                                     wrapperStorage.style.pointerEvents = "none";
+                                                 }
                                              }
-                                             if (wrapperStorage) {
-                                                 wrapperStorage.style.opacity = "0.4";
-                                                 wrapperStorage.style.pointerEvents = "none";
-                                             }
+
+                                             cargarVariantesRealesML(itemInfo.id, true, false, false, optionType);
+                                         } else {
+                                             // No local price - show "Bajo Pedido" without fetching from ML
+                                             esBajoPedidoGlobal = true;
+                                             const hidden = document.getElementById('hiddenPrecioContado');
+                                             if (hidden) hidden.value = 0;
+                                             document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong style="color:#d97706;">Bajo Pedido 📋</strong>`;
+                                             document.getElementById('pdp-enganche-grande').innerText = `Bajo Pedido`;
+                                             document.getElementById('pdp-weekly-amount').innerText = `Bajo Pedido`;
+                                             document.getElementById('pdp-weekly-term').innerText = `Consultar precio con asesor`;
+                                             // Update the picker label to show the new selection
+                                             const labelSpan = sectionDiv.querySelector('label span');
+                                             if (labelSpan) labelSpan.innerText = itemInfo.name;
+                                             // Hide loading overlay
+                                             ocultarCargandoVariantes();
                                          }
-
-                                         cargarVariantesRealesML(itemInfo.id, true, false, false, optionType);
                                     };
                                     pillsWrapper.appendChild(pill);
                                 });
