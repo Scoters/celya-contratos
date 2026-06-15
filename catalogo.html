@@ -197,11 +197,22 @@
             background: var(--primary-light);
             border-color: var(--text-muted);
         }
+        body.dark-theme .storage-pill.selected {
+            border-color: var(--accent);
+            background-color: rgba(230, 126, 34, 0.15);
+            color: var(--accent);
+        }
 
         body.dark-theme #ml-shipping-warning {
             background-color: rgba(217, 119, 6, 0.1);
             border-color: rgba(217, 119, 6, 0.2);
             color: #fbbf24;
+        }
+
+        body.dark-theme .reconditioned-tag {
+            background-color: rgba(217, 119, 6, 0.1) !important;
+            color: #fbbf24 !important;
+            border-color: rgba(217, 119, 6, 0.2) !important;
         }
 
         body.dark-theme .frecuencia-toggle {
@@ -533,6 +544,13 @@
             font-weight: 600;
             padding: 3px 8px;
             border-radius: 6px;
+        }
+
+        .reconditioned-tag {
+            background-color: #fffbeb !important;
+            color: #d97706 !important;
+            border-color: #fef3c7 !important;
+            font-weight: 600;
         }
 
         .price-row {
@@ -1831,7 +1849,7 @@
                                     ${ramText ? `<span class="spec-tag">⚡ ${ramText}</span>` : ''}
                                     ${memoriaText ? `<span class="spec-tag">💾 ${memoriaText}</span>` : ''}
                                     <span class="spec-tag">🎨 ${numColores} ${numColores === 1 ? 'color' : 'colores'}</span>
-                                    ${item.modelo && item.modelo.toLowerCase().includes('reacondicionado') ? `<span class="spec-tag" style="background-color: #fffbeb; color: #d97706; border: 1px solid #fef3c7; font-weight: 600;">🔧 Reacondicionado</span>` : ''}
+                                    ${item.modelo && item.modelo.toLowerCase().includes('reacondicionado') ? `<span class="spec-tag reconditioned-tag">🔧 Reacondicionado</span>` : ''}
                                 </div>
                                 ${item.precioContado ? `<div class="price-row"><span class="price-contado">Precio Contado:</span><span class="price-contado"><span>$${Math.round(item.precioContado).toLocaleString('es-MX')} MXN</span></span></div>` : ''}
                                 <div class="enganche" data-enganche="${engancheComodoCalculado.toLocaleString('es-MX')}" data-precio="${Math.round(item.precioContado).toLocaleString('es-MX')}">
@@ -4946,8 +4964,8 @@
                                     }
                                 }
                                 sectionDiv.innerHTML = `
-                                    <label style="font-weight: 600; font-size: 14px; color: #1e293b; display: block; margin-bottom: 8px;">
-                                        ${pickerLabel}: <span style="font-weight: 400; color: #64748b;">${selectedValName}</span>
+                                    <label style="font-weight: 600; font-size: 14px; color: var(--text-main); display: block; margin-bottom: 8px;">
+                                        ${pickerLabel}: <span style="font-weight: 400; color: var(--text-muted);">${selectedValName}</span>
                                     </label>
                                     <div class="pills-wrapper" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
                                 `;
