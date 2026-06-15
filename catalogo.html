@@ -2386,10 +2386,12 @@
                     titleUpper.includes("XIAOMI") ||
                     titleUpper.includes("REDMI") ||
                     titleUpper.includes("POCO") ||
-                    titleUpper.includes("OPPO");
+                    titleUpper.includes("OPPO") ||
+                    titleUpper.includes("IPHONE") ||
+                    titleUpper.includes("APPLE");
 
                 if (!esMarcaFinanciada) {
-                    errorDiv.innerText = "Lo sentimos, por el momento sólo financiamos celulares Samsung, Motorola, Xiaomi y Oppo.";
+                    errorDiv.innerText = "Lo sentimos, por el momento sólo financiamos celulares Samsung, Motorola, Xiaomi, Oppo y iPhone.";
                     errorDiv.style.display = 'block';
                     btnConsultar.innerText = "Cotizar";
                     btnConsultar.disabled = false;

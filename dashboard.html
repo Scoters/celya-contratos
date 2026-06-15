@@ -1146,7 +1146,7 @@
                                         `;
                                         const btn = card.querySelector('.btn-convertir-trigger');
                                         btn.addEventListener('click', function () {
-                                                abrirConvertForm(it.fila, it.modelo, it.color, it.memoria, it.precioPlaceholder);
+                                                abrirConvertForm(it.fila, it.modelo, it.color, it.memoria, it.precioPlaceholder, it.precioContado, it.planElegido);
                                         });
                                         cont.appendChild(card);
                                 });
@@ -1155,21 +1155,41 @@
                         }
                 }
 
-                function abrirConvertForm(fila, modelo = "", color = "", memoria = "", precioPlaceholder = 0) {
+                function abrirConvertForm(fila, modelo = "", color = "", memoria = "", precioPlaceholder = 0, precioContado = 0, planElegido = "") {
+                        const rate26Input = document.getElementById('cfg-plan-rapido');
+                        const rate52Input = document.getElementById('cfg-plan-comodo');
+                        const rate26 = rate26Input ? (parseFloat(rate26Input.value) || 66) : 66;
+                        const rate52 = rate52Input ? (parseFloat(rate52Input.value) || 90) : 90;
+                        const factor = (String(planElegido).includes("52") || planElegido == 52) ? (1 + rate52/100) : (1 + rate26/100);
+
+                        if (!precioContado && precioPlaceholder) {
+                            precioContado = Math.round(precioPlaceholder / factor);
+                        }
+
                         const cont = document.getElementById('placeholders-list');
                         // Reemplazamos por formulario simple
                         cont.innerHTML = `
                             <div style="padding:6px; text-align:left;">
                                 <h3 style="margin-top:0;">Convertir Cotización a Inventario (fila ${fila})</h3>
-                                <div style="margin-bottom:12px; font-weight:bold; color:var(--text-primary); font-size:16px;">${limpiarNombreModelo(modelo)}</div>
+                                
+                                <label>Modelo del Celular:</label>
+                                <input id="conv-modelo" value="${limpiarNombreModelo(modelo)}" placeholder="Ej. Motorola G54" />
+
                                 <label>IMEI nuevo (requerido):</label>
                                 <input id="conv-imei" placeholder="Ej. 990000000000012" />
+                                
                                 <label>Color:</label>
                                 <input id="conv-color" value="${color}" placeholder="Ej. Negro" />
+                                
                                 <label>Capacidad / Memoria:</label>
                                 <input id="conv-memoria" value="${memoria}" placeholder="Ej. 128GB" />
-                                <label>Precio Financiado Final:</label>
-                                <input id="conv-precio" type="number" value="${precioPlaceholder || ''}" placeholder="Ej. 7990" />
+                                
+                                <label>Precio de Contado (Precio en Inventario):</label>
+                                <input id="conv-precio" type="number" value="${precioContado || ''}" placeholder="Ej. 4800" />
+                                <div style="font-size:12px; color:var(--text-secondary); margin-top:-8px; margin-bottom:12px;" id="conv-precio-financiado-preview">
+                                    Precio Financiado Estimado: $${Number(precioPlaceholder).toLocaleString('es-MX')} (Plan ${planElegido || '—'} sem)
+                                </div>
+
                                 <label>Estado:</label>
                                 <select id="conv-estado">
                                     <option value="siendo pagado" selected>siendo pagado</option>
@@ -1177,8 +1197,10 @@
                                     <option value="MAS VENDIDO">MAS VENDIDO</option>
                                     <option value="BAJO DEMANDA">BAJO DEMANDA</option>
                                 </select>
+                                
                                 <label>Notas (opcional):</label>
                                 <textarea id="conv-notas" placeholder="Ej. Celular comprado de Mercado Libre para el cliente" style="width:100%; min-height:80px; padding:10px; border:1px solid rgba(255, 255, 255, 0.12); border-radius:8px; box-sizing:border-box; background:rgba(15, 23, 42, 0.5); color:white;"></textarea>
+                                
                                 <div style="display:flex; gap:8px; margin-top:20px;">
                                     <button id="conv-confirm" class="btn-pago" style="flex:1; background:linear-gradient(135deg, #10b981, #047857); margin-top:0;">✅ Convertir a Inventario</button>
                                     <button id="conv-cancel" class="btn-config" style="flex:1; background:linear-gradient(135deg, #64748b, #475569); margin-top:0;">Cancelar</button>
@@ -1186,9 +1208,18 @@
                             </div>
                         `;
 
+                        // Escuchador dinámico de precio
+                        document.getElementById('conv-precio').addEventListener('input', function() {
+                            const val = parseFloat(this.value) || 0;
+                            const preview = Math.round(val * factor);
+                            document.getElementById('conv-precio-financiado-preview').innerText = 
+                                `Precio Financiado Estimado: $${preview.toLocaleString('es-MX')} (Plan ${planElegido || '—'} sem)`;
+                        });
+
                         document.getElementById('conv-cancel').addEventListener('click', cargarPlaceholders);
                         document.getElementById('conv-confirm').addEventListener('click', async function () {
                                 const imei = document.getElementById('conv-imei').value.trim();
+                                const modeloVal = document.getElementById('conv-modelo').value.trim();
                                 const color = document.getElementById('conv-color').value.trim();
                                 const memoria = document.getElementById('conv-memoria').value.trim();
                                 const precioFinal = document.getElementById('conv-precio').value.trim();
@@ -1196,12 +1227,14 @@
                                 const notas = document.getElementById('conv-notas').value.trim();
 
                                 if (!imei) { toast('IMEI es requerido.', 'warning'); return; }
+                                if (!modeloVal) { toast('Modelo es requerido.', 'warning'); return; }
 
                                 const params = new URLSearchParams();
                                 params.append('action', 'convertirPlaceholderAInventario');
                                 params.append('token', CONFIG.API_TOKEN);
                                 params.append('fila', String(fila));
                                 params.append('imei', imei);
+                                params.append('modelo', modeloVal);
                                 params.append('color', color);
                                 params.append('memoria', memoria);
                                 params.append('precioFinal', precioFinal);
