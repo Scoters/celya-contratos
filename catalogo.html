@@ -2461,7 +2461,7 @@
                 if (divEnganche) {
                     divEnganche.style.opacity = '1';
                     const precioContado = parseFloat((divEnganche.getAttribute('data-precio') || '').replace(/[\$,]/g, '')) || 0;
-                    const factorEng = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165;
+                    const factorEng = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
                     const quinEnganche = Math.ceil((precioContado * factorEng) / 10) * 10;
                     divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche: $${quinEnganche.toLocaleString('es-MX')} MXN`;
                 }
