@@ -4911,11 +4911,6 @@
                                     const normLabel = prod.picker_label.trim().toLowerCase();
                                     const isSel = prod.tags && prod.tags.includes("selected");
 
-                                    // Simplificar y ocultar opciones que pertenezcan a otro catálogo de Mercado Libre
-                                    if (prod.product_id && cleanId && prod.product_id.toUpperCase() !== cleanId.toUpperCase() && !isSel) {
-                                        return;
-                                    }
-
                                     let optionType = "";
                                     if (pIdUpper.includes("RAM")) {
                                         optionType = "ram";
@@ -4923,6 +4918,26 @@
                                         optionType = "memory";
                                     } else if (pIdUpper === "GRADING") {
                                         optionType = "grading";
+                                    }
+
+                                    // Simplificar y ocultar opciones que pertenezcan a otro catálogo de Mercado Libre,
+                                    // a menos que estén registradas localmente en nuestro inventario/catálogo.
+                                    if (prod.product_id && cleanId && prod.product_id.toUpperCase() !== cleanId.toUpperCase() && !isSel) {
+                                        const existsLocally = window.equiposCargados && window.equiposCargados.some(eq => {
+                                            if (eq.id && eq.id.toUpperCase() === prod.product_id.toUpperCase()) return true;
+                                            if (eq.link) {
+                                                const match = eq.link.match(/(MLM\-?\d+)/i);
+                                                if (match && match[0].replace("-", "").toUpperCase() === prod.product_id.toUpperCase()) return true;
+                                            }
+                                            if (eq.modelo && baseModelsMatch(eq.modelo, window.currentBaseModelName)) {
+                                                if (optionType === "memory" && eq.memoria && memoriesMatch(eq.memoria, prod.picker_label)) return true;
+                                                if (optionType === "ram" && eq.ram && ramsMatch(eq.ram, prod.picker_label)) return true;
+                                            }
+                                            return false;
+                                        });
+                                        if (!existsLocally) {
+                                            return;
+                                        }
                                     }
                                     
                                     // Only skip if the option has absolutely no stock in the family
