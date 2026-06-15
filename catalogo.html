@@ -76,22 +76,23 @@
         }
 
         header {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            color: white;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            color: #0f172a;
             text-align: center;
-            padding: 40px 20px;
-            border-bottom: 4px solid var(--accent);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 45px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 4px 30px rgba(15, 23, 42, 0.04);
         }
 
         header img {
             max-height: 90px;
-            margin-bottom: 10px;
-            transition: transform 0.3s ease;
+            margin-bottom: 12px;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.06));
         }
 
         header img:hover {
-            transform: scale(1.05);
+            transform: scale(1.04);
         }
 
         header h1 {
@@ -103,9 +104,12 @@
 
         header p {
             margin: 8px 0 0 0;
-            color: #94a3b8;
+            color: #475569;
             font-size: 16px;
-            font-weight: 300;
+            font-weight: 400;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .container {
@@ -927,7 +931,7 @@
 
     <header>
         <div style="text-align: center; margin-bottom: 10px;">
-            <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo">
+            <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo" style="cursor: pointer;" onclick="window.location.reload();">
         </div>
         <p>Estrena el smartphone que buscas con pagos semanales/quincenales a tu medida</p>
     </header>
@@ -2613,7 +2617,7 @@
                     "verde lima", "lima verde", "verde", "green", "lima", "lime", "menta", "mint",
                     "rojo", "red", "naranja", "orange", "coral",
                     "rosa", "pink", "gold", "oro", "dorado", "bronce", "bronze",
-                    "violeta", "violet", "purpura", "purple", "morado", "lavanda", "lavender", "lila", "lilac",
+                    "violeta", "violet", "purpura", "púrpura", "purple", "morado", "lavanda", "lavender", "lila", "lilac",
                     "gris", "grey", "gray", "amarillo", "yellow"
                 ];
                 // Sort color keys by length descending to match longer names first
@@ -2829,7 +2833,7 @@
                 "verde": ["verde", "green", "lima", "lime", "menta", "mint", "musgo"],
                 "rojo": ["rojo", "red", "naranja", "orange", "coral", "atardecer"],
                 "rosa": ["rosa", "pink", "gold", "oro", "dorado", "bronce", "bronze"],
-                "violeta": ["violeta", "violet", "purpura", "purple", "morado", "lavanda", "lavender", "lila", "lilac"],
+                "violeta": ["violeta", "violet", "purpura", "púrpura", "purple", "morado", "lavanda", "lavender", "lila", "lilac"],
                 "gris": ["gris", "grey", "gray", "plata", "silver"]
             };
             
@@ -2894,7 +2898,7 @@
                 "rosa": "#ec4899", "pink": "#ec4899", "gold": "#f59e0b", "oro": "#f59e0b", "dorado": "#f59e0b", "bronce": "#b45309", "bronze": "#b45309",
                 
                 // Morados y Violetas
-                "violeta": "#8b5cf6", "violet": "#8b5cf6", "purpura": "#a855f7", "purple": "#a855f7", "morado": "#a855f7", "lavanda": "#e9d5ff", "lavender": "#e9d5ff",
+                "violeta": "#8b5cf6", "violet": "#8b5cf6", "purpura": "#a855f7", "púrpura": "#a855f7", "purple": "#a855f7", "morado": "#a855f7", "lavanda": "#e9d5ff", "lavender": "#e9d5ff",
                 "lila": "#d8b4fe", "lilac": "#d8b4fe"
             };
 
@@ -5120,7 +5124,7 @@
             // 1. Remover colores conocidos (incluyendo variaciones)
             const colores = [
                 "black", "negro", "blue", "azul", "white", "blanco", "green", "verde", "silver", "plata",
-                "gray", "gris", "gold", "oro", "purple", "morado", "pink", "rosa", "red", "rojo", "light",
+                "gray", "gris", "gold", "oro", "purple", "morado", "purpura", "púrpura", "pink", "rosa", "red", "rojo", "light",
                 "dark", "sky", "navy", "rose", "violet", "violeta", "lavender", "lavanda", "carbon", "carbono",
                 "claro", "oscuro", "space", "estelar", "celeste", "brillante", "mate",
                 "phantom", "cream", "crema", "beige", "coral", "titanium", "titanio",
