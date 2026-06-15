@@ -17,21 +17,122 @@
             --accent-gradient: linear-gradient(135deg, #ff9f43, #e67e22);
             --success: #27ae60;
             --danger: #e74c3c;
+            --bg-page: #f1f5f9;
+            --bg-card: #ffffff;
             --bg-light: #f8fafc;
             --border-color: #e2e8f0;
             --text-main: #1e293b;
             --text-muted: #64748b;
+            
+            --bg-header: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            --text-header: #0f172a;
+            --border-header: #e2e8f0;
+            --shadow-header: rgba(15, 23, 42, 0.04);
+            
+            --bg-input: #ffffff;
+            --text-input: #1e293b;
+            --bg-toggle: #f1f5f9;
+            --bg-modal: #ffffff;
+            --text-pdp-title: #0f172a;
+            --bg-variant-loading: rgba(255, 255, 255, 0.7);
+        }
+
+        body.dark-theme {
+            --primary: #f8fafc;
+            --primary-light: #334155;
+            --primary-hover: #475569;
+            --accent: #f97316;
+            --accent-gradient: linear-gradient(135deg, #fb923c, #f97316);
+            --bg-page: #18181b;       /* Zinc 900 (Gris oscuro/medio) */
+            --bg-card: #27272a;       /* Zinc 800 (Gris medio card) */
+            --bg-light: #27272a;
+            --border-color: #3f3f46;  /* Zinc 700 border */
+            --text-main: #f4f4f5;     /* Zinc 100 text */
+            --text-muted: #a1a1aa;    /* Zinc 400 muted */
+            
+            --bg-header: linear-gradient(180deg, #27272a 0%, #18181b 100%);
+            --text-header: #f4f4f5;
+            --border-header: #3f3f46;
+            --shadow-header: rgba(0, 0, 0, 0.2);
+            
+            --bg-input: #18181b;
+            --text-input: #f4f4f5;
+            --bg-toggle: #18181b;
+            --bg-modal: #27272a;
+            --text-pdp-title: #f4f4f5;
+            --bg-variant-loading: rgba(24, 24, 27, 0.7);
         }
 
         body {
             font-family: 'Outfit', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f1f5f9;
+            background-color: var(--bg-page);
             color: var(--text-main);
             line-height: 1.5;
             user-select: none;
             -webkit-user-select: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Botón de cambio de tema */
+        .theme-toggle-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 16px;
+            z-index: 50;
+            outline: none;
+        }
+
+        .theme-toggle-btn:hover {
+            transform: scale(1.08) rotate(15deg);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+            border-color: var(--accent);
+        }
+
+        body.dark-theme header img {
+            filter: invert(1) drop-shadow(0 4px 6px rgba(255,255,255,0.08));
+        }
+
+        body.dark-theme .card-celular .enganche {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        body.dark-theme .storage-pill {
+            background: var(--bg-card);
+            border-color: var(--border-color);
+            color: var(--text-main);
+        }
+        body.dark-theme .storage-pill:hover {
+            background: var(--primary-light);
+            border-color: var(--text-muted);
+        }
+
+        body.dark-theme #ml-shipping-warning {
+            background-color: rgba(217, 119, 6, 0.1);
+            border-color: rgba(217, 119, 6, 0.2);
+            color: #fbbf24;
+        }
+
+        #ml-shipping-warning {
+            background-color: #fffbeb;
+            border: 1px solid #fef3c7;
+            color: #b45309;
         }
 
         input, textarea, select {
@@ -120,7 +221,7 @@
         }
 
         .buscador-box {
-            background: white;
+            background: var(--bg-card);
             padding: 30px;
             border-radius: 16px;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
@@ -150,6 +251,8 @@
             font-size: 16px;
             font-family: inherit;
             outline: none;
+            background: var(--bg-input);
+            color: var(--text-input);
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
@@ -181,7 +284,7 @@
 
         /* Toolbar para Ordenar y Filtrar */
         .controls-bar {
-            background: white;
+            background: var(--bg-card);
             padding: 15px 25px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
@@ -214,8 +317,8 @@
             font-size: 14px;
             font-weight: 500;
             outline: none;
-            color: var(--text-main);
-            background-color: white;
+            color: var(--text-input);
+            background-color: var(--bg-input);
             cursor: pointer;
             transition: border-color 0.2s ease;
         }
@@ -241,8 +344,8 @@
         }
 
         .section-header .count-badge {
-            background: #e2e8f0;
-            color: var(--primary);
+            background: var(--border-color);
+            color: var(--text-main);
             font-size: 14px;
             font-weight: 600;
             padding: 4px 12px;
@@ -259,7 +362,7 @@
 
         /* Tarjeta Celular Premium */
         .card-celular {
-            background: white;
+            background: var(--bg-card);
             border-radius: 16px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             padding: 24px;
@@ -552,7 +655,7 @@
         }
 
         .modal-content {
-            background: white;
+            background: var(--bg-modal);
             padding: 24px;
             border-radius: 16px;
             max-width: 980px;
@@ -582,7 +685,7 @@
         }
 
         .pdp-close-btn:hover {
-            color: #1e293b;
+            color: var(--primary);
         }
 
         /* Loading animation for dynamic variants */
@@ -592,7 +695,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(255, 255, 255, 0.7);
+            background: var(--bg-variant-loading);
             backdrop-filter: blur(2px);
             display: flex;
             align-items: center;
@@ -645,12 +748,12 @@
         .pdp-thumb {
             width: 54px;
             height: 54px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             cursor: pointer;
             object-fit: contain;
             padding: 2px;
-            background: white;
+            background: var(--bg-card);
             transition: border-color 0.2s;
         }
 
@@ -665,10 +768,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            border: 1px solid #f1f5f9;
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 20px;
-            background: #ffffff;
+            background: var(--bg-card);
             height: 380px;
         }
 
@@ -930,6 +1033,12 @@
 <body>
 
     <header>
+        <!-- Botón de cambio de tema (☀️ / 🌙) -->
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Cambiar tema">
+            <span class="theme-icon-sun">☀️</span>
+            <span class="theme-icon-moon" style="display:none;">🌙</span>
+        </button>
+
         <div style="text-align: center; margin-bottom: 10px;">
             <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo" style="cursor: pointer;" onclick="window.location.reload();">
         </div>
@@ -1032,18 +1141,18 @@
                     <div class="pdp-price-container">
                         <div style="display: flex; align-items: baseline; gap: 8px;">
                             <span class="pdp-price-amount" id="pdp-enganche-grande">$0</span>
-                            <span style="font-size: 14px; color: #737373;">Pago Inicial (Enganche)</span>
+                            <span style="font-size: 14px; color: var(--text-muted);">Pago Inicial (Enganche)</span>
                         </div>
 
                         <div class="pdp-weekly-payments">
                             <span style="font-size: 24px;" id="pdp-weekly-amount">$0</span>
-                            <span id="pdp-weekly-term" style="font-size: 14px; font-weight: normal; color: #737373;">en
+                            <span id="pdp-weekly-term" style="font-size: 14px; font-weight: normal; color: var(--text-muted);">en
                                 -- pagos semanales</span>
                         </div>
-                        <div style="font-size: 13px; color: #64748b; margin-top: 6px;" id="pdp-contado-chico-texto">
+                        <div style="font-size: 13px; color: var(--text-muted); margin-top: 6px;" id="pdp-contado-chico-texto">
                             Precio de Contado: <strong>$0</strong>
                         </div>
-                        <div id="ml-shipping-warning" style="display: none; margin-top: 10px; padding: 10px 12px; background-color: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; font-size: 13px; color: #b45309; align-items: center; gap: 8px;">
+                        <div id="ml-shipping-warning" style="display: none; margin-top: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; align-items: center; gap: 8px;">
                             <span style="font-size: 16px;">✈️</span>
                             <span><strong>Envío Internacional:</strong> Este producto se envía desde el extranjero y <span id="ml-shipping-time-txt" style="font-weight: 600;">llegará pronto</span>.</span>
                         </div>
@@ -1054,18 +1163,18 @@
                         style="display: none; border: none; padding: 0; background: none; text-align: left;">
                         <div style="margin-bottom: 12px;">
                             <label
-                                style="font-weight: 600; font-size: 14px; color: #1e293b; display: block; margin-bottom: 8px;">
+                                style="font-weight: 600; font-size: 14px; color: var(--text-main); display: block; margin-bottom: 8px;">
                                 Color: <span id="color-seleccionado-txt"
-                                    style="font-weight: 400; color: #64748b;">-</span>
+                                    style="font-weight: 400; color: var(--text-muted);">-</span>
                             </label>
                             <div id="ml-colors-wrapper" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
                         </div>
 
                         <div id="ml-storage-section" style="display: none; margin-bottom: 12px;">
                             <label
-                                style="font-weight: 600; font-size: 14px; color: #1e293b; display: block; margin-bottom: 8px;">
+                                style="font-weight: 600; font-size: 14px; color: var(--text-main); display: block; margin-bottom: 8px;">
                                 Capacidad: <span id="memoria-seleccionada-txt"
-                                    style="font-weight: 400; color: #64748b;">-</span>
+                                    style="font-weight: 400; color: var(--text-muted);">-</span>
                             </label>
                             <div id="ml-storage-wrapper" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
                         </div>
@@ -5295,8 +5404,46 @@
                 item.element.style.display = item.display;
             });
             if (closeFn) closeFn(); 
-        }, duration);
     }
+    
+    // Tema Oscuro / Claro Inicialización y Eventos
+    (function() {
+        const btn = document.getElementById('theme-toggle');
+        if (!btn) return;
+        
+        const sunIcon = btn.querySelector('.theme-icon-sun');
+        const moonIcon = btn.querySelector('.theme-icon-moon');
+        
+        // Cargar tema guardado o preferencia del sistema
+        const savedTheme = localStorage.getItem('celya-theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const useDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
+        
+        if (useDark) {
+            document.body.classList.add('dark-theme');
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'inline-block';
+        } else {
+            document.body.classList.remove('dark-theme');
+            sunIcon.style.display = 'inline-block';
+            moonIcon.style.display = 'none';
+        }
+        
+        btn.addEventListener('click', () => {
+            const isDark = document.body.classList.toggle('dark-theme');
+            localStorage.setItem('celya-theme', isDark ? 'dark' : 'light');
+            
+            if (isDark) {
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'inline-block';
+                toast('Tema oscuro activado', 'info', 'Tema');
+            } else {
+                sunIcon.style.display = 'inline-block';
+                moonIcon.style.display = 'none';
+                toast('Tema claro activado', 'info', 'Tema');
+            }
+        });
+    })();
     </script>
 
 </html>
