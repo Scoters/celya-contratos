@@ -1256,7 +1256,7 @@
         window.catalogCacheActive = false;
 
         // Variables globales para Pedido Especial
-        let CONFIG_TASAS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, gananciaContadoFactor: 1.36, engancheSemanal: 0.165, engancheQuincenal: 0.33 };
+        let CONFIG_TASAS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, gananciaContadoFactor: 1.36, engancheSemanal: 0.165, engancheQuincenal: 0.33, engancheComodo: 0.165 };
         let ML_CACHE_VARIANTES = {};
         let isFetchingML = {};
         let pe_data_actual = null;
@@ -1312,7 +1312,7 @@
         }
 
         function calcularCuotaSemanal52(precioContado) {
-            const factorEng = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
+            const factorEng = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165;
             const factorInt = CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90;
             const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
             return Math.round(((precioContado * (1 + factorInt)) - eng) / 52);
@@ -1326,7 +1326,7 @@
         }
 
         function calcularCuotaQuincenal26(precioContado) {
-            const factorEng = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+            const factorEng = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165;
             const factorInt = CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90;
             const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
             return Math.round(((precioContado * (1 + factorInt)) - eng) / 26);
@@ -1635,7 +1635,7 @@
                     const cuotaSem52 = calcularCuotaSemanal52(priceContadoNum);
                     const cuotaQuin13 = calcularCuotaQuincenal13(priceContadoNum);
                     const cuotaQuin26 = calcularCuotaQuincenal26(priceContadoNum);
-                    const engancheSemanalCalculado = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheSemanal || 0.165)) / 10) * 10;
+                    const engancheComodoCalculado = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)) / 10) * 10;
 
                     // Simple template
                     const cardHtml = `
@@ -1645,10 +1645,10 @@
                                     <span class="brand-badge ${claseMarca}">${marca}</span>
                                     ${item.estado === "MAS VENDIDO" ? `<span class="status-badge status-featured">⭐ Destacado</span>` : (item.entregaInmediata || item.estado === "DISPONIBLE") ? `<span class="status-badge status-available">⚡ Disponible</span>` : `<span class="status-badge status-order">⏳ Bajo Pedido</span>`}
                                 </div>
-                                <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheSemanalCalculado}, '${item.color || ""}', '${item.memoria || ""}', this)">
+                                <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheComodoCalculado}, '${item.color || ""}', '${item.memoria || ""}', this)">
                                     <img src="${item.foto}" alt="${modeloLimpio}" onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop'">
                                 </div>
-                                <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheSemanalCalculado}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpio}</h4>
+                                <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheComodoCalculado}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpio}</h4>
                                 <div class="specs-container">
                                     ${ramText ? `<span class="spec-tag">⚡ ${ramText}</span>` : ''}
                                     ${memoriaText ? `<span class="spec-tag">💾 ${memoriaText}</span>` : ''}
@@ -1656,9 +1656,9 @@
                                     ${item.modelo && item.modelo.toLowerCase().includes('reacondicionado') ? `<span class="spec-tag" style="background-color: #fffbeb; color: #d97706; border: 1px solid #fef3c7; font-weight: 600;">🔧 Reacondicionado</span>` : ''}
                                 </div>
                                 ${item.precioContado ? `<div class="price-row"><span class="price-contado">Precio Contado:</span><span class="price-contado"><span>$${Math.round(item.precioContado).toLocaleString('es-MX')} MXN</span></span></div>` : ''}
-                                <div class="enganche" data-enganche="${engancheSemanalCalculado.toLocaleString('es-MX')}" data-precio="${Math.round(item.precioContado).toLocaleString('es-MX')}">
+                                <div class="enganche" data-enganche="${engancheComodoCalculado.toLocaleString('es-MX')}" data-precio="${Math.round(item.precioContado).toLocaleString('es-MX')}">
                                     <span>Pago Inicial</span>
-                                    Enganche: $${engancheSemanalCalculado.toLocaleString('es-MX')} MXN
+                                    Enganche: $${engancheComodoCalculado.toLocaleString('es-MX')} MXN
                                 </div>
                             </div>
                             <div>
@@ -1698,7 +1698,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/\'/g, "").replace(/\"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheSemanalCalculado}, '${item.color || ""}', '${item.memoria || ""}', this)">Pedir a Crédito</button>
+                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/\'/g, "").replace(/\"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheComodoCalculado}, '${item.color || ""}', '${item.memoria || ""}', this)">Pedir a Crédito</button>
                             </div>
                         </div>
                     `;
@@ -1741,7 +1741,7 @@
                 if (divEnganche) {
                     divEnganche.style.opacity = '1';
                     const precioContado = parseFloat((divEnganche.getAttribute('data-precio') || '').replace(/[\$,]/g, '')) || 0;
-                    const factorEng = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
+                    const factorEng = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165;
                     const weeklyEnganche = Math.ceil((precioContado * factorEng) / 10) * 10;
                     divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche: $${weeklyEnganche.toLocaleString('es-MX')} MXN`;
                 }
@@ -1753,7 +1753,7 @@
                 if (divEnganche) {
                     divEnganche.style.opacity = '1';
                     const precioContado = parseFloat((divEnganche.getAttribute('data-precio') || '').replace(/[\$,]/g, '')) || 0;
-                    const factorEng = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+                    const factorEng = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165;
                     const quinEnganche = Math.ceil((precioContado * factorEng) / 10) * 10;
                     divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche: $${quinEnganche.toLocaleString('es-MX')} MXN`;
                 }
@@ -1862,6 +1862,12 @@
             const cliFrecuencia = document.getElementById('cliFrecuencia');
             if (cliFrecuencia) {
                 cliFrecuencia.value = freqInicial;
+            }
+
+            // Establecer plazo por defecto a Plan Cómodo (52 Semanas)
+            const cliPlazo = document.getElementById('cliPlazo');
+            if (cliPlazo) {
+                cliPlazo.value = "52 Semanas";
             }
 
             // Initialize Dynamic Price Calculator
@@ -2047,9 +2053,11 @@
                 document.getElementById('pdp-weekly-amount').innerText = `$0 MXN`;
                 document.getElementById('pdp-weekly-term').innerText = `en 1 pago de contado`;
             } else {
-                const factorEnganche = (freq === "SEMANAL") 
-                    ? (CONFIG_TASAS.engancheSemanal || 0.165) 
-                    : (CONFIG_TASAS.engancheQuincenal || 0.33);
+                const factorEnganche = (plazo === "52 Semanas")
+                    ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
+                    : ((freq === "SEMANAL") 
+                        ? (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165) 
+                        : (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33));
                 const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
 
                 const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
@@ -2293,9 +2301,11 @@
             const freq = document.getElementById('pe-cliFrecuencia').value;
 
             // Matemática
-            const factorEnganche = (freq === "SEMANAL") 
-                ? (CONFIG_TASAS.engancheSemanal || 0.165) 
-                : (CONFIG_TASAS.engancheQuincenal || 0.33);
+            const factorEnganche = (plazo === "52 Semanas")
+                ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
+                : ((freq === "SEMANAL") 
+                    ? (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165) 
+                    : (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33));
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
 
@@ -2346,9 +2356,11 @@
 
             const basePrice = parseFloat(pe_data_actual.price) || 0;
             const precioContado = basePrice * CONFIG_TASAS.gananciaContadoFactor;
-            const factorEnganche = (freq === "SEMANAL") 
-                ? (CONFIG_TASAS.engancheSemanal || 0.165) 
-                : (CONFIG_TASAS.engancheQuincenal || 0.33);
+            const factorEnganche = (plazo === "52 Semanas")
+                ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
+                : ((freq === "SEMANAL") 
+                    ? (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165) 
+                    : (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33));
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
             let textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (26 Semanas)" : "Plan Cómodo (52 Semanas)";
@@ -2470,9 +2482,11 @@
                     if (freq === "QUINCENAL") {
                         numPagos = numPagos / 2;
                     }
-                    const factorEnganche = (freq === "SEMANAL") 
-                        ? (CONFIG_TASAS.engancheSemanal || 0.165) 
-                        : (CONFIG_TASAS.engancheQuincenal || 0.33);
+                    const factorEnganche = (plazo === "52 Semanas")
+                        ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
+                        : ((freq === "SEMANAL") 
+                            ? (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165) 
+                            : (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33));
                     const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
 
                     const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
@@ -2558,7 +2572,7 @@
 
         // Parse specs (color, memory, ram) from Mercado Libre product names
         function parseSpecsFromProductName(name) {
-            if (!name) return { color: "", memory: "", ram: "" };
+            if (!name) return { color: "", memory: "", ram: "", grading: "" };
             
             // Try to split by " - " first
             const parts = name.split(" - ");
@@ -2578,7 +2592,8 @@
                     "verde lima", "lima verde", "verde", "green", "lima", "lime", "menta", "mint",
                     "rojo", "red", "naranja", "orange", "coral",
                     "rosa", "pink", "gold", "oro", "dorado", "bronce", "bronze",
-                    "violeta", "violet", "purpura", "purple", "morado", "lavanda", "lavender"
+                    "violeta", "violet", "purpura", "purple", "morado", "lavanda", "lavender", "lila", "lilac",
+                    "gris", "grey", "gray", "amarillo", "yellow"
                 ];
                 // Sort color keys by length descending to match longer names first
                 const sortedColorKeys = colorKeys.sort((a, b) => b.length - a.length);
@@ -2607,8 +2622,13 @@
             } else if (gbValues.length === 1) {
                 memory = gbValues[0].original.toUpperCase();
             }
+
+            let grading = "";
+            if (lowerName.includes("excelente")) grading = "Excelente";
+            else if (lowerName.includes("bueno")) grading = "Bueno";
+            else if (lowerName.includes("aceptable")) grading = "Aceptable";
             
-            return { color, memory, ram };
+            return { color, memory, ram, grading };
         }
 
         // Check if a specific picker option exists in stock for ANY product in the family
@@ -2620,11 +2640,9 @@
                 if (optionType === "color") {
                     if (!colorsMatch(prod.color, optionValue)) return false;
                 } else if (optionType === "memory") {
-                    const prodMem = prod.memory ? prod.memory.toLowerCase().replace(/\s+/g, "") : "";
-                    if (prodMem !== valClean) return false;
+                    if (!memoriesMatch(prod.memory, optionValue)) return false;
                 } else if (optionType === "ram") {
-                    const prodRam = prod.ram ? prod.ram.toLowerCase().replace(/\s+/g, "") : "";
-                    if (prodRam !== valClean) return false;
+                    if (!ramsMatch(prod.ram, optionValue)) return false;
                 } else if (optionType === "grading") {
                     const prodGrad = prod.grading ? prod.grading.toLowerCase().replace(/\s+/g, "") : "";
                     if (prodGrad !== valClean) return false;
@@ -2691,10 +2709,10 @@
             if (optionType === "color" && colorSeleccionadoGlobal && colorsMatch(colorSeleccionadoGlobal, optionValue)) {
                 return true;
             }
-            if (optionType === "memory" && memoriaSeleccionadaGlobal && memoriaSeleccionadaGlobal.toLowerCase().replace(/\s+/g, "") === valClean) {
+            if (optionType === "memory" && memoriaSeleccionadaGlobal && memoriesMatch(memoriaSeleccionadaGlobal, optionValue)) {
                 return true;
             }
-            if (optionType === "ram" && ramSeleccionadaGlobal && ramSeleccionadaGlobal.toLowerCase().replace(/\s+/g, "") === valClean) {
+            if (optionType === "ram" && ramSeleccionadaGlobal && ramsMatch(ramSeleccionadaGlobal, optionValue)) {
                 return true;
             }
             if (optionType === "grading" && gradingSeleccionadoGlobal && gradingSeleccionadoGlobal.toLowerCase().replace(/\s+/g, "") === valClean) {
@@ -2708,35 +2726,50 @@
                 if (optionType === "color") {
                     if (!colorsMatch(prod.color, optionValue)) return false;
                 } else if (optionType === "memory") {
-                    const prodMem = prod.memory ? prod.memory.toLowerCase().replace(/\s+/g, "") : "";
-                    if (prodMem !== valClean) return false;
+                    if (!memoriesMatch(prod.memory, optionValue)) return false;
                 } else if (optionType === "ram") {
-                    const prodRam = prod.ram ? prod.ram.toLowerCase().replace(/\s+/g, "") : "";
-                    if (prodRam !== valClean) return false;
+                    if (!ramsMatch(prod.ram, optionValue)) return false;
                 } else if (optionType === "grading") {
                     const prodGrad = prod.grading ? prod.grading.toLowerCase().replace(/\s+/g, "") : "";
                     if (prodGrad !== valClean) return false;
                 }
 
-                // Verify the product matches all other currently selected specs (ignoring blank specs to prevent multi-dimensional conflicts)
-                if (optionType !== "color" && colorSeleccionadoGlobal) {
-                    // Decouple color and grading to ensure grading options like Bueno/Aceptable are available for Lavender
-                    if (optionType !== "grading") {
-                        if (prod.color && !colorsMatch(prod.color, colorSeleccionadoGlobal)) return false;
-                    }
+                // Verify compatibility with other selected dimensions based on option type
+                if (optionType === "color") {
+                    // Colors are never constrained by other selected specs to prevent gray borders on available colors
+                    return true;
                 }
-                if (optionType !== "memory" && memoriaSeleccionadaGlobal) {
-                    const prodMem = prod.memory ? prod.memory.toLowerCase().replace(/\s+/g, "") : "";
-                    const selMem = memoriaSeleccionadaGlobal.toLowerCase().replace(/\s+/g, "");
-                    if (prodMem && prodMem !== selMem) return false;
-                }
-                if (optionType !== "grading" && gradingSeleccionadoGlobal) {
-                    // Decouple color and grading: do not filter out color options based on selected grading
-                    if (optionType !== "color") {
+                
+                if (optionType === "memory") {
+                    // Memory is constrained by selected Color and RAM
+                    if (colorSeleccionadoGlobal && !colorsMatch(prod.color, colorSeleccionadoGlobal)) return false;
+                    if (ramSeleccionadaGlobal && !ramsMatch(prod.ram, ramSeleccionadaGlobal)) return false;
+                    if (gradingSeleccionadoGlobal) {
                         const prodGrad = prod.grading ? prod.grading.toLowerCase().replace(/\s+/g, "") : "";
                         const selGrad = gradingSeleccionadoGlobal.toLowerCase().replace(/\s+/g, "");
-                        if (prodGrad && prodGrad !== selGrad) return false;
+                        if (prodGrad !== selGrad) return false;
                     }
+                    return true;
+                }
+                
+                if (optionType === "ram") {
+                    // RAM is constrained by selected Color and Memory
+                    if (colorSeleccionadoGlobal && !colorsMatch(prod.color, colorSeleccionadoGlobal)) return false;
+                    if (memoriaSeleccionadaGlobal && !memoriesMatch(prod.memory, memoriaSeleccionadaGlobal)) return false;
+                    if (gradingSeleccionadoGlobal) {
+                        const prodGrad = prod.grading ? prod.grading.toLowerCase().replace(/\s+/g, "") : "";
+                        const selGrad = gradingSeleccionadoGlobal.toLowerCase().replace(/\s+/g, "");
+                        if (prodGrad !== selGrad) return false;
+                    }
+                    return true;
+                }
+                
+                if (optionType === "grading") {
+                    // Grading is constrained by selected Color, Memory and RAM
+                    if (colorSeleccionadoGlobal && !colorsMatch(prod.color, colorSeleccionadoGlobal)) return false;
+                    if (memoriaSeleccionadaGlobal && !memoriesMatch(prod.memory, memoriaSeleccionadaGlobal)) return false;
+                    if (ramSeleccionadaGlobal && !ramsMatch(prod.ram, ramSeleccionadaGlobal)) return false;
+                    return true;
                 }
 
                 return true;
@@ -2775,7 +2808,8 @@
                 "verde": ["verde", "green", "lima", "lime", "menta", "mint", "musgo"],
                 "rojo": ["rojo", "red", "naranja", "orange", "coral", "atardecer"],
                 "rosa": ["rosa", "pink", "gold", "oro", "dorado", "bronce", "bronze"],
-                "violeta": ["violeta", "violet", "purpura", "purple", "morado", "lavanda", "lavender"]
+                "violeta": ["violeta", "violet", "purpura", "purple", "morado", "lavanda", "lavender", "lila", "lilac"],
+                "gris": ["gris", "grey", "gray", "plata", "silver"]
             };
             
             for (const canonical in groups) {
@@ -2786,10 +2820,30 @@
             return name;
         }
 
-        // Compara si dos etiquetas de color corresponden a la misma familia física
+        // Compara si dos etiquetas de color corresponden a la misma familia física (soporta comas)
         function colorsMatch(c1, c2) {
             if (!c1 || !c2) return false;
-            return obtenerGrupoColor(c1) === obtenerGrupoColor(c2);
+            const list1 = c1.split(',').map(s => s.trim().toLowerCase());
+            const list2 = c2.split(',').map(s => s.trim().toLowerCase());
+            return list1.some(val1 => 
+                list2.some(val2 => obtenerGrupoColor(val1) === obtenerGrupoColor(val2))
+            );
+        }
+
+        // Compara si dos especificaciones de memoria coinciden (soporta comas)
+        function memoriesMatch(m1, m2) {
+            if (!m1 || !m2) return false;
+            const list1 = m1.split(',').map(s => s.trim().toLowerCase().replace(/\s+/g, ""));
+            const list2 = m2.split(',').map(s => s.trim().toLowerCase().replace(/\s+/g, ""));
+            return list1.some(val1 => list2.includes(val1));
+        }
+
+        // Compara si dos especificaciones de RAM coinciden (soporta comas)
+        function ramsMatch(r1, r2) {
+            if (!r1 || !r2) return false;
+            const list1 = r1.split(',').map(s => s.trim().toLowerCase().replace(/\s+/g, ""));
+            const list2 = r2.split(',').map(s => s.trim().toLowerCase().replace(/\s+/g, ""));
+            return list1.some(val1 => list2.includes(val1));
         }
 
         function obtenerCodigoColor(nombreColor) {
@@ -2819,7 +2873,8 @@
                 "rosa": "#ec4899", "pink": "#ec4899", "gold": "#f59e0b", "oro": "#f59e0b", "dorado": "#f59e0b", "bronce": "#b45309", "bronze": "#b45309",
                 
                 // Morados y Violetas
-                "violeta": "#8b5cf6", "violet": "#8b5cf6", "purpura": "#a855f7", "purple": "#a855f7", "morado": "#a855f7", "lavanda": "#e9d5ff", "lavender": "#e9d5ff"
+                "violeta": "#8b5cf6", "violet": "#8b5cf6", "purpura": "#a855f7", "purple": "#a855f7", "morado": "#a855f7", "lavanda": "#e9d5ff", "lavender": "#e9d5ff",
+                "lila": "#d8b4fe", "lilac": "#d8b4fe"
             };
 
             const nombreLower = nombreColor.toLowerCase().trim();
@@ -2895,14 +2950,7 @@
             // Loop 1: Exact matches (including condition/grading if present in sheet item title)
             for (const eq of window.equiposCargados) {
                 if (!eq.modelo) continue;
-                const eqModeloClean = eq.modelo.replace(/-\s*(excelente|bueno|aceptable)\s*\(reacondicionado\)/gi, "")
-                                                .replace(/-\s*\(reacondicionado\)/gi, "")
-                                                .replace(/\(reacondicionado\)/gi, "")
-                                                .replace(/reacondicionado/gi, "")
-                                                .replace(/^[,\-\s]+|[,\-\s]+$/g, "")
-                                                .toLowerCase().replace(/[^a-z0-9]/g, "");
-                                                
-                if (eqModeloClean !== baseNorm && !eqModeloClean.includes(baseNorm) && !baseNorm.includes(eqModeloClean)) {
+                if (!baseModelsMatch(eq.modelo, window.currentBaseModelName)) {
                     continue;
                 }
                 
@@ -2942,14 +2990,7 @@
             if (gradingNorm) {
                 for (const eq of window.equiposCargados) {
                     if (!eq.modelo) continue;
-                    const eqModeloClean = eq.modelo.replace(/-\s*(excelente|bueno|aceptable)\s*\(reacondicionado\)/gi, "")
-                                                    .replace(/-\s*\(reacondicionado\)/gi, "")
-                                                    .replace(/\(reacondicionado\)/gi, "")
-                                                    .replace(/reacondicionado/gi, "")
-                                                    .replace(/^[,\-\s]+|[,\-\s]+$/g, "")
-                                                    .toLowerCase().replace(/[^a-z0-9]/g, "");
-                                                    
-                    if (eqModeloClean !== baseNorm && !eqModeloClean.includes(baseNorm) && !baseNorm.includes(eqModeloClean)) {
+                    if (!baseModelsMatch(eq.modelo, window.currentBaseModelName)) {
                         continue;
                     }
                     
@@ -2986,6 +3027,44 @@
             
             logDebugFrontend(`buscarPrecioEquivalenteLocal - No se encontró coincidencia para ${window.currentBaseModelName} (Color: ${color}, Memoria: ${memoria}, Grading: ${grading})`);
             return null;
+        }
+
+        function baseModelsMatch(m1, m2) {
+            if (!m1 || !m2) return false;
+            
+            const clean = (str) => {
+                let s = limpiarNombreModelo(str).toLowerCase();
+                // Remove brand names to allow matching between "Xiaomi Redmi..." and "Redmi..."
+                s = s.replace(/\b(xiaomi|samsung|apple|iphone|motorola|oppo|vivo|realme|huawei|honor)\b/gi, "");
+                // Remove grading
+                s = s.replace(/reacondicionado/gi, "");
+                return s.replace(/[^a-z0-9]/g, "");
+            };
+            
+            const c1 = clean(m1);
+            const c2 = clean(m2);
+            
+            return c1 === c2 || c1.includes(c2) || c2.includes(c1);
+        }
+        function isSpecMatchingLoadedProduct(cleanId, specType, specValue) {
+            if (!cleanId || !specValue) return false;
+            const prod = productMapGlobal[cleanId];
+            if (!prod) return true; // Fallback to true if product is not in map
+            
+            if (specType === "color") {
+                return !prod.color || colorsMatch(prod.color, specValue);
+            }
+            if (specType === "memory") {
+                return !prod.memory || memoriesMatch(prod.memory, specValue);
+            }
+            if (specType === "ram") {
+                return !prod.ram || ramsMatch(prod.ram, specValue);
+            }
+            if (specType === "grading") {
+                if (!prod.grading) return true;
+                return prod.grading.toLowerCase().replace(/\s+/g, "") === specValue.toLowerCase().replace(/\s+/g, "");
+            }
+            return false;
         }
 
         async function cargarVariantesRealesML(idProducto, esCambioVariante = false, isAutoRedirect = false, isAfterTimeout = false, clickSource = null) {
@@ -3188,7 +3267,7 @@
                 // the user's actual color choice (e.g., Green → loads 512GB mock → normalized to
                 // 512GB Black root → reverts to Black). The global state variables are the source
                 // of truth for what the user selected.
-                if (data && hasSpecificFreshData) {
+                if (data && hasSpecificFreshData && (isSameMockFamily || isSpecificCache)) {
                     shouldRestoreUI = true;
                 }
 
@@ -3386,10 +3465,83 @@
 
                 if (!data) return;
 
-                // Populate productMapGlobal with all products in the family from pickers
+                // Populate productMapGlobal by merging pickers from the active response, 
+                // all matching local catalog rows, and all matching cache entries to ensure we have full stock status.
                 productMapGlobal = {};
-                if (data.pickers) {
-                    data.pickers.forEach(picker => {
+                
+                const familyPayloads = new Set();
+                if (data) familyPayloads.add(data);
+                
+                const currentCatalogId = data.catalog_product_id;
+                
+                // 1. Merge from ML_CACHE_VARIANTES
+                Object.values(ML_CACHE_VARIANTES).forEach(cachedVal => {
+                    if (!cachedVal || !cachedVal.pickers) return;
+                    let belongs = false;
+                    if (currentCatalogId && cachedVal.catalog_product_id === currentCatalogId) {
+                        belongs = true;
+                    } else if (cachedVal.id === cleanId || (cachedVal.catalog_product_id && cachedVal.catalog_product_id === cleanId)) {
+                        belongs = true;
+                    } else {
+                        const hasShared = cachedVal.pickers.some(pkr => 
+                            pkr.products && pkr.products.some(p => p.product_id === cleanId)
+                        );
+                        if (hasShared) belongs = true;
+                    }
+                    if (belongs) familyPayloads.add(cachedVal);
+                });
+                
+                // 2. Merge from window.equiposCargados (matching base model)
+                if (window.equiposCargados && window.currentBaseModelName) {
+                    console.log(`[DEBUG-ALL-ROWS] Listing all rows in equiposCargados:`);
+                    window.equiposCargados.forEach(eq => {
+                        console.log(`- Row ID: ${eq.id}, Modelo: "${eq.modelo}", Link: "${eq.link}"`);
+                    });
+                    console.log(`[DEBUG-MERGE] window.currentBaseModelName = "${window.currentBaseModelName}"`);
+                    window.equiposCargados.forEach(eq => {
+                        if (!eq.modelo) return;
+                        const match = baseModelsMatch(eq.modelo, window.currentBaseModelName);
+                        if (match) {
+                            // Synthesize product entry in productMapGlobal from the sheet row columns by parsing the MLM ID from the link
+                            let eqMlid = "";
+                            if (eq.link) {
+                                const match = eq.link.match(/(MLM\-?\d+)/i);
+                                if (match) {
+                                    eqMlid = match[0].replace("-", "").toUpperCase();
+                                }
+                            }
+                            console.log(`[DEBUG-MERGE-MATCH] model: "${eq.modelo}", parsed MLID: "${eqMlid}", color: "${eq.color}", memory: "${eq.memoria}"`);
+                            if (eqMlid) {
+                                if (!productMapGlobal[eqMlid]) {
+                                    productMapGlobal[eqMlid] = {
+                                        id: eqMlid,
+                                        color: eq.color || "",
+                                        memory: eq.memoria || "",
+                                        ram: eq.ram || "",
+                                        grading: "",  // Don't set grading from sheet - only ML picker data should determine grading availability
+                                        tags: [],
+                                        isOutOfStock: false
+                                    };
+                                }
+                            }
+
+                            if (eq.variantesJson) {
+                                let parsed = eq.variantesJson;
+                                if (typeof parsed === 'string') {
+                                    try { parsed = JSON.parse(parsed); } catch(e) {}
+                                }
+                                if (parsed && parsed.pickers) {
+                                    familyPayloads.add(parsed);
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // 3. Populate productMapGlobal from all gathered payloads
+                familyPayloads.forEach(payload => {
+                    if (!payload.pickers) return;
+                    payload.pickers.forEach(picker => {
                         const pIdUpper = picker.picker_id ? picker.picker_id.toUpperCase() : "";
                         let attributeType = "";
                         if (pIdUpper.includes("COLOR") || pIdUpper === "FINISH" || pIdUpper === "ACABADO") {
@@ -3418,14 +3570,22 @@
                                         isOutOfStock: isOutOfStock
                                     };
                                 } else {
+                                    // Backfill empty properties from parsed product name
+                                    const existing = productMapGlobal[p.product_id];
+                                    const parsed = parseSpecsFromProductName(p.product_name || p.product_title || "");
+                                    if (!existing.color && parsed.color) existing.color = parsed.color;
+                                    if (!existing.memory && parsed.memory) existing.memory = parsed.memory;
+                                    if (!existing.ram && parsed.ram) existing.ram = parsed.ram;
+                                    if (!existing.grading && parsed.grading) existing.grading = parsed.grading;
+
                                     if (p.tags) {
                                         p.tags.forEach(t => {
-                                            if (!productMapGlobal[p.product_id].tags.includes(t)) {
-                                                productMapGlobal[p.product_id].tags.push(t);
+                                            if (!existing.tags.includes(t)) {
+                                                existing.tags.push(t);
                                             }
                                         });
-                                        const outOfStockFlag = productMapGlobal[p.product_id].tags && isProductTagOutOfStock(productMapGlobal[p.product_id].tags);
-                                        productMapGlobal[p.product_id].isOutOfStock = outOfStockFlag;
+                                        const outOfStockFlag = existing.tags && isProductTagOutOfStock(existing.tags);
+                                        existing.isOutOfStock = outOfStockFlag;
                                     }
                                 }
 
@@ -3436,7 +3596,7 @@
                             });
                         }
                     });
-                }
+                });
 
                 // === PICKER CROSS-ATTRIBUTE SYNC ===
                 // When a picker selection forces changes to other attributes (change-multiple-pickers),
@@ -3525,9 +3685,240 @@
                     }
                 }
 
+                // Obtener valores seleccionados reales desde pickers o atributos de la variante cargada (basándonos en cleanId)
+                let activeColorVal = "";
+                let activeStorageVal = "";
+                let activeRamVal = "";
+                let activeGradingVal = "";
+
+                if (data.pickers && data.pickers.length > 0) {
+                    data.pickers.forEach(picker => {
+                        const pIdUpper = picker.picker_id.toUpperCase();
+                        // 1. Buscar si el producto activo actual (cleanId) está en el listado de este picker
+                        let matchingProd = picker.products && picker.products.find(p => p.product_id === cleanId);
+                        if (!matchingProd) {
+                            matchingProd = picker.products && picker.products.find(p => 
+                                p.product_id === data.id || 
+                                (data.catalog_product_id && p.product_id === data.catalog_product_id)
+                            );
+                        }
+                        if (matchingProd) {
+                            const val = matchingProd.picker_label.trim();
+                            if (pIdUpper.includes("COLOR") || pIdUpper === "FINISH" || pIdUpper === "ACABADO") {
+                                activeColorVal = val;
+                            } else if (pIdUpper.includes("RAM")) {
+                                activeRamVal = val;
+                            } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
+                                activeStorageVal = val;
+                            } else if (pIdUpper === "GRADING") {
+                                activeGradingVal = val;
+                            }
+                        }
+                    });
+                }
+
+                // 2. Si no se encontró buscando por cleanId, usar el que tenga tag "selected" en la API
+                if (data.pickers && data.pickers.length > 0) {
+                    data.pickers.forEach(picker => {
+                        const pIdUpper = picker.picker_id.toUpperCase();
+                        const selectedProd = picker.products && picker.products.find(p => p.tags && p.tags.includes("selected"));
+                        if (selectedProd) {
+                            const val = selectedProd.picker_label.trim();
+                            if (!activeColorVal && (pIdUpper.includes("COLOR") || pIdUpper === "FINISH" || pIdUpper === "ACABADO")) {
+                                activeColorVal = val;
+                            } else if (!activeRamVal && pIdUpper.includes("RAM")) {
+                                activeRamVal = val;
+                            } else if (!activeStorageVal && (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY"))) {
+                                activeStorageVal = val;
+                            } else if (!activeGradingVal && pIdUpper === "GRADING") {
+                                activeGradingVal = val;
+                            }
+                        }
+                    });
+                }
+
+                // Fallback a attributes si no se encontró en pickers
+                if (!activeColorVal && data.attributes) {
+                    const attrColor = data.attributes.find(a => {
+                        const idUpper = a.id.toUpperCase();
+                        return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
+                    });
+                    if (attrColor && attrColor.value_name) {
+                        activeColorVal = attrColor.value_name.trim();
+                    }
+                }
+                if (!activeStorageVal && data.attributes) {
+                    const attrStorage = data.attributes.find(a => {
+                        const idUpper = a.id.toUpperCase();
+                        return idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO";
+                    });
+                    if (attrStorage && attrStorage.value_name) {
+                        activeStorageVal = attrStorage.value_name.trim();
+                    }
+                }
+
+                // === USER SELECTION OVERRIDE ===
+                // When the user explicitly clicked a picker option, their choice must win
+                // over what the mock JSON marks as 'selected'.
+                // IMPORTANT: When the user clicks a DIFFERENT dimension (e.g., grading),
+                // preserve all OTHER dimensions (color, memory, RAM) unconditionally,
+                // because ML's pickers often point to product IDs from a single color
+                // (e.g., grading picker always shows Black IDs even when viewing Beige).
+                if (esCambioVariante && colorSeleccionadoGlobal) {
+                    if (clickSource && clickSource !== "color") {
+                        // User clicked a different dimension, preserve their color
+                        activeColorVal = colorSeleccionadoGlobal;
+                    } else if (isSpecMatchingLoadedProduct(cleanId, "color", colorSeleccionadoGlobal)) {
+                        activeColorVal = colorSeleccionadoGlobal;
+                    }
+                }
+                if (esCambioVariante && memoriaSeleccionadaGlobal) {
+                    if (clickSource && clickSource !== "memory") {
+                        activeStorageVal = memoriaSeleccionadaGlobal;
+                    } else if (isSpecMatchingLoadedProduct(cleanId, "memory", memoriaSeleccionadaGlobal)) {
+                        activeStorageVal = memoriaSeleccionadaGlobal;
+                    }
+                }
+                if (esCambioVariante && ramSeleccionadaGlobal) {
+                    if (clickSource && clickSource !== "ram") {
+                        activeRamVal = ramSeleccionadaGlobal;
+                    } else if (isSpecMatchingLoadedProduct(cleanId, "ram", ramSeleccionadaGlobal)) {
+                        activeRamVal = ramSeleccionadaGlobal;
+                    }
+                }
+                if (esCambioVariante && gradingSeleccionadoGlobal) {
+                    if (clickSource && clickSource !== "grading") {
+                        activeGradingVal = gradingSeleccionadoGlobal;
+                    } else if (isSpecMatchingLoadedProduct(cleanId, "grading", gradingSeleccionadoGlobal)) {
+                        activeGradingVal = gradingSeleccionadoGlobal;
+                    }
+                }
+                if (!activeRamVal && data.attributes) {
+                    const attrRam = data.attributes.find(a => {
+                        const idUpper = a.id.toUpperCase();
+                        return idUpper.includes("RAM");
+                    });
+                    if (attrRam && attrRam.value_name) {
+                        activeRamVal = attrRam.value_name.trim();
+                    }
+                }
+                if (!activeGradingVal && data.attributes) {
+                    const attrGrading = data.attributes.find(a => a.id === "GRADING" || a.name === "Estado del reacondicionado");
+                    if (attrGrading && attrGrading.value_name) {
+                        activeGradingVal = attrGrading.value_name.trim();
+                    }
+                }
+
+                // Fallback a variables globales/defaults
+                if (!activeColorVal) activeColorVal = colorSeleccionado || defaultColor || "";
+                if (!activeStorageVal) activeStorageVal = almacenamientoSeleccionado || defaultMemoria || "";
+                
+                colorSeleccionadoGlobal = activeColorVal;
+                colorSeleccionado = activeColorVal;
+                memoriaSeleccionadaGlobal = activeStorageVal;
+                almacenamientoSeleccionado = activeStorageVal;
+                gradingSeleccionadoGlobal = activeGradingVal || "";
+                ramSeleccionadaGlobal = activeRamVal || "";
+
                 // Auto-redirection to match user's selected attributes
                 if (!isAutoRedirect && data.pickers && data.pickers.length > 0) {
                     let redirectId = null;
+
+                    // A. Check if the current variant is out of stock and redirect to best in-stock alternative
+                    const activeProductState = productMapGlobal[cleanId];
+                    if (activeProductState && activeProductState.isOutOfStock) {
+                        let bestProduct = null;
+                        let bestScore = -1;
+                        
+                        // Extract current active values from pickers as fallback if global selections are empty
+                        let currentActiveColor = "";
+                        let currentActiveMemory = "";
+                        let currentActiveRam = "";
+                        let currentActiveGrading = "";
+                        
+                        if (data.pickers) {
+                            data.pickers.forEach(picker => {
+                                const pIdUpper = picker.picker_id ? picker.picker_id.toUpperCase() : "";
+                                const selProd = picker.products && picker.products.find(p => p.tags && p.tags.includes("selected"));
+                                if (selProd) {
+                                    const val = selProd.picker_label.trim();
+                                    if (pIdUpper.includes("COLOR") || pIdUpper === "FINISH" || pIdUpper === "ACABADO") {
+                                        currentActiveColor = val;
+                                    } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
+                                        currentActiveMemory = val;
+                                    } else if (pIdUpper.includes("RAM")) {
+                                        currentActiveRam = val;
+                                    } else if (pIdUpper === "GRADING") {
+                                        currentActiveGrading = val;
+                                    }
+                                }
+                            });
+                        }
+                        
+                        const selColor = colorSeleccionadoGlobal || currentActiveColor || "";
+                        const selMem = memoriaSeleccionadaGlobal || currentActiveMemory || "";
+                        const selRam = ramSeleccionadaGlobal || currentActiveRam || "";
+                        const selGrad = gradingSeleccionadoGlobal || currentActiveGrading || "";
+                        
+                        Object.values(productMapGlobal).forEach(prod => {
+                            if (prod.isOutOfStock) return;
+                            
+                            let score = 0;
+                            
+                            if (clickSource === "color") {
+                                if (prod.color && colorsMatch(prod.color, selColor)) score += 100;
+                                if (prod.memory && memoriesMatch(prod.memory, selMem)) score += 10;
+                                if (prod.ram && ramsMatch(prod.ram, selRam)) score += 5;
+                                if (prod.grading && prod.grading.toLowerCase().replace(/\s+/g, "") === selGrad.toLowerCase().replace(/\s+/g, "")) score += 2;
+                            } else if (clickSource === "memory") {
+                                if (prod.memory && memoriesMatch(prod.memory, selMem)) score += 100;
+                                if (prod.color && colorsMatch(prod.color, selColor)) score += 10;
+                                if (prod.ram && ramsMatch(prod.ram, selRam)) score += 5;
+                                if (prod.grading && prod.grading.toLowerCase().replace(/\s+/g, "") === selGrad.toLowerCase().replace(/\s+/g, "")) score += 2;
+                            } else if (clickSource === "ram") {
+                                if (prod.ram && ramsMatch(prod.ram, selRam)) score += 100;
+                                if (prod.color && colorsMatch(prod.color, selColor)) score += 10;
+                                if (prod.memory && memoriesMatch(prod.memory, selMem)) score += 5;
+                                if (prod.grading && prod.grading.toLowerCase().replace(/\s+/g, "") === selGrad.toLowerCase().replace(/\s+/g, "")) score += 2;
+                            } else if (clickSource === "grading") {
+                                if (prod.grading && prod.grading.toLowerCase().replace(/\s+/g, "") === selGrad.toLowerCase().replace(/\s+/g, "")) score += 100;
+                                if (prod.color && colorsMatch(prod.color, selColor)) score += 10;
+                                if (prod.memory && memoriesMatch(prod.memory, selMem)) score += 5;
+                                if (prod.ram && ramsMatch(prod.ram, selRam)) score += 2;
+                            } else {
+                                if (prod.color && colorsMatch(prod.color, selColor)) score += 20;
+                                if (prod.memory && memoriesMatch(prod.memory, selMem)) score += 20;
+                                if (prod.ram && ramsMatch(prod.ram, selRam)) score += 10;
+                                if (prod.grading && prod.grading.toLowerCase().replace(/\s+/g, "") === selGrad.toLowerCase().replace(/\s+/g, "")) score += 5;
+                            }
+                            
+                            if (score > bestScore) {
+                                bestScore = score;
+                                bestProduct = prod;
+                            }
+                        });
+                        
+                        if (bestProduct && bestProduct.id !== cleanId) {
+                            redirectId = bestProduct.id;
+                            console.log(`[OUT-OF-STOCK REDIRECT] Selected variant ${cleanId} is out of stock. Redirecting to best in-stock variant ${redirectId} with score ${bestScore} based on clickSource: ${clickSource}`);
+                            
+                            // Synchronize global selections to match the redirected in-stock variant specs
+                            if (bestProduct.color) {
+                                colorSeleccionadoGlobal = bestProduct.color;
+                                colorSeleccionado = bestProduct.color;
+                            }
+                            if (bestProduct.memory) {
+                                memoriaSeleccionadaGlobal = bestProduct.memory;
+                                almacenamientoSeleccionado = bestProduct.memory;
+                            }
+                            if (bestProduct.ram) {
+                                ramSeleccionadaGlobal = bestProduct.ram;
+                            }
+                            if (bestProduct.grading) {
+                                gradingSeleccionadoGlobal = bestProduct.grading;
+                            }
+                        }
+                    }
 
                     // 1. Check GRADING (Condition)
                     if (gradingSeleccionadoGlobal) {
@@ -3693,121 +4084,7 @@
                     }
                 }
 
-                // Obtener valores seleccionados reales desde pickers o atributos de la variante cargada (basándonos en cleanId)
-                let activeColorVal = "";
-                let activeStorageVal = "";
-                let activeRamVal = "";
-                let activeGradingVal = "";
-
-                if (data.pickers && data.pickers.length > 0) {
-                    data.pickers.forEach(picker => {
-                        const pIdUpper = picker.picker_id.toUpperCase();
-                        // 1. Buscar si el producto activo actual (cleanId) está en el listado de este picker
-                        let matchingProd = picker.products && picker.products.find(p => p.product_id === cleanId);
-                        if (!matchingProd) {
-                            matchingProd = picker.products && picker.products.find(p => 
-                                p.product_id === data.id || 
-                                (data.catalog_product_id && p.product_id === data.catalog_product_id)
-                            );
-                        }
-                        if (matchingProd) {
-                            const val = matchingProd.picker_label.trim();
-                            if (pIdUpper.includes("COLOR") || pIdUpper === "FINISH" || pIdUpper === "ACABADO") {
-                                activeColorVal = val;
-                            } else if (pIdUpper.includes("RAM")) {
-                                activeRamVal = val;
-                            } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY")) {
-                                activeStorageVal = val;
-                            } else if (pIdUpper === "GRADING") {
-                                activeGradingVal = val;
-                            }
-                        }
-                    });
-                }
-
-                // 2. Si no se encontró buscando por cleanId, usar el que tenga tag "selected" en la API
-                if (data.pickers && data.pickers.length > 0) {
-                    data.pickers.forEach(picker => {
-                        const pIdUpper = picker.picker_id.toUpperCase();
-                        const selectedProd = picker.products && picker.products.find(p => p.tags && p.tags.includes("selected"));
-                        if (selectedProd) {
-                            const val = selectedProd.picker_label.trim();
-                            if (!activeColorVal && (pIdUpper.includes("COLOR") || pIdUpper === "FINISH" || pIdUpper === "ACABADO")) {
-                                activeColorVal = val;
-                            } else if (!activeRamVal && pIdUpper.includes("RAM")) {
-                                activeRamVal = val;
-                            } else if (!activeStorageVal && (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY"))) {
-                                activeStorageVal = val;
-                            } else if (!activeGradingVal && pIdUpper === "GRADING") {
-                                activeGradingVal = val;
-                            }
-                        }
-                    });
-                }
-
-                // Fallback a attributes si no se encontró en pickers
-                if (!activeColorVal && data.attributes) {
-                    const attrColor = data.attributes.find(a => {
-                        const idUpper = a.id.toUpperCase();
-                        return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
-                    });
-                    if (attrColor && attrColor.value_name) {
-                        activeColorVal = attrColor.value_name.trim();
-                    }
-                }
-                if (!activeStorageVal && data.attributes) {
-                    const attrStorage = data.attributes.find(a => {
-                        const idUpper = a.id.toUpperCase();
-                        return idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO";
-                    });
-                    if (attrStorage && attrStorage.value_name) {
-                        activeStorageVal = attrStorage.value_name.trim();
-                    }
-                }
-
-                // === USER SELECTION OVERRIDE ===
-                // When the user explicitly clicked a color or storage option, their choice must win
-                // over what the mock JSON marks as 'selected'. This prevents reversion when a color
-                // (e.g. Green on S23) maps to a different mock family (512GB mock) but the user
-                // is still in the context of their last explicit selection.
-                if (esCambioVariante && colorSeleccionadoGlobal) {
-                    activeColorVal = colorSeleccionadoGlobal;
-                }
-                if (esCambioVariante && memoriaSeleccionadaGlobal) {
-                    activeStorageVal = memoriaSeleccionadaGlobal;
-                }
-                if (esCambioVariante && ramSeleccionadaGlobal) {
-                    activeRamVal = ramSeleccionadaGlobal;
-                }
-                if (esCambioVariante && gradingSeleccionadoGlobal) {
-                    activeGradingVal = gradingSeleccionadoGlobal;
-                }
-                if (!activeRamVal && data.attributes) {
-                    const attrRam = data.attributes.find(a => {
-                        const idUpper = a.id.toUpperCase();
-                        return idUpper.includes("RAM");
-                    });
-                    if (attrRam && attrRam.value_name) {
-                        activeRamVal = attrRam.value_name.trim();
-                    }
-                }
-                if (!activeGradingVal && data.attributes) {
-                    const attrGrading = data.attributes.find(a => a.id === "GRADING" || a.name === "Estado del reacondicionado");
-                    if (attrGrading && attrGrading.value_name) {
-                        activeGradingVal = attrGrading.value_name.trim();
-                    }
-                }
-
-                // Fallback a variables globales/defaults
-                if (!activeColorVal) activeColorVal = colorSeleccionado || defaultColor || "";
-                if (!activeStorageVal) activeStorageVal = almacenamientoSeleccionado || defaultMemoria || "";
-                
-                colorSeleccionadoGlobal = activeColorVal;
-                colorSeleccionado = activeColorVal;
-                memoriaSeleccionadaGlobal = activeStorageVal;
-                almacenamientoSeleccionado = activeStorageVal;
-                gradingSeleccionadoGlobal = activeGradingVal || "";
-                ramSeleccionadaGlobal = activeRamVal || "";
+                // (Relocated: active values and overrides resolution logic runs before auto-redirection block)
 
                 // Limpiar selectores previos antes de repintar los reales
                 wrapperColores.innerHTML = "";
@@ -3933,7 +4210,15 @@
                             return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
                         });
                         if (colorPicker && colorPicker.products) {
-                            const activeColorProd = colorPicker.products.find(p => p.product_id === cleanId);
+                            // First try to find photo by cleanId
+                            let activeColorProd = colorPicker.products.find(p => p.product_id === cleanId);
+                            // If not found (e.g., loaded Black-Bueno while Beige is selected),
+                            // fall back to matching by the user's selected color
+                            if (!activeColorProd && colorSeleccionadoGlobal) {
+                                activeColorProd = colorPicker.products.find(p => 
+                                    p.picker_label && colorsMatch(p.picker_label, colorSeleccionadoGlobal)
+                                );
+                            }
                             if (activeColorProd) {
                                 if (activeColorProd.picture_id) {
                                     primeraFoto = `https://http2.mlstatic.com/D_NQ_NP_${activeColorProd.picture_id}-O.jpg`;
@@ -4412,17 +4697,40 @@
                                 const itemsOrdenados = Array.from(itemsVistos.entries());
                                 let targetItemNorm = "";
 
-                                 for (const [normLabel, itemInfo] of itemsOrdenados) {
-                                     if (
-                                         normLabel === activeValNorm || 
-                                         itemInfo.id === cleanId || 
-                                         itemInfo.id === data.id || 
-                                         (data.catalog_product_id && itemInfo.id === data.catalog_product_id)
-                                     ) {
-                                         targetItemNorm = normLabel;
-                                         break;
+                                 // Priority 1: Match the normalized active value name (user selection / active variant value)
+                                 if (activeValNorm) {
+                                     for (const [normLabel, itemInfo] of itemsOrdenados) {
+                                         if (normLabel === activeValNorm) {
+                                             targetItemNorm = normLabel;
+                                             break;
+                                         }
                                      }
                                  }
+                                 
+                                 // Priority 2: Match the cleanId (currently selected variant ID)
+                                 if (!targetItemNorm) {
+                                     for (const [normLabel, itemInfo] of itemsOrdenados) {
+                                         if (itemInfo.id === cleanId) {
+                                             targetItemNorm = normLabel;
+                                             break;
+                                         }
+                                     }
+                                 }
+                                 
+                                 // Priority 3: Match the data.id or data.catalog_product_id
+                                 if (!targetItemNorm) {
+                                     for (const [normLabel, itemInfo] of itemsOrdenados) {
+                                         if (
+                                             itemInfo.id === data.id || 
+                                             (data.catalog_product_id && itemInfo.id === data.catalog_product_id)
+                                         ) {
+                                             targetItemNorm = normLabel;
+                                             break;
+                                         }
+                                     }
+                                 }
+                                 
+                                 // Priority 4: Fallback to the first selected item in picker products
                                  if (!targetItemNorm) {
                                      for (const [normLabel, itemInfo] of itemsOrdenados) {
                                          if (itemInfo.isSelected) {
@@ -4431,6 +4739,8 @@
                                          }
                                      }
                                  }
+                                 
+                                 // Priority 5: Fallback to the first item in the ordered list
                                  if (!targetItemNorm && itemsOrdenados.length > 0) {
                                      targetItemNorm = itemsOrdenados[0][0];
                                  }

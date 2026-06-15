@@ -670,9 +670,11 @@
                     document.getElementById('totalFinanciado').value = "$0";
                     document.getElementById('cuota').value = "$0";
                 } else {
-                    const factorEngancheMinimo = (frecuencia === "SEMANAL") 
-                        ? (CONFIG_TASAS_SHEETS.engancheSemanal || 0.165) 
-                        : (CONFIG_TASAS_SHEETS.engancheQuincenal || 0.33);
+                    const factorEngancheMinimo = (planElegido === "52")
+                        ? (CONFIG_TASAS_SHEETS.engancheComodo || CONFIG_TASAS_SHEETS.engancheSemanal || 0.165)
+                        : ((frecuencia === "SEMANAL")
+                            ? (CONFIG_TASAS_SHEETS.engancheSemanal || 0.165)
+                            : (CONFIG_TASAS_SHEETS.engancheQuincenal || 0.33));
                     const engancheMinimoObligatorio = Math.ceil((precioContado * factorEngancheMinimo) / 10) * 10;
 
                     // Actualizar enganche
@@ -833,9 +835,11 @@
                 const selector = selectorCobro || "";
                 const partes = selector ? selector.split('|') : [];
                 const frecuencia = partes[0] || "SEMANAL";
-                const factorEngancheMinimo = (frecuencia === "SEMANAL") 
-                    ? (CONFIG_TASAS_SHEETS.engancheSemanal || 0.165) 
-                    : (CONFIG_TASAS_SHEETS.engancheQuincenal || 0.33);
+                const factorEngancheMinimo = (planElegido === "52")
+                    ? (CONFIG_TASAS_SHEETS.engancheComodo || CONFIG_TASAS_SHEETS.engancheSemanal || 0.165)
+                    : ((frecuencia === "SEMANAL")
+                        ? (CONFIG_TASAS_SHEETS.engancheSemanal || 0.165)
+                        : (CONFIG_TASAS_SHEETS.engancheQuincenal || 0.33));
                 const engancheMinimoObligatorio = Math.ceil((precioContado * factorEngancheMinimo) / 10) * 10;
                 const engancheIngresado = parseFloat(document.getElementById('monto').value.replace(/[\$,]/g, "")) || 0;
 

@@ -755,6 +755,11 @@
                     <input type="number" step="0.1" id="cfg-enganche-quincenal" name="engancheQuincenal" min="0" placeholder="Ej. 33">
                 </div>
 
+                <div class="form-group-config">
+                    <label for="cfg-enganche-comodo">🛋️ % Enganche Plan Cómodo</label>
+                    <input type="number" step="0.1" id="cfg-enganche-comodo" name="engancheComodo" min="0" placeholder="Ej. 16.5">
+                </div>
+
                 <button type="button" class="btn-save-config" onclick="guardarConfiguracionGlobal()">
                     💾 Guardar Parámetros
                 </button>
@@ -836,6 +841,7 @@
                 document.getElementById('cfg-ganancia-contado').value = datos.config.gananciaContado !== undefined ? datos.config.gananciaContado : 15;
                 document.getElementById('cfg-enganche-semanal').value = datos.config.engancheSemanal !== undefined ? datos.config.engancheSemanal : 16.5;
                 document.getElementById('cfg-enganche-quincenal').value = datos.config.engancheQuincenal !== undefined ? datos.config.engancheQuincenal : 33;
+                document.getElementById('cfg-enganche-comodo').value = datos.config.engancheComodo !== undefined ? datos.config.engancheComodo : 16.5;
 
                 dbClientesActivos = datos.clientesActivos || [];
                 listaClientesGlobal = dbClientesActivos;
@@ -1023,6 +1029,7 @@
                     document.getElementById('cfg-ganancia-contado').value = data.config.gananciaContado || 36;
                     document.getElementById('cfg-enganche-semanal').value = data.config.engancheSemanal || 16.5;
                     document.getElementById('cfg-enganche-quincenal').value = data.config.engancheQuincenal || 33;
+                    document.getElementById('cfg-enganche-comodo').value = data.config.engancheComodo || 16.5;
                 }
             } catch (e) {
                 console.error("Error al cargar la configuración global:", e);
@@ -1046,6 +1053,7 @@
             params.append('gananciaContado', document.getElementById('cfg-ganancia-contado').value);
             params.append('engancheSemanal', document.getElementById('cfg-enganche-semanal').value);
             params.append('engancheQuincenal', document.getElementById('cfg-enganche-quincenal').value);
+            params.append('engancheComodo', document.getElementById('cfg-enganche-comodo').value);
 
             try {
                 const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
