@@ -1185,7 +1185,7 @@
                                 <input id="conv-memoria" value="${memoria}" placeholder="Ej. 128GB" />
                                 
                                 <label>Precio de Contado (Precio en Inventario):</label>
-                                <input id="conv-precio" type="number" value="${precioContado || ''}" placeholder="Ej. 4800" />
+                                <input id="conv-precio" type="text" value="${precioContado || ''}" placeholder="Ej. 4800" />
                                 <div style="font-size:12px; color:var(--text-secondary); margin-top:-8px; margin-bottom:12px;" id="conv-precio-financiado-preview">
                                     Precio Financiado Estimado: $${Number(precioPlaceholder).toLocaleString('es-MX')} (Plan ${planElegido || '—'} sem)
                                 </div>
@@ -1210,7 +1210,7 @@
 
                         // Escuchador dinámico de precio
                         document.getElementById('conv-precio').addEventListener('input', function() {
-                            const val = parseFloat(this.value) || 0;
+                            const val = parseFloat(this.value.replace(/[\$,]/g, "")) || 0;
                             const preview = Math.round(val * factor);
                             document.getElementById('conv-precio-financiado-preview').innerText = 
                                 `Precio Financiado Estimado: $${preview.toLocaleString('es-MX')} (Plan ${planElegido || '—'} sem)`;
@@ -1222,7 +1222,7 @@
                                 const modeloVal = document.getElementById('conv-modelo').value.trim();
                                 const color = document.getElementById('conv-color').value.trim();
                                 const memoria = document.getElementById('conv-memoria').value.trim();
-                                const precioFinal = document.getElementById('conv-precio').value.trim();
+                                const precioFinal = document.getElementById('conv-precio').value.replace(/[\$,]/g, "").trim();
                                 const estado = document.getElementById('conv-estado').value.trim();
                                 const notas = document.getElementById('conv-notas').value.trim();
 
