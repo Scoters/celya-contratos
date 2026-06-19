@@ -1585,8 +1585,13 @@
         </div>
 
         <div id="contenedorResultados" class="grid-equipos">
-            <p style="grid-column: 1/-1; text-align:center; color:var(--text-muted); font-style:italic;">Cargando
-                catálogo oficial...</p>
+            <div style="grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(50px, 8vh, 100px) 16px; gap: 20px; text-align: center;">
+                <div class="pdp-spinner" style="width: 50px; height: 50px; border-width: 4px; border-top-color: var(--accent); border-left-color: var(--border-color); border-right-color: var(--border-color); border-bottom-color: var(--border-color); animation-duration: 0.75s;"></div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <h3 style="font-size: clamp(18px, 4.5vw, 22px); font-weight: 700; color: var(--text-main); margin: 0; font-family: 'Outfit', sans-serif; letter-spacing: -0.5px;">Cargando catálogo oficial...</h3>
+                    <p style="font-size: clamp(13px, 3.5vw, 14.5px); color: var(--text-muted); margin: 0; max-width: 380px; line-height: 1.5;">Estamos conectando con la base de datos para mostrarte los equipos disponibles y cotizar tus pagos semanales al instante.</p>
+                </div>
+            </div>
         </div>
 
         <!-- Caja de Pedido Especial al final de la página -->

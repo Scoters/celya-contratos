@@ -552,7 +552,7 @@
                 const preCotizacionId = urlParams.get('pre_cotizacion_id');
                 if (preCotizacionId) {
                     try {
-                        const urlCot = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerCotizacion&id=${encodeURIComponent(preCotizacionId)}`;
+                        const urlCot = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerCotizacion&id=${encodeURIComponent(preCotizacionId)}&token=${encodeURIComponent(CONFIG.API_TOKEN)}`;
                         const resCot = await fetch(urlCot);
                         const dataCot = await resCot.json();
                         if (dataCot && dataCot.result === 'success' && dataCot.data) {
@@ -619,7 +619,7 @@
                     // 3. Le pedimos a la base de datos que nos traiga los textos usando el imei de referencia
                     const imeiRef = urlParams.get('imei_ref');
                     if (imeiRef) {
-                        fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=buscarDatosVip&imeiAnterior=${imeiRef}`)
+                        fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=buscarDatosVip&imeiAnterior=${imeiRef}&token=${encodeURIComponent(CONFIG.API_TOKEN)}`)
                             .then(res => res.json())
                             .then(data => {
                                 if (data && data.success) {
@@ -684,7 +684,7 @@
                     // Actualizar total financiado
                     const factorInteres = (planElegido === "26") ? CONFIG_TASAS_SHEETS.interes26 : CONFIG_TASAS_SHEETS.interes52;
                     const totalFinanciadoCalculado = Math.round((precioContado * (1 + factorInteres)) - engancheMinimoObligatorio);
-                    
+
                     totalFinanciadoActual = totalFinanciadoCalculado;
                     document.getElementById('totalFinanciado').value = "$" + totalFinanciadoCalculado.toLocaleString('es-MX');
 
@@ -732,7 +732,7 @@
                 // Alerta visual de carga
                 selectDisp.style.background = "#fff3cd";
 
-                fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=verificarImei&imei=${imeiSelected}`)
+                fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=verificarImei&imei=${imeiSelected}&token=${encodeURIComponent(CONFIG.API_TOKEN)}`)
                     .then(res => res.json())
                     .then(data => {
                         if (data && data.existe) {
@@ -895,7 +895,7 @@
                     if (tipoPeriodoSeleccionado === 'quincenal') {
                         numPagos = plazoUnidades / 2;
                     }
-                    cuotaCalculada = totalFinanciadoFinal / numPagos;
+                    cuotaCalculada = Math.round(totalFinanciadoFinal / numPagos);
                 }
 
                 sheetData.set('cuota', cuotaCalculada);
@@ -1030,51 +1030,116 @@
         display: flex; flex-direction: column; gap: 12px; pointer-events: none;
     "></div>
     <style>
-        @keyframes toastIn  { from { opacity:0; transform:translateX(110%); } to { opacity:1; transform:translateX(0); } }
-        @keyframes toastOut { from { opacity:1; transform:translateX(0);    } to { opacity:0; transform:translateX(110%); } }
-        @keyframes toastBar { from { width:100%; } to { width:0%; } }
-        .celya-toast {
-            min-width: 300px; max-width: 420px; border-radius: 14px;
-            padding: 16px 20px 20px; box-shadow: 0 8px 32px rgba(0,0,0,.22);
-            font-family: 'Inter', sans-serif; font-size: 14px; color: #fff;
-            pointer-events: all; position: relative; overflow: hidden;
-            animation: toastIn .35s cubic-bezier(.22,1,.36,1) forwards;
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(110%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
-        .celya-toast.hide { animation: toastOut .3s ease forwards; }
+
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(110%);
+            }
+        }
+
+        @keyframes toastBar {
+            from {
+                width: 100%;
+            }
+
+            to {
+                width: 0%;
+            }
+        }
+
+        .celya-toast {
+            min-width: 300px;
+            max-width: 420px;
+            border-radius: 14px;
+            padding: 16px 20px 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, .22);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: #fff;
+            pointer-events: all;
+            position: relative;
+            overflow: hidden;
+            animation: toastIn .35s cubic-bezier(.22, 1, .36, 1) forwards;
+        }
+
+        .celya-toast.hide {
+            animation: toastOut .3s ease forwards;
+        }
+
         .celya-toast-bar {
-            position: absolute; bottom: 0; left: 0; height: 3px;
-            background: rgba(255,255,255,.45);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, .45);
             animation: toastBar var(--dur) linear forwards;
         }
-        .celya-toast-icon { font-size: 22px; flex-shrink: 0; }
-        .celya-toast-body { display: flex; align-items: flex-start; gap: 12px; }
-        .celya-toast-title { font-weight: 700; font-size: 15px; margin-bottom: 3px; }
-        .celya-toast-msg   { opacity: .88; line-height: 1.4; }
+
+        .celya-toast-icon {
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .celya-toast-body {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .celya-toast-title {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 3px;
+        }
+
+        .celya-toast-msg {
+            opacity: .88;
+            line-height: 1.4;
+        }
     </style>
     <script>
-    function toast(msg, type, title) {
-        type  = type  || 'info';
-        title = title || { success:'Listo', error:'Error', warning:'Atenci\u00f3n', info:'Info' }[type];
-        const bg = { success:'linear-gradient(135deg,#16a34a,#15803d)',
-                     error:  'linear-gradient(135deg,#dc2626,#b91c1c)',
-                     warning:'linear-gradient(135deg,#d97706,#b45309)',
-                     info:   'linear-gradient(135deg,#2563eb,#1d4ed8)' }[type];
-        const icon = { success:'\u2705', error:'\u26d4', warning:'\u26a0\ufe0f', info:'\u2139\ufe0f' }[type];
-        const dur = 4200;
-        const el = document.createElement('div');
-        el.className = 'celya-toast';
-        el.style.cssText += 'background:' + bg;
-        el.style.setProperty('--dur', dur + 'ms');
-        el.innerHTML = '<div class="celya-toast-body">'
-            + '<span class="celya-toast-icon">' + icon + '</span>'
-            + '<div><div class="celya-toast-title">' + title + '</div>'
-            + '<div class="celya-toast-msg">' + msg + '</div></div></div>'
-            + '<div class="celya-toast-bar"></div>';
-        document.getElementById('toast-container').appendChild(el);
-        const remove = () => { el.classList.add('hide'); setTimeout(() => el.remove(), 320); };
-        const tid = setTimeout(remove, dur);
-        el.addEventListener('click', () => { clearTimeout(tid); remove(); });
-    }
+        function toast(msg, type, title) {
+            type = type || 'info';
+            title = title || { success: 'Listo', error: 'Error', warning: 'Atenci\u00f3n', info: 'Info' }[type];
+            const bg = {
+                success: 'linear-gradient(135deg,#16a34a,#15803d)',
+                error: 'linear-gradient(135deg,#dc2626,#b91c1c)',
+                warning: 'linear-gradient(135deg,#d97706,#b45309)',
+                info: 'linear-gradient(135deg,#2563eb,#1d4ed8)'
+            }[type];
+            const icon = { success: '\u2705', error: '\u26d4', warning: '\u26a0\ufe0f', info: '\u2139\ufe0f' }[type];
+            const dur = 4200;
+            const el = document.createElement('div');
+            el.className = 'celya-toast';
+            el.style.cssText += 'background:' + bg;
+            el.style.setProperty('--dur', dur + 'ms');
+            el.innerHTML = '<div class="celya-toast-body">'
+                + '<span class="celya-toast-icon">' + icon + '</span>'
+                + '<div><div class="celya-toast-title">' + title + '</div>'
+                + '<div class="celya-toast-msg">' + msg + '</div></div></div>'
+                + '<div class="celya-toast-bar"></div>';
+            document.getElementById('toast-container').appendChild(el);
+            const remove = () => { el.classList.add('hide'); setTimeout(() => el.remove(), 320); };
+            const tid = setTimeout(remove, dur);
+            el.addEventListener('click', () => { clearTimeout(tid); remove(); });
+        }
     </script>
 </body>
 
