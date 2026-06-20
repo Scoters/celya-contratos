@@ -1720,21 +1720,26 @@
                         </div>
                     </div>
 
-                    <div class="enganche-personalizado-pdp"
-                        style="margin-top: 10px; margin-bottom: 10px; text-align: left;">
-                        <label
-                            style="display: block; font-size: 12px; font-weight: 600; color: var(--primary); margin-bottom: 4px;"
-                            id="lbl-cliEnganchePersonalizado">🏁 Personaliza tu Enganche (Mínimo: <span
-                                id="pdp-enganche-minimo-label">$0</span>):</label>
-                        <div style="display: flex; gap: 6px; align-items: center;">
-                            <span style="font-weight: bold; color: var(--text-main); font-size: 14px;">$</span>
-                            <input type="number" id="cliEnganchePersonalizado"
-                                placeholder="Monto mayor para abonos más bajos..."
-                                oninput="actualizarPrecioCalculadoPDP()"
-                                style="flex: 1; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; outline: none; background: var(--bg-card); color: var(--text-main); box-sizing: border-box;">
-                            <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">MXN</span>
+                    <details class="enganche-personalizado-pdp" id="pdp-enganche-personalizado-container"
+                        style="margin-top: 10px; margin-bottom: 10px; text-align: left; background: var(--bg-card); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                        <summary style="cursor: pointer; font-size: 13px; font-weight: 600; color: var(--primary); outline: none; list-style: none; display: flex; align-items: center; justify-content: space-between;">
+                            <span>🏁 Personalizar Enganche <span style="font-size: 11px; font-weight: 400; color: var(--text-muted);">(Opcional)</span></span>
+                            <span style="font-size: 12px; color: var(--text-muted);">▼</span>
+                        </summary>
+                        <div style="margin-top: 8px;">
+                            <label style="display: block; font-size: 11px; font-weight: 500; color: var(--text-muted); margin-bottom: 4px;" id="lbl-cliEnganchePersonalizado">
+                                Mínimo requerido: <strong id="pdp-enganche-minimo-label" style="color: var(--text-main);">$0</strong>
+                            </label>
+                            <div style="display: flex; gap: 6px; align-items: center;">
+                                <span style="font-weight: bold; color: var(--text-main); font-size: 14px;">$</span>
+                                <input type="number" id="cliEnganchePersonalizado"
+                                    placeholder="Monto mayor para abonos más bajos..."
+                                    oninput="actualizarPrecioCalculadoPDP()"
+                                    style="flex: 1; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; outline: none; background: var(--bg-card); color: var(--text-main); box-sizing: border-box;">
+                                <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">MXN</span>
+                            </div>
                         </div>
-                    </div>
+                    </details>
 
                     <!-- Variantes Dinámicas -->
                     <div id="ml-dynamic-variants-container"
@@ -1887,21 +1892,26 @@
                     </div>
                 </div>
 
-                <div class="enganche-personalizado-pdp"
-                    style="margin-top: 10px; margin-bottom: 10px; text-align: left;">
-                    <label
-                        style="display: block; font-size: 12px; font-weight: 600; color: var(--primary); margin-bottom: 4px;"
-                        id="lbl-pe-cliEnganchePersonalizado">🏁 Personaliza tu Enganche (Mínimo: <span
-                            id="pe-enganche-minimo-label">$0</span>):</label>
-                    <div style="display: flex; gap: 6px; align-items: center;">
-                        <span style="font-weight: bold; color: var(--text-main); font-size: 14px;">$</span>
-                        <input type="number" id="pe-cliEnganchePersonalizado"
-                            placeholder="Monto mayor para abonos más bajos..."
-                            oninput="actualizarPreciosPedidoEspecial()"
-                            style="flex: 1; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; outline: none; background: var(--bg-card); color: var(--text-main); box-sizing: border-box;">
-                        <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">MXN</span>
+                <details class="enganche-personalizado-pdp" id="pe-enganche-personalizado-container"
+                    style="margin-top: 10px; margin-bottom: 10px; text-align: left; background: var(--bg-card); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                    <summary style="cursor: pointer; font-size: 13px; font-weight: 600; color: var(--primary); outline: none; list-style: none; display: flex; align-items: center; justify-content: space-between;">
+                        <span>🏁 Personalizar Enganche <span style="font-size: 11px; font-weight: 400; color: var(--text-muted);">(Opcional)</span></span>
+                        <span style="font-size: 12px; color: var(--text-muted);">▼</span>
+                    </summary>
+                    <div style="margin-top: 8px;">
+                        <label style="display: block; font-size: 11px; font-weight: 500; color: var(--text-muted); margin-bottom: 4px;" id="lbl-pe-cliEnganchePersonalizado">
+                            Mínimo requerido: <strong id="pe-enganche-minimo-label" style="color: var(--text-main);">$0</strong>
+                        </label>
+                        <div style="display: flex; gap: 6px; align-items: center;">
+                            <span style="font-weight: bold; color: var(--text-main); font-size: 14px;">$</span>
+                            <input type="number" id="pe-cliEnganchePersonalizado"
+                                placeholder="Monto mayor para abonos más bajos..."
+                                oninput="actualizarPreciosPedidoEspecial()"
+                                style="flex: 1; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; outline: none; background: var(--bg-card); color: var(--text-main); box-sizing: border-box;">
+                            <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">MXN</span>
+                        </div>
                     </div>
-                </div>
+                </details>
 
                 <!-- Alerta de Producto de Importación -->
                 <div id="pe-import-warning"
@@ -2146,7 +2156,7 @@
         window.catalogCacheActive = false;
 
         // Variables globales para Pedido Especial
-        let CONFIG_TASAS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, gananciaContadoFactor: 1.36, engancheSemanal: 0.165, engancheQuincenal: 0.33, engancheComodo: 0.165 };
+        let CONFIG_TASAS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, gananciaContadoFactor: 1.36, engancheSemanal: 0.165, engancheQuincenal: 0.33, engancheComodo: 0.11 };
         let ML_CACHE_VARIANTES = {};
         let isFetchingML = {};
         let pe_data_actual = null;
@@ -2557,9 +2567,9 @@
                     const cuotaQuin26 = calcularCuotaQuincenal26(priceContadoNum);
 
                     const engSem26 = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165)) / 10) * 10;
-                    const engSem52 = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)) / 10) * 10;
+                    const engSem52 = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11)) / 10) * 10;
                     const engQuin13 = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33)) / 10) * 10;
-                    const engQuin26 = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33)) / 10) * 10;
+                    const engQuin26 = Math.ceil((priceContadoNum * ((CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11) * 2)) / 10) * 10;
 
                     const engancheComodoCalculado = Math.min(engSem26, engSem52);
 
@@ -3014,26 +3024,29 @@
                 labelFrecuencia = "quincenales";
             }
 
-            const labelEng = document.getElementById('lbl-cliEnganchePersonalizado');
+            const containerEng = document.getElementById('pdp-enganche-personalizado-container');
             const inputEng = document.getElementById('cliEnganchePersonalizado');
 
             if (freq === "CONTADO") {
                 document.getElementById('pdp-enganche-grande').innerText = `$${Math.round(precioContado).toLocaleString('es-MX')} MXN`;
                 document.getElementById('pdp-weekly-amount').innerText = `$0 MXN`;
                 document.getElementById('pdp-weekly-term').innerText = `en 1 pago de contado`;
-                if (labelEng) labelEng.style.display = "none";
-                if (inputEng) inputEng.style.display = "none";
+                if (containerEng) containerEng.style.display = "none";
             } else {
-                if (labelEng) labelEng.style.display = "block";
-                if (inputEng) inputEng.style.display = "block";
+                if (containerEng) containerEng.style.display = "block";
 
                 let factorEnganche;
                 if (freq === "QUINCENAL") {
-                    factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+                    if (plazo === "52 Semanas") {
+                        const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
+                        factorEnganche = factorEngCom * 2;
+                    } else {
+                        factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+                    }
                 } else if (freq === "SEMANAL") {
                     // Para semanal, el factor depende del plazo
                     factorEnganche = (plazo === "52 Semanas")
-                        ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
+                        ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11)
                         : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
                 } else { // "CONTADO" o cualquier otro caso, aunque CONTADO ya se maneja antes
                     factorEnganche = 0; // No hay enganche para contado
@@ -3045,6 +3058,7 @@
 
                 const minLabel = document.getElementById('pdp-enganche-minimo-label');
                 if (minLabel) minLabel.innerText = `$${engancheCalculado.toLocaleString('es-MX')} MXN`;
+                if (inputEng) inputEng.min = engancheCalculado;
 
                 let customEnganche = parseFloat(inputEng.value) || 0;
                 let engancheFinal = engancheCalculado;
@@ -3395,10 +3409,15 @@
             // Matemática
             let factorEnganche;
             if (freq === "QUINCENAL") {
-                factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+                if (plazo === "52 Semanas") {
+                    const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
+                    factorEnganche = factorEngCom * 2;
+                } else {
+                    factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+                }
             } else {
                 factorEnganche = (plazo === "52 Semanas")
-                    ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
+                    ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11)
                     : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
             }
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
@@ -3410,6 +3429,7 @@
             if (minLabel) minLabel.innerText = `$${engancheCalculado.toLocaleString('es-MX')} MXN`;
 
             const inputEng = document.getElementById('pe-cliEnganchePersonalizado');
+            if (inputEng) inputEng.min = engancheCalculado;
             let customEnganche = parseFloat(inputEng.value) || 0;
             let engancheFinal = engancheCalculado;
 
@@ -3471,10 +3491,15 @@
             const precioContado = basePrice * CONFIG_TASAS.gananciaContadoFactor;
             let factorEnganche;
             if (freq === "QUINCENAL") {
-                factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+                if (plazo === "52 Semanas") {
+                    const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
+                    factorEnganche = factorEngCom * 2;
+                } else {
+                    factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+                }
             } else {
                 factorEnganche = (plazo === "52 Semanas")
-                    ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
+                    ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11)
                     : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
             }
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
@@ -3616,10 +3641,15 @@
                     }
                     let factorEnganche;
                     if (freq === "QUINCENAL") {
-                        factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+                        if (plazo === "52 Semanas") {
+                            const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
+                            factorEnganche = factorEngCom * 2;
+                        } else {
+                            factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+                        }
                     } else {
                         factorEnganche = (plazo === "52 Semanas")
-                            ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
+                            ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11)
                             : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
                     }
                     const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
