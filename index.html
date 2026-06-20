@@ -2013,8 +2013,13 @@
                         <div id="ml-extra-pickers-container"></div>
                     </div>
 
+                    <!-- Banner de advertencia para anomalías de precio -->
+                    <div id="pdp-price-anomaly-warning" style="display: none; margin-top: 15px; margin-bottom: 15px; padding: 12px; background-color: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; color: #991b1b; font-size: 13px; line-height: 1.4; text-align: left;">
+                        <strong>⚠️ Variación no disponible:</strong> Detectamos una inconsistencia temporal en los precios de MercadoLibre para esta capacidad o RAM. Por favor selecciona otra variante.
+                    </div>
+
                     <!-- Formulario de Crédito CelYa! -->
-                    <div class="pdp-form-card">
+                    <div class="pdp-form-card" id="pdp-credit-form-card">
                         <h4 style="margin-top: 0;">📋 Rellena tu Solicitud de Crédito</h4>
 
                         <form id="formInteresado">
@@ -2067,11 +2072,6 @@
                             </select>
 
 
-
-                            <!-- Banner de advertencia para anomalías de precio -->
-                            <div id="pdp-price-anomaly-warning" style="display: none; margin-top: 15px; padding: 12px; background-color: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; color: #991b1b; font-size: 13px; line-height: 1.4; text-align: left;">
-                                <strong>⚠️ Variación no disponible:</strong> Detectamos una inconsistencia temporal en los precios de MercadoLibre para esta capacidad o RAM. Por favor selecciona otra variante.
-                            </div>
 
                             <div style="display: flex; gap: 12px; margin-top: 20px;">
                                 <button type="button" onclick="enviarSolicitudFinal()"
@@ -2999,9 +2999,11 @@
         }
 
         function abrirModalCredito(id, modelo, esFijo, foto, cuota26, cuota52, link, precioContado, engancheMinimo, color, memoria, triggerElement) {
-            // Reset modal pricing warning state
+            // Reset modal pricing warning state and form visibility
             const warningEl = document.getElementById('pdp-price-anomaly-warning');
             if (warningEl) warningEl.style.display = 'none';
+            const formCard = document.getElementById('pdp-credit-form-card');
+            if (formCard) formCard.style.display = 'block';
             const btnSubmit = document.querySelector('button[onclick="enviarSolicitudFinal()"]');
             if (btnSubmit) {
                 btnSubmit.disabled = false;
@@ -6651,9 +6653,11 @@
         }
 
         function actualizarPreciosYFotoPorVarianteActual() {
-            // Reset warning display and submit button status first
+            // Reset warning display, form visibility, and submit button status first
             const warningEl = document.getElementById('pdp-price-anomaly-warning');
             if (warningEl) warningEl.style.display = 'none';
+            const formCard = document.getElementById('pdp-credit-form-card');
+            if (formCard) formCard.style.display = 'block';
             const btnSubmit = document.querySelector('button[onclick="enviarSolicitudFinal()"]');
             if (btnSubmit) {
                 btnSubmit.disabled = false;
@@ -6733,9 +6737,10 @@
                 }
             }
 
-            // Check for pricing anomaly to show warning and disable submit
+            // Check for pricing anomaly to show warning and hide form / disable submit
             if (typeof detectarAnomaliaDePrecioSeleccionado === "function" && detectarAnomaliaDePrecioSeleccionado()) {
                 if (warningEl) warningEl.style.display = 'block';
+                if (formCard) formCard.style.display = 'none';
                 if (btnSubmit) {
                     btnSubmit.disabled = true;
                     btnSubmit.style.opacity = "0.5";
