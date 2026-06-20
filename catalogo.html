@@ -2759,7 +2759,7 @@
             }
 
             // Intercambiar tamaño y lugar del precio de contado por el enganche (Pago Inicial)
-            document.getElementById('pdp-enganche-grande').innerText = `$${(Math.ceil((engancheMinimo || 0) / 10) * 10).toLocaleString('es-MX')} MXN`;
+
             document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(precioContado || 0).toLocaleString('es-MX')} MXN</strong>`;
 
             currentMLItemLink = link || "";
