@@ -114,6 +114,8 @@
         .header-search-container {
             display: flex;
             justify-content: center;
+            align-items: center;
+            gap: 12px;
             margin-top: 10px;
             width: 100%;
         }
@@ -463,7 +465,7 @@
         }
 
         .brand-badge {
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 700;
             text-transform: uppercase;
             padding: 4px 10px;
@@ -497,7 +499,7 @@
         }
 
         .status-badge {
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             padding: 4px 8px;
             border-radius: 20px;
@@ -570,7 +572,7 @@
             background-color: var(--bg-light);
             border: 1px solid var(--border-color);
             color: var(--text-muted);
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             padding: 3.5px 9px;
             border-radius: 6px;
@@ -1575,6 +1577,127 @@
                 display: none; /* Hide tooltip on mobile */
             }
         }
+
+        /* ═════════════════════ FILTERS TOGGLE BUTTON & DRAWER ═════════════════════ */
+        .filters-toggle-btn {
+            height: 42px;
+            padding: 0 18px;
+            border-radius: 24px;
+            background: var(--bg-card);
+            border: 1.5px solid var(--border-color);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            outline: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .filters-toggle-btn:hover {
+            transform: scale(1.03);
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.1);
+        }
+
+        .filters-toggle-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.2;
+            transition: transform 0.3s ease;
+        }
+
+        .filters-toggle-btn:hover svg {
+            transform: rotate(-10deg);
+        }
+
+        .filters-sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(2px);
+            z-index: 1050;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .filters-sidebar-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .celya-filters-sidebar {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 320px;
+            max-width: 85%;
+            height: 100%;
+            background: var(--bg-card);
+            border-left: 1px solid var(--border-color);
+            box-shadow: -10px 10px 30px rgba(0, 0, 0, 0.15);
+            z-index: 1100;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .celya-filters-sidebar.active {
+            right: 0;
+        }
+
+        .filters-sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .filters-sidebar-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .filters-sidebar-close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: var(--text-muted);
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .filters-sidebar-close-btn:hover {
+            color: var(--danger);
+        }
+
+        .filters-sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
     </style>
 </head>
 
@@ -1592,39 +1715,6 @@
             <button type="button" class="sidebar-close-btn" onclick="cerrarMenuLateral()">×</button>
         </div>
         <div class="sidebar-content">
-            <!-- Sección de Filtros y Orden -->
-            <div class="sidebar-filters-section" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1.5px solid var(--border-color);">
-                <h3 style="font-size: 15px; font-weight: 700; color: var(--primary); margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px; font-family: inherit;">
-                    🎛️ Filtrar y Ordenar
-                </h3>
-                
-                <div class="sidebar-control-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
-                    <label for="filterBrand" style="font-size: 12px; font-weight: 600; color: var(--text-muted); font-family: inherit;">🏷️ Filtrar Marca:</label>
-                    <select id="filterBrand" onchange="aplicarFiltrosYOrden()" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); font-family: inherit; font-size: 14px; font-weight: 500; outline: none; color: var(--text-input); background-color: var(--bg-input);">
-                        <option value="ALL">Todas las marcas</option>
-                    </select>
-                </div>
-                
-                <div class="sidebar-control-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
-                    <label for="filterImport" style="font-size: 12px; font-weight: 600; color: var(--text-muted); font-family: inherit;">✈️ Tipo de Envío:</label>
-                    <select id="filterImport" onchange="aplicarFiltrosYOrden()" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); font-family: inherit; font-size: 14px; font-weight: 500; outline: none; color: var(--text-input); background-color: var(--bg-input);">
-                        <option value="NO_IMPORT" selected>Ocultar importados</option>
-                        <option value="ALL">Todos los equipos</option>
-                        <option value="ONLY_IMPORT">Solo importados</option>
-                    </select>
-                </div>
-                
-                <div class="sidebar-control-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
-                    <label for="sortBy" style="font-size: 12px; font-weight: 600; color: var(--text-muted); font-family: inherit;">↕️ Ordenar por:</label>
-                    <select id="sortBy" onchange="aplicarFiltrosYOrden()" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); font-family: inherit; font-size: 14px; font-weight: 500; outline: none; color: var(--text-input); background-color: var(--bg-input);">
-                        <option value="ENGANCHE_ASC" selected>Enganche Mínimo: Menor a Mayor</option>
-                        <option value="DEFAULT">Destacados (Recomendado)</option>
-                        <option value="PLAN_26_ASC">Pago Semanal (Plan Rápido): Menor a Mayor</option>
-                        <option value="PLAN_52_ASC">Pago Semanal (Plan Cómodo): Menor a Mayor</option>
-                        <option value="MODEL_ASC">Marca / Modelo (A-Z)</option>
-                    </select>
-                </div>
-            </div>
             <ul class="sidebar-menu">
                 <li>
                     <a href="javascript:void(0)" onclick="abrirModalInfoLegal('faq')">
@@ -1649,6 +1739,45 @@
             <p>© 2026 CelYa! • Todos los derechos reservados.</p>
             <p class="sidebar-disclaimer">Este sitio y los dispositivos están protegidos por software MDM para fines de
                 financiamiento.</p>
+        </div>
+    </div>
+
+    <!-- Overlay de Filtros -->
+    <div id="filtersSidebarOverlay" class="filters-sidebar-overlay" onclick="cerrarMenuFiltros()"></div>
+
+    <!-- Menú de Filtros Lateral (Filters Sidebar Drawer) -->
+    <div id="celyaFiltersSidebar" class="celya-filters-sidebar">
+        <div class="filters-sidebar-header">
+            <h3 class="filters-sidebar-title">🎛️ Filtrar y Ordenar</h3>
+            <button type="button" class="filters-sidebar-close-btn" onclick="cerrarMenuFiltros()">×</button>
+        </div>
+        <div class="filters-sidebar-content">
+            <div class="sidebar-control-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px;">
+                <label for="filterBrand" style="font-size: 12px; font-weight: 600; color: var(--text-muted); font-family: inherit;">🏷️ Filtrar Marca:</label>
+                <select id="filterBrand" onchange="aplicarFiltrosYOrden()" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); font-family: inherit; font-size: 14px; font-weight: 500; outline: none; color: var(--text-input); background-color: var(--bg-input);">
+                    <option value="ALL">Todas las marcas</option>
+                </select>
+            </div>
+            
+            <div class="sidebar-control-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px;">
+                <label for="filterImport" style="font-size: 12px; font-weight: 600; color: var(--text-muted); font-family: inherit;">✈️ Tipo de Envío:</label>
+                <select id="filterImport" onchange="aplicarFiltrosYOrden()" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); font-family: inherit; font-size: 14px; font-weight: 500; outline: none; color: var(--text-input); background-color: var(--bg-input);">
+                    <option value="NO_IMPORT" selected>Ocultar importados</option>
+                    <option value="ALL">Todos los equipos</option>
+                    <option value="ONLY_IMPORT">Solo importados</option>
+                </select>
+            </div>
+            
+            <div class="sidebar-control-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
+                <label for="sortBy" style="font-size: 12px; font-weight: 600; color: var(--text-muted); font-family: inherit;">↕️ Ordenar por:</label>
+                <select id="sortBy" onchange="aplicarFiltrosYOrden()" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); font-family: inherit; font-size: 14px; font-weight: 500; outline: none; color: var(--text-input); background-color: var(--bg-input);">
+                    <option value="ENGANCHE_ASC" selected>Enganche Mínimo: Menor a Mayor</option>
+                    <option value="DEFAULT">Destacados (Recomendado)</option>
+                    <option value="PLAN_26_ASC">Pago Semanal (Plan Rápido): Menor a Mayor</option>
+                    <option value="PLAN_52_ASC">Pago Semanal (Plan Cómodo): Menor a Mayor</option>
+                    <option value="MODEL_ASC">Marca / Modelo (A-Z)</option>
+                </select>
+            </div>
         </div>
     </div>
 
@@ -1682,6 +1811,23 @@
                 <input type="text" id="inputBusqueda" placeholder="Buscar celular...">
                 <button type="button" class="clear-search-btn" id="clearSearchBtn" onclick="clearSearch()">×</button>
             </div>
+            
+            <!-- Botón de Filtros -->
+            <button type="button" id="filters-toggle" class="filters-toggle-btn" aria-label="Abrir filtros" onclick="abrirMenuFiltros()">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="21" x2="4" y2="14"></line>
+                    <line x1="4" y1="10" x2="4" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12" y2="3"></line>
+                    <line x1="20" y1="21" x2="20" y2="16"></line>
+                    <line x1="20" y1="12" x2="20" y2="3"></line>
+                    <line x1="1" y1="14" x2="7" y2="14"></line>
+                    <line x1="9" y1="8" x2="15" y2="8"></line>
+                    <line x1="17" y1="16" x2="23" y2="16"></line>
+                </svg>
+                <span>Filtros</span>
+            </button>
         </div>
     </header>
 
@@ -3284,6 +3430,18 @@
         function cerrarMenuLateral() {
             document.getElementById('celyaSidebar').classList.remove('active');
             document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+
+        function abrirMenuFiltros() {
+            document.getElementById('celyaFiltersSidebar').classList.add('active');
+            document.getElementById('filtersSidebarOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function cerrarMenuFiltros() {
+            document.getElementById('celyaFiltersSidebar').classList.remove('active');
+            document.getElementById('filtersSidebarOverlay').classList.remove('active');
+            document.body.style.overflow = '';
         }
 
         // --- FUNCIONES PEDIDO ESPECIAL ---
