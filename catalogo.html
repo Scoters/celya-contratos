@@ -1697,9 +1697,15 @@
                         </div>
                         <div id="ml-shipping-warning"
                             style="display: none; margin-top: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; align-items: center; gap: 8px;">
-                            <span style="font-size: 16px;">✈️</span>
-                            <span><strong>Envío Internacional:</strong> Este producto se envía desde el extranjero y
-                                <span id="ml-shipping-time-txt" style="font-weight: 600;">llegará pronto</span>.</span>
+                        </div>
+                    </div>
+
+                    <div class="enganche-personalizado-pdp" style="margin-top: 15px; margin-bottom: 15px; background: rgba(155, 89, 182, 0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(155, 89, 182, 0.2); text-align: left;">
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: var(--primary); margin-bottom: 6px;" id="lbl-cliEnganchePersonalizado">🏁 Personaliza tu Enganche (Mínimo: <span id="pdp-enganche-minimo-label">$0</span>):</label>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span style="font-weight: bold; color: var(--text-main); font-size: 16px;">$</span>
+                            <input type="number" id="cliEnganchePersonalizado" placeholder="Introduce un monto mayor para bajar abonos..." oninput="actualizarPrecioCalculadoPDP()" style="flex: 1; padding: 8px 12px; border: 1.5px solid var(--border-color); border-radius: 6px; font-size: 14px; outline: none; background: var(--bg-card); color: var(--text-main); box-sizing: border-box;">
+                            <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">MXN</span>
                         </div>
                     </div>
 
@@ -1740,8 +1746,7 @@
                             <input type="hidden" id="hiddenCuota52">
                             <input type="hidden" id="hiddenPrecioContado">
 
-                            <label style="margin-top: 0;" id="lbl-cliEnganchePersonalizado">🏁 Monto de Enganche Personalizado (Mínimo: <span id="pdp-enganche-minimo-label">$0</span>):</label>
-                            <input type="number" id="cliEnganchePersonalizado" placeholder="Ej. 1200 (Introduce un enganche mayor para bajar abonos)" oninput="actualizarPrecioCalculadoPDP()" style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none; margin-bottom: 12px;">
+
 
                             <label style="margin-top: 0;">Tu Nombre Completo:</label>
                             <input type="text" id="cliNombre" required placeholder="Ej. Juan Pérez">
@@ -1855,6 +1860,15 @@
                     </div>
                 </div>
 
+                    <div class="enganche-personalizado-pdp" style="margin-top: 15px; margin-bottom: 20px; background: rgba(155, 89, 182, 0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(155, 89, 182, 0.2); text-align: left;">
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: var(--primary); margin-bottom: 6px;" id="lbl-pe-cliEnganchePersonalizado">🏁 Personaliza tu Enganche (Mínimo: <span id="pe-enganche-minimo-label">$0</span>):</label>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span style="font-weight: bold; color: var(--text-main); font-size: 16px;">$</span>
+                            <input type="number" id="pe-cliEnganchePersonalizado" placeholder="Introduce un monto mayor para bajar abonos..." oninput="actualizarPreciosPedidoEspecial()" style="flex: 1; padding: 8px 12px; border: 1.5px solid var(--border-color); border-radius: 6px; font-size: 14px; outline: none; background: var(--bg-card); color: var(--text-main); box-sizing: border-box;">
+                            <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">MXN</span>
+                        </div>
+                    </div>
+
                 <!-- Alerta de Producto de Importación -->
                 <div id="pe-import-warning"
                     style="display: none; margin-bottom: 20px; padding: 12px; border-radius: 10px; background-color: #fffbeb; border: 1px solid #fef3c7; color: #b45309; font-size: 13px; line-height: 1.5; gap: 8px; align-items: flex-start; text-align: left;">
@@ -1869,8 +1883,7 @@
                 <div class="pdp-form-card" style="padding: 15px; margin-top: 0; text-align: left;">
                     <h4 style="margin-top: 0; margin-bottom: 15px;">📋 Rellena tu Solicitud de Crédito</h4>
                     <form id="formPedidoEspecial">
-                        <label style="margin-top: 0; font-weight: 600; font-size: 13px; color: var(--text-main);" id="lbl-pe-cliEnganchePersonalizado">🏁 Monto de Enganche Personalizado (Mínimo: <span id="pe-enganche-minimo-label">$0</span>):</label>
-                        <input type="number" id="pe-cliEnganchePersonalizado" placeholder="Ej. 1200 (Introduce un enganche mayor para bajar abonos)" oninput="actualizarPreciosPedidoEspecial()" style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none; margin-bottom: 12px;">
+
 
                         <label style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">Tu
                             Nombre Completo:</label>
