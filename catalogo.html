@@ -2663,6 +2663,9 @@
                 if (btnSolicitar) btnSolicitar.innerText = 'Pedir a Crédito';
                 if (divEnganche) {
                     divEnganche.style.opacity = '1';
+                    console.log(`[DEBUG] Card ID: ${card.dataset.id}, Freq: ${freq}`);
+                    console.log(`[DEBUG] Card ID: ${card.dataset.id}, Freq: ${freq}, Precio Contado: ${precioContado}`);
+                    console.log(`[DEBUG] Weekly Enganche: ${weeklyEnganche}`);
                     const precioContado = parseFloat((divEnganche.getAttribute('data-precio') || '').replace(/[\$,]/g, '')) || 0;
                     const factorEngSem = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
                     const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165;
