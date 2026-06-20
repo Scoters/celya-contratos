@@ -2215,7 +2215,7 @@
         }
 
         function calcularCuotaSemanal52(precioContado) {
-            const factorEng = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165;
+            const factorEng = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
             const factorInt = CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90;
             const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
             return Math.round(((precioContado * (1 + factorInt)) - eng) / 52);
@@ -2712,7 +2712,7 @@
                     divEnganche.style.opacity = '1';
                     const precioContado = parseFloat((divEnganche.getAttribute('data-precio') || '').replace(/[\$,]/g, '')) || 0;
                     const factorEngSem = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
-                    const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165;
+                    const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
                     const weeklyEnganche = Math.min(
                         Math.ceil((precioContado * factorEngSem) / 10) * 10,
                         Math.ceil((precioContado * factorEngCom) / 10) * 10
