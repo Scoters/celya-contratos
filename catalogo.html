@@ -1779,6 +1779,9 @@
                                 <option value="52 Semanas">Plan Cómodo (52 Pagos Semanales)</option>
                             </select>
 
+                            <label style="margin-top: 10px;" id="lbl-cliEnganchePersonalizado">🏁 Monto de Enganche Personalizado (Mínimo: <span id="pdp-enganche-minimo-label">$0</span>):</label>
+                            <input type="number" id="cliEnganchePersonalizado" placeholder="Ej. 1200 (Introduce un enganche mayor para bajar abonos)" oninput="actualizarPrecioCalculadoPDP()" style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
+
                             <div style="display: flex; gap: 12px; margin-top: 20px;">
                                 <button type="button" onclick="enviarSolicitudFinal()"
                                     style="background:#3483fa; color:white; border:none; padding:14px; flex:1; font-weight:bold; border-radius:8px; cursor:pointer; font-size:16px; transition: background 0.2s;"
@@ -1915,6 +1918,9 @@
                             <option value="26 Semanas">Plan Rápido (26 Semanas)</option>
                             <option value="52 Semanas">Plan Cómodo (52 Semanas)</option>
                         </select>
+
+                        <label style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);" id="lbl-pe-cliEnganchePersonalizado">🏁 Monto de Enganche Personalizado (Mínimo: <span id="pe-enganche-minimo-label">$0</span>):</label>
+                        <input type="number" id="pe-cliEnganchePersonalizado" placeholder="Ej. 1200 (Introduce un enganche mayor para bajar abonos)" oninput="actualizarPreciosPedidoEspecial()" style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
 
                         <div style="display: flex; gap: 12px; margin-top: 20px;">
                             <button type="button" onclick="enviarSolicitudPedidoEspecial()"
@@ -2737,6 +2743,11 @@
                 cliPlazo.value = "52 Semanas";
             }
 
+            const inputEng = document.getElementById('cliEnganchePersonalizado');
+            if (inputEng) {
+                inputEng.value = "";
+            }
+
             // Initialize Dynamic Price Calculator
             actualizarPlazosYPrecioPDP();
 
@@ -2915,11 +2926,19 @@
                 labelFrecuencia = "quincenales";
             }
 
+            const labelEng = document.getElementById('lbl-cliEnganchePersonalizado');
+            const inputEng = document.getElementById('cliEnganchePersonalizado');
+
             if (freq === "CONTADO") {
                 document.getElementById('pdp-enganche-grande').innerText = `$${Math.round(precioContado).toLocaleString('es-MX')} MXN`;
                 document.getElementById('pdp-weekly-amount').innerText = `$0 MXN`;
                 document.getElementById('pdp-weekly-term').innerText = `en 1 pago de contado`;
+                if (labelEng) labelEng.style.display = "none";
+                if (inputEng) inputEng.style.display = "none";
             } else {
+                if (labelEng) labelEng.style.display = "block";
+                if (inputEng) inputEng.style.display = "block";
+
                 const factorEnganche = (plazo === "52 Semanas")
                     ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
                     : ((freq === "SEMANAL")
@@ -2928,10 +2947,20 @@
                 const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
 
                 const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
-                const totalFinanciado = (precioContado * (1 + factorInteres)) - engancheCalculado;
+                
+                const minLabel = document.getElementById('pdp-enganche-minimo-label');
+                if (minLabel) minLabel.innerText = `$${engancheCalculado.toLocaleString('es-MX')} MXN`;
+
+                let customEnganche = parseFloat(inputEng.value) || 0;
+                let engancheFinal = engancheCalculado;
+                if (customEnganche > engancheCalculado) {
+                    engancheFinal = customEnganche;
+                }
+
+                const totalFinanciado = (precioContado * (1 + factorInteres)) - engancheFinal;
                 const cuotaActiva = totalFinanciado / numPagos;
 
-                document.getElementById('pdp-enganche-grande').innerText = `$${engancheCalculado.toLocaleString('es-MX')} MXN`;
+                document.getElementById('pdp-enganche-grande').innerText = `$${engancheFinal.toLocaleString('es-MX')} MXN`;
                 document.getElementById('pdp-weekly-amount').innerText = `$${Math.round(cuotaActiva).toLocaleString('es-MX')} MXN`;
                 document.getElementById('pdp-weekly-term').innerText = `en ${numPagos} pagos ${labelFrecuencia}`;
             }
@@ -3269,8 +3298,20 @@
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
 
-            const enganche = Math.ceil((precioContado * factorEnganche) / 10) * 10;
-            const totalFinanciado = (precioContado * (1 + factorInteres)) - enganche;
+            const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
+
+            const minLabel = document.getElementById('pe-enganche-minimo-label');
+            if (minLabel) minLabel.innerText = `$${engancheCalculado.toLocaleString('es-MX')} MXN`;
+
+            const inputEng = document.getElementById('pe-cliEnganchePersonalizado');
+            let customEnganche = parseFloat(inputEng.value) || 0;
+            let engancheFinal = engancheCalculado;
+
+            if (customEnganche > engancheCalculado) {
+                engancheFinal = customEnganche;
+            }
+
+            const totalFinanciado = (precioContado * (1 + factorInteres)) - engancheFinal;
 
             let cuota = totalFinanciado / numPagos;
             let labelFrecuencia = "/sem";
@@ -3281,7 +3322,7 @@
                 labelFrecuencia = "/quin";
             }
 
-            document.getElementById('pe-preview-enganche').innerText = `$${enganche.toLocaleString('es-MX')} MXN`;
+            document.getElementById('pe-preview-enganche').innerText = `$${engancheFinal.toLocaleString('es-MX')} MXN`;
             document.getElementById('pe-preview-semanal').innerText = `$${Math.round(cuota).toLocaleString('es-MX')} MXN${labelFrecuencia}`;
         }
 
@@ -3325,8 +3366,16 @@
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
             let textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (26 Semanas)" : "Plan Cómodo (52 Semanas)";
 
-            const enganche = Math.ceil((precioContado * factorEnganche) / 10) * 10;
-            const totalFinanciado = (precioContado * (1 + factorInteres)) - enganche;
+            const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
+            
+            const inputEng = document.getElementById('pe-cliEnganchePersonalizado');
+            let customEnganche = parseFloat(inputEng.value) || 0;
+            let engancheFinal = engancheCalculado;
+            if (customEnganche > engancheCalculado) {
+                engancheFinal = customEnganche;
+            }
+
+            const totalFinanciado = (precioContado * (1 + factorInteres)) - engancheFinal;
 
             let cuota = totalFinanciado / numPagos;
 
@@ -3337,7 +3386,7 @@
             }
 
             const baseUrl = window.location.origin + window.location.pathname.replace('catalogo.html', 'index.html');
-            const prefilledUrl = `${baseUrl}?pre_modelo=${encodeURIComponent(pe_data_actual.title)}&pre_frecuencia=${encodeURIComponent(freq)}&pre_plazo=${encodeURIComponent(plazo === "26 Semanas" ? "26" : "52")}&pre_nombre=${encodeURIComponent(nombre)}&pre_telefono=${encodeURIComponent(telefono)}&pre_color=&pre_capacidad=`;
+            const prefilledUrl = `${baseUrl}?pre_modelo=${encodeURIComponent(pe_data_actual.title)}&pre_frecuencia=${encodeURIComponent(freq)}&pre_plazo=${encodeURIComponent(plazo === "26 Semanas" ? "26" : "52")}&pre_nombre=${encodeURIComponent(nombre)}&pre_telefono=${encodeURIComponent(telefono)}&pre_color=&pre_capacidad=&pre_enganche=${engancheFinal}`;
 
             const planElegidoVal = (freq === "CONTADO") ? "Contado" : (plazo === "26 Semanas" ? "Plan Rápido" : "Plan Cómodo");
             const frecuenciaVal = (freq === "SEMANAL") ? "Semanal" : ((freq === "QUINCENAL") ? "Quincenal" : "Contado");
@@ -3359,8 +3408,8 @@
                 params.append('linkPrellenado', prefilledUrl);
                 // Precio para el desglose en Telegram
                 params.append('precioCosto', Math.round(pe_data_actual.price || 0));
-                params.append('precioContado', Math.round((pe_data_actual.price || 0) * (1 + (CONFIG_TASAS.gananciaContado || 0.15))));
-                params.append('engancheCalc', Math.round(cuota > 0 ? (pe_data_actual.price || 0) * (CONFIG_TASAS.engancheComodo || CONFIG_TASAS.engancheSemanal || 0.165) : 0));
+                params.append('precioContado', Math.round(precioContado));
+                params.append('engancheCalc', Math.round(engancheFinal));
 
                 const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
                     method: 'POST',
@@ -3437,6 +3486,7 @@
 
                 // Determinar cuota correspondiente al plazo elegido y frecuencia
                 let cuotaBase = 0;
+                let finalEnganche = 0;
                 if (freq !== "CONTADO") {
                     const precioContado = parseFloat(document.getElementById('hiddenPrecioContado').value) || 0;
                     let numPagos = (plazo === "26 Semanas") ? 26 : 52;
@@ -3451,7 +3501,15 @@
                     const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
 
                     const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
-                    const totalFinanciado = (precioContado * (1 + factorInteres)) - engancheCalculado;
+                    
+                    const inputEng = document.getElementById('cliEnganchePersonalizado');
+                    let customEnganche = parseFloat(inputEng.value) || 0;
+                    finalEnganche = engancheCalculado;
+                    if (customEnganche > engancheCalculado) {
+                        finalEnganche = customEnganche;
+                    }
+
+                    const totalFinanciado = (precioContado * (1 + factorInteres)) - finalEnganche;
                     cuotaBase = totalFinanciado / numPagos;
                 }
                 params.append('cuota', Math.round(cuotaBase));
@@ -3485,14 +3543,11 @@
                 params.append('frecuencia', frecuenciaVal);
 
                 const baseUrl = window.location.origin + window.location.pathname.replace('catalogo.html', 'index.html');
-                const prefilledUrl = `${baseUrl}?pre_modelo=${encodeURIComponent(modelo)}&pre_frecuencia=${encodeURIComponent(freq)}&pre_plazo=${encodeURIComponent(plazo === "26 Semanas" ? "26" : "52")}&pre_nombre=${encodeURIComponent(nombre)}&pre_telefono=${encodeURIComponent(telefono)}&pre_color=${encodeURIComponent(colorSeleccionado || "")}&pre_capacidad=${encodeURIComponent(almacenamientoSeleccionado || "")}`;
+                const prefilledUrl = `${baseUrl}?pre_modelo=${encodeURIComponent(modelo)}&pre_frecuencia=${encodeURIComponent(freq)}&pre_plazo=${encodeURIComponent(plazo === "26 Semanas" ? "26" : "52")}&pre_nombre=${encodeURIComponent(nombre)}&pre_telefono=${encodeURIComponent(telefono)}&pre_color=${encodeURIComponent(colorSeleccionado || "")}&pre_capacidad=${encodeURIComponent(almacenamientoSeleccionado || "")}&pre_enganche=${finalEnganche}`;
                 params.append('linkPrellenado', prefilledUrl);
                 // Precio para el desglose en Telegram
                 const _precioContadoTg = parseFloat(document.getElementById('hiddenPrecioContado').value) || 0;
-                const _factorEngTg = (plazo === "52 Semanas")
-                    ? (CONFIG_TASAS.engancheComodo || 0.165)
-                    : ((freq === "SEMANAL") ? (CONFIG_TASAS.engancheSemanal || 0.165) : (CONFIG_TASAS.engancheQuincenal || 0.33));
-                const _engancheTg = Math.ceil((_precioContadoTg * _factorEngTg) / 10) * 10;
+                const _engancheTg = finalEnganche;
                 const _precioCostoTg = _precioContadoTg > 0 ? Math.round(_precioContadoTg / (1 + (CONFIG_TASAS.gananciaContado || 0.15))) : 0;
                 params.append('precioCosto', _precioCostoTg);
                 params.append('precioContado', Math.round(_precioContadoTg));

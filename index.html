@@ -209,8 +209,8 @@
             <input type="text" id="precioContado" readonly
                 style="background-color: #e9ecef; font-weight: bold; color: #1a5276;">
 
-            <label for="monto">🏁 Pago Inicial / Enganche:</label>
-            <input type="text" id="monto" name="monto" readonly style="background-color: #e9ecef; color: #c0392b;">
+            <label for="monto">🏁 Pago Inicial / Enganche Recibido ($):</label>
+            <input type="number" id="monto" name="monto" style="color: #c0392b; font-weight: bold;" placeholder="Ej. 1200" min="0">
 
             <label for="plazoSemanas">Plazo de Financiamiento:</label>
             <select id="plazoSemanas" required>
@@ -544,6 +544,11 @@
                     if (telInput) telInput.value = preTelefono;
                 }
 
+                const preEnganche = urlParams.get('pre_enganche');
+                if (preEnganche) {
+                    document.getElementById('monto').value = parseFloat(preEnganche) || "";
+                }
+
                 const preClientId = urlParams.get('pre_client_id');
                 if (preClientId && preClientId.startsWith("C-Y")) {
                     document.getElementById('idClienteVisual').value = preClientId;
@@ -649,6 +654,9 @@
         document.getElementById('plazoSemanas').addEventListener('change', function () {
             actualizarEngancheYFinanciamientoPorPlazo();
         });
+        document.getElementById('monto').addEventListener('input', function () {
+            actualizarEngancheYFinanciamientoPorPlazo();
+        });
 
         function actualizarEngancheYFinanciamientoPorPlazo() {
             const imeiSelected = document.getElementById('selectDispositivo').value;
@@ -680,11 +688,24 @@
 
                     // Actualizar enganche
                     document.getElementById('engancheDisplay').value = engancheMinimoObligatorio;
-                    document.getElementById('monto').value = engancheMinimoObligatorio;
+
+                    // Obtener enganche ingresado (si es que el usuario escribió algo y es mayor)
+                    const inputMonto = document.getElementById('monto');
+                    let engancheIngresado = parseFloat(inputMonto.value) || 0;
+
+                    let engancheEfectivo = engancheMinimoObligatorio;
+                    if (engancheIngresado > engancheMinimoObligatorio) {
+                        engancheEfectivo = engancheIngresado;
+                    } else {
+                        // Si no ha escrito nada o es menor, y no tiene el foco activo, ponemos el mínimo
+                        if (document.activeElement !== inputMonto) {
+                            inputMonto.value = engancheMinimoObligatorio;
+                        }
+                    }
 
                     // Actualizar total financiado
                     const factorInteres = (planElegido === "26") ? CONFIG_TASAS_SHEETS.interes26 : CONFIG_TASAS_SHEETS.interes52;
-                    const totalFinanciadoCalculado = Math.round((precioContado * (1 + factorInteres)) - engancheMinimoObligatorio);
+                    const totalFinanciadoCalculado = Math.round((precioContado * (1 + factorInteres)) - engancheEfectivo);
 
                     totalFinanciadoActual = totalFinanciadoCalculado;
                     document.getElementById('totalFinanciado').value = "$" + totalFinanciadoCalculado.toLocaleString('es-MX');
