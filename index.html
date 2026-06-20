@@ -136,6 +136,17 @@
             border-radius: 6px;
             margin-top: 15px;
         }
+
+        .btn-loading {
+            animation: pulse-loading 1.5s infinite ease-in-out !important;
+            cursor: not-allowed !important;
+            background-color: #34495e !important;
+        }
+        @keyframes pulse-loading {
+            0% { opacity: 1; }
+            50% { opacity: 0.65; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 
@@ -892,9 +903,15 @@
             const btn = document.getElementById('btnEnviar');
             const colorOriginal = btn.style.background;
 
-            btn.innerText = "⏳ Subiendo expediente y firmas...";
-            btn.style.background = "#34495e";
             btn.disabled = true;
+            btn.classList.add('btn-loading');
+
+            let dotCount = 0;
+            btn.innerText = "⏳ Guardando expediente";
+            const loadingInterval = setInterval(() => {
+                dotCount = (dotCount + 1) % 4;
+                btn.innerText = "⏳ Guardando expediente" + ".".repeat(dotCount);
+            }, 600);
 
             try {
                 const formularioElemento = document.getElementById('contratoForm');
@@ -949,13 +966,15 @@
                 sheetData.append('ineTraseraBase64', ineTraseraB64);
                 sheetData.append('fotoEvidenciaBase64', fotoEvidenciaB64);
 
-                btn.innerText = "⏳ Guardando en Google Sheets (esto puede tardar)...";
                 const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     body: sheetData.toString(),
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
                 });
                 const data = await response.json();
+
+                clearInterval(loadingInterval);
+                btn.classList.remove('btn-loading');
 
                 if (data.result === 'success') {
                     btn.innerText = "✅ ¡Contrato Guardado con Éxito!";
@@ -984,6 +1003,8 @@
                     }, 4500);
                 }
             } catch (err) {
+                clearInterval(loadingInterval);
+                btn.classList.remove('btn-loading');
                 btn.innerText = "❌ Error de conexión, reintente.";
                 btn.style.background = "#c0392b";
                 btn.disabled = false;
