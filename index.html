@@ -2068,6 +2068,11 @@
 
 
 
+                            <!-- Banner de advertencia para anomalías de precio -->
+                            <div id="pdp-price-anomaly-warning" style="display: none; margin-top: 15px; padding: 12px; background-color: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; color: #991b1b; font-size: 13px; line-height: 1.4; text-align: left;">
+                                <strong>⚠️ Variación no disponible:</strong> Detectamos una inconsistencia temporal en los precios de MercadoLibre para esta capacidad o RAM. Por favor selecciona otra variante.
+                            </div>
+
                             <div style="display: flex; gap: 12px; margin-top: 20px;">
                                 <button type="button" onclick="enviarSolicitudFinal()"
                                     style="background:#3483fa; color:white; border:none; padding:14px; flex:1; font-weight:bold; border-radius:8px; cursor:pointer; font-size:16px; transition: background 0.2s;"
@@ -2391,6 +2396,8 @@
                         que el dispositivo presente un fallo de software o hardware de fábrica que sea debidamente
                         diagnosticado y validado por nuestro equipo técnico y que no pueda ser reparado o sustituido.
                     </p>
+
+                    <p><strong>SEXTA: Exclusión de Responsabilidad por Errores de Terceros (MercadoLibre)</strong><br>El Cliente acepta y reconoce que el catálogo de productos y precios se sincroniza con sistemas de terceros, incluyendo MercadoLibre. CelYa! no se hace responsable por errores de precios, inconsistencias en especificaciones de almacenamiento/RAM, o fallas técnicas en dicha sincronización. En caso de detectarse un error manifiesto en el precio cotizado o mostrado, CelYa! se reserva el derecho de cancelar la cotización o suspender el trámite de financiamiento sin ninguna responsabilidad para la empresa.</p>
                 </div>
             </div>
         </div>
@@ -2992,6 +2999,16 @@
         }
 
         function abrirModalCredito(id, modelo, esFijo, foto, cuota26, cuota52, link, precioContado, engancheMinimo, color, memoria, triggerElement) {
+            // Reset modal pricing warning state
+            const warningEl = document.getElementById('pdp-price-anomaly-warning');
+            if (warningEl) warningEl.style.display = 'none';
+            const btnSubmit = document.querySelector('button[onclick="enviarSolicitudFinal()"]');
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.style.opacity = "";
+                btnSubmit.style.cursor = "pointer";
+            }
+
             document.getElementById('hiddenId').value = id;
             document.getElementById('hiddenModelo').value = modelo;
             document.getElementById('hiddenEsFijo').value = esFijo;
@@ -3852,6 +3869,12 @@
         async function enviarSolicitudFinal() {
             if (isSubmitting) return;
 
+            // Block quote submission if pricing anomaly is active
+            if (typeof detectarAnomaliaDePrecioSeleccionado === "function" && detectarAnomaliaDePrecioSeleccionado()) {
+                toast('No se puede cotizar esta variante debido a una inconsistencia de precios.', 'error');
+                return;
+            }
+
             const nombre = document.getElementById('cliNombre').value.trim();
             const telefono = document.getElementById('cliTelefono').value.trim();
             const sueldo = document.getElementById('cliSueldo').value;
@@ -4496,6 +4519,156 @@
 
             logDebugFrontend(`buscarPrecioEquivalenteLocal - No se encontró coincidencia para ${window.currentBaseModelName} (Color: ${color}, Memoria: ${memoria}, Grading: ${grading})`);
             return null;
+        }
+
+        function obtenerMemoriaDeVariacion(v) {
+            const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
+            const memAttr = allAttrs.find(a => {
+                const idUpper = (a.id || "").toUpperCase();
+                return (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO" || idUpper === "RAM_MEMORY") && a.value_name;
+            });
+            return memAttr ? memAttr.value_name : "";
+        }
+
+        function obtenerSpecsDeVariacion(v) {
+            const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
+            let storageVal = 0;
+            let ramVal = 0;
+
+            allAttrs.forEach(a => {
+                const idUpper = (a.id || "").toUpperCase();
+                const nameUpper = (a.name || "").toUpperCase();
+                const valueStr = (a.value_name || "").toUpperCase().replace(/\s+/g, "");
+
+                if (!valueStr) return;
+
+                const isRam = idUpper.includes("RAM") || nameUpper.includes("RAM");
+                const isStorage = idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") ||
+                                  idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" ||
+                                  idUpper === "CAPACITY" || idUpper === "CAPACIDAD" ||
+                                  idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO" ||
+                                  nameUpper.includes("ALMACENAMIENTO") || nameUpper.includes("CAPACIDAD");
+
+                let numericValue = 0;
+                const match = valueStr.match(/(\d+(?:\.\d+)?)/);
+                if (match) {
+                    numericValue = parseFloat(match[1]);
+                    if (valueStr.includes("TB")) {
+                        numericValue = numericValue * 1024;
+                    }
+                }
+
+                if (isRam) {
+                    ramVal = numericValue;
+                } else if (isStorage && !isRam) {
+                    storageVal = numericValue;
+                }
+            });
+
+            return { storage: storageVal, ram: ramVal };
+        }
+
+        function resolverPrecioContadoDeVariacion(v) {
+            const memStr = obtenerMemoriaDeVariacion(v);
+            let localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memStr, gradingSeleccionadoGlobal, true);
+            let precioReal = 0;
+            if (localPrice && localPrice > 0) {
+                const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
+                precioReal = localPrice / gananciaFactor;
+            } else {
+                precioReal = (v.prices && v.prices.length > 0)
+                    ? (v.prices[0].amount || v.price || 0)
+                    : (v.price || 0);
+
+                if (precioReal <= 0) {
+                    localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memStr, gradingSeleccionadoGlobal, false);
+                    if (localPrice && localPrice > 0) {
+                        const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
+                        precioReal = localPrice / gananciaFactor;
+                    }
+                }
+            }
+            const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
+            return Math.round(precioReal * gananciaFactor);
+        }
+
+        function detectarAnomaliaDePrecioSeleccionado() {
+            if (!variantesVivasGlobal || variantesVivasGlobal.length === 0) return false;
+            const varianteSeleccionada = variantesVivasGlobal.find(v => {
+                const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
+                const colorMatch = colorSeleccionadoGlobal ? allAttrs.some(a => {
+                    const idUpper = a.id.toUpperCase();
+                    return (idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO") && a.value_name && colorsMatch(a.value_name, colorSeleccionadoGlobal);
+                }) : true;
+                const memoriaMatch = memoriaSeleccionadaGlobal ? allAttrs.some(a => {
+                    const idUpper = a.id.toUpperCase();
+                    return (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO" || idUpper === "RAM_MEMORY") && a.value_name && a.value_name.toLowerCase().replace(/\s+/g, "") === memoriaSeleccionadaGlobal.toLowerCase().replace(/\s+/g, "");
+                }) : true;
+                const gradingMatch = gradingSeleccionadoGlobal ? allAttrs.some(a => {
+                    const idUpper = (a.id || '').toString().toUpperCase();
+                    return (idUpper === "GRADING" || a.name === "Estado del reacondicionado") && a.value_name && a.value_name.toLowerCase().trim() === gradingSeleccionadoGlobal.toLowerCase().trim();
+                }) : true;
+                return colorMatch && memoriaMatch && gradingMatch;
+            });
+
+            if (!varianteSeleccionada) return false;
+
+            const specsSelected = obtenerSpecsDeVariacion(varianteSeleccionada);
+            const priceSelected = resolverPrecioContadoDeVariacion(varianteSeleccionada);
+
+            if (priceSelected <= 0) return false;
+
+            for (let i = 0; i < variantesVivasGlobal.length; i++) {
+                const vOther = variantesVivasGlobal[i];
+                if (vOther.id === varianteSeleccionada.id) continue;
+
+                const otherAttrs = (vOther.attribute_combinations || []).concat(vOther.attributes || []);
+                const colorMatch = colorSeleccionadoGlobal ? otherAttrs.some(a => {
+                    const idUpper = a.id.toUpperCase();
+                    return (idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO") && a.value_name && colorsMatch(a.value_name, colorSeleccionadoGlobal);
+                }) : true;
+                const gradingMatch = gradingSeleccionadoGlobal ? otherAttrs.some(a => {
+                    const idUpper = (a.id || '').toString().toUpperCase();
+                    return (idUpper === "GRADING" || a.name === "Estado del reacondicionado") && a.value_name && a.value_name.toLowerCase().trim() === gradingSeleccionadoGlobal.toLowerCase().trim();
+                }) : true;
+
+                if (!colorMatch || !gradingMatch) continue;
+
+                const specsOther = obtenerSpecsDeVariacion(vOther);
+                const priceOther = resolverPrecioContadoDeVariacion(vOther);
+
+                if (priceOther <= 0) continue;
+
+                const hasStorageComparison = specsSelected.storage > 0 && specsOther.storage > 0;
+                const hasRamComparison = specsSelected.ram > 0 && specsOther.ram > 0;
+
+                let isAnomaly = false;
+
+                if (hasStorageComparison) {
+                    const isHigherStorage = specsSelected.storage > specsOther.storage;
+                    const isSameOrHigherRam = hasRamComparison ? (specsSelected.ram >= specsOther.ram) : true;
+                    if (isHigherStorage && isSameOrHigherRam && priceSelected <= priceOther) {
+                        isAnomaly = true;
+                    }
+                }
+                if (hasRamComparison && !isAnomaly) {
+                    const isHigherRam = specsSelected.ram > specsOther.ram;
+                    const isSameOrHigherStorage = hasStorageComparison ? (specsSelected.storage >= specsOther.storage) : true;
+                    if (isHigherRam && isSameOrHigherStorage && priceSelected <= priceOther) {
+                        isAnomaly = true;
+                    }
+                }
+
+                if (isAnomaly) {
+                    console.warn("Anomalía detectada:", {
+                        selected: { id: varianteSeleccionada.id, specs: specsSelected, price: priceSelected },
+                        other: { id: vOther.id, specs: specsOther, price: priceOther }
+                    });
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         function baseModelsMatch(m1, m2) {
@@ -6478,6 +6651,16 @@
         }
 
         function actualizarPreciosYFotoPorVarianteActual() {
+            // Reset warning display and submit button status first
+            const warningEl = document.getElementById('pdp-price-anomaly-warning');
+            if (warningEl) warningEl.style.display = 'none';
+            const btnSubmit = document.querySelector('button[onclick="enviarSolicitudFinal()"]');
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.style.opacity = "";
+                btnSubmit.style.cursor = "pointer";
+            }
+
             if (!variantesVivasGlobal || variantesVivasGlobal.length === 0) return;
             const varianteSeleccionada = variantesVivasGlobal.find(v => {
                 const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
@@ -6547,6 +6730,16 @@
                     document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(precioContadoFinal || 0).toLocaleString('es-MX')} MXN</strong>`;
                 } catch (e) {
                     console.warn('No se pudo fijar precio contado final desde variante:', e);
+                }
+            }
+
+            // Check for pricing anomaly to show warning and disable submit
+            if (typeof detectarAnomaliaDePrecioSeleccionado === "function" && detectarAnomaliaDePrecioSeleccionado()) {
+                if (warningEl) warningEl.style.display = 'block';
+                if (btnSubmit) {
+                    btnSubmit.disabled = true;
+                    btnSubmit.style.opacity = "0.5";
+                    btnSubmit.style.cursor = "not-allowed";
                 }
             }
         }
