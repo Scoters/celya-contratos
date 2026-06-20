@@ -2670,7 +2670,7 @@
                         Math.ceil((precioContado * factorEngSem) / 10) * 10,
                         Math.ceil((precioContado * factorEngCom) / 10) * 10
                     );
-                    divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche desde: $${quinEnganche.toLocaleString('es-MX')} MXN`;
+                    divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche desde: $${weeklyEnganche.toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
                 }
             } else if (freq === 'quincenal') {
                 if (cuotasSemanal) cuotasSemanal.style.display = 'none';
@@ -2681,12 +2681,8 @@
                     divEnganche.style.opacity = '1';
                     const precioContado = parseFloat((divEnganche.getAttribute('data-precio') || '').replace(/[\$,]/g, '')) || 0;
                     const factorEngQuin = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
-                    const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165;
-                    const quinEnganche = Math.min(
-                        Math.ceil((precioContado * factorEngQuin) / 10) * 10,
-                        Math.ceil((precioContado * factorEngCom) / 10) * 10
-                    );
-                    divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche desde: $${quinEnganche.toLocaleString('es-MX')} MXN`;
+                    const quinEnganche = Math.ceil((precioContado * factorEngQuin) / 10) * 10;
+                    divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche desde: $${quinEnganche.toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
                 }
             } else { // contado
                 if (cuotasSemanal) cuotasSemanal.style.display = 'none';
