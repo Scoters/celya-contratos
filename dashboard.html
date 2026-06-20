@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CelYa! - Panel de Control Administrativo</title>
     <script src="config.js?v=2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
@@ -564,6 +566,64 @@
                 padding: 10px;
             }
         }
+        
+        /* Estilos específicos para nuevos módulos */
+        .badge-rojo {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .badge-naranja {
+            background-color: rgba(249, 115, 22, 0.2);
+            color: #f97316;
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .badge-verde {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .badge-azul {
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .btn-cierre {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        .btn-cierre:hover {
+            background: linear-gradient(135deg, #059669, #047857) !important;
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4) !important;
+        }
+        .btn-pdf {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        .btn-pdf:hover {
+            background: linear-gradient(135deg, #dc2626, #991b1b) !important;
+            box-shadow: 0 6px 18px rgba(239, 68, 68, 0.4) !important;
+        }
     </style>
 </head>
 
@@ -715,6 +775,90 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- 📦 Módulo de Gestión de Inventario -->
+                <div class="container" style="margin-top: 24px;">
+                    <h3>📦 Gestión de Inventario</h3>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
+                        Busca un equipo y actualiza su estado (por ejemplo, marcar como Robado, Perdido o Devuelto).
+                    </p>
+                    
+                    <label for="buscarInventarioInput">Buscar Celular (Modelo, Color o IMEI):</label>
+                    <div style="position: relative; width: 100%;">
+                        <input type="text" id="buscarInventarioInput" placeholder="🔍 Escribe para buscar celular..." style="width: 100%; box-sizing: border-box; padding: 12px; font-size: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(15, 23, 42, 0.5); color: #fff; outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='var(--primary-color)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+                        <div id="resultadosInventario" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.5); margin-top: 5px;"></div>
+                    </div>
+                    <input type="hidden" id="buscarInventarioVal" value="">
+
+                    <div id="cardDetalleInventario" style="display: none; margin-top: 20px; border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 15px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label style="margin:0;">Modelo:</label>
+                                <input type="text" id="invModelo" readonly>
+                            </div>
+                            <div>
+                                <label style="margin:0;">IMEI:</label>
+                                <input type="text" id="invImei" readonly>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 12px;">
+                            <div>
+                                <label style="margin:0;">Color:</label>
+                                <input type="text" id="invColor" readonly>
+                            </div>
+                            <div>
+                                <label style="margin:0;">Memoria:</label>
+                                <input type="text" id="invMemoria" readonly>
+                            </div>
+                        </div>
+
+                        <label for="invEstado">Estado Actual del Equipo:</label>
+                        <select id="invEstado" style="font-weight: bold; background: rgba(15, 23, 42, 0.7);">
+                            <option value="DISPONIBLE">🟢 DISPONIBLE (Listo para venta)</option>
+                            <option value="MAS VENDIDO">⭐ DESTACADO (Más vendido)</option>
+                            <option value="BAJO DEMANDA">⏳ BAJO DEMANDA (Sobre pedido)</option>
+                            <option value="VENDIDO">🔴 VENDIDO</option>
+                            <option value="ROBADO">🚨 ROBADO</option>
+                            <option value="PERDIDO">❓ PERDIDO</option>
+                            <option value="DEVUELTO">↩️ DEVUELTO</option>
+                            <option value="RESERVADO">🔒 RESERVADO</option>
+                        </select>
+
+                        <button type="button" id="btnActualizarEstadoInventario" onclick="guardarEstadoInventario()" style="margin-top: 15px; background: linear-gradient(135deg, #a855f7, #7e22ce); font-size: 15px; font-weight: bold; padding: 12px; width: 100%;">
+                            💾 Guardar Estado del Equipo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 🚨 Reporte de Morosos -->
+                <div class="container" style="margin-top: 24px;">
+                    <h3>🚨 Reporte de Morosos</h3>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
+                        Visualiza los clientes activos que tienen atrasos de pago y exporta la lista completa a PDF.
+                    </p>
+                    
+                    <button type="button" class="btn-pdf" id="btnExportarMorososPDF" onclick="generarReporteMorososPDF()" style="margin-top: 0; margin-bottom: 15px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: auto; font-size: 14px; padding: 10px 20px;">
+                        📄 Exportar Morosos a PDF
+                    </button>
+                    
+                    <div style="overflow-x: auto; max-height: 350px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px;">
+                        <table style="margin-top: 0; min-width: 500px;">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Cliente</th>
+                                    <th>Días Atraso</th>
+                                    <th>Saldo Pendiente</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaMorososCuerpo">
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px;">Cargando lista de morosos...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
             <div class="column-right">
@@ -764,6 +908,52 @@
                     </form>
 
 
+                </div>
+
+                <!-- 💰 Módulo de Cierre de Caja Diario -->
+                <div class="container" style="margin-top: 24px;">
+                    <h3>💰 Cierre de Caja Diario</h3>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
+                        Selecciona un día para calcular el dinero cobrado por método de pago e ingresa el efectivo real para cerrar caja.
+                    </p>
+
+                    <label for="fechaCierreCaja">Fecha a Consultar / Cerrar:</label>
+                    <input type="date" id="fechaCierreCaja" style="margin-bottom: 15px;" onchange="calcularResumenCajaDiario()">
+
+                    <div style="background: rgba(15, 23, 42, 0.4); padding: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 15px;">
+                        <h4 style="margin: 0 0 10px 0; color: #fff; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 5px;">📊 Resumen de Cobros del Día</h4>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+                            <span>💵 Efectivo Esperado:</span>
+                            <span id="cierreEfectivoEsperado" style="font-weight: bold; color: #10b981;">$0 MXN</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+                            <span>🏦 Transferencia:</span>
+                            <span id="cierreTransferencia" style="font-weight: bold; color: #3b82f6;">$0 MXN</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+                            <span>💳 Tarjeta:</span>
+                            <span id="cierreTarjeta" style="font-weight: bold; color: #f59e0b;">$0 MXN</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; color: #fff; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 8px; margin-top: 8px;">
+                            <span>💰 Total Recaudado:</span>
+                            <span id="cierreTotalEsperado">$0 MXN</span>
+                        </div>
+                    </div>
+
+                    <label for="cierreEfectivoReal">💵 Efectivo Real en Caja ($):</label>
+                    <input type="number" id="cierreEfectivoReal" placeholder="Introduce el dinero físico real..." oninput="calcularDiferenciaCaja()">
+
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; margin-top: 12px; padding: 8px 12px; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
+                        <span>Diferencia en Caja (Faltante/Sobrante):</span>
+                        <span id="cierreDiferencia" style="font-weight: bold; color: #fff;">$0 MXN</span>
+                    </div>
+
+                    <label for="cierreNotas">Notas / Comentarios de Caja:</label>
+                    <textarea id="cierreNotas" placeholder="Ej. Hubo un faltante por cambio entregado..." style="min-height: 60px;"></textarea>
+
+                    <button type="button" class="btn-cierre" id="btnRegistrarCierre" onclick="guardarCierreCaja()" style="margin-top: 15px; font-size: 15px; font-weight: bold; padding: 12px; width: 100%;">
+                        📝 Registrar Cierre de Caja en Excel
+                    </button>
                 </div>
             </div>
         </main>
@@ -957,6 +1147,11 @@
                 dbInventarioEquipos = datos.inventario || [];
                 dbHistorialPagos = datos.historialPagos || [];
                 listaPromesasGlobal = datos.promesasActivas || [];
+
+                // Inicializar nuevos módulos cargados de datos
+                if (typeof window.inicializarNuevosModulos === 'function') {
+                    window.inicializarNuevosModulos();
+                }
 
             } catch (err) {
                 console.error("Error al cargar datos del dashboard:", err);
@@ -1993,8 +2188,415 @@
                     } finally {
                         btnAgregar.innerText = originalText;
                         btnAgregar.disabled = false;
-                    }
+
+            }
+        };
+
+        // ==========================================
+        // 📦 MÓDULO DE GESTIÓN DE INVENTARIO
+        // ==========================================
+        function inicializarAutocompleteInventario() {
+            const input = document.getElementById('buscarInventarioInput');
+            const resultados = document.getElementById('resultadosInventario');
+
+            if (!input || !resultados) return;
+
+            input.addEventListener('input', function(e) {
+                const query = e.target.value.toLowerCase().trim();
+                resultados.innerHTML = '';
+                if (!query) {
+                    resultados.style.display = 'none';
+                    return;
+                }
+
+                const matches = dbInventarioEquipos.filter(eq => 
+                    (eq.modelo && eq.modelo.toLowerCase().includes(query)) ||
+                    (eq.imei && eq.imei.toLowerCase().includes(query)) ||
+                    (eq.color && eq.color.toLowerCase().includes(query))
+                );
+
+                if (matches.length === 0) {
+                    resultados.innerHTML = '<div style="padding: 10px; color: #a0aec0; font-size: 13px;">No se encontraron equipos</div>';
+                } else {
+                    matches.forEach(eq => {
+                        const item = document.createElement('div');
+                        item.style.padding = '10px 14px';
+                        item.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                        item.style.cursor = 'pointer';
+                        item.style.transition = 'background 0.2s';
+                        item.onmouseover = () => item.style.backgroundColor = 'rgba(255,255,255,0.08)';
+                        item.onmouseout = () => item.style.backgroundColor = 'transparent';
+
+                        const badgeClass = eq.estado === 'DISPONIBLE' ? 'badge-verde' : (eq.estado === 'VENDIDO' ? 'badge-rojo' : 'badge-azul');
+                        item.innerHTML = `
+                            <div style="font-weight: 600; color: #fff; font-size: 14px;">${eq.modelo} <span class="${badgeClass}">${eq.estado}</span></div>
+                            <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">IMEI: ${eq.imei} | Color: ${eq.color} | Memoria: ${eq.memoria || 'N/A'}</div>
+                        `;
+                        item.addEventListener('click', function() {
+                            seleccionarEquipoInventario(eq.imei);
+                        });
+                        resultados.appendChild(item);
+                    });
+                }
+                resultados.style.display = 'block';
+            });
+
+            // Cerrar al hacer clic afuera
+            document.addEventListener('click', function(e) {
+                if (e.target !== input && e.target !== resultados && !resultados.contains(e.target)) {
+                    resultados.style.display = 'none';
+                }
+            });
+        }
+
+        function seleccionarEquipoInventario(imei) {
+            const eq = dbInventarioEquipos.find(item => item.imei === imei);
+            if (!eq) return;
+
+            document.getElementById('buscarInventarioInput').value = `${eq.modelo} (${eq.imei})`;
+            document.getElementById('buscarInventarioVal').value = eq.imei;
+            document.getElementById('resultadosInventario').style.display = 'none';
+
+            document.getElementById('invModelo').value = eq.modelo;
+            document.getElementById('invImei').value = eq.imei;
+            document.getElementById('invColor').value = eq.color;
+            document.getElementById('invMemoria').value = eq.memoria || 'Genérico';
+            document.getElementById('invEstado').value = eq.estado;
+
+            document.getElementById('cardDetalleInventario').style.display = 'block';
+        }
+
+        window.guardarEstadoInventario = async function() {
+            const imei = document.getElementById('buscarInventarioVal').value;
+            const nuevoEstado = document.getElementById('invEstado').value;
+            const btn = document.getElementById('btnActualizarEstadoInventario');
+
+            if (!imei || !nuevoEstado) {
+                toast('Debe seleccionar un equipo e ingresar el estado.', 'warning');
+                return;
+            }
+
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ Guardando estado...";
+            btn.disabled = true;
+
+            try {
+                const params = new URLSearchParams();
+                params.append('action', 'cambiarEstadoEquipo');
+                params.append('token', CONFIG.API_TOKEN);
+                params.append('imei', imei);
+                params.append('estado', nuevoEstado);
+
+                const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: params.toString(),
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
                 });
+                const data = await res.json();
+
+                if (data.result === 'success') {
+                    toast('El estado del equipo se ha actualizado en el Excel.', 'success', 'Inventario Actualizado');
+                    
+                    // Actualizar en memoria
+                    const eqIndex = dbInventarioEquipos.findIndex(item => item.imei === imei);
+                    if (eqIndex !== -1) {
+                        dbInventarioEquipos[eqIndex].estado = nuevoEstado;
+                    }
+                    
+                    // Actualizar formulario y caché local
+                    limpiarCacheLocalCatalogo();
+                } else {
+                    toast('Error al actualizar el estado: ' + (data.error || data.message || 'Desconocido'), 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                toast('Error de comunicación con el script.', 'error');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // ==========================================
+        // 🚨 MÓDULO DE REPORTE DE MOROSOS
+        // ==========================================
+        function cargarListaMorosos() {
+            const tbody = document.getElementById('tablaMorososCuerpo');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+
+            // Filtrar clientes con días de atraso > 0
+            const morosos = dbClientesActivos.filter(c => (parseInt(c.diasAtraso) || 0) > 0);
+
+            // Ordenar por días de atraso de mayor a menor
+            morosos.sort((a, b) => (parseInt(b.diasAtraso) || 0) - (parseInt(a.diasAtraso) || 0));
+
+            if (morosos.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--accent-green); font-weight: bold; padding: 20px;">
+                            🎉 ¡Felicidades! No hay clientes con atraso de pago hoy.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            morosos.forEach(c => {
+                const tr = document.createElement('tr');
+                const badgeClass = c.diasAtraso <= 7 ? 'badge-naranja' : 'badge-rojo';
+                tr.innerHTML = `
+                    <td style="font-weight: bold; color: var(--primary-color);">${c.id || 'C-Y'}</td>
+                    <td>
+                        <div style="font-weight: 600; color: #fff;">${c.cliente}</div>
+                        <div style="font-size: 11px; color: var(--text-secondary);">IMEI: ${c.imei}</div>
+                    </td>
+                    <td>
+                        <span class="${badgeClass}">${c.diasAtraso} días</span>
+                    </td>
+                    <td style="font-weight: bold; color: #f87171;">
+                        $${Math.round(c.saldoPendiente).toLocaleString('es-MX')} MXN
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.generarReporteMorososPDF = function() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // Filtrar morosos
+                const morosos = dbClientesActivos.filter(c => (parseInt(c.diasAtraso) || 0) > 0);
+                morosos.sort((a, b) => (parseInt(b.diasAtraso) || 0) - (parseInt(a.diasAtraso) || 0));
+
+                const totalMorosos = morosos.length;
+                const totalSaldoVencido = morosos.reduce((acc, c) => acc + (parseFloat(c.saldoPendiente) || 0), 0);
+
+                // Estilos estéticos y Branding de CelYa
+                doc.setFillColor(15, 23, 42); // Fondo oscuro para header
+                doc.rect(0, 0, 210, 40, 'F');
+
+                doc.setTextColor(255, 255, 255);
+                doc.setFont("Helvetica", "bold");
+                doc.setFontSize(22);
+                doc.text("💜 CelYa! Ecosistema", 15, 18);
+
+                doc.setFont("Helvetica", "normal");
+                doc.setFontSize(11);
+                doc.setTextColor(148, 163, 184); // color gris
+                doc.text("Reporte Administrativo de Cartera Vencida y Morosidad", 15, 25);
+
+                const fechaStr = new Date().toLocaleString('es-MX');
+                doc.setFontSize(9);
+                doc.text(`Fecha Generación: ${fechaStr}`, 150, 18);
+
+                // Tarjetas de Resumen
+                doc.setFillColor(248, 250, 252); // Fondo gris muy claro
+                doc.roundedRect(15, 48, 85, 22, 3, 3, 'F');
+                doc.setTextColor(30, 41, 59);
+                doc.setFontSize(10);
+                doc.setFont("Helvetica", "normal");
+                doc.text("Clientes con Atraso:", 20, 56);
+                doc.setFont("Helvetica", "bold");
+                doc.setFontSize(14);
+                doc.text(`${totalMorosos}`, 20, 64);
+
+                doc.setFillColor(254, 242, 242); // Fondo rojo claro
+                doc.roundedRect(110, 48, 85, 22, 3, 3, 'F');
+                doc.setTextColor(220, 38, 38);
+                doc.setFontSize(10);
+                doc.setFont("Helvetica", "normal");
+                doc.text("Cartera Total Vencida:", 115, 56);
+                doc.setFont("Helvetica", "bold");
+                doc.setFontSize(14);
+                doc.text(`$${Math.round(totalSaldoVencido).toLocaleString('es-MX')} MXN`, 115, 64);
+
+                // Tabla de deudores
+                const rows = morosos.map(c => [
+                    c.id || 'S/ID',
+                    c.cliente,
+                    c.imei,
+                    `${c.diasAtraso} días`,
+                    `$${Math.round(c.saldoPendiente).toLocaleString('es-MX')} MXN`
+                ]);
+
+                doc.autoTable({
+                    startY: 78,
+                    head: [['ID Cliente', 'Nombre Cliente', 'IMEI del Celular', 'Días Atraso', 'Saldo Pendiente']],
+                    body: rows,
+                    theme: 'grid',
+                    headStyles: { fillColor: [155, 89, 182], textColor: [255, 255, 255], fontStyle: 'bold' },
+                    columnStyles: {
+                        0: { cellWidth: 25 },
+                        1: { cellWidth: 55 },
+                        2: { cellWidth: 40 },
+                        3: { cellWidth: 30, halign: 'center' },
+                        4: { cellWidth: 40, halign: 'right' }
+                    },
+                    styles: { fontSize: 9, cellPadding: 4 },
+                    alternateRowStyles: { fillColor: [250, 250, 250] }
+                });
+
+                doc.save(`Reporte_Morosos_CelYa_${new Date().toISOString().substring(0, 10)}.pdf`);
+                toast('Se ha descargado el archivo PDF correctamente.', 'success', 'Reporte PDF Generado');
+            } catch (err) {
+                console.error(err);
+                toast('Error al estructurar y descargar el PDF.', 'error');
+            }
+        }
+
+        // ==========================================
+        // 💰 MÓDULO DE CIERRE DE CAJA DIARIO
+        // ==========================================
+        let resumenCajaActual = { efectivo: 0, transferencia: 0, tarjeta: 0, total: 0 };
+
+        window.calcularResumenCajaDiario = function() {
+            const fechaInput = document.getElementById('fechaCierreCaja').value;
+            if (!fechaInput) return;
+
+            // Formatear la fecha seleccionada de yyyy-mm-dd a dd/mm/yyyy
+            const partes = fechaInput.split("-");
+            const fechaBuscar = `${partes[2]}/${partes[1]}/${partes[0]}`;
+
+            let efectivo = 0;
+            let transferencia = 0;
+            let tarjeta = 0;
+
+            // Iteramos sobre todos los abonos de los clientes cargados
+            dbClientesActivos.forEach(c => {
+                if (c.historialAbonos) {
+                    c.historialAbonos.forEach(p => {
+                        if (p.fecha && p.fecha.trim() === fechaBuscar) {
+                            const monto = parseFloat(p.monto) || 0;
+                            const metodo = String(p.chofer || '').trim().toUpperCase();
+
+                            if (metodo.includes("TRANSFER") || metodo.includes("BANCO") || metodo.includes("NU") || metodo.includes("AZTECA")) {
+                                transferencia += monto;
+                            } else if (metodo.includes("TARJETA") || metodo.includes("CLIP") || metodo.includes("CREDITO") || metodo.includes("DEBITO")) {
+                                tarjeta += monto;
+                            } else {
+                                efectivo += monto; // Por defecto o efectivo
+                            }
+                        }
+                    });
+                }
+            });
+
+            resumenCajaActual = {
+                efectivo: efectivo,
+                transferencia: transferencia,
+                tarjeta: tarjeta,
+                total: efectivo + transferencia + tarjeta
+            };
+
+            // Escribir en la UI
+            document.getElementById('cierreEfectivoEsperado').innerText = `$${efectivo.toLocaleString('es-MX')} MXN`;
+            document.getElementById('cierreTransferencia').innerText = `$${transferencia.toLocaleString('es-MX')} MXN`;
+            document.getElementById('cierreTarjeta').innerText = `$${tarjeta.toLocaleString('es-MX')} MXN`;
+            document.getElementById('cierreTotalEsperado').innerText = `$${(efectivo + transferencia + tarjeta).toLocaleString('es-MX')} MXN`;
+
+            // Resetear inputs de cierre real
+            document.getElementById('cierreEfectivoReal').value = '';
+            document.getElementById('cierreDiferencia').innerText = '$0 MXN';
+            document.getElementById('cierreDiferencia').style.color = '#fff';
+            document.getElementById('cierreNotas').value = '';
+        }
+
+        window.calcularDiferenciaCaja = function() {
+            const efectivoRealVal = parseFloat(document.getElementById('cierreEfectivoReal').value) || 0;
+            const diferencia = efectivoRealVal - resumenCajaActual.efectivo;
+            const difEl = document.getElementById('cierreDiferencia');
+
+            if (diferencia === 0) {
+                difEl.innerText = `$0 MXN (Caja Cuadrada)`;
+                difEl.style.color = '#10b981'; // verde
+            } else if (diferencia < 0) {
+                difEl.innerText = `-$${Math.abs(diferencia).toLocaleString('es-MX')} MXN (Faltante)`;
+                difEl.style.color = '#ef4444'; // rojo
+            } else {
+                difEl.innerText = `+$${diferencia.toLocaleString('es-MX')} MXN (Sobrante)`;
+                difEl.style.color = '#f59e0b'; // naranja/amarillo
+            }
+        }
+
+        window.guardarCierreCaja = async function() {
+            const fechaInput = document.getElementById('fechaCierreCaja').value;
+            const efectivoRealVal = document.getElementById('cierreEfectivoReal').value;
+            const notas = document.getElementById('cierreNotas').value.trim();
+            const btn = document.getElementById('btnRegistrarCierre');
+
+            if (!fechaInput) {
+                toast('Debe seleccionar una fecha para hacer el cierre.', 'warning');
+                return;
+            }
+            if (efectivoRealVal === "") {
+                toast('Debe ingresar el monto real de efectivo que hay físicamente en la caja.', 'warning');
+                return;
+            }
+
+            const efectivoReal = parseFloat(efectivoRealVal) || 0;
+            const diferencia = efectivoReal - resumenCajaActual.efectivo;
+
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ Registrando cierre...";
+            btn.disabled = true;
+
+            try {
+                const params = new URLSearchParams();
+                params.append('action', 'registrarCierreCaja');
+                params.append('token', CONFIG.API_TOKEN);
+                params.append('efectivo', resumenCajaActual.efectivo);
+                params.append('transferencia', resumenCajaActual.transferencia);
+                params.append('tarjeta', resumenCajaActual.tarjeta);
+                params.append('diferencia', diferencia);
+                params.append('notas', `Fecha Cierre Caja: ${fechaInput}. Notas: ${notas}`);
+
+                const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: params.toString(),
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                const data = await res.json();
+
+                if (data.result === 'success') {
+                    toast('Cierre de caja guardado exitosamente en la pestaña Cierres del Spreadsheet.', 'success', 'Cierre Exitoso');
+                    // Resetear
+                    document.getElementById('cierreEfectivoReal').value = '';
+                    document.getElementById('cierreDiferencia').innerText = '$0 MXN';
+                    document.getElementById('cierreNotas').value = '';
+                } else {
+                    toast('Error al guardar el cierre de caja: ' + (data.error || data.message || 'Desconocido'), 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                toast('Error de red al guardar el cierre.', 'error');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // ==========================================
+        // 🔄 INICIALIZADOR GENERAL DE NUEVOS MÓDULOS
+        // ==========================================
+        window.inicializarNuevosModulos = function() {
+            // 1. Cargar lista de morosos
+            cargarListaMorosos();
+
+            // 2. Cargar autocompleter de inventario
+            inicializarAutocompleteInventario();
+
+            // 3. Poner fecha de hoy por defecto para el cierre de caja y calcularlo
+            const hoy = new Date();
+            const yyyy = hoy.getFullYear();
+            const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+            const dd = String(hoy.getDate()).padStart(2, '0');
+            document.getElementById('fechaCierreCaja').value = `${yyyy}-${mm}-${dd}`;
+            calcularResumenCajaDiario();
+        }
             }
         };
     </script>
