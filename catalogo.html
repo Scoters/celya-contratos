@@ -1569,6 +1569,14 @@
                 </select>
             </div>
             <div class="control-group">
+                <label for="filterImport">✈️ Tipo de Envío:</label>
+                <select id="filterImport" onchange="aplicarFiltrosYOrden()">
+                    <option value="ALL">Todos los equipos</option>
+                    <option value="NO_IMPORT">Ocultar importados</option>
+                    <option value="ONLY_IMPORT">Solo importados</option>
+                </select>
+            </div>
+            <div class="control-group">
                 <label for="sortBy">↕️ Ordenar por:</label>
                 <select id="sortBy" onchange="aplicarFiltrosYOrden()">
                     <option value="ENGANCHE_ASC" selected>Enganche Mínimo: Menor a Mayor</option>
@@ -2382,6 +2390,7 @@
         // Aplica el orden y filtrado localmente
         function aplicarFiltrosYOrden() {
             const brandSelected = document.getElementById('filterBrand').value;
+            const importSelected = document.getElementById('filterImport').value;
             const sortSelected = document.getElementById('sortBy').value;
             const contenedor = document.getElementById('contenedorResultados');
 
@@ -2408,6 +2417,11 @@
             let filtrados = [...window.equiposCargados];
             if (brandSelected !== "ALL") {
                 filtrados = filtrados.filter(item => obtenerMarca(item.modelo) === brandSelected);
+            }
+            if (importSelected === "NO_IMPORT") {
+                filtrados = filtrados.filter(item => !(item.esImportacion === true || item.esImportacion === 'true'));
+            } else if (importSelected === "ONLY_IMPORT") {
+                filtrados = filtrados.filter(item => (item.esImportacion === true || item.esImportacion === 'true'));
             }
 
             // 2. Ordenar
