@@ -832,32 +832,39 @@
 
                 <!-- 🚨 Reporte de Morosos -->
                 <div class="container" style="margin-top: 24px;">
-                    <h3>🚨 Reporte de Morosos</h3>
-                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
-                        Visualiza los clientes activos que tienen atrasos de pago y exporta la lista completa a PDF.
-                    </p>
-                    
-                    <button type="button" class="btn-pdf" id="btnExportarMorososPDF" onclick="generarReporteMorososPDF()" style="margin-top: 0; margin-bottom: 15px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: auto; font-size: 14px; padding: 10px 20px;">
-                        📄 Exportar Morosos a PDF
-                    </button>
-                    
-                    <div style="overflow-x: auto; max-height: 350px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px;">
-                        <table style="margin-top: 0; min-width: 500px;">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Cliente</th>
-                                    <th>Días Atraso</th>
-                                    <th>Saldo Pendiente</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tablaMorososCuerpo">
-                                <tr>
-                                    <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px;">Cargando lista de morosos...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <details style="outline: none;">
+                        <summary style="font-size: 18px; font-weight: 600; color: var(--text-primary); cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--primary-color); padding-bottom: 8px; margin-bottom: 0; outline: none;">
+                            <span style="display: flex; align-items: center; gap: 8px;">🚨 Reporte de Morosos</span>
+                            <span style="font-size: 12px; color: var(--text-secondary); font-weight: normal;">🔽 Clic para expandir</span>
+                        </summary>
+                        <div style="margin-top: 20px; cursor: default;">
+                            <p style="color: var(--text-secondary); font-size: 13px; margin-top: 0; margin-bottom: 15px;">
+                                Visualiza los clientes activos que tienen atrasos de pago y exporta la lista completa a PDF.
+                            </p>
+                            
+                            <button type="button" class="btn-pdf" id="btnExportarMorososPDF" onclick="generarReporteMorososPDF()" style="margin-top: 0; margin-bottom: 15px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: auto; font-size: 14px; padding: 10px 20px;">
+                                📄 Exportar Morosos a PDF
+                            </button>
+                            
+                            <div style="overflow-x: auto; max-height: 350px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px;">
+                                <table style="margin-top: 0; min-width: 500px;">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Cliente</th>
+                                            <th>Días Atraso</th>
+                                            <th>Saldo Pendiente</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaMorososCuerpo">
+                                        <tr>
+                                            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px;">Cargando lista de morosos...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </details>
                 </div>
             </div>
 
@@ -2188,7 +2195,8 @@
                     } finally {
                         btnAgregar.innerText = originalText;
                         btnAgregar.disabled = false;
-
+                    }
+                });
             }
         };
 
