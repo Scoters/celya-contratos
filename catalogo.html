@@ -1571,8 +1571,8 @@
             <div class="control-group">
                 <label for="sortBy">↕️ Ordenar por:</label>
                 <select id="sortBy" onchange="aplicarFiltrosYOrden()">
+                    <option value="ENGANCHE_ASC" selected>Enganche Mínimo: Menor a Mayor</option>
                     <option value="DEFAULT">Destacados (Recomendado)</option>
-                    <option value="ENGANCHE_ASC">Enganche Mínimo: Menor a Mayor</option>
                     <option value="PLAN_26_ASC">Pago Semanal (Plan Rápido): Menor a Mayor</option>
                     <option value="PLAN_52_ASC">Pago Semanal (Plan Cómodo): Menor a Mayor</option>
                     <option value="MODEL_ASC">Marca / Modelo (A-Z)</option>
@@ -1698,6 +1698,8 @@
                         </div>
                         <div id="ml-shipping-warning"
                             style="display: none; margin-top: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; align-items: center; gap: 8px;">
+                            <span style="font-size: 16px;">✈️</span>
+                            <span><strong>Envío Internacional:</strong> Este producto se envía desde el extranjero y <span id="ml-shipping-time-txt" style="font-weight: 600;">llegará pronto</span>.</span>
                         </div>
                     </div>
 
