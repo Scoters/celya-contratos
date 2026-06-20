@@ -2558,8 +2558,8 @@
 
                     const engSem26 = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165)) / 10) * 10;
                     const engSem52 = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)) / 10) * 10;
-                    const engQuin13 = engSem26;
-                    const engQuin26 = engSem52;
+                    const engQuin13 = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33)) / 10) * 10;
+                    const engQuin26 = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33)) / 10) * 10;
 
                     const engancheComodoCalculado = Math.min(engSem26, engSem52);
 
@@ -2579,6 +2579,8 @@
                     let contentEnganche = "";
                     if (freqPrevia === "contado") {
                         contentEnganche = `Pago Único: $${Math.round(item.precioContado || 0).toLocaleString('es-MX')} MXN`;
+                    } else if (freqPrevia === "quincenal") {
+                        contentEnganche = `<span>Pago Inicial</span> Enganche desde: $${Math.min(engQuin13, engQuin26).toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
                     } else {
                         contentEnganche = `<span>Pago Inicial</span> Enganche desde: $${engancheComodoCalculado.toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
                     }
@@ -2715,12 +2717,8 @@
                 if (divEnganche) {
                     divEnganche.style.opacity = '1';
                     const precioContado = parseFloat((divEnganche.getAttribute('data-precio') || '').replace(/[\$,]/g, '')) || 0;
-                    const factorEngSem = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
-                    const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165;
-                    const quinEnganche = Math.min(
-                        Math.ceil((precioContado * factorEngSem) / 10) * 10,
-                        Math.ceil((precioContado * factorEngCom) / 10) * 10
-                    );
+                    const factorEngQuin = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+                    const quinEnganche = Math.ceil((precioContado * factorEngQuin) / 10) * 10;
                     divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche desde: $${quinEnganche.toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
                 }
             } else { // contado
@@ -3030,8 +3028,10 @@
                 if (inputEng) inputEng.style.display = "block";
 
                 let factorEnganche;
-                if (freq === "QUINCENAL" || freq === "SEMANAL") {
-                    // Para semanal y quincenal, el factor depende del plazo (semanal y quincenal tienen el mismo enganche)
+                if (freq === "QUINCENAL") {
+                    factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+                } else if (freq === "SEMANAL") {
+                    // Para semanal, el factor depende del plazo
                     factorEnganche = (plazo === "52 Semanas")
                         ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
                         : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
@@ -3386,7 +3386,9 @@
             // Matemática
             const factorEnganche = (plazo === "52 Semanas")
                 ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
-                : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
+                : ((freq === "QUINCENAL")
+                    ? (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33)
+                    : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165));
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
 
@@ -3451,7 +3453,9 @@
             const precioContado = basePrice * CONFIG_TASAS.gananciaContadoFactor;
             const factorEnganche = (plazo === "52 Semanas")
                 ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
-                : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
+                : ((freq === "QUINCENAL")
+                    ? (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33)
+                    : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165));
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
             let textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (26 Semanas)" : "Plan Cómodo (52 Semanas)";
@@ -3585,7 +3589,9 @@
                     }
                     const factorEnganche = (plazo === "52 Semanas")
                         ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
-                        : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
+                        : ((freq === "QUINCENAL")
+                            ? (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33)
+                            : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165));
                     const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
 
                     const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
