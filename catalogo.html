@@ -2198,7 +2198,10 @@
             const factorEng = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
             const factorInt = CONFIG_TASAS.interes26 !== undefined ? CONFIG_TASAS.interes26 : 0.66;
             const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
-            return Math.round(((precioContado * (1 + factorInt)) - eng) / 26);
+            const totalFinanciado = (precioContado * (1 + factorInt)) - eng;
+            const cuota = totalFinanciado / 26;
+            console.log(`[DEBUG - Cuota Quin 26] Precio: ${precioContado}, FactorEng: ${factorEng}, FactorInt: ${factorInt}, Eng: ${eng}, TotalFin: ${totalFinanciado}, Cuota sin redondear: ${cuota}, Cuota redondeada: ${Math.round(cuota)}`);
+            return Math.round(cuota);
         }
 
         function calcularCuotaSemanal52(precioContado) {
@@ -2212,11 +2215,14 @@
             const factorEng = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
             const factorInt = CONFIG_TASAS.interes26 !== undefined ? CONFIG_TASAS.interes26 : 0.66;
             const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
-            return Math.round(((precioContado * (1 + factorInt)) - eng) / 13);
+            const totalFinanciado = (precioContado * (1 + factorInt)) - eng;
+            const cuota = totalFinanciado / 13;
+            console.log(`[DEBUG - Cuota Quin 13] Precio: ${precioContado}, FactorEng: ${factorEng}, FactorInt: ${factorInt}, Eng: ${eng}, TotalFin: ${totalFinanciado}, Cuota sin redondear: ${cuota}, Cuota redondeada: ${Math.round(cuota)}`);
+            return Math.round(cuota);
         }
 
         function calcularCuotaQuincenal26(precioContado) {
-            const factorEng = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165;
+            const factorEng = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
             const factorInt = CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90;
             const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
             return Math.round(((precioContado * (1 + factorInt)) - eng) / 26);
@@ -3001,6 +3007,7 @@
                 } else { // "CONTADO" o cualquier otro caso, aunque CONTADO ya se maneja antes
                     factorEnganche = 0; // No hay enganche para contado
                 }
+                console.log(`[DEBUG - actualizarPrecioCalculadoPDP] Determined factorEnganche: ${factorEnganche}`);
                 const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
 
                 const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
