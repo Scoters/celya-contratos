@@ -2212,20 +2212,11 @@
         }
 
         function calcularCuotaQuincenal13(precioContado) {
-            const factorEng = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
-            const factorInt = CONFIG_TASAS.interes26 !== undefined ? CONFIG_TASAS.interes26 : 0.66;
-            const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
-            const totalFinanciado = (precioContado * (1 + factorInt)) - eng;
-            const cuota = totalFinanciado / 13;
-            console.log(`[DEBUG - Cuota Quin 13] Precio: ${precioContado}, FactorEng: ${factorEng}, FactorInt: ${factorInt}, Eng: ${eng}, TotalFin: ${totalFinanciado}, Cuota sin redondear: ${cuota}, Cuota redondeada: ${Math.round(cuota)}`);
-            return Math.round(cuota);
+            return calcularCuotaSemanal26(precioContado) * 2;
         }
 
         function calcularCuotaQuincenal26(precioContado) {
-            const factorEng = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
-            const factorInt = CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90;
-            const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
-            return Math.round(((precioContado * (1 + factorInt)) - eng) / 26);
+            return calcularCuotaSemanal52(precioContado) * 2;
         }
 
         // Extrae la marca del título del modelo de forma inteligente
@@ -2400,6 +2391,26 @@
             const sortSelected = document.getElementById('sortBy').value;
             const contenedor = document.getElementById('contenedorResultados');
 
+            // Guardar frecuencias seleccionadas antes de vaciar
+            const frecuenciasGuardadas = new Map();
+            if (contenedor) {
+                const cardsExistentes = contenedor.querySelectorAll('.card-celular');
+                cardsExistentes.forEach(card => {
+                    const itemId = card.getAttribute('data-item-id');
+                    const activeBtn = card.querySelector('.freq-btn.active');
+                    if (itemId && activeBtn) {
+                        const clickAttr = activeBtn.getAttribute('onclick') || '';
+                        let freq = "semanal";
+                        if (clickAttr.includes('quincenal')) {
+                            freq = "quincenal";
+                        } else if (clickAttr.includes('contado')) {
+                            freq = "contado";
+                        }
+                        frecuenciasGuardadas.set(itemId, freq);
+                    }
+                });
+            }
+
             // Indicar visualmente si lo que se muestra proviene de caché
             try {
                 if (window.catalogCacheActive) {
@@ -2547,10 +2558,30 @@
 
                     const engSem26 = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165)) / 10) * 10;
                     const engSem52 = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)) / 10) * 10;
-                    const engQuin13 = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33)) / 10) * 10;
-                    const engQuin26 = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)) / 10) * 10;
+                    const engQuin13 = engSem26;
+                    const engQuin26 = engSem52;
 
                     const engancheComodoCalculado = Math.min(engSem26, engSem52);
+
+                    // Determinar frecuencia previamente seleccionada
+                    const freqPrevia = frecuenciasGuardadas.get(item.id) || "semanal";
+
+                    const activeSem = freqPrevia === "semanal" ? "active" : "";
+                    const activeQuin = freqPrevia === "quincenal" ? "active" : "";
+                    const activeCont = freqPrevia === "contado" ? "active" : "";
+
+                    const displaySem = freqPrevia === "semanal" ? "" : "display: none;";
+                    const displayQuin = freqPrevia === "quincenal" ? "" : "display: none;";
+                    const displayCont = freqPrevia === "contado" ? "" : "display: none;";
+
+                    const textSolicitar = freqPrevia === "contado" ? "Comprar de Contado" : "Pedir a Crédito";
+
+                    let contentEnganche = "";
+                    if (freqPrevia === "contado") {
+                        contentEnganche = `Pago Único: $${Math.round(item.precioContado || 0).toLocaleString('es-MX')} MXN`;
+                    } else {
+                        contentEnganche = `<span>Pago Inicial</span> Enganche desde: $${engancheComodoCalculado.toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
+                    }
 
                     // Simple template
                     const cardHtml = `
@@ -2573,22 +2604,20 @@
                                 </div>
                                 ${item.precioContado ? `<div class="price-row"><span class="price-contado">Precio Contado:</span><span class="price-contado"><span>$${Math.round(item.precioContado).toLocaleString('es-MX')} MXN</span></span></div>` : ''}
                                 <div class="enganche" data-enganche="${engancheComodoCalculado.toLocaleString('es-MX')}" data-precio="${Math.round(item.precioContado).toLocaleString('es-MX')}">
-                                    <span>Pago Inicial</span>
-                                    Enganche desde: $${engancheComodoCalculado.toLocaleString('es-MX')} MXN
-                                    <span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>
+                                    ${contentEnganche}
                                 </div>
                             </div>
                             <div>
                                 <div class="frecuencia-toggle-container">
                                     <span style="font-size: 12px; font-weight: 600; color: var(--text-muted);">Pago:</span>
                                     <div class="frecuencia-toggle">
-                                        <button type="button" class="freq-btn active" onclick="setCardFrecuencia(this, 'semanal')">Semanal</button>
-                                        <button type="button" class="freq-btn" onclick="setCardFrecuencia(this, 'quincenal')">Quincenal</button>
-                                        <button type="button" class="freq-btn" onclick="setCardFrecuencia(this, 'contado')">Contado</button>
+                                        <button type="button" class="freq-btn ${activeSem}" onclick="setCardFrecuencia(this, 'semanal')">Semanal</button>
+                                        <button type="button" class="freq-btn ${activeQuin}" onclick="setCardFrecuencia(this, 'quincenal')">Quincenal</button>
+                                        <button type="button" class="freq-btn ${activeCont}" onclick="setCardFrecuencia(this, 'contado')">Contado</button>
                                     </div>
                                 </div>
                                 <div class="cuotas">
-                                    <div class="cuotas-semanal">
+                                    <div class="cuotas-semanal" style="${displaySem}">
                                         <div class="cuota-item" style="align-items: center;">
                                             <span class="plan-label">⏱️ Plan Rápido (26 semanas):</span>
                                             <div style="text-align: right;">
@@ -2604,7 +2633,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="cuotas-quincenal" style="display: none;">
+                                    <div class="cuotas-quincenal" style="${displayQuin}">
                                         <div class="cuota-item" style="align-items: center;">
                                             <span class="plan-label">⏱️ Plan Rápido (13 quincenas):</span>
                                             <div style="text-align: right;">
@@ -2620,14 +2649,14 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="cuotas-contado" style="display: none;">
+                                    <div class="cuotas-contado" style="${displayCont}">
                                         <div class="cuota-item">
                                             <span class="plan-label">💵 Precio de Contado:</span>
                                             <span class="plan-val" style="font-size: 16px; font-weight: 700; color: #10b981;">$${Math.round(item.precioContado || 0).toLocaleString('es-MX')} MXN</span>
                                         </div>
                                     </div>
                                 </div>
-                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/\'/g, "").replace(/\"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheComodoCalculado}, '${item.color || ""}', '${item.memoria || ""}', this)">Pedir a Crédito</button>
+                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/\'/g, "").replace(/\"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheComodoCalculado}, '${item.color || ""}', '${item.memoria || ""}', this)">${textSolicitar}</button>
                             </div>
                         </div>
                     `;
@@ -2686,8 +2715,12 @@
                 if (divEnganche) {
                     divEnganche.style.opacity = '1';
                     const precioContado = parseFloat((divEnganche.getAttribute('data-precio') || '').replace(/[\$,]/g, '')) || 0;
-                    const factorEngQuin = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
-                    const quinEnganche = Math.ceil((precioContado * factorEngQuin) / 10) * 10;
+                    const factorEngSem = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
+                    const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165;
+                    const quinEnganche = Math.min(
+                        Math.ceil((precioContado * factorEngSem) / 10) * 10,
+                        Math.ceil((precioContado * factorEngCom) / 10) * 10
+                    );
                     divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche desde: $${quinEnganche.toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
                 }
             } else { // contado
@@ -2997,10 +3030,8 @@
                 if (inputEng) inputEng.style.display = "block";
 
                 let factorEnganche;
-                if (freq === "QUINCENAL") {
-                    factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
-                } else if (freq === "SEMANAL") {
-                    // Para semanal, el factor depende del plazo
+                if (freq === "QUINCENAL" || freq === "SEMANAL") {
+                    // Para semanal y quincenal, el factor depende del plazo (semanal y quincenal tienen el mismo enganche)
                     factorEnganche = (plazo === "52 Semanas")
                         ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
                         : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
@@ -3355,9 +3386,7 @@
             // Matemática
             const factorEnganche = (plazo === "52 Semanas")
                 ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
-                : ((freq === "SEMANAL")
-                    ? (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165)
-                    : (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33));
+                : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
 
@@ -3422,9 +3451,7 @@
             const precioContado = basePrice * CONFIG_TASAS.gananciaContadoFactor;
             const factorEnganche = (plazo === "52 Semanas")
                 ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
-                : ((freq === "SEMANAL")
-                    ? (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165)
-                    : (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33));
+                : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
             let textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (26 Semanas)" : "Plan Cómodo (52 Semanas)";
@@ -3558,9 +3585,7 @@
                     }
                     const factorEnganche = (plazo === "52 Semanas")
                         ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
-                        : ((freq === "SEMANAL")
-                            ? (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165)
-                            : (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33));
+                        : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
                     const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
 
                     const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
