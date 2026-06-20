@@ -2663,9 +2663,6 @@
                 if (btnSolicitar) btnSolicitar.innerText = 'Pedir a Crédito';
                 if (divEnganche) {
                     divEnganche.style.opacity = '1';
-                    console.log(`[DEBUG] Card ID: ${card.dataset.id}, Freq: ${freq}`);
-                    console.log(`[DEBUG] Card ID: ${card.dataset.id}, Freq: ${freq}, Precio Contado: ${precioContado}`);
-                    console.log(`[DEBUG] Weekly Enganche: ${weeklyEnganche}`);
                     const precioContado = parseFloat((divEnganche.getAttribute('data-precio') || '').replace(/[\$,]/g, '')) || 0;
                     const factorEngSem = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
                     const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165;
@@ -2673,6 +2670,7 @@
                         Math.ceil((precioContado * factorEngSem) / 10) * 10,
                         Math.ceil((precioContado * factorEngCom) / 10) * 10
                     );
+                    console.log(`[DEBUG - setCardFrecuencia] Card ID: ${card.dataset.id}, Freq: ${freq}, Calculated Weekly Enganche: ${weeklyEnganche}`);
                     divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche desde: $${weeklyEnganche.toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
                 }
             } else if (freq === 'quincenal') {
@@ -2685,6 +2683,7 @@
                     const precioContado = parseFloat((divEnganche.getAttribute('data-precio') || '').replace(/[\$,]/g, '')) || 0;
                     const factorEngQuin = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
                     const quinEnganche = Math.ceil((precioContado * factorEngQuin) / 10) * 10;
+                    console.log(`[DEBUG - setCardFrecuencia] Card ID: ${card.dataset.id}, Freq: ${freq}, Calculated Quin Enganche: ${quinEnganche}`);
                     divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche desde: $${quinEnganche.toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
                 }
             } else { // contado
@@ -2787,6 +2786,7 @@
                     }
                 }
             }
+            console.log(`[DEBUG - abrirModalCredito] Frecuencia inicial determinada: ${freqInicial}`);
 
             // Establecer frecuencia en el select del modal
             const cliFrecuencia = document.getElementById('cliFrecuencia');
@@ -2995,6 +2995,8 @@
             } else {
                 if (labelEng) labelEng.style.display = "block";
                 if (inputEng) inputEng.style.display = "block";
+
+                console.log(`[DEBUG - actualizarPrecioCalculadoPDP] Freq: ${freq}, Plazo: ${plazo}, Precio Contado: ${precioContado}`);
 
                 const factorEnganche = (plazo === "52 Semanas")
                     ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
