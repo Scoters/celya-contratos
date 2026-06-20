@@ -185,9 +185,6 @@
             <label>Modelo Seleccionado:</label>
             <input type="text" id="modeloDisplay" name="modelo" readonly>
 
-            <label>Monto de Enganche Pago ($):</label>
-            <input type="text" id="engancheDisplay" readonly>
-
             <label for="agendaCobro">📆 Frecuencia y Día de Pago Obligatorio:</label>
             <select id="agendaCobro" required>
                 <option value="">-- Selecciona cómo y cuándo pagará --</option>
@@ -652,13 +649,13 @@
         document.getElementById('selectDispositivo').addEventListener('change', actualizarFormularioPrecios);
         document.getElementById('agendaCobro').addEventListener('change', procesarAgendaCobro);
         document.getElementById('plazoSemanas').addEventListener('change', function () {
-            actualizarEngancheYFinanciamientoPorPlazo();
+            actualizarEngancheYFinanciamientoPorPlazo(true);
         });
         document.getElementById('monto').addEventListener('input', function () {
-            actualizarEngancheYFinanciamientoPorPlazo();
+            actualizarEngancheYFinanciamientoPorPlazo(false);
         });
 
-        function actualizarEngancheYFinanciamientoPorPlazo() {
+        function actualizarEngancheYFinanciamientoPorPlazo(forceReset = false) {
             const imeiSelected = document.getElementById('selectDispositivo').value;
             const equipo = cacheInventario.find(e => e.imei === imeiSelected);
             if (!equipo) return;
@@ -673,7 +670,6 @@
 
                 if (frecuencia === "CONTADO") {
                     // Contado: Pago inicial = Precio de contado, Total Financiado = 0, Cuota = 0
-                    document.getElementById('engancheDisplay').value = precioContado;
                     document.getElementById('monto').value = precioContado;
                     totalFinanciadoActual = 0;
                     document.getElementById('totalFinanciado').value = "$0";
@@ -688,32 +684,55 @@
                             : (CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.165));
                     const engancheMinimoObligatorio = Math.ceil((precioContado * factorEngancheMinimo) / 10) * 10;
 
-                    // Actualizar enganche
-                    document.getElementById('engancheDisplay').value = engancheMinimoObligatorio;
-
-                    // Obtener enganche ingresado (si es que el usuario escribió algo y es mayor)
                     const inputMonto = document.getElementById('monto');
-                    let engancheIngresado = parseFloat(inputMonto.value) || 0;
-
-                    let engancheEfectivo = engancheMinimoObligatorio;
-                    if (engancheIngresado > engancheMinimoObligatorio) {
-                        engancheEfectivo = engancheIngresado;
+                    
+                    if (forceReset) {
+                        inputMonto.value = engancheMinimoObligatorio;
                     } else {
-                        // Si no ha escrito nada o es menor, y no tiene el foco activo, ponemos el mínimo
-                        if (document.activeElement !== inputMonto) {
-                            inputMonto.value = engancheMinimoObligatorio;
+                        let engancheIngresado = parseFloat(inputMonto.value) || 0;
+                        if (engancheIngresado < engancheMinimoObligatorio) {
+                            if (document.activeElement !== inputMonto) {
+                                inputMonto.value = engancheMinimoObligatorio;
+                            }
                         }
                     }
 
-                    // Actualizar total financiado
-                    const factorInteres = (planElegido === "26") ? CONFIG_TASAS_SHEETS.interes26 : CONFIG_TASAS_SHEETS.interes52;
-                    const totalFinanciadoCalculado = Math.round((precioContado * (1 + factorInteres)) - engancheEfectivo);
+                    let engancheIngresado = parseFloat(inputMonto.value) || 0;
+                    let engancheEfectivo = engancheMinimoObligatorio;
+                    if (engancheIngresado > engancheMinimoObligatorio) {
+                        engancheEfectivo = engancheIngresado;
+                    }
 
+                    // --- CALCULAR CUOTA BASE Y CUOTA ACTIVA EXACTAMENTE COMO EN CATALOGO.HTML ---
+                    const factorEngSemanal = (planElegido === "52")
+                        ? (CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.11)
+                        : (CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.165);
+                    const engSemanalCalculado = Math.ceil((precioContado * factorEngSemanal) / 10) * 10;
+                    
+                    const factorInteres = (planElegido === "26") ? CONFIG_TASAS_SHEETS.interes26 : CONFIG_TASAS_SHEETS.interes52;
+                    const totalFinanciadoSemanal = (precioContado * (1 + factorInteres)) - engSemanalCalculado;
+                    const numPagosSemanales = (planElegido === "26") ? 26 : 52;
+                    
+                    let cuotaBase = totalFinanciadoSemanal / numPagosSemanales;
+                    
+                    if (frecuencia === "QUINCENAL") {
+                        cuotaBase = cuotaBase * 2;
+                    }
+                    
+                    const numPagos = (frecuencia === "QUINCENAL") ? (numPagosSemanales / 2) : numPagosSemanales;
+
+                    let cuotaActiva = cuotaBase;
+                    if (engancheEfectivo > engancheMinimoObligatorio) {
+                        const extraEnganche = engancheEfectivo - engancheMinimoObligatorio;
+                        cuotaActiva = cuotaBase - (extraEnganche / numPagos);
+                    }
+
+                    const cuotaFinal = Math.round(cuotaActiva);
+                    document.getElementById('cuota').value = "$" + cuotaFinal.toLocaleString('es-MX');
+
+                    const totalFinanciadoCalculado = cuotaFinal * numPagos;
                     totalFinanciadoActual = totalFinanciadoCalculado;
                     document.getElementById('totalFinanciado').value = "$" + totalFinanciadoCalculado.toLocaleString('es-MX');
-
-                    // Recalcular cuota
-                    recalcularCuotaPorFrecuenciaModificada(frecuencia);
                 }
             }
         }
@@ -725,7 +744,6 @@
             if (!equipo) {
                 totalFinanciadoActual = 0;
                 document.getElementById('modeloDisplay').value = "";
-                document.getElementById('engancheDisplay').value = "";
                 if (document.getElementById('precioContado')) {
                     document.getElementById('precioContado').value = "";
                 }
@@ -742,7 +760,7 @@
             }
 
             // Llamamos a la función de cálculo dinámico para llenar enganche, total financiado y cuota
-            actualizarEngancheYFinanciamientoPorPlazo();
+            actualizarEngancheYFinanciamientoPorPlazo(true);
 
             document.getElementById('totalLetraHidden').value = equipo.totalLetra || "";
 
@@ -816,24 +834,11 @@
             }
 
             // 2. Ejecutamos la matemática de la cuota dinero
-            actualizarEngancheYFinanciamientoPorPlazo();
+            actualizarEngancheYFinanciamientoPorPlazo(true);
         }
 
         function recalcularCuotaPorFrecuenciaModificada(frecuencia) {
-            const plazoSemanas = parseInt(document.getElementById('plazoSemanas').value) || 26;
-            if (frecuencia === "CONTADO") {
-                document.getElementById('cuota').value = "$0";
-                return;
-            }
-            if (totalFinanciadoActual === 0) return;
-
-            let totalAbonos = plazoSemanas;
-            if (frecuencia === "QUINCENAL") {
-                totalAbonos = plazoSemanas / 2;
-            }
-
-            let cuotaCalculada = totalFinanciadoActual / totalAbonos;
-            document.getElementById('cuota').value = "$" + Math.round(cuotaCalculada).toLocaleString('es-MX');
+            // Se calcula directamente dentro de actualizarEngancheYFinanciamientoPorPlazo
         }
 
         document.getElementById('contratoForm').addEventListener('submit', async function (e) {
