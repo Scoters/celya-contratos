@@ -3011,6 +3011,9 @@
                 btnSubmit.style.cursor = "pointer";
             }
 
+            // Save the base model's default cash price for fallback resolved pricing checks
+            window.pdpBasePrecioContado = precioContado || 0;
+
             document.getElementById('hiddenId').value = id;
             document.getElementById('hiddenModelo').value = modelo;
             document.getElementById('hiddenEsFijo').value = esFijo;
@@ -4589,6 +4592,10 @@
                         precioReal = localPrice / gananciaFactor;
                     }
                 }
+            }
+            if (precioReal <= 0 && window.pdpBasePrecioContado > 0) {
+                const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
+                precioReal = window.pdpBasePrecioContado / gananciaFactor;
             }
             const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
             return Math.round(precioReal * gananciaFactor);
@@ -6714,6 +6721,12 @@
                         precioReal = localPrice / gananciaFactor;
                     }
                 }
+            }
+
+            // Fallback to base model price if resolved price is <= 0
+            if (precioReal <= 0 && window.pdpBasePrecioContado > 0) {
+                const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
+                precioReal = window.pdpBasePrecioContado / gananciaFactor;
             }
 
             if (precioReal > 0) {
