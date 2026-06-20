@@ -436,6 +436,7 @@
         function procesarFoto(input, previewId, tipo) {
             const file = input.files[0];
             if (!file) return;
+            document.getElementById(previewId).innerHTML = `<span style="color:#e67e22; font-size:12px; font-weight:bold;">⏳ Procesando y optimizando imagen...</span>`;
             const reader = new FileReader();
             reader.onload = function (evt) {
                 let img = new Image();
@@ -917,12 +918,36 @@
                 sheetData.append('ineTraseraBase64', ineTraseraB64);
                 sheetData.append('fotoEvidenciaBase64', fotoEvidenciaB64);
 
-                const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    body: sheetData.toString(),
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                const responseText = await new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', CONFIG.GOOGLE_SCRIPT_URL);
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                    // Track upload progress dynamically
+                    xhr.upload.addEventListener('progress', (e) => {
+                        if (e.lengthComputable) {
+                            const percent = Math.round((e.loaded / e.total) * 100);
+                            if (percent < 100) {
+                                btn.innerText = `⏳ Subiendo expediente: ${percent}%`;
+                            } else {
+                                btn.innerText = `⏳ Guardando y procesando en Google...`;
+                            }
+                        }
+                    });
+
+                    xhr.onload = () => {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            resolve(xhr.responseText);
+                        } else {
+                            reject(new Error(`Server error: ${xhr.status}`));
+                        }
+                    };
+
+                    xhr.onerror = () => reject(new Error('Error de red al subir'));
+                    xhr.send(sheetData.toString());
                 });
-                const data = await res.json();
+
+                const data = JSON.parse(responseText);
 
                 if (data.result === 'success') {
                     btn.innerText = "✅ ¡Contrato Guardado con Éxito!";
