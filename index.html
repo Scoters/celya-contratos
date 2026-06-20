@@ -713,10 +713,11 @@
                     const totalFinanciadoSemanal = (precioContado * (1 + factorInteres)) - engSemanalCalculado;
                     const numPagosSemanales = (planElegido === "26") ? 26 : 52;
                     
-                    let cuotaBase = totalFinanciadoSemanal / numPagosSemanales;
+                    const cuotaSemanalBase = Math.round(totalFinanciadoSemanal / numPagosSemanales);
                     
+                    let cuotaBase = cuotaSemanalBase;
                     if (frecuencia === "QUINCENAL") {
-                        cuotaBase = cuotaBase * 2;
+                        cuotaBase = cuotaSemanalBase * 2;
                     }
                     
                     const numPagos = (frecuencia === "QUINCENAL") ? (numPagosSemanales / 2) : numPagosSemanales;
