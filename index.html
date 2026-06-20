@@ -6691,6 +6691,17 @@
             });
 
             if (!varianteSeleccionada) {
+                // Display warning and hide the credit form if the selected variant combo is unavailable
+                if (warningEl) {
+                    warningEl.innerHTML = '<strong>⚠️ Combinación no disponible:</strong> Esta combinación de color y almacenamiento no está disponible actualmente. Por favor selecciona otra variante.';
+                    warningEl.style.display = 'block';
+                }
+                if (formCard) formCard.style.display = 'none';
+                if (btnSubmit) {
+                    btnSubmit.disabled = true;
+                    btnSubmit.style.opacity = "0.5";
+                    btnSubmit.style.cursor = "not-allowed";
+                }
                 return;
             }
 
