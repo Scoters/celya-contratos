@@ -629,10 +629,20 @@
                             <span id="semaforoSaludText" style="font-weight: 600;">Estado de salud</span>
                         </div>
 
+                        <!-- Contador de semanas para rescisión -->
+                        <div id="rescisionContainer" style="margin-top: 8px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.04);">
+                            <span style="color: #a0aec0;">Semanas de atraso: <strong id="semanasAtrasoTexto" style="color: #fff;">0 / 0</strong></span>
+                            <span id="badgeRescision" style="display: none; background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px;">⚠️ APTO PARA RESCISIÓN</span>
+                        </div>
+
                         <!-- Promesa de pago activa (si existe) -->
                         <div id="promesaActivaContainer" style="display: none; margin-top: 15px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 10px;">
                             <span style="font-weight: bold; color: #60a5fa; font-size: 13px; display: block; margin-bottom: 2px;">📅 Promesa de Pago Activa:</span>
-                            <span id="promesaActivaDetalle" style="font-size: 13px; color: #fff;"></span>
+                            <span id="promesaActivaDetalle" style="font-size: 13px; color: #fff; display: block; margin-bottom: 8px;"></span>
+                            <div style="display: flex; gap: 8px;">
+                                <button type="button" onclick="resolverPromesaPago('CUMPLIDA')" style="background: #10b981; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">✅ Cumplida</button>
+                                <button type="button" onclick="resolverPromesaPago('INCUMPLIDA')" style="background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">❌ Incumplida</button>
+                            </div>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
@@ -659,13 +669,13 @@
                         <details id="detallesLiquidacion" style="margin-top: 20px; font-size: 13px; color: var(--text-secondary); cursor: pointer;">
                             <summary style="color: #64748b; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06); outline: none;">
                                 ⚙️ Opciones avanzadas de liquidación
-                            </summary>
-                            <div style="margin-top: 12px; padding: 12px; background: rgba(15, 23, 42, 0.4); border-radius: 8px; border: 1px dashed rgba(255, 255, 255, 0.1); cursor: default;" onclick="event.stopPropagation()">
-                                <p style="margin: 0 0 10px 0; font-size: 12px; color: #a0aec0;">¿El cliente quiere liquidar todo el celular hoy? Aplica un 15% de descuento en el saldo restante:</p>
-                                <button type="button" id="btnLiquidacionAnticipada" onclick="aplicarDescuentoLiquidacion()" style="margin-top: 0; padding: 10px 14px; font-size: 13px; font-weight: bold; width:100%;">
-                                    🚀 Calcular Liquidación con Descuento
-                                </button>
-                            </div>
+                             </summary>
+                             <div style="margin-top: 12px; padding: 12px; background: rgba(15, 23, 42, 0.4); border-radius: 8px; border: 1px dashed rgba(255, 255, 255, 0.1); cursor: default;" onclick="event.stopPropagation()">
+                                 <p id="descLiquidacionTexto" style="margin: 0 0 10px 0; font-size: 12px; color: #a0aec0;">¿El cliente quiere liquidar todo el celular hoy? Aplica un 15% de descuento en el saldo restante:</p>
+                                 <button type="button" id="btnLiquidacionAnticipada" onclick="aplicarDescuentoLiquidacion()" style="margin-top: 0; padding: 10px 14px; font-size: 13px; font-weight: bold; width:100%;">
+                                     🚀 Calcular Liquidación con Descuento
+                                 </button>
+                             </div>
                         </details>
 
                         <!-- Opciones de promesa de pago colapsables -->
@@ -812,10 +822,53 @@
                     <input type="number" step="0.1" id="cfg-enganche-comodo" name="engancheComodo" min="0" placeholder="Ej. 16.5">
                 </div>
 
+                <div class="form-group-config">
+                    <label for="cfg-descuento-liquidacion">🚀 % Descuento Liquidación Anticipada</label>
+                    <input type="number" step="0.1" id="cfg-descuento-liquidacion" name="descuentoLiquidacion" min="0" placeholder="Ej. 15">
+                </div>
+
+                <div class="form-group-config">
+                    <label for="cfg-telegram-token">🤖 Telegram Bot Token</label>
+                    <input type="text" id="cfg-telegram-token" name="telegramBotToken" placeholder="Ej. 123456789:ABCdef...">
+                </div>
+
+                <div class="form-group-config">
+                    <label for="cfg-telegram-chatid">💬 Telegram Chat ID</label>
+                    <input type="text" id="cfg-telegram-chatid" name="telegramChatId" placeholder="Ej. -1001234567890">
+                </div>
+
                 <button type="button" class="btn-save-config" onclick="guardarConfiguracionGlobal()">
                     💾 Guardar Parámetros
                 </button>
+
+                <button type="button" class="btn-test-telegram" onclick="probarNotificacionTelegram()" style="margin-top: 12px; padding: 10px 14px; font-size: 13px; font-weight: bold; width:100%; background: linear-gradient(135deg, #10b981, #059669); border:none; color:white; border-radius:6px; cursor:pointer;">
+                    🔔 Enviar Resumen de Prueba a Telegram
+                </button>
+
+                <button type="button" class="btn-webhook-telegram" onclick="activarWebhookTelegram()" style="margin-top: 10px; padding: 10px 14px; font-size: 13px; font-weight: bold; width:100%; background: linear-gradient(135deg, #3b82f6, #1d4ed8); border:none; color:white; border-radius:6px; cursor:pointer;">
+                    🔗 Activar Webhook de Comandos Telegram
+                </button>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal de Recibo de Pago para Copiar -->
+    <div id="modal-recibo-pago" class="modal-celya-config" style="display: none; z-index: 10000;">
+        <div class="modal-config-content" style="max-width: 500px; text-align: center; border-top: 5px solid #10b981;">
+            <span class="close-config-btn" onclick="cerrarModalRecibo()">&times;</span>
+            <h2>🎉 ¡Abono Registrado!</h2>
+            <p class="modal-subtitle">Copia el mensaje de confirmación para enviarlo al cliente por WhatsApp:</p>
+            
+            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 15px; margin: 15px 0; text-align: left;">
+                <textarea id="txt-recibo-mensaje" style="width: 100%; min-height: 140px; background: transparent; border: none; color: white; outline: none; font-family: inherit; font-size: 14px; resize: none; line-height: 1.5;" readonly></textarea>
+            </div>
+            
+            <button type="button" class="btn-save-config" onclick="copiarMensajeRecibo()" style="background: linear-gradient(135deg, #10b981, #059669); margin-bottom: 10px; width: 100%;">
+                📋 Copiar Mensaje
+            </button>
+            <button type="button" onclick="cerrarModalReciboYRecargar()" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 10px 14px; width: 100%; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; border-color: rgba(255,255,255,0.2);">
+                Cerrar y Actualizar Pantalla
+            </button>
         </div>
     </div>
 
@@ -825,6 +878,7 @@
         let dbInventarioEquipos = [];
         let dbHistorialPagos = [];
         let listaPromesasGlobal = [];
+        let configGlobal = {};
         let clienteSeleccionadoActual = null;
 
         function limpiarNombreModelo(modelo) {
@@ -886,6 +940,7 @@
                     return;
                 }
 
+                configGlobal = datos.config || {};
                 document.getElementById('cfg-interes-moratorio').value = datos.config.interes;
                 document.getElementById('cfg-horas-tolerancia').value = datos.config.horastol;
                 document.getElementById('cfg-semanas-rescindir').value = datos.config.semanastol;
@@ -895,6 +950,7 @@
                 document.getElementById('cfg-enganche-semanal').value = datos.config.engancheSemanal !== undefined ? datos.config.engancheSemanal : 16.5;
                 document.getElementById('cfg-enganche-quincenal').value = datos.config.engancheQuincenal !== undefined ? datos.config.engancheQuincenal : 33;
                 document.getElementById('cfg-enganche-comodo').value = datos.config.engancheComodo !== undefined ? datos.config.engancheComodo : 16.5;
+                document.getElementById('cfg-descuento-liquidacion').value = datos.config.descuentoLiquidacion !== undefined ? datos.config.descuentoLiquidacion : 15;
 
                 dbClientesActivos = datos.clientesActivos || [];
                 listaClientesGlobal = dbClientesActivos;
@@ -1057,6 +1113,27 @@
                     }
                 }
 
+                // Contador de semanas de atraso vs toleradas
+                const semanasAtrasoTexto = document.getElementById('semanasAtrasoTexto');
+                const badgeRescision = document.getElementById('badgeRescision');
+                if (semanasAtrasoTexto && badgeRescision) {
+                    let semanasToleradas = parseInt(configGlobal.semanasTolerancia) || 3;
+                    let semanasAtraso = Math.floor(diasAtraso / 7);
+                    semanasAtrasoTexto.innerText = `${semanasAtraso} / ${semanasToleradas}`;
+                    if (semanasAtraso >= semanasToleradas) {
+                        badgeRescision.style.display = 'inline-block';
+                    } else {
+                        badgeRescision.style.display = 'none';
+                    }
+                }
+
+                // Actualizar texto del descuento por liquidación anticipada
+                const descLiquidacionTexto = document.getElementById('descLiquidacionTexto');
+                if (descLiquidacionTexto) {
+                    let descPct = parseFloat(configGlobal.descuentoLiquidacion) || 15;
+                    descLiquidacionTexto.innerText = `¿El cliente quiere liquidar todo el celular hoy? Aplica un ${descPct}% de descuento en el saldo restante:`;
+                }
+
                 // Mostrar promesa de pago activa
                 mostrarPromesaActiva(clienteSeleccionadoActual.imei);
 
@@ -1111,6 +1188,45 @@
                 container.style.display = 'block';
             } else if (container) {
                 container.style.display = 'none';
+            }
+        }
+
+        // Marcar promesa de pago como cumplida o incumplida
+        async function resolverPromesaPago(nuevoEstatus) {
+            if (!clienteSeleccionadoActual) return;
+            const imei = clienteSeleccionadoActual.imei;
+
+            if (!confirm(`¿Estás seguro de marcar esta promesa como ${nuevoEstatus}?`)) {
+                return;
+            }
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('action', 'actualizarEstatusPromesa');
+                formData.append('token', CONFIG.API_TOKEN);
+                formData.append('imei', imei);
+                formData.append('estatus', nuevoEstatus);
+
+                const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData.toString(),
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                const data = await res.json();
+
+                if (data.result === 'success') {
+                    toast(`Promesa marcada como ${nuevoEstatus} con éxito.`, 'success');
+
+                    // Remover de caché local
+                    listaPromesasGlobal = listaPromesasGlobal.filter(p => p.imei !== imei);
+
+                    // Actualizar UI
+                    mostrarPromesaActiva(imei);
+                } else {
+                    toast('Error al actualizar promesa: ' + (data.message || 'Error desconocido'), 'error');
+                }
+            } catch (err) {
+                toast('Error de red al actualizar promesa.', 'error');
             }
         }
 
@@ -1196,8 +1312,11 @@
         function aplicarDescuentoLiquidacion() {
             if (!clienteSeleccionadoActual) return;
 
+            let descPct = parseFloat(configGlobal.descuentoLiquidacion) || 15;
+            let factorDescuento = 1 - (descPct / 100);
+
             let saldoTotalConInteres = parseFloat(clienteSeleccionadoActual.saldoPendiente) || 0;
-            let cantidadConDescuento = Math.round(saldoTotalConInteres * 0.85); // 15% de descuento directo en intereses
+            let cantidadConDescuento = Math.round(saldoTotalConInteres * factorDescuento);
 
             // Colocamos el monto calculado directo en el input para que solo le den clic a registrar
             document.getElementById('montoAbono').value = cantidadConDescuento;
@@ -1243,7 +1362,25 @@
 
                     if (data.result === 'success') {
                         toast('Abono registrado exitosamente.', 'success', 'Abono guardado');
-                        location.reload();
+                        
+                        // Calcular nuevo saldo pendiente
+                        const abonoMonto = parseFloat(monto) || 0;
+                        const saldoActual = parseFloat(clienteSeleccionadoActual.saldoPendiente) || 0;
+                        const nuevoSaldo = Math.max(0, Math.round(saldoActual - abonoMonto));
+                        
+                        // Generar el mensaje
+                        const mensaje = `¡Hola, ${clienteSeleccionadoActual.cliente}! 👋\n` +
+                                        `Te confirmamos que hemos registrado tu abono exitosamente.\n\n` +
+                                        `💵 *Monto recibido:* $${Math.round(abonoMonto).toLocaleString('es-MX')}\n` +
+                                        `📉 *Nuevo saldo pendiente:* $${nuevoSaldo.toLocaleString('es-MX')}\n\n` +
+                                        `¡Muchas gracias por tu pago y por mantener tu cuenta al corriente! 😊\n` +
+                                        `CelYa! te desea un excelente día. ✨`;
+                                        
+                        document.getElementById('txt-recibo-mensaje').value = mensaje;
+                        document.getElementById('modal-recibo-pago').style.display = 'block';
+                        
+                        btn.innerText = originalText;
+                        btn.disabled = false;
                     } else {
                         toast('Error al registrar abono: ' + (data.message || 'Error desconocido'), 'error');
                         btn.innerText = originalText;
@@ -1295,6 +1432,9 @@
                     document.getElementById('cfg-enganche-semanal').value = data.config.engancheSemanal || 16.5;
                     document.getElementById('cfg-enganche-quincenal').value = data.config.engancheQuincenal || 33;
                     document.getElementById('cfg-enganche-comodo').value = data.config.engancheComodo || 16.5;
+                    document.getElementById('cfg-descuento-liquidacion').value = data.config.descuentoLiquidacion || 15;
+                    document.getElementById('cfg-telegram-token').value = data.config.telegramBotToken || '';
+                    document.getElementById('cfg-telegram-chatid').value = data.config.telegramChatId || '';
                 }
             } catch (e) {
                 console.error("Error al cargar la configuración global:", e);
@@ -1319,6 +1459,9 @@
             params.append('engancheSemanal', document.getElementById('cfg-enganche-semanal').value);
             params.append('engancheQuincenal', document.getElementById('cfg-enganche-quincenal').value);
             params.append('engancheComodo', document.getElementById('cfg-enganche-comodo').value);
+            params.append('descuentoLiquidacion', document.getElementById('cfg-descuento-liquidacion').value);
+            params.append('telegramBotToken', document.getElementById('cfg-telegram-token').value);
+            params.append('telegramChatId', document.getElementById('cfg-telegram-chatid').value);
 
             try {
                 const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
@@ -1330,6 +1473,19 @@
 
                 if (data.result === 'success') {
                     toast('Parámetros globales actualizados con éxito.', 'success', 'Configuración guardada');
+                    
+                    // Update local config cache
+                    configGlobal.interes = document.getElementById('cfg-interes-moratorio').value;
+                    configGlobal.horastol = document.getElementById('cfg-horas-tolerancia').value;
+                    configGlobal.semanasTolerancia = document.getElementById('cfg-semanas-rescindir').value;
+                    configGlobal.planRapido = document.getElementById('cfg-plan-rapido').value;
+                    configGlobal.planComodo = document.getElementById('cfg-plan-comodo').value;
+                    configGlobal.gananciaContado = document.getElementById('cfg-ganancia-contado').value;
+                    configGlobal.engancheSemanal = document.getElementById('cfg-enganche-semanal').value;
+                    configGlobal.engancheQuincenal = document.getElementById('cfg-enganche-quincenal').value;
+                    configGlobal.engancheComodo = document.getElementById('cfg-enganche-comodo').value;
+                    configGlobal.descuentoLiquidacion = document.getElementById('cfg-descuento-liquidacion').value;
+
                     cerrarModalConfig();
                 } else {
                     toast('Ocurrió un error al guardar la configuración.', 'error');
@@ -1339,6 +1495,106 @@
             } finally {
                 btn.disabled = false;
                 btn.innerText = "💾 Guardar Parámetros";
+            }
+        }
+
+        // Enviar resumen matutino de prueba
+        async function probarNotificacionTelegram() {
+            const btn = document.querySelector('.btn-test-telegram');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = "⏳ Enviando resumen...";
+
+            const params = new URLSearchParams();
+            params.append('action', 'probarResumenMatutino');
+            params.append('token', CONFIG.API_TOKEN);
+
+            try {
+                const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: params.toString(),
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                const data = await response.json();
+
+                if (data.result === 'success') {
+                    toast('Resumen matutino de prueba enviado con éxito a Telegram.', 'success', 'Prueba enviada');
+                } else {
+                    toast('Error al enviar prueba: ' + (data.message || 'Error desconocido'), 'error');
+                }
+            } catch (error) {
+                console.error("Error al probar Telegram:", error);
+                toast('Error de red al enviar la prueba de Telegram.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        }
+
+        // Activar Webhook de Comandos de Telegram
+        async function activarWebhookTelegram() {
+            const btn = document.querySelector('.btn-webhook-telegram');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = "⏳ Configurando Webhook...";
+
+            const params = new URLSearchParams();
+            params.append('action', 'registrarWebhookTelegram');
+            params.append('token', CONFIG.API_TOKEN);
+
+            try {
+                const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: params.toString(),
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                const data = await response.json();
+
+                if (data.result === 'success') {
+                    toast('¡Comandos del Bot de Telegram activados con éxito!', 'success', 'Webhook activado');
+                } else {
+                    toast('Error: ' + (data.message || 'Error desconocido'), 'error');
+                }
+            } catch (error) {
+                console.error("Error al configurar webhook:", error);
+                toast('Error de red al activar el webhook de Telegram.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        }
+
+        // Funciones del Modal de Recibo de Pago
+        function cerrarModalRecibo() {
+            document.getElementById('modal-recibo-pago').style.display = 'none';
+        }
+
+        function cerrarModalReciboYRecargar() {
+            cerrarModalRecibo();
+            location.reload();
+        }
+
+        function copiarMensajeRecibo() {
+            const txt = document.getElementById('txt-recibo-mensaje');
+            txt.select();
+            txt.setSelectionRange(0, 99999); // Para móviles
+            try {
+                const copiado = document.execCommand('copy');
+                if (copiado) {
+                    toast('Mensaje copiado al portapapeles.', 'success');
+                } else {
+                    throw new Error("execCommand falló");
+                }
+            } catch (err) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(txt.value).then(() => {
+                        toast('Mensaje copiado al portapapeles.', 'success');
+                    }).catch(() => {
+                        toast('No se pudo copiar automáticamente. Selecciónalo y cópialo manualmente.', 'warning');
+                    });
+                } else {
+                    toast('No se pudo copiar automáticamente. Selecciónalo y cópialo manualmente.', 'warning');
+                }
             }
         }
 
