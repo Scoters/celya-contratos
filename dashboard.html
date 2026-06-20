@@ -610,15 +610,29 @@
             <div class="column-left">
                 <div class="container">
                     <h3>💵 Módulo de Cobranza Dinámica</h3>
-                    <label for="buscarClienteAbono">Buscar Cliente (Nombre o ID):</label>
-                    <select id="buscarClienteAbono" onchange="cargarDetallesCobranza()">
-                        <option value="">-- Selecciona un cliente para cobrar --</option>
-                    </select>
+                    <label for="buscarClienteAbonoInput">Buscar Cliente (Nombre, ID o IMEI):</label>
+                    <div style="position: relative; width: 100%;">
+                        <input type="text" id="buscarClienteAbonoInput" placeholder="🔍 Escribe para buscar cliente..." style="width: 100%; box-sizing: border-box; padding: 12px; font-size: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(15, 23, 42, 0.5); color: #fff; outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='var(--primary-color)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+                        <div id="resultadosClienteAbono" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.5); margin-top: 5px;"></div>
+                    </div>
+                    <input type="hidden" id="buscarClienteAbonoVal" value="">
 
-                    <div id="cardDetalleCobro" style="display:none;">
+                    <div id="cardDetalleCobro" style="display:none; margin-top: 20px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <span style="font-weight: bold; color: var(--text-primary); font-size: 16px;">Estado del Cliente:</span>
                             <span id="badgeAtraso">0 días de atraso</span>
+                        </div>
+
+                        <!-- Semáforo de salud financiera -->
+                        <div id="semaforoSaludContainer" style="margin-top: 8px; font-size: 12px; display: flex; align-items: center; gap: 6px; color: #a0aec0; background: rgba(255, 255, 255, 0.02); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.04);">
+                            <span id="semaforoSaludIndicator" style="width: 10px; height: 10px; border-radius: 50%; display: inline-block;"></span>
+                            <span id="semaforoSaludText" style="font-weight: 600;">Estado de salud</span>
+                        </div>
+
+                        <!-- Promesa de pago activa (si existe) -->
+                        <div id="promesaActivaContainer" style="display: none; margin-top: 15px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 10px;">
+                            <span style="font-weight: bold; color: #60a5fa; font-size: 13px; display: block; margin-bottom: 2px;">📅 Promesa de Pago Activa:</span>
+                            <span id="promesaActivaDetalle" style="font-size: 13px; color: #fff;"></span>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
@@ -632,20 +646,48 @@
                             </div>
                         </div>
 
-                        <div style="margin-top: 20px;">
-                            <p style="margin: 0 0 10px 0; font-size: 13px; color: #34d399; text-align: center;">¿El cliente quiere liquidar todo el celular hoy?</p>
-                            <button type="button" id="btnLiquidacionAnticipada" onclick="aplicarDescuentoLiquidacion()">
-                                🚀 Calcular Liquidación con Descuento de Intereses
+                        <!-- Monto a recibir prominente y visible inmediatamente -->
+                        <div id="formMontoCobro" style="display: none; margin-top: 20px; border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 15px;">
+                            <label for="montoAbono" style="font-size: 15px; font-weight: bold; color: #34d399; margin-bottom: 8px; display: block;">💵 Monto a Recibir ($):</label>
+                            <input type="number" id="montoAbono" placeholder="Mete la cantidad que te va a pagar" style="font-size: 18px; padding: 12px; font-weight: bold; color: #fff; background: rgba(15, 23, 42, 0.6); border: 2px solid #34d399; border-radius: 8px; box-sizing: border-box; width: 100%;">
+                            <button type="button" id="btnRegistrarCobro" style="margin-top: 12px; background: linear-gradient(135deg, #10b981, #059669); font-size: 15px; font-weight: bold; padding: 12px; width: 100%;">
+                                📲 Registrar Abono en la Hoja
                             </button>
                         </div>
-                    </div>
 
-                    <div id="formMontoCobro" style="display: none; margin-top: 15px;">
-                        <label for="montoAbono">Monto a Recibir ($):</label>
-                        <input type="number" id="montoAbono" placeholder="Mete la cantidad que te va a pagar">
-                        <button type="button" id="btnRegistrarCobro">
-                            📲 Registrar Abono en la Hoja
-                        </button>
+                        <!-- Opciones de liquidación colapsables y discretas -->
+                        <details id="detallesLiquidacion" style="margin-top: 20px; font-size: 13px; color: var(--text-secondary); cursor: pointer;">
+                            <summary style="color: #64748b; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06); outline: none;">
+                                ⚙️ Opciones avanzadas de liquidación
+                            </summary>
+                            <div style="margin-top: 12px; padding: 12px; background: rgba(15, 23, 42, 0.4); border-radius: 8px; border: 1px dashed rgba(255, 255, 255, 0.1); cursor: default;" onclick="event.stopPropagation()">
+                                <p style="margin: 0 0 10px 0; font-size: 12px; color: #a0aec0;">¿El cliente quiere liquidar todo el celular hoy? Aplica un 15% de descuento en el saldo restante:</p>
+                                <button type="button" id="btnLiquidacionAnticipada" onclick="aplicarDescuentoLiquidacion()" style="margin-top: 0; padding: 10px 14px; font-size: 13px; font-weight: bold; width:100%;">
+                                    🚀 Calcular Liquidación con Descuento
+                                </button>
+                            </div>
+                        </details>
+
+                        <!-- Opciones de promesa de pago colapsables -->
+                        <details id="detallesPromesa" style="margin-top: 12px; font-size: 13px; color: var(--text-secondary); cursor: pointer;">
+                            <summary style="color: #64748b; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06); outline: none;">
+                                📅 Crear Promesa de Pago
+                            </summary>
+                            <div style="margin-top: 12px; padding: 12px; background: rgba(15, 23, 42, 0.4); border-radius: 8px; border: 1px dashed rgba(255, 255, 255, 0.1); cursor: default;" onclick="event.stopPropagation()">
+                                <label style="margin:0 0 4px 0; display:block; font-weight: 600;">Fecha de Pago Prometida:</label>
+                                <input type="date" id="promesaFecha" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(15, 23, 42, 0.6); color:white; box-sizing:border-box; margin-bottom:10px; outline:none; font-family:inherit;">
+
+                                <label style="margin:0 0 4px 0; display:block; font-weight: 600;">Monto Prometido ($):</label>
+                                <input type="number" id="promesaMonto" placeholder="Ej. 500" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(15, 23, 42, 0.6); color:white; box-sizing:border-box; margin-bottom:10px; outline:none;">
+
+                                <label style="margin:0 0 4px 0; display:block; font-weight: 600;">Notas / Comentarios:</label>
+                                <textarea id="promesaNotas" placeholder="Ej. Pagará en OXXO por la tarde" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(15, 23, 42, 0.6); color:white; box-sizing:border-box; min-height:60px; margin-bottom:12px; outline:none; font-family:inherit; resize:vertical;"></textarea>
+
+                                <button type="button" id="btnGuardarPromesa" onclick="registrarPromesaPago()" style="margin-top: 0; padding: 10px 14px; font-size: 13px; font-weight: bold; width:100%; background:linear-gradient(135deg, #3b82f6, #1d4ed8); border:none; color:white; border-radius:6px; cursor:pointer;">
+                                    💾 Guardar Promesa de Pago
+                                </button>
+                            </div>
+                        </details>
                     </div>
 
                     <div id="moduloHistorialAbonos" style="display: none;">
@@ -782,6 +824,7 @@
         let listaClientesGlobal = [];
         let dbInventarioEquipos = [];
         let dbHistorialPagos = [];
+        let listaPromesasGlobal = [];
         let clienteSeleccionadoActual = null;
 
         function limpiarNombreModelo(modelo) {
@@ -857,25 +900,107 @@
                 listaClientesGlobal = dbClientesActivos;
                 dbInventarioEquipos = datos.inventario || [];
                 dbHistorialPagos = datos.historialPagos || [];
-
-                const select = document.getElementById('buscarClienteAbono');
-                select.innerHTML = '<option value="">-- Selecciona un cliente para cobrar --</option>';
-
-                dbClientesActivos.forEach(c => {
-                    let opt = document.createElement('option');
-                    opt.value = c.imei;
-                    opt.innerText = `${c.id || "S/ID"} - ${c.cliente} (${c.imei})`;
-                    select.appendChild(opt);
-                });
+                listaPromesasGlobal = datos.promesasActivas || [];
 
             } catch (err) {
-                document.getElementById('buscarClienteAbono').innerHTML = '<option value="">❌ Error al mapear deudores</option>';
+                console.error("Error al cargar datos del dashboard:", err);
             }
         };
 
+        // 🔍 Autocomplete Event Listeners for Client Collection
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('buscarClienteAbonoInput');
+            const resultados = document.getElementById('resultadosClienteAbono');
+
+            if (input && resultados) {
+                input.addEventListener('input', function(e) {
+                    const query = e.target.value.toLowerCase().trim();
+                    if (!query) {
+                        resultados.style.display = 'none';
+                        resultados.innerHTML = '';
+                        return;
+                    }
+
+                    const matches = listaClientesGlobal.filter(c => 
+                        (c.cliente && c.cliente.toLowerCase().includes(query)) || 
+                        (c.id && c.id.toLowerCase().includes(query)) || 
+                        (c.imei && c.imei.toLowerCase().includes(query))
+                    );
+
+                    resultados.innerHTML = '';
+                    if (matches.length === 0) {
+                        resultados.innerHTML = '<div style="padding: 10px; color: #a0aec0; font-size: 13px;">No se encontraron resultados</div>';
+                    } else {
+                        matches.forEach(c => {
+                            const item = document.createElement('div');
+                            item.style.padding = '10px 14px';
+                            item.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                            item.style.cursor = 'pointer';
+                            item.style.transition = 'background 0.2s';
+                            item.onmouseover = () => item.style.backgroundColor = 'rgba(255,255,255,0.08)';
+                            item.onmouseout = () => item.style.backgroundColor = 'transparent';
+
+                            item.innerHTML = `
+                                <div style="font-weight: 600; color: #fff; font-size: 14px;">${c.cliente}</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">ID: ${c.id || 'S/ID'} | IMEI: ${c.imei}</div>
+                            `;
+                            item.addEventListener('click', function() {
+                                seleccionarClienteAbono(c.imei, c.cliente, c.id);
+                            });
+                            resultados.appendChild(item);
+                        });
+                    }
+                    resultados.style.display = 'block';
+                });
+
+                input.addEventListener('focus', function(e) {
+                    const query = e.target.value.toLowerCase().trim();
+                    if (query) {
+                        const event = new Event('input');
+                        e.target.dispatchEvent(event);
+                    } else {
+                        resultados.innerHTML = '';
+                        const limit = Math.min(listaClientesGlobal.length, 15);
+                        for (let i = 0; i < limit; i++) {
+                            const c = listaClientesGlobal[i];
+                            const item = document.createElement('div');
+                            item.style.padding = '10px 14px';
+                            item.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                            item.style.cursor = 'pointer';
+                            item.style.transition = 'background 0.2s';
+                            item.onmouseover = () => item.style.backgroundColor = 'rgba(255,255,255,0.08)';
+                            item.onmouseout = () => item.style.backgroundColor = 'transparent';
+                            item.innerHTML = `
+                                <div style="font-weight: 600; color: #fff; font-size: 14px;">${c.cliente}</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">ID: ${c.id || 'S/ID'} | IMEI: ${c.imei}</div>
+                            `;
+                            item.addEventListener('click', function() {
+                                seleccionarClienteAbono(c.imei, c.cliente, c.id);
+                            });
+                            resultados.appendChild(item);
+                        }
+                        resultados.style.display = 'block';
+                    }
+                });
+            }
+
+            document.addEventListener('click', function(e) {
+                if (input && resultados && e.target !== input && e.target !== resultados && !resultados.contains(e.target)) {
+                    resultados.style.display = 'none';
+                }
+            });
+        });
+
+        function seleccionarClienteAbono(imei, clienteNombre, idCliente) {
+            document.getElementById('buscarClienteAbonoInput').value = `${idCliente || 'S/ID'} - ${clienteNombre} (${imei})`;
+            document.getElementById('buscarClienteAbonoVal').value = imei;
+            document.getElementById('resultadosClienteAbono').style.display = 'none';
+            cargarDetallesCobranza();
+        }
+
         // 1. 🔄 Carga todos los detalles del deudor en pantalla
         function cargarDetallesCobranza() {
-            const imeiSeleccionado = document.getElementById('buscarClienteAbono').value;
+            const imeiSeleccionado = document.getElementById('buscarClienteAbonoVal').value;
 
             if (!imeiSeleccionado) {
                 document.getElementById('cardDetalleCobro').style.display = 'none';
@@ -892,6 +1017,9 @@
                 document.getElementById('infoCuotaRegular').value = "$" + (isNaN(cuotaLimpia) ? "0" : cuotaLimpia);
                 document.getElementById('infoSaldoPendiente').value = "$" + Math.round(saldoReal).toLocaleString('es-MX');
 
+                // Pre-fill Monto a Recibir with the weekly payment amount
+                document.getElementById('montoAbono').value = cuotaLimpia > 0 ? Math.round(cuotaLimpia) : "";
+
                 // Manejo del contador de atraso exacto
                 const badge = document.getElementById('badgeAtraso');
                 const diasAtraso = parseInt(clienteSeleccionadoActual.diasAtraso) || 0;
@@ -905,6 +1033,32 @@
                     badge.style.color = "#27ae60";
                     badge.innerText = "Al Corriente ✅";
                 }
+
+                // Semáforo de salud financiera
+                const semaforoIndicator = document.getElementById('semaforoSaludIndicator');
+                const semaforoText = document.getElementById('semaforoSaludText');
+                if (semaforoIndicator && semaforoText) {
+                    if (diasAtraso === 0) {
+                        semaforoIndicator.style.backgroundColor = '#10b981'; // Green
+                        semaforoText.innerText = 'Excelente - Al Corriente';
+                        semaforoText.style.color = '#10b981';
+                    } else if (diasAtraso <= 7) {
+                        semaforoIndicator.style.backgroundColor = '#eab308'; // Yellow
+                        semaforoText.innerText = 'Leve - Retraso Menor';
+                        semaforoText.style.color = '#eab308';
+                    } else if (diasAtraso <= 21) {
+                        semaforoIndicator.style.backgroundColor = '#f97316'; // Orange
+                        semaforoText.innerText = 'Moderado - Retraso Significativo';
+                        semaforoText.style.color = '#f97316';
+                    } else {
+                        semaforoIndicator.style.backgroundColor = '#ef4444'; // Red
+                        semaforoText.innerText = 'Crítico - Umbral de Bloqueo';
+                        semaforoText.style.color = '#ef4444';
+                    }
+                }
+
+                // Mostrar promesa de pago activa
+                mostrarPromesaActiva(clienteSeleccionadoActual.imei);
 
                 // C. 📑 Historial Rápido de Abonos (Pintar Tabla)
                 const cuerpoTabla = document.getElementById('tablaHistorialCuerpo');
@@ -930,10 +1084,111 @@
                 document.getElementById('cardDetalleCobro').style.display = 'block';
                 document.getElementById('formMontoCobro').style.display = 'block';
 
-                // Reseteamos el botón de liquidación por si acaso
+                // Reseteamos el botón y el panel de liquidación/promesa por si acaso
+                const detailsLiq = document.getElementById('detallesLiquidacion');
+                if (detailsLiq) detailsLiq.open = false;
+                const detailsProm = document.getElementById('detallesPromesa');
+                if (detailsProm) detailsProm.open = false;
+
                 const btnLiq = document.getElementById('btnLiquidacionAnticipada');
-                btnLiq.innerText = "🚀 Calcular Liquidación con Descuento de Intereses";
+                btnLiq.innerText = "🚀 Calcular Liquidación con Descuento";
                 btnLiq.style.background = "#2ecc71";
+
+                // Resetear campos del formulario de promesa de pago
+                document.getElementById('promesaFecha').value = "";
+                document.getElementById('promesaMonto').value = "";
+                document.getElementById('promesaNotas').value = "";
+            }
+        }
+
+        // Mostrar promesa de pago activa
+        function mostrarPromesaActiva(imei) {
+            const promesa = listaPromesasGlobal.find(p => p.imei === imei);
+            const container = document.getElementById('promesaActivaContainer');
+            const detalle = document.getElementById('promesaActivaDetalle');
+            if (promesa && container && detalle) {
+                detalle.innerHTML = `Fecha: <strong>${promesa.fechaPromesa}</strong> | Monto: <strong>$${promesa.montoPrometido}</strong><br><span style="font-size:11px; color:#94a3b8;">Nota: ${promesa.notes || promesa.notas || 'Sin notas'}</span>`;
+                container.style.display = 'block';
+            } else if (container) {
+                container.style.display = 'none';
+            }
+        }
+
+        // Registrar promesa de pago en la base de datos
+        async function registrarPromesaPago() {
+            if (!clienteSeleccionadoActual) {
+                toast('Por favor selecciona un cliente primero.', 'warning');
+                return;
+            }
+            const fecha = document.getElementById('promesaFecha').value;
+            const monto = document.getElementById('promesaMonto').value;
+            const notas = document.getElementById('promesaNotas').value;
+
+            if (!fecha) {
+                toast('Por favor selecciona una fecha para la promesa.', 'warning');
+                return;
+            }
+            if (!monto || parseFloat(monto) <= 0) {
+                toast('Por favor ingresa un monto válido.', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('btnGuardarPromesa');
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ Guardando...";
+            btn.disabled = true;
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('action', 'registrarPromesa');
+                formData.append('token', CONFIG.API_TOKEN);
+                formData.append('imei', clienteSeleccionadoActual.imei);
+                formData.append('cliente', clienteSeleccionadoActual.cliente);
+                formData.append('fechaPromesa', fecha);
+                formData.append('montoPrometido', monto);
+                formData.append('notas', notas);
+
+                const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData.toString(),
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                const data = await res.json();
+
+                if (data.result === 'success') {
+                    toast('Promesa de pago registrada exitosamente.', 'success');
+                    
+                    let parts = fecha.split('-');
+                    let fFormatted = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : fecha;
+
+                    const nuevaPromesa = {
+                        imei: clienteSeleccionadoActual.imei,
+                        cliente: clienteSeleccionadoActual.cliente,
+                        fechaPromesa: fFormatted,
+                        montoPrometido: parseFloat(monto),
+                        notas: notas
+                    };
+
+                    // Filter out existing and push new active promise
+                    listaPromesasGlobal = listaPromesasGlobal.filter(p => p.imei !== clienteSeleccionadoActual.imei);
+                    listaPromesasGlobal.push(nuevaPromesa);
+
+                    mostrarPromesaActiva(clienteSeleccionadoActual.imei);
+
+                    document.getElementById('promesaFecha').value = "";
+                    document.getElementById('promesaMonto').value = "";
+                    document.getElementById('promesaNotas').value = "";
+
+                    const detailsProm = document.getElementById('detallesPromesa');
+                    if (detailsProm) detailsProm.open = false;
+                } else {
+                    toast('Error al registrar promesa: ' + (data.message || 'Error desconocido'), 'error');
+                }
+            } catch (err) {
+                toast('Error de red al registrar promesa.', 'error');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
         }
 
