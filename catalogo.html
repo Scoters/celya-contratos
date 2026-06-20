@@ -1740,6 +1740,9 @@
                             <input type="hidden" id="hiddenCuota52">
                             <input type="hidden" id="hiddenPrecioContado">
 
+                            <label style="margin-top: 0;" id="lbl-cliEnganchePersonalizado">🏁 Monto de Enganche Personalizado (Mínimo: <span id="pdp-enganche-minimo-label">$0</span>):</label>
+                            <input type="number" id="cliEnganchePersonalizado" placeholder="Ej. 1200 (Introduce un enganche mayor para bajar abonos)" oninput="actualizarPrecioCalculadoPDP()" style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none; margin-bottom: 12px;">
+
                             <label style="margin-top: 0;">Tu Nombre Completo:</label>
                             <input type="text" id="cliNombre" required placeholder="Ej. Juan Pérez">
 
@@ -1779,8 +1782,7 @@
                                 <option value="52 Semanas">Plan Cómodo (52 Pagos Semanales)</option>
                             </select>
 
-                            <label style="margin-top: 10px;" id="lbl-cliEnganchePersonalizado">🏁 Monto de Enganche Personalizado (Mínimo: <span id="pdp-enganche-minimo-label">$0</span>):</label>
-                            <input type="number" id="cliEnganchePersonalizado" placeholder="Ej. 1200 (Introduce un enganche mayor para bajar abonos)" oninput="actualizarPrecioCalculadoPDP()" style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
+
 
                             <div style="display: flex; gap: 12px; margin-top: 20px;">
                                 <button type="button" onclick="enviarSolicitudFinal()"
@@ -1867,7 +1869,10 @@
                 <div class="pdp-form-card" style="padding: 15px; margin-top: 0; text-align: left;">
                     <h4 style="margin-top: 0; margin-bottom: 15px;">📋 Rellena tu Solicitud de Crédito</h4>
                     <form id="formPedidoEspecial">
-                        <label style="margin-top: 0; font-weight: 600; font-size: 13px; color: var(--text-main);">Tu
+                        <label style="margin-top: 0; font-weight: 600; font-size: 13px; color: var(--text-main);" id="lbl-pe-cliEnganchePersonalizado">🏁 Monto de Enganche Personalizado (Mínimo: <span id="pe-enganche-minimo-label">$0</span>):</label>
+                        <input type="number" id="pe-cliEnganchePersonalizado" placeholder="Ej. 1200 (Introduce un enganche mayor para bajar abonos)" oninput="actualizarPreciosPedidoEspecial()" style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none; margin-bottom: 12px;">
+
+                        <label style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">Tu
                             Nombre Completo:</label>
                         <input type="text" id="pe-cliNombre" required placeholder="Ej. Juan Pérez"
                             style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
@@ -1919,8 +1924,7 @@
                             <option value="52 Semanas">Plan Cómodo (52 Semanas)</option>
                         </select>
 
-                        <label style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);" id="lbl-pe-cliEnganchePersonalizado">🏁 Monto de Enganche Personalizado (Mínimo: <span id="pe-enganche-minimo-label">$0</span>):</label>
-                        <input type="number" id="pe-cliEnganchePersonalizado" placeholder="Ej. 1200 (Introduce un enganche mayor para bajar abonos)" oninput="actualizarPreciosPedidoEspecial()" style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
+
 
                         <div style="display: flex; gap: 12px; margin-top: 20px;">
                             <button type="button" onclick="enviarSolicitudPedidoEspecial()"
