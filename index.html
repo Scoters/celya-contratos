@@ -4602,7 +4602,17 @@
         }
 
         function detectarAnomaliaDePrecioSeleccionado() {
-            if (!variantesVivasGlobal || variantesVivasGlobal.length === 0) return false;
+            console.log("=== INICIO DETECTAR ANOMALIA DE PRECIO ===");
+            console.log("Color seleccionado global:", colorSeleccionadoGlobal);
+            console.log("Memoria seleccionada global:", memoriaSeleccionadaGlobal);
+            console.log("Grading seleccionado global:", gradingSeleccionadoGlobal);
+            console.log("Cantidad de variantes vivas totales:", variantesVivasGlobal ? variantesVivasGlobal.length : 0);
+
+            if (!variantesVivasGlobal || variantesVivasGlobal.length === 0) {
+                console.log("Fin anomalía: No hay variantes vivas cargadas.");
+                return false;
+            }
+
             const varianteSeleccionada = variantesVivasGlobal.find(v => {
                 const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
                 const colorMatch = colorSeleccionadoGlobal ? allAttrs.some(a => {
@@ -4620,12 +4630,24 @@
                 return colorMatch && memoriaMatch && gradingMatch;
             });
 
-            if (!varianteSeleccionada) return false;
+            if (!varianteSeleccionada) {
+                console.log("Fin anomalía: No se encontró variante seleccionada coincidente.");
+                return false;
+            }
 
             const specsSelected = obtenerSpecsDeVariacion(varianteSeleccionada);
             const priceSelected = resolverPrecioContadoDeVariacion(varianteSeleccionada);
 
-            if (priceSelected <= 0) return false;
+            console.log("Variante seleccionada:", {
+                id: varianteSeleccionada.id,
+                specs: specsSelected,
+                price: priceSelected
+            });
+
+            if (priceSelected <= 0) {
+                console.log("Fin anomalía: El precio de la variante seleccionada es <= 0.");
+                return false;
+            }
 
             for (let i = 0; i < variantesVivasGlobal.length; i++) {
                 const vOther = variantesVivasGlobal[i];
@@ -4641,12 +4663,22 @@
                     return (idUpper === "GRADING" || a.name === "Estado del reacondicionado") && a.value_name && a.value_name.toLowerCase().trim() === gradingSeleccionadoGlobal.toLowerCase().trim();
                 }) : true;
 
+                console.log(`Hermano #${i + 1} (${vOther.id}): colorMatch=${colorMatch}, gradingMatch=${gradingMatch}`);
+
                 if (!colorMatch || !gradingMatch) continue;
 
                 const specsOther = obtenerSpecsDeVariacion(vOther);
                 const priceOther = resolverPrecioContadoDeVariacion(vOther);
 
-                if (priceOther <= 0) continue;
+                console.log(`Hermano #${i + 1} (${vOther.id}) detalles:`, {
+                    specs: specsOther,
+                    price: priceOther
+                });
+
+                if (priceOther <= 0) {
+                    console.log(`Hermano #${i + 1} omitido porque precio <= 0.`);
+                    continue;
+                }
 
                 const hasStorageComparison = specsSelected.storage > 0 && specsOther.storage > 0;
                 const hasRamComparison = specsSelected.ram > 0 && specsOther.ram > 0;
@@ -4656,6 +4688,7 @@
                 if (hasStorageComparison) {
                     const isHigherStorage = specsSelected.storage > specsOther.storage;
                     const isSameOrHigherRam = hasRamComparison ? (specsSelected.ram >= specsOther.ram) : true;
+                    console.log(`Comparando storage: selectedStorage(${specsSelected.storage}) > otherStorage(${specsOther.storage}) -> ${isHigherStorage}. isSameOrHigherRam -> ${isSameOrHigherRam}`);
                     if (isHigherStorage && isSameOrHigherRam && priceSelected <= priceOther) {
                         isAnomaly = true;
                     }
@@ -4663,6 +4696,7 @@
                 if (hasRamComparison && !isAnomaly) {
                     const isHigherRam = specsSelected.ram > specsOther.ram;
                     const isSameOrHigherStorage = hasStorageComparison ? (specsSelected.storage >= specsOther.storage) : true;
+                    console.log(`Comparando RAM: selectedRam(${specsSelected.ram}) > otherRam(${specsOther.ram}) -> ${isHigherRam}. isSameOrHigherStorage -> ${isSameOrHigherStorage}`);
                     if (isHigherRam && isSameOrHigherStorage && priceSelected <= priceOther) {
                         isAnomaly = true;
                     }
@@ -4673,10 +4707,12 @@
                         selected: { id: varianteSeleccionada.id, specs: specsSelected, price: priceSelected },
                         other: { id: vOther.id, specs: specsOther, price: priceOther }
                     });
+                    console.log("=== FIN DETECTAR ANOMALIA (ANOMALIA ENCONTRADA) ===");
                     return true;
                 }
             }
 
+            console.log("=== FIN DETECTAR ANOMALIA (SIN ANOMALIA) ===");
             return false;
         }
 
