@@ -2645,12 +2645,11 @@
         let defaultMemoria = "";
 
         function setCardFrecuencia(btn, freq) {
-            console.log(`[DEBUG - setCardFrecuencia] --- INICIO --- Card ID: ${btn.closest('.card-celular').dataset.itemId}, Freq recibida: ${freq}`);
+            console.trace(`[DEBUG - setCardFrecuencia] INICIO - Freq recibida: ${freq}`);
             const card = btn.closest('.card-celular');
             const btns = btn.parentNode.querySelectorAll('.freq-btn');
             btns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            console.log(`[DEBUG - setCardFrecuencia] Botón activo: ${btn.innerText}, ¿Es activo?: ${btn.classList.contains('active')}`);
 
             const cuotasSemanal = card.querySelector('.cuotas-semanal');
             const cuotasQuincenal = card.querySelector('.cuotas-quincenal');
@@ -2662,7 +2661,6 @@
                 if (cuotasSemanal) cuotasSemanal.style.display = 'block';
                 if (cuotasQuincenal) cuotasQuincenal.style.display = 'none';
                 if (cuotasContado) cuotasContado.style.display = 'none';
-                console.log(`[DEBUG - setCardFrecuencia - Semanal] cuotasSemanal display: ${cuotasSemanal ? cuotasSemanal.style.display : 'N/A'}, cuotasQuincenal display: ${cuotasQuincenal ? cuotasQuincenal.style.display : 'N/A'}`);
                 if (btnSolicitar) btnSolicitar.innerText = 'Pedir a Crédito';
                 if (divEnganche) {
                     divEnganche.style.opacity = '1';
@@ -2674,13 +2672,11 @@
                         Math.ceil((precioContado * factorEngCom) / 10) * 10
                     );
                     divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche desde: $${weeklyEnganche.toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
-                    console.log(`[DEBUG - setCardFrecuencia - Semanal] divEnganche.innerHTML: ${divEnganche.innerHTML}`);
                 }
             } else if (freq === 'quincenal') {
                 if (cuotasSemanal) cuotasSemanal.style.display = 'none';
                 if (cuotasQuincenal) cuotasQuincenal.style.display = 'block';
                 if (cuotasContado) cuotasContado.style.display = 'none';
-                console.log(`[DEBUG - setCardFrecuencia - Quincenal] cuotasSemanal display: ${cuotasSemanal ? cuotasSemanal.style.display : 'N/A'}, cuotasQuincenal display: ${cuotasQuincenal ? cuotasQuincenal.style.display : 'N/A'}`);
                 if (btnSolicitar) btnSolicitar.innerText = 'Pedir a Crédito';
                 if (divEnganche) {
                     divEnganche.style.opacity = '1';
@@ -2688,7 +2684,6 @@
                     const factorEngQuin = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
                     const quinEnganche = Math.ceil((precioContado * factorEngQuin) / 10) * 10;
                     divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche desde: $${quinEnganche.toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
-                    console.log(`[DEBUG - setCardFrecuencia - Quincenal] divEnganche.innerHTML: ${divEnganche.innerHTML}`);
                 }
             } else { // contado
                 if (cuotasSemanal) cuotasSemanal.style.display = 'none';
@@ -3022,8 +3017,6 @@
 
                 const totalFinanciado = (precioContado * (1 + factorInteres)) - engancheFinal;
                 const cuotaActiva = totalFinanciado / numPagos;
-                console.log(`[DEBUG - actualizarPrecioCalculadoPDP] Freq: ${freq}, Plazo: ${plazo}, numPagos: ${numPagos}, factorInteres: ${factorInteres}`);
-                console.log(`[DEBUG - actualizarPrecioCalculadoPDP] totalFinanciado: ${totalFinanciado}, cuotaActiva: ${cuotaActiva}`);
                 document.getElementById('pdp-enganche-grande').innerText = `$${engancheFinal.toLocaleString('es-MX')} MXN`;
                 document.getElementById('pdp-weekly-amount').innerText = `$${Math.round(cuotaActiva).toLocaleString('es-MX')} MXN`;
                 document.getElementById('pdp-weekly-term').innerText = `en ${numPagos} pagos ${labelFrecuencia}`;
