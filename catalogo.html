@@ -2671,7 +2671,7 @@
                         Math.ceil((precioContado * factorEngSem) / 10) * 10,
                         Math.ceil((precioContado * factorEngCom) / 10) * 10
                     );
-                    console.log(`[DEBUG - setCardFrecuencia] Card ID: ${card.dataset.id}, Freq: ${freq}, Calculated Weekly Enganche: ${weeklyEnganche}`);
+                    console.log(`[DEBUG - setCardFrecuencia] Card ID: ${card.dataset.itemId}, Freq: ${freq}, Calculated Weekly Enganche: ${weeklyEnganche}`);
                     divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche desde: $${weeklyEnganche.toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
                 }
             } else if (freq === 'quincenal') {
@@ -3000,11 +3000,19 @@
 
                 console.log(`[DEBUG - actualizarPrecioCalculadoPDP] Freq: ${freq}, Plazo: ${plazo}, Precio Contado: ${precioContado}`);
 
-                const factorEnganche = (plazo === "52 Semanas")
-                    ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
-                    : ((freq === "SEMANAL")
-                        ? (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165)
-                        : (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33));
+                let factorEnganche;
+                if (freq === "QUINCENAL") {
+                    factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+                } else if (freq === "SEMANAL") {
+                    // Para semanal, el factor depende del plazo
+                    factorEnganche = (plazo === "52 Semanas")
+                        ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
+                        : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
+                } else { // "CONTADO" o cualquier otro caso, aunque CONTADO ya se maneja antes
+                    factorEnganche = 0; // No hay enganche para contado
+                }
+                console.log(`[DEBUG - actualizarPrecioCalculadoPDP] CONFIG_TASAS.engancheSemanal: ${CONFIG_TASAS.engancheSemanal}, CONFIG_TASAS.engancheQuincenal: ${CONFIG_TASAS.engancheQuincenal}, CONFIG_TASAS.engancheComodo: ${CONFIG_TASAS.engancheComodo}`);
+                console.log(`[DEBUG - actualizarPrecioCalculadoPDP] Determined factorEnganche: ${factorEnganche}`);
                 const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
 
                 const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
