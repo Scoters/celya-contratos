@@ -463,7 +463,7 @@
         }
 
         .brand-badge {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
             padding: 4px 10px;
@@ -497,7 +497,7 @@
         }
 
         .status-badge {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             padding: 4px 8px;
             border-radius: 20px;
@@ -548,9 +548,9 @@
         .card-celular h4 {
             margin: 10px 0 5px 0;
             color: var(--primary);
-            font-size: 17px;
+            font-size: 19px;
             font-weight: 600;
-            height: 48px;
+            height: 54px;
             overflow: hidden;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -570,9 +570,9 @@
             background-color: var(--bg-light);
             border: 1px solid var(--border-color);
             color: var(--text-muted);
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
-            padding: 3px 8px;
+            padding: 3.5px 9px;
             border-radius: 6px;
         }
 
@@ -593,7 +593,7 @@
         }
 
         .price-contado {
-            font-size: 13px;
+            font-size: 14.5px;
             color: var(--text-muted);
             font-weight: 500;
         }
@@ -604,7 +604,7 @@
         }
 
         .card-celular .enganche {
-            font-size: 20px;
+            font-size: 23px;
             font-weight: 700;
             color: #15803d;
             background: #f0fdf4;
@@ -616,7 +616,7 @@
         }
 
         .card-celular .enganche span {
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 500;
             color: var(--text-muted);
             display: block;
@@ -625,7 +625,7 @@
         }
 
         .card-celular .cuotas {
-            font-size: 13px;
+            font-size: 14.5px;
             color: var(--text-main);
             margin-bottom: 20px;
             background: var(--bg-light);
@@ -1592,6 +1592,39 @@
             <button type="button" class="sidebar-close-btn" onclick="cerrarMenuLateral()">×</button>
         </div>
         <div class="sidebar-content">
+            <!-- Sección de Filtros y Orden -->
+            <div class="sidebar-filters-section" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1.5px solid var(--border-color);">
+                <h3 style="font-size: 15px; font-weight: 700; color: var(--primary); margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px; font-family: inherit;">
+                    🎛️ Filtrar y Ordenar
+                </h3>
+                
+                <div class="sidebar-control-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
+                    <label for="filterBrand" style="font-size: 12px; font-weight: 600; color: var(--text-muted); font-family: inherit;">🏷️ Filtrar Marca:</label>
+                    <select id="filterBrand" onchange="aplicarFiltrosYOrden()" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); font-family: inherit; font-size: 14px; font-weight: 500; outline: none; color: var(--text-input); background-color: var(--bg-input);">
+                        <option value="ALL">Todas las marcas</option>
+                    </select>
+                </div>
+                
+                <div class="sidebar-control-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
+                    <label for="filterImport" style="font-size: 12px; font-weight: 600; color: var(--text-muted); font-family: inherit;">✈️ Tipo de Envío:</label>
+                    <select id="filterImport" onchange="aplicarFiltrosYOrden()" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); font-family: inherit; font-size: 14px; font-weight: 500; outline: none; color: var(--text-input); background-color: var(--bg-input);">
+                        <option value="NO_IMPORT" selected>Ocultar importados</option>
+                        <option value="ALL">Todos los equipos</option>
+                        <option value="ONLY_IMPORT">Solo importados</option>
+                    </select>
+                </div>
+                
+                <div class="sidebar-control-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
+                    <label for="sortBy" style="font-size: 12px; font-weight: 600; color: var(--text-muted); font-family: inherit;">↕️ Ordenar por:</label>
+                    <select id="sortBy" onchange="aplicarFiltrosYOrden()" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); font-family: inherit; font-size: 14px; font-weight: 500; outline: none; color: var(--text-input); background-color: var(--bg-input);">
+                        <option value="ENGANCHE_ASC" selected>Enganche Mínimo: Menor a Mayor</option>
+                        <option value="DEFAULT">Destacados (Recomendado)</option>
+                        <option value="PLAN_26_ASC">Pago Semanal (Plan Rápido): Menor a Mayor</option>
+                        <option value="PLAN_52_ASC">Pago Semanal (Plan Cómodo): Menor a Mayor</option>
+                        <option value="MODEL_ASC">Marca / Modelo (A-Z)</option>
+                    </select>
+                </div>
+            </div>
             <ul class="sidebar-menu">
                 <li>
                     <a href="javascript:void(0)" onclick="abrirModalInfoLegal('faq')">
@@ -1654,33 +1687,7 @@
 
     <div class="container">
 
-        <!-- Barra de Controles (Ordenar y Filtrar) -->
-        <div class="controls-bar">
-            <div class="control-group">
-                <label for="filterBrand">🏷️ Filtrar Marca:</label>
-                <select id="filterBrand" onchange="aplicarFiltrosYOrden()">
-                    <option value="ALL">Todas las marcas</option>
-                </select>
-            </div>
-            <div class="control-group">
-                <label for="filterImport">✈️ Tipo de Envío:</label>
-                <select id="filterImport" onchange="aplicarFiltrosYOrden()">
-                    <option value="NO_IMPORT" selected>Ocultar importados</option>
-                    <option value="ALL">Todos los equipos</option>
-                    <option value="ONLY_IMPORT">Solo importados</option>
-                </select>
-            </div>
-            <div class="control-group">
-                <label for="sortBy">↕️ Ordenar por:</label>
-                <select id="sortBy" onchange="aplicarFiltrosYOrden()">
-                    <option value="ENGANCHE_ASC" selected>Enganche Mínimo: Menor a Mayor</option>
-                    <option value="DEFAULT">Destacados (Recomendado)</option>
-                    <option value="PLAN_26_ASC">Pago Semanal (Plan Rápido): Menor a Mayor</option>
-                    <option value="PLAN_52_ASC">Pago Semanal (Plan Cómodo): Menor a Mayor</option>
-                    <option value="MODEL_ASC">Marca / Modelo (A-Z)</option>
-                </select>
-            </div>
-        </div>
+
 
         <div class="section-header">
             <h2 id="tituloSeccion">✨ Modelos Destacados y Favoritos CelYa!</h2>
