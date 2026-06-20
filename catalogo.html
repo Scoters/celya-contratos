@@ -3052,8 +3052,17 @@
                     engancheFinal = customEnganche;
                 }
 
-                const totalFinanciado = (precioContado * (1 + factorInteres)) - engancheFinal;
-                const cuotaActiva = totalFinanciado / numPagos;
+                let cuotaBase = (plazo === "26 Semanas") ? calcularCuotaSemanal26(precioContado) : calcularCuotaSemanal52(precioContado);
+                if (freq === "QUINCENAL") {
+                    cuotaBase = cuotaBase * 2;
+                }
+
+                let cuotaActiva = cuotaBase;
+                if (engancheFinal > engancheCalculado) {
+                    const extraEnganche = engancheFinal - engancheCalculado;
+                    cuotaActiva = cuotaBase - (extraEnganche / numPagos);
+                }
+
                 document.getElementById('pdp-enganche-grande').innerText = `$${engancheFinal.toLocaleString('es-MX')} MXN`;
                 document.getElementById('pdp-weekly-amount').innerText = `$${Math.round(cuotaActiva).toLocaleString('es-MX')} MXN`;
                 document.getElementById('pdp-weekly-term').innerText = `en ${numPagos} pagos ${labelFrecuencia}`;
@@ -3384,11 +3393,14 @@
             const freq = document.getElementById('pe-cliFrecuencia').value;
 
             // Matemática
-            const factorEnganche = (plazo === "52 Semanas")
-                ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
-                : ((freq === "QUINCENAL")
-                    ? (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33)
-                    : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165));
+            let factorEnganche;
+            if (freq === "QUINCENAL") {
+                factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+            } else {
+                factorEnganche = (plazo === "52 Semanas")
+                    ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
+                    : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
+            }
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
 
@@ -3405,16 +3417,22 @@
                 engancheFinal = customEnganche;
             }
 
-            const totalFinanciado = (precioContado * (1 + factorInteres)) - engancheFinal;
-
-            let cuota = totalFinanciado / numPagos;
-            let labelFrecuencia = "/sem";
-
             if (freq === "QUINCENAL") {
                 numPagos = numPagos / 2;
-                cuota = totalFinanciado / numPagos;
-                labelFrecuencia = "/quin";
             }
+
+            let baseCuota = (plazo === "26 Semanas") ? calcularCuotaSemanal26(precioContado) : calcularCuotaSemanal52(precioContado);
+            if (freq === "QUINCENAL") {
+                baseCuota = baseCuota * 2;
+            }
+
+            let cuota = baseCuota;
+            if (engancheFinal > engancheCalculado) {
+                const extraEnganche = engancheFinal - engancheCalculado;
+                cuota = baseCuota - (extraEnganche / numPagos);
+            }
+
+            let labelFrecuencia = (freq === "QUINCENAL") ? "/quin" : "/sem";
 
             document.getElementById('pe-preview-enganche').innerText = `$${engancheFinal.toLocaleString('es-MX')} MXN`;
             document.getElementById('pe-preview-semanal').innerText = `$${Math.round(cuota).toLocaleString('es-MX')} MXN${labelFrecuencia}`;
@@ -3451,11 +3469,14 @@
 
             const basePrice = parseFloat(pe_data_actual.price) || 0;
             const precioContado = basePrice * CONFIG_TASAS.gananciaContadoFactor;
-            const factorEnganche = (plazo === "52 Semanas")
-                ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
-                : ((freq === "QUINCENAL")
-                    ? (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33)
-                    : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165));
+            let factorEnganche;
+            if (freq === "QUINCENAL") {
+                factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+            } else {
+                factorEnganche = (plazo === "52 Semanas")
+                    ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
+                    : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
+            }
             const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
             let numPagos = (plazo === "26 Semanas") ? 26 : 52;
             let textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (26 Semanas)" : "Plan Cómodo (52 Semanas)";
@@ -3469,14 +3490,20 @@
                 engancheFinal = customEnganche;
             }
 
-            const totalFinanciado = (precioContado * (1 + factorInteres)) - engancheFinal;
-
-            let cuota = totalFinanciado / numPagos;
-
             if (freq === "QUINCENAL") {
                 numPagos = numPagos / 2;
-                cuota = totalFinanciado / numPagos;
                 textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (13 Quincenas)" : "Plan Cómodo (26 Quincenas)";
+            }
+
+            let baseCuota = (plazo === "26 Semanas") ? calcularCuotaSemanal26(precioContado) : calcularCuotaSemanal52(precioContado);
+            if (freq === "QUINCENAL") {
+                baseCuota = baseCuota * 2;
+            }
+
+            let cuota = baseCuota;
+            if (engancheFinal > engancheCalculado) {
+                const extraEnganche = engancheFinal - engancheCalculado;
+                cuota = baseCuota - (extraEnganche / numPagos);
             }
 
             const baseUrl = window.location.origin + window.location.pathname.replace('catalogo.html', 'index.html');
@@ -3587,11 +3614,14 @@
                     if (freq === "QUINCENAL") {
                         numPagos = numPagos / 2;
                     }
-                    const factorEnganche = (plazo === "52 Semanas")
-                        ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
-                        : ((freq === "QUINCENAL")
-                            ? (CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33)
-                            : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165));
+                    let factorEnganche;
+                    if (freq === "QUINCENAL") {
+                        factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+                    } else {
+                        factorEnganche = (plazo === "52 Semanas")
+                            ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.165)
+                            : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
+                    }
                     const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
 
                     const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
@@ -3603,8 +3633,17 @@
                         finalEnganche = customEnganche;
                     }
 
-                    const totalFinanciado = (precioContado * (1 + factorInteres)) - finalEnganche;
-                    cuotaBase = totalFinanciado / numPagos;
+                    let baseCuota = (plazo === "26 Semanas") ? calcularCuotaSemanal26(precioContado) : calcularCuotaSemanal52(precioContado);
+                    if (freq === "QUINCENAL") {
+                        baseCuota = baseCuota * 2;
+                    }
+
+                    if (finalEnganche > engancheCalculado) {
+                        const extraEnganche = finalEnganche - engancheCalculado;
+                        cuotaBase = baseCuota - (extraEnganche / numPagos);
+                    } else {
+                        cuotaBase = baseCuota;
+                    }
                 }
                 params.append('cuota', Math.round(cuotaBase));
 
