@@ -893,8 +893,10 @@
             background: var(--bg-variant-loading);
             backdrop-filter: blur(4px);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 14px;
             z-index: 99999;
             opacity: 0;
             pointer-events: none;
@@ -904,6 +906,32 @@
         .pdp-loading-overlay.active {
             opacity: 1;
             pointer-events: auto;
+        }
+
+        .pdp-loading-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.3px;
+        }
+
+        .pdp-loading-close-btn {
+            margin-top: 10px;
+            padding: 8px 28px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-card);
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+        }
+        .pdp-loading-close-btn:hover {
+            background: var(--bg-light);
+        }
+        .pdp-loading-close-btn:active {
+            transform: scale(0.96);
         }
 
         .pdp-spinner {
@@ -2623,6 +2651,8 @@
             <!-- Overlay de Carga de Variantes -->
             <div id="pdp-variants-loading-overlay" class="pdp-loading-overlay">
                 <div class="pdp-spinner"></div>
+                <span class="pdp-loading-label">Cargando variantes...</span>
+                <button type="button" class="pdp-loading-close-btn" onclick="ocultarCargandoVariantes()">✕ Cerrar</button>
             </div>
 
             <div class="pdp-layout">
@@ -5327,17 +5357,28 @@
             }
         }
 
+        let _loadingOverlayTimer = null;
+
         function mostrarCargandoVariantes() {
             const overlay = document.getElementById('pdp-variants-loading-overlay');
             if (overlay) {
                 overlay.classList.add('active');
             }
+            // Auto-cerrar después de 15 segundos
+            if (_loadingOverlayTimer) clearTimeout(_loadingOverlayTimer);
+            _loadingOverlayTimer = setTimeout(() => {
+                ocultarCargandoVariantes();
+            }, 15000);
         }
 
         function ocultarCargandoVariantes() {
             const overlay = document.getElementById('pdp-variants-loading-overlay');
             if (overlay) {
                 overlay.classList.remove('active');
+            }
+            if (_loadingOverlayTimer) {
+                clearTimeout(_loadingOverlayTimer);
+                _loadingOverlayTimer = null;
             }
         }
 
