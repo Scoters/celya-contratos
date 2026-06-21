@@ -102,7 +102,6 @@
             display: grid;
             grid-template-columns: 1.25fr 1fr;
             gap: 24px;
-            align-items: start;
         }
 
         .column-left, .column-right {
@@ -761,10 +760,14 @@
                             
                             <label for="metodoAbono" style="font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 8px; display: block;">💳 Método de Pago:</label>
                             <select id="metodoAbono" style="font-size: 15px; padding: 10px; font-weight: 600; color: #fff; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; box-sizing: border-box; width: 100%; margin-bottom: 12px; font-family: inherit; outline: none;">
+                                <option value="Transferencia" selected>🏦 Transferencia Bancaria / Depósito</option>
                                 <option value="Efectivo">💵 Efectivo</option>
-                                <option value="Transferencia">🏦 Transferencia Bancaria</option>
+                                <option value="Spin OXXO">🏪 Spin by OXXO Efectivo</option>
                                 <option value="Tarjeta">💳 Tarjeta (Clip/Débito/Crédito)</option>
                             </select>
+
+                            <label for="folioAbono" style="font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 8px; display: block;">🔢 Folio / Referencia (Opcional):</label>
+                            <input type="text" id="folioAbono" placeholder="Ej. 123456 o número de autorización" style="font-size: 15px; padding: 10px; color: #fff; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; box-sizing: border-box; width: 100%; margin-bottom: 12px; outline: none; font-family: inherit; transition: border 0.2s;" onfocus="this.style.borderColor='var(--primary-color)'" onblur="this.style.borderColor='rgba(255,255,255,0.15)'">
 
                             <button type="button" id="btnRegistrarCobro" style="margin-top: 4px; background: linear-gradient(135deg, #10b981, #059669); font-size: 15px; font-weight: bold; padding: 12px; width: 100%;">
                                 📲 Registrar Abono en la Hoja
@@ -1230,7 +1233,8 @@
                     const matches = listaClientesGlobal.filter(c => 
                         (c.cliente && c.cliente.toLowerCase().includes(query)) || 
                         (c.id && c.id.toLowerCase().includes(query)) || 
-                        (c.imei && c.imei.toLowerCase().includes(query))
+                        (c.imei && c.imei.toLowerCase().includes(query)) ||
+                        (c.modelo && c.modelo.toLowerCase().includes(query))
                     );
 
                     resultados.innerHTML = '';
@@ -1248,7 +1252,7 @@
 
                             item.innerHTML = `
                                 <div style="font-weight: 600; color: #fff; font-size: 14px;">${c.cliente}</div>
-                                <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">ID: ${c.id || 'S/ID'} | IMEI: ${c.imei}</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">ID: ${c.id || 'S/ID'} | ${c.modelo || 'Genérico'} (IMEI: ${c.imei})</div>
                             `;
                             item.addEventListener('click', function() {
                                 seleccionarClienteAbono(c.imei, c.cliente, c.id);
@@ -1278,7 +1282,7 @@
                             item.onmouseout = () => item.style.backgroundColor = 'transparent';
                             item.innerHTML = `
                                 <div style="font-weight: 600; color: #fff; font-size: 14px;">${c.cliente}</div>
-                                <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">ID: ${c.id || 'S/ID'} | IMEI: ${c.imei}</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">ID: ${c.id || 'S/ID'} | ${c.modelo || 'Genérico'} (IMEI: ${c.imei})</div>
                             `;
                             item.addEventListener('click', function() {
                                 seleccionarClienteAbono(c.imei, c.cliente, c.id);
@@ -1298,7 +1302,9 @@
         });
 
         function seleccionarClienteAbono(imei, clienteNombre, idCliente) {
-            document.getElementById('buscarClienteAbonoInput').value = `${idCliente || 'S/ID'} - ${clienteNombre} (${imei})`;
+            const c = listaClientesGlobal.find(item => item.imei === imei);
+            const modelo = c ? (c.modelo || 'Genérico') : 'Genérico';
+            document.getElementById('buscarClienteAbonoInput').value = `${idCliente || 'S/ID'} - ${clienteNombre} | ${modelo} (IMEI: ${imei})`;
             document.getElementById('buscarClienteAbonoVal').value = imei;
             document.getElementById('resultadosClienteAbono').style.display = 'none';
             cargarDetallesCobranza();
@@ -1582,6 +1588,8 @@
                 if (!clienteSeleccionadoActual) return;
                 const monto = document.getElementById('montoAbono').value;
                 const metodo = document.getElementById('metodoAbono').value;
+                const folioVal = document.getElementById('folioAbono').value.trim();
+                const folio = folioVal || 'Cobro Dinámico';
                 if (!monto || parseFloat(monto) <= 0) {
                     toast('Por favor ingresa un monto válido.', 'warning');
                     return;
@@ -1601,7 +1609,7 @@
                     formData.append('monto', monto);
                     formData.append('metodo', metodo);
                     formData.append('semana', 'Abono');
-                    formData.append('folio', 'Cobro Dinámico');
+                    formData.append('folio', folio);
                     formData.append('notas', 'Registrado desde Módulo de Cobranza Dinámica');
 
                     const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
@@ -1620,15 +1628,24 @@
                         const nuevoSaldo = Math.max(0, Math.round(saldoActual - abonoMonto));
                         
                         // Generar el mensaje
-                        const mensaje = `¡Hola, ${clienteSeleccionadoActual.cliente}! 👋\n` +
-                                        `Te confirmamos que hemos registrado tu abono exitosamente.\n\n` +
-                                        `💵 *Monto recibido:* $${Math.round(abonoMonto).toLocaleString('es-MX')} MXN\n` +
-                                        `📉 *Nuevo saldo pendiente:* $${nuevoSaldo.toLocaleString('es-MX')} MXN\n\n` +
+                        let mensaje = `¡Hola, ${clienteSeleccionadoActual.cliente}! 👋\n` +
+                                        `Te confirmamos que hemos registrado tu abono para tu equipo *${clienteSeleccionadoActual.modelo || 'Celular'}* exitosamente.\n\n` +
+                                        `💵 *Monto recibido:* $${Math.round(abonoMonto).toLocaleString('es-MX')} MXN\n`;
+                                        
+                        if (folioVal) {
+                            mensaje += `🔢 *Folio/Referencia:* #${folioVal}\n`;
+                        }
+                        
+                        mensaje += `📉 *Nuevo saldo pendiente:* $${nuevoSaldo.toLocaleString('es-MX')} MXN\n\n` +
                                         `¡Muchas gracias por tu pago y por mantener tu cuenta al corriente! 😊\n` +
                                         `CelYa! te desea un excelente día. ✨`;
                                         
                         document.getElementById('txt-recibo-mensaje').value = mensaje;
                         document.getElementById('modal-recibo-pago').style.display = 'block';
+                        
+                        // Limpiar campos
+                        document.getElementById('folioAbono').value = '';
+                        document.getElementById('montoAbono').value = '';
                         
                         btn.innerText = originalText;
                         btn.disabled = false;
