@@ -5817,6 +5817,23 @@
             return false;
         }
 
+        function obtenerFotoDeProductoCatalogo(productId, dataObj) {
+            if (!dataObj || !dataObj.pickers) return "";
+            for (const picker of dataObj.pickers) {
+                if (picker.products) {
+                    const prod = picker.products.find(p => p.product_id === productId);
+                    if (prod) {
+                        if (prod.picture_id) {
+                            return `https://http2.mlstatic.com/D_NQ_NP_${prod.picture_id}-O.jpg`;
+                        } else if (prod.thumbnail) {
+                            return prod.thumbnail.replace("-I.jpg", "-O.jpg");
+                        }
+                    }
+                }
+            }
+            return "";
+        }
+
         async function cargarVariantesRealesML(idProducto, esCambioVariante = false, isAutoRedirect = false, isAfterTimeout = false, clickSource = null) {
             const contenedor = document.getElementById('ml-dynamic-variants-container');
             const wrapperColores = document.getElementById('ml-colors-wrapper');
@@ -6552,8 +6569,9 @@
                     let redirectId = null;
 
                     // A. Check if the current variant is out of stock and redirect to best in-stock alternative
+                    // (Only auto-redirect on initial load when clickSource is not set)
                     const activeProductState = productMapGlobal[cleanId];
-                    if (activeProductState && activeProductState.isOutOfStock) {
+                    if (!clickSource && activeProductState && activeProductState.isOutOfStock) {
                         let bestProduct = null;
                         let bestScore = -1;
 
@@ -7182,6 +7200,62 @@
                         document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>Cargando...</strong>`;
                         document.getElementById('pdp-enganche-grande').innerText = `Cargando...`;
                         document.getElementById('pdp-weekly-amount').innerText = `Cargando...`;
+                    }
+
+                    // === ACTUALIZAR FOTO PARA PRODUCTOS DE CATÁLOGO ===
+                    try {
+                        const newPhotoUrl = obtenerFotoDeProductoCatalogo(cleanId, data);
+                        if (newPhotoUrl) {
+                            const imgEl = document.getElementById('modal-producto-foto');
+                            if (imgEl && imgEl.getAttribute('src') !== newPhotoUrl) {
+                                imgEl.src = newPhotoUrl;
+                            }
+                            // También actualizar la miniatura de la galería
+                            const thumbsContainer = document.getElementById('pdp-thumbs-container');
+                            if (thumbsContainer) {
+                                thumbsContainer.querySelectorAll('.pdp-thumb').forEach(t => {
+                                    t.classList.remove('active');
+                                });
+                                const firstThumb = thumbsContainer.querySelector('.pdp-thumb');
+                                if (firstThumb) {
+                                    firstThumb.src = newPhotoUrl;
+                                    firstThumb.classList.add('active');
+                                }
+                            }
+                        }
+                    } catch (photoErr) {
+                        console.warn('Error actualizando foto de producto de catálogo:', photoErr);
+                    }
+
+                    // === CHECK STOCK FOR CATALOG PRODUCTS ===
+                    const activeProductState = productMapGlobal[cleanId];
+                    const isOutOfStock = activeProductState ? activeProductState.isOutOfStock : false;
+                    const warningEl = document.getElementById('pdp-price-anomaly-warning');
+                    const formCard = document.getElementById('pdp-credit-form-card');
+                    const btnSubmit = document.querySelector('button[onclick="enviarSolicitudFinal()"]');
+
+                    if (isOutOfStock) {
+                        if (warningEl) {
+                            warningEl.innerHTML = '<strong>⚠️ Combinación no disponible:</strong> Esta combinación de color y almacenamiento no está disponible actualmente. Por favor selecciona otra variante.';
+                            warningEl.style.display = 'block';
+                        }
+                        if (formCard) formCard.style.display = 'none';
+                        if (btnSubmit) {
+                            btnSubmit.disabled = true;
+                            btnSubmit.style.opacity = "0.5";
+                            btnSubmit.style.cursor = "not-allowed";
+                        }
+                    } else {
+                        const isPricingAnomaly = typeof detectarAnomaliaDePrecioSeleccionado === "function" && detectarAnomaliaDePrecioSeleccionado();
+                        if (!isPricingAnomaly) {
+                            if (warningEl) warningEl.style.display = 'none';
+                            if (formCard) formCard.style.display = 'block';
+                            if (btnSubmit) {
+                                btnSubmit.disabled = false;
+                                btnSubmit.style.opacity = "";
+                                btnSubmit.style.cursor = "pointer";
+                            }
+                        }
                     }
 
                     const colorPicker = data.pickers.find(p => {
