@@ -1865,15 +1865,7 @@
 
         /* Botón Central Llenar Solicitud Desplegable */
         .floating-solicitud-container {
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+            display: none !important;
         }
         .floating-solicitud-btn {
             height: 60px;
@@ -1987,6 +1979,94 @@
                 bottom: 65px;
                 width: 250px;
                 max-height: 280px;
+            }
+        }
+
+        /* Botón Flotante Llenar Solicitud en PDP (Modal Abierto) */
+        .pdp-floating-solicitud-btn {
+            position: fixed;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 48px;
+            height: 48px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #00E6D6 0%, #00BFFF 100%);
+            color: #ffffff !important;
+            border: none;
+            display: none; /* dynamically flex when modal opens */
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0, 191, 255, 0.4);
+            z-index: 21000;
+            overflow: hidden;
+            transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            white-space: nowrap;
+            padding: 0;
+            font-family: 'Outfit', 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            box-sizing: border-box !important;
+            outline: none;
+        }
+        .pdp-floating-solicitud-btn:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 191, 255, 0.5);
+        }
+        .pdp-floating-solicitud-btn:active {
+            transform: translateY(-50%) scale(0.96);
+        }
+        .pdp-floating-solicitud-btn .btn-icon {
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 48px;
+            height: 48px;
+        }
+        .pdp-floating-solicitud-btn .btn-text {
+            max-width: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-width 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding-right: 0;
+        }
+        
+        /* Expanded State */
+        .pdp-floating-solicitud-btn.expanded {
+            width: 280px;
+            border-radius: 24px;
+            justify-content: flex-start;
+            padding-left: 0;
+            background: linear-gradient(135deg, #00C8BB 0%, #009FFF 100%);
+        }
+        .pdp-floating-solicitud-btn.expanded .btn-text {
+            max-width: 220px;
+            opacity: 1;
+            padding-right: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .pdp-floating-solicitud-btn {
+                right: 16px;
+                width: 44px;
+                height: 44px;
+                border-radius: 22px;
+            }
+            .pdp-floating-solicitud-btn .btn-icon {
+                min-width: 44px;
+                height: 44px;
+                font-size: 18px;
+            }
+            .pdp-floating-solicitud-btn.expanded {
+                width: 250px;
+            }
+            .pdp-floating-solicitud-btn.expanded .btn-text {
+                font-size: 12.5px;
+                padding-right: 14px;
             }
         }
     </style>
@@ -3515,6 +3595,13 @@
 
             // Cargar variantes reales desde Mercado Libre en vivo
             cargarVariantesRealesML(id);
+
+            // Mostrar botón flotante de PDP
+            const pdpFloatBtn = document.getElementById('pdpFloatingSolicitudBtn');
+            if (pdpFloatBtn) {
+                pdpFloatBtn.style.display = 'flex';
+                pdpFloatBtn.classList.remove('expanded');
+            }
         }
 
         let pdpInfoLocked = false;
@@ -3722,6 +3809,13 @@
             almacenamientoSeleccionado = "";
             itemVariationsData = [];
             currentMLItemLink = "";
+
+            // Ocultar botón flotante de PDP
+            const pdpFloatBtn = document.getElementById('pdpFloatingSolicitudBtn');
+            if (pdpFloatBtn) {
+                pdpFloatBtn.style.display = 'none';
+                pdpFloatBtn.classList.remove('expanded');
+            }
         }
 
         // Cerrar modal al hacer clic en el fondo oscuro exterior
@@ -7392,6 +7486,12 @@
             </div>
         </div>
     </div>
+
+    <!-- Botón Flotante Llenar Solicitud en PDP (se muestra al abrir modal) -->
+    <button type="button" id="pdpFloatingSolicitudBtn" class="pdp-floating-solicitud-btn" onclick="handlePdpFloatingClick(event)">
+        <span class="btn-icon">📋</span>
+        <span class="btn-text">Llenar solicitud de crédito</span>
+    </button>
 </body>
 <!-- ═════════════════════ TOAST + MODAL RESULT SYSTEM ═════════════════════ -->
 <div id="toast-container" style="
@@ -7847,15 +7947,38 @@
         });
     };
 
-    window.scrollToPDPForm = function() {
+    window.scrollToPDPForm = function(immediate = false) {
+        const delay = immediate ? 0 : 600;
         setTimeout(() => {
             const formCard = document.getElementById('pdp-credit-form-card');
             const pdpContent = document.querySelector('#modalCredito .modal-content');
             if (formCard && pdpContent) {
                 formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-        }, 600);
+        }, delay);
     };
+
+    // Lógica del botón flotante de Llenar Solicitud dentro de la modal (PDP)
+    window.handlePdpFloatingClick = function(event) {
+        if (event) event.stopPropagation();
+        const btn = document.getElementById('pdpFloatingSolicitudBtn');
+        if (!btn) return;
+        
+        const isExpanded = btn.classList.contains('expanded');
+        if (!isExpanded) {
+            btn.classList.add('expanded');
+        } else {
+            window.scrollToPDPForm(true);
+        }
+    };
+
+    // Cerrar el botón expandido al hacer clic fuera
+    window.addEventListener('click', function(event) {
+        const btn = document.getElementById('pdpFloatingSolicitudBtn');
+        if (btn && btn.classList.contains('expanded') && !btn.contains(event.target)) {
+            btn.classList.remove('expanded');
+        }
+    });
 
     // Ocultar botones de PDP en móvil al hacer scroll hacia abajo y mostrarlos al subir
     (function() {
