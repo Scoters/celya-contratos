@@ -165,11 +165,11 @@
             display: flex;
             background: #e9ecef;
             border: 1px solid #ced4da;
-            padding: 4px;
+            padding: 3px;
             border-radius: 6px;
-            gap: 4px;
+            gap: 2px;
             margin-top: 5px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             box-sizing: border-box;
             width: 100%;
         }
@@ -177,9 +177,9 @@
             flex: 1;
             border: none;
             background: transparent;
-            padding: 8px 6px;
+            padding: 6px 4px;
             font-family: inherit;
-            font-size: 14px;
+            font-size: 12.5px;
             font-weight: bold;
             color: #495057;
             border-radius: 4px;
@@ -190,7 +190,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 38px;
+            min-height: 32px;
         }
         .segment-control-form .segment-btn-form:hover {
             background: rgba(0, 0, 0, 0.05);
@@ -735,8 +735,9 @@
                 }
 
                 const preEnganche = urlParams.get('pre_enganche');
-                if (preEnganche) {
-                    document.getElementById('monto').value = parseFloat(preEnganche) || "";
+                if (preEnganche !== null && preEnganche.trim() !== "") {
+                    const parsedEng = parseFloat(preEnganche);
+                    document.getElementById('monto').value = isNaN(parsedEng) ? "" : parsedEng;
                 }
 
                 const preClientId = urlParams.get('pre_client_id');
@@ -863,7 +864,7 @@
                 const val = btn.getAttribute('data-plazo');
                 const opt = selectPlazo.querySelector(`option[value="${val}"]`);
                 if (opt) {
-                    btn.innerText = opt.text;
+                    btn.innerText = opt.text.split('(')[0].trim();
                     
                     if (val === currentVal) {
                         btn.classList.add('active');
@@ -1037,7 +1038,7 @@
             });
         }
 
-        document.getElementById('selectDispositivo').addEventListener('change', actualizarFormularioPrecios');
+        document.getElementById('selectDispositivo').addEventListener('change', actualizarFormularioPrecios);
         document.getElementById('agendaCobro').addEventListener('change', procesarAgendaCobro);
         document.getElementById('plazoSemanas').addEventListener('change', function () {
             actualizarEngancheYFinanciamientoPorPlazo(true);

@@ -302,33 +302,39 @@
 
         .frecuencia-toggle-container {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 6px;
             margin: 10px 0 15px 0;
             background: var(--bg-light);
-            padding: 6px 12px;
+            padding: 8px 10px;
             border-radius: 10px;
             border: 1px solid var(--border-color);
         }
 
         .frecuencia-toggle {
             display: flex;
+            width: 100%;
             background: #e2e8f0;
             border-radius: 6px;
             padding: 2px;
+            box-sizing: border-box;
         }
 
         .freq-btn {
+            flex: 1;
             background: transparent;
             border: 1px solid transparent;
-            padding: 7px 16px;
-            font-size: 14px;
+            padding: 6px 2px;
+            font-size: 12px;
             font-weight: 700;
             color: var(--text-muted);
             cursor: pointer;
             border-radius: 6px;
             transition: all 0.2s ease;
             letter-spacing: 0.3px;
+            text-align: center;
+            white-space: nowrap;
         }
 
         .freq-btn.active {
@@ -877,10 +883,10 @@
             display: flex;
             background: var(--bg-light);
             border: 1px solid var(--border-color);
-            padding: 4px;
-            border-radius: 10px;
-            gap: 4px;
-            margin-bottom: 12px;
+            padding: 3px;
+            border-radius: 8px;
+            gap: 2px;
+            margin-bottom: 8px;
             box-sizing: border-box;
             width: 100%;
         }
@@ -888,12 +894,12 @@
             flex: 1;
             border: none;
             background: transparent;
-            padding: 10px 8px;
+            padding: 6px 4px;
             font-family: 'Outfit', sans-serif;
-            font-size: 13.5px;
+            font-size: 12.5px;
             font-weight: 600;
             color: var(--text-muted);
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
@@ -902,7 +908,7 @@
             align-items: center;
             justify-content: center;
             line-height: 1.2;
-            min-height: 40px;
+            min-height: 32px;
         }
         .segment-control .segment-btn:hover {
             color: var(--text-main);
@@ -917,7 +923,7 @@
         
         /* Ajuste específico para el plazo o etiquetas más largas */
         .plazo-control .segment-btn {
-            font-size: 12.5px;
+            font-size: 11.5px;
         }
         
         /* Frecuencia de pagos semanales con tono azul */
@@ -2897,7 +2903,7 @@
                                 </select>
                             </div>
 
-                            <label style="margin-top: 10px; display: block; font-weight: 600; font-size: 14px; color: var(--text-main); margin-bottom: 6px;">Frecuencia de Pago de tu Preferencia:</label>
+                            <label style="margin-top: 8px; display: block; font-weight: 600; font-size: 12.5px; color: var(--text-main); margin-bottom: 4px;">Frecuencia de Pago:</label>
                              <select id="cliFrecuencia" onchange="actualizarPlazosYPrecioPDP()" style="display: none;">
                                  <option value="SEMANAL">Semanal (Cada Semana)</option>
                                  <option value="QUINCENAL">Quincenal (Cada 15 días)</option>
@@ -2909,7 +2915,7 @@
                                  <button type="button" class="segment-btn" data-val="CONTADO">De Contado</button>
                              </div>
  
-                             <label id="lbl-cliPlazo" style="margin-top: 14px; display: block; font-weight: 600; font-size: 14px; color: var(--text-main); margin-bottom: 6px;">Plazo de Pago de tu Preferencia:</label>
+                             <label id="lbl-cliPlazo" style="margin-top: 10px; display: block; font-weight: 600; font-size: 12.5px; color: var(--text-main); margin-bottom: 4px;">Plazo de Pago:</label>
                              <select id="cliPlazo" onchange="actualizarPrecioCalculadoPDP()" style="display: none;">
                                  <option value="26 Semanas">Plan Rápido (26 Pagos Semanales)</option>
                                  <option value="52 Semanas">Plan Cómodo (52 Pagos Semanales)</option>
@@ -3082,8 +3088,7 @@
                         </div>
 
                         <label
-                            style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main); display: block; margin-bottom: 6px;">Frecuencia
-                            de Pago:</label>
+                            style="margin-top: 8px; font-weight: 600; font-size: 12.5px; color: var(--text-main); display: block; margin-bottom: 4px;">Frecuencia de Pago:</label>
                         <select id="pe-cliFrecuencia" onchange="actualizarPlazosYPreciosPedidoEspecial()"
                             style="display: none;">
                             <option value="SEMANAL">Semanal (Cada Semana)</option>
@@ -3097,8 +3102,7 @@
                         </div>
 
                         <label id="pe-lbl-cliPlazo"
-                            style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main); display: block; margin-bottom: 6px;">Plazo
-                            Deseado:</label>
+                            style="margin-top: 8px; font-weight: 600; font-size: 12.5px; color: var(--text-main); display: block; margin-bottom: 4px;">Plazo Deseado:</label>
                         <select id="pe-cliPlazo" onchange="actualizarPreciosPedidoEspecial()"
                             style="display: none;">
                             <option value="26 Semanas">Plan Rápido (26 Pagos Semanales)</option>
@@ -3763,7 +3767,7 @@
                             </div>
                             <div>
                                 <div class="frecuencia-toggle-container">
-                                    <span style="font-size: 12px; font-weight: 600; color: var(--text-muted);">Pago:</span>
+                                    <span style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Frecuencia de Pago:</span>
                                     <div class="frecuencia-toggle">
                                         <button type="button" class="freq-btn ${activeSem}" onclick="setCardFrecuencia(this, 'semanal')">Semanal</button>
                                         <button type="button" class="freq-btn ${activeQuin}" onclick="setCardFrecuencia(this, 'quincenal')">Quincenal</button>
@@ -4172,8 +4176,8 @@
                 const val = btn.getAttribute('data-val');
                 const opt = select.querySelector(`option[value="${val}"]`);
                 if (opt) {
-                    // Actualizar el texto según el option del select
-                    btn.innerText = opt.text;
+                    // Actualizar el texto según el option del select (solo el texto corto antes de paréntesis)
+                    btn.innerText = opt.text.split('(')[0].trim();
                     
                     // Sincronizar estado activo
                     if (val === currentVal) {
@@ -5111,8 +5115,8 @@
                 // Determinar cuota correspondiente al plazo elegido y frecuencia
                 let cuotaBase = 0;
                 let finalEnganche = 0;
+                const precioContado = parseFloat(document.getElementById('hiddenPrecioContado').value) || 0;
                 if (freq !== "CONTADO") {
-                    const precioContado = parseFloat(document.getElementById('hiddenPrecioContado').value) || 0;
                     let numPagos = (plazo === "26 Semanas") ? 26 : 52;
                     if (freq === "QUINCENAL") {
                         numPagos = numPagos / 2;
@@ -5152,6 +5156,9 @@
                     } else {
                         cuotaBase = baseCuota;
                     }
+                } else {
+                    finalEnganche = Math.round(precioContado);
+                    cuotaBase = 0;
                 }
                 params.append('cuota', Math.round(cuotaBase));
 
