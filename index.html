@@ -3857,6 +3857,22 @@
             defaultColor = color || "";
             defaultMemoria = memoria || "";
 
+            // Guardar especificaciones base globales para el filtro de anomalías Tier 1
+            window.pdpBaseSpecs = {
+                color: color || "",
+                memory: memoria || "",
+                ram: ""
+            };
+            try {
+                if (typeof parseSpecsFromProductName === "function") {
+                    const parsedBase = parseSpecsFromProductName(modelo);
+                    if (parsedBase.ram) window.pdpBaseSpecs.ram = parsedBase.ram;
+                    if (!window.pdpBaseSpecs.memory && parsedBase.memory) window.pdpBaseSpecs.memory = parsedBase.memory;
+                }
+            } catch (specErr) {
+                console.warn("Error parsing base specs in abrirModalCredito:", specErr);
+            }
+
             const imgElement = document.getElementById('modal-producto-foto');
             if (imgElement) {
                 imgElement.src = foto || "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop";
@@ -3955,19 +3971,6 @@
                                 cleanId = id;
                             }
                             ML_CACHE_VARIANTES[cleanId] = parsed;
-
-                            // Sembrar el mismo objeto de caché para todas las variantes de la familia
-                            if (parsed.pickers && Array.isArray(parsed.pickers)) {
-                                parsed.pickers.forEach(picker => {
-                                    if (picker.products && Array.isArray(picker.products)) {
-                                        picker.products.forEach(p => {
-                                            if (p.product_id && p.product_id !== cleanId) {
-                                                ML_CACHE_VARIANTES[p.product_id] = parsed;
-                                            }
-                                        });
-                                    }
-                                });
-                            }
                         }
                     } catch (e) {
                         console.warn("Error seeding variants cache:", e);
@@ -5556,7 +5559,7 @@
             return { storage: storageVal, ram: ramVal };
         }
 
-        function resolverPrecioContadoDeVariacion(v) {
+        function resolverPrecioContadoDeVariacion(v, isSelected = false) {
             const memStr = obtenerMemoriaDeVariacion(v);
             let localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memStr, gradingSeleccionadoGlobal, true);
             let precioReal = 0;
@@ -5564,9 +5567,16 @@
                 const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
                 precioReal = localPrice / gananciaFactor;
             } else {
-                precioReal = (v.prices && v.prices.length > 0)
-                    ? (v.prices[0].amount || v.price || 0)
-                    : (v.price || 0);
+                const cachedData = v.id ? ML_CACHE_VARIANTES[v.id] : null;
+                const priceSource = (cachedData && cachedData.isFresh) ? cachedData : v;
+
+                precioReal = (priceSource.prices && priceSource.prices.length > 0)
+                    ? (priceSource.prices[0].amount || priceSource.price || 0)
+                    : (priceSource.price || 0);
+
+                if (precioReal <= 0 && cachedData && cachedData.buy_box_winner && cachedData.buy_box_winner.price) {
+                    precioReal = cachedData.buy_box_winner.price;
+                }
 
                 if (precioReal <= 0) {
                     localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memStr, gradingSeleccionadoGlobal, false);
@@ -5576,12 +5586,28 @@
                     }
                 }
             }
-            if (precioReal <= 0 && window.pdpBasePrecioContado > 0) {
+            if (precioReal <= 0 && isSelected && window.pdpBasePrecioContado > 0) {
                 const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
                 precioReal = window.pdpBasePrecioContado / gananciaFactor;
             }
+            if (precioReal <= 0) return 0;
             const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
             return Math.round(precioReal * gananciaFactor);
+        }
+
+        function obtenerGbsNumericos(specStr) {
+            if (!specStr) return 0;
+            const match = specStr.toUpperCase().match(/(\d+(?:\.\d+)?)\s*(GB|TB)/);
+            if (match) {
+                let val = parseFloat(match[1]);
+                if (match[2] === "TB") val *= 1024;
+                return val;
+            }
+            const matchSimple = specStr.match(/(\d+(?:\.\d+)?)/);
+            if (matchSimple) {
+                return parseFloat(matchSimple[1]);
+            }
+            return 0;
         }
 
         function detectarAnomaliaDePrecioSeleccionado() {
@@ -5589,14 +5615,35 @@
             console.log("Color seleccionado global:", colorSeleccionadoGlobal);
             console.log("Memoria seleccionada global:", memoriaSeleccionadaGlobal);
             console.log("Grading seleccionado global:", gradingSeleccionadoGlobal);
-            console.log("Cantidad de variantes vivas totales:", variantesVivasGlobal ? variantesVivasGlobal.length : 0);
 
-            if (!variantesVivasGlobal || variantesVivasGlobal.length === 0) {
+            const warningEl = document.getElementById('pdp-price-anomaly-warning');
+
+            let listToUse = [];
+            if (variantesVivasGlobal && variantesVivasGlobal.length > 0) {
+                listToUse = variantesVivasGlobal;
+            } else if (productMapGlobal && Object.keys(productMapGlobal).length > 0) {
+                listToUse = Object.values(productMapGlobal).map(p => {
+                    return {
+                        id: p.id,
+                        attribute_combinations: [
+                            { id: "COLOR", value_name: p.color },
+                            { id: "INTERNAL_MEMORY", value_name: p.memory },
+                            { id: "RAM_MEMORY", value_name: p.ram },
+                            { id: "GRADING", value_name: p.grading }
+                        ],
+                        attributes: []
+                    };
+                });
+            }
+
+            console.log("Cantidad de variantes vivas totales:", listToUse.length);
+
+            if (listToUse.length === 0) {
                 console.log("Fin anomalía: No hay variantes vivas cargadas.");
                 return false;
             }
 
-            const varianteSeleccionada = variantesVivasGlobal.find(v => {
+            const varianteSeleccionada = listToUse.find(v => {
                 const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
                 const colorMatch = colorSeleccionadoGlobal ? allAttrs.some(a => {
                     const idUpper = a.id.toUpperCase();
@@ -5619,7 +5666,7 @@
             }
 
             const specsSelected = obtenerSpecsDeVariacion(varianteSeleccionada);
-            const priceSelected = resolverPrecioContadoDeVariacion(varianteSeleccionada);
+            const priceSelected = resolverPrecioContadoDeVariacion(varianteSeleccionada, true);
 
             console.log("Variante seleccionada:", {
                 id: varianteSeleccionada.id,
@@ -5632,8 +5679,36 @@
                 return false;
             }
 
-            for (let i = 0; i < variantesVivasGlobal.length; i++) {
-                const vOther = variantesVivasGlobal[i];
+            // Tier 1 check: Compare selected variant's price with base price if specs changed
+            const currentMem = memoriaSeleccionadaGlobal || almacenamientoSeleccionado || "";
+            const currentRam = ramSeleccionadaGlobal || "";
+            const baseMem = window.pdpBaseSpecs ? window.pdpBaseSpecs.memory : defaultMemoria;
+            const baseRam = window.pdpBaseSpecs ? window.pdpBaseSpecs.ram : "";
+
+            const currMemGb = obtenerGbsNumericos(currentMem);
+            const baseMemGb = obtenerGbsNumericos(baseMem);
+            const currRamGb = obtenerGbsNumericos(currentRam);
+            const baseRamGb = obtenerGbsNumericos(baseRam);
+
+            const hasStorageChange = currMemGb > 0 && baseMemGb > 0 && currMemGb !== baseMemGb;
+            const hasRamChange = currRamGb > 0 && baseRamGb > 0 && currRamGb !== baseRamGb;
+
+            if ((hasStorageChange || hasRamChange) && priceSelected === window.pdpBasePrecioContado) {
+                console.warn("Anomalía Tier 1: El precio de contado final no cambió del precio base, pero las especificaciones de memoria/RAM son diferentes.", {
+                    currentSpecs: { memory: currentMem, ram: currentRam },
+                    baseSpecs: { memory: baseMem, ram: baseRam },
+                    price: priceSelected
+                });
+                if (warningEl) {
+                    warningEl.innerHTML = '<strong>⚠️ Error de carga en precios:</strong> El precio no se actualizó correctamente para la capacidad seleccionada. Intente seleccionar otra variante o espere un momento.';
+                }
+                console.log("=== FIN DETECTAR ANOMALIA (ANOMALIA TIER 1 ENCONTRADA) ===");
+                return true;
+            }
+
+            // Tier 2 sibling comparison
+            for (let i = 0; i < listToUse.length; i++) {
+                const vOther = listToUse[i];
                 if (vOther.id === varianteSeleccionada.id) continue;
 
                 const otherAttrs = (vOther.attribute_combinations || []).concat(vOther.attributes || []);
@@ -5651,7 +5726,7 @@
                 if (!colorMatch || !gradingMatch) continue;
 
                 const specsOther = obtenerSpecsDeVariacion(vOther);
-                const priceOther = resolverPrecioContadoDeVariacion(vOther);
+                const priceOther = resolverPrecioContadoDeVariacion(vOther, false);
 
                 console.log(`Hermano #${i + 1} (${vOther.id}) detalles:`, {
                     specs: specsOther,
@@ -5686,11 +5761,14 @@
                 }
 
                 if (isAnomaly) {
-                    console.warn("Anomalía detectada:", {
+                    console.warn("Anomalía Tier 2 detectada:", {
                         selected: { id: varianteSeleccionada.id, specs: specsSelected, price: priceSelected },
                         other: { id: vOther.id, specs: specsOther, price: priceOther }
                     });
-                    console.log("=== FIN DETECTAR ANOMALIA (ANOMALIA ENCONTRADA) ===");
+                    if (warningEl) {
+                        warningEl.innerHTML = '<strong>⚠️ Variación no disponible:</strong> Detectamos una inconsistencia temporal en los precios de MercadoLibre para esta capacidad o RAM. Por favor selecciona otra variante.';
+                    }
+                    console.log("=== FIN DETECTAR ANOMALIA (ANOMALIA TIER 2 ENCONTRADA) ===");
                     return true;
                 }
             }
@@ -5805,8 +5883,20 @@
                 }
             }
 
-            // Determinar si tenemos datos frescos específicos para este ID (no un placeholder de familia sembrado)
+            // Determinar si tenemos datos frescos específicos para este ID (o un fallback de familia)
             let cache = ML_CACHE_VARIANTES[cleanId];
+            if (!cache) {
+                // Buscar en el caché si hay alguna otra variante de la misma familia cargada
+                const familyCache = Object.values(ML_CACHE_VARIANTES).find(c => 
+                    c && c.isFresh && c.pickers && c.pickers.some(picker =>
+                        picker.products && picker.products.some(p => p.product_id === cleanId)
+                    )
+                );
+                if (familyCache) {
+                    cache = familyCache;
+                }
+            }
+
             if (!cache || !cache.isFresh || (cache.id !== cleanId && cache.catalog_product_id !== cleanId)) {
                 if (window.equiposCargados) {
                     const foundInCatalog = window.equiposCargados.find(item => {
@@ -5837,22 +5927,9 @@
                                 parsed.isFresh = true;
                                 ML_CACHE_VARIANTES[cleanId] = parsed;
                                 cache = parsed;
-
-                                // Sembrar el mismo objeto de caché para todas las variantes de la familia
-                                if (parsed.pickers && Array.isArray(parsed.pickers)) {
-                                    parsed.pickers.forEach(picker => {
-                                        if (picker.products && Array.isArray(picker.products)) {
-                                            picker.products.forEach(p => {
-                                                if (p.product_id) {
-                                                    ML_CACHE_VARIANTES[p.product_id] = parsed;
-                                                }
-                                            });
-                                        }
-                                    });
-                                }
                             }
                         } catch (e) {
-                            console.warn("Error parsing status/seeding variants cache:", e);
+                            console.warn("Error parsing status variants cache:", e);
                         }
                     }
                 }
@@ -6075,22 +6152,10 @@
                                     }
                                 }
 
+                                // Almacenar datos frescos únicamente para la variante específica consultada
                                 ML_CACHE_VARIANTES[originalCleanId] = freshData;
-                                if (cleanId !== originalCleanId) {
-                                    ML_CACHE_VARIANTES[cleanId] = freshData;
-                                }
-
-                                // Sembrar también para todos los IDs de variantes de la familia en la caché fresca
-                                if (freshData.pickers && Array.isArray(freshData.pickers)) {
-                                    freshData.pickers.forEach(picker => {
-                                        if (picker.products && Array.isArray(picker.products)) {
-                                            picker.products.forEach(p => {
-                                                if (p.product_id) {
-                                                    ML_CACHE_VARIANTES[p.product_id] = freshData;
-                                                }
-                                            });
-                                        }
-                                    });
+                                if (freshData.id && freshData.id !== originalCleanId) {
+                                    ML_CACHE_VARIANTES[freshData.id] = freshData;
                                 }
 
                                 // Forzar renderizado secundario con los datos actualizados
