@@ -960,7 +960,9 @@
                 if (quincenalOpt) quincenalOpt.style.display = "none";
             } else if (freq === "QUINCENAL") {
                 if (semanalCal) semanalCal.style.display = "none";
-                if (quincenalOpt) quincenalOpt.style.display = "grid";
+                if (quincenalOpt) {
+                    quincenalOpt.style.display = (window.quincenalAbierto !== false) ? "grid" : "none";
+                }
             } else {
                 if (semanalCal) semanalCal.style.display = "none";
                 if (quincenalOpt) quincenalOpt.style.display = "none";
@@ -1007,12 +1009,20 @@
                                 select.value = "SEMANAL|SABADO";
                                 window.calendarAbierto = true;
                             }
+                            window.quincenalAbierto = false;
                         } else if (freq === "QUINCENAL") {
-                            select.value = "QUINCENAL|15 Y 30";
+                            const partes = select.value.split('|');
+                            if (partes[0] === "QUINCENAL") {
+                                window.quincenalAbierto = !window.quincenalAbierto;
+                            } else {
+                                select.value = "QUINCENAL|15 Y 30";
+                                window.quincenalAbierto = true;
+                            }
                             window.calendarAbierto = false;
                         } else if (freq === "CONTADO") {
                             select.value = "CONTADO|UNICO";
                             window.calendarAbierto = false;
+                            window.quincenalAbierto = false;
                         }
                         triggerSelectChange(select);
                         syncAgendaCobro();
@@ -1041,6 +1051,7 @@
                     btn.addEventListener('click', () => {
                         const quin = btn.getAttribute('data-quin');
                         select.value = `QUINCENAL|${quin}`;
+                        window.quincenalAbierto = false; // Cerrar el selector de quincena al elegir una opción
                         triggerSelectChange(select);
                         syncAgendaCobro();
                     });
@@ -1050,6 +1061,9 @@
             // Inicialmente cerrado si ya viene un día pre-seleccionado
             if (select.value.startsWith("SEMANAL")) {
                 window.calendarAbierto = false;
+            }
+            if (select.value.startsWith("QUINCENAL")) {
+                window.quincenalAbierto = false;
             }
 
             syncAgendaCobro();
