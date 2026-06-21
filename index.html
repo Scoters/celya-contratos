@@ -1061,6 +1061,15 @@
             }
 
             /* Botón de Salida en la Esquina Superior Derecha en Mobile (Flotante y más grande) */
+            @keyframes pdpCloseBounce {
+                0%, 100% {
+                    transform: translateY(0) scale(1);
+                }
+                50% {
+                    transform: translateY(-8px) scale(1.05);
+                }
+            }
+
             .pdp-close-btn {
                 position: fixed !important;
                 top: 20px !important;
@@ -1070,25 +1079,27 @@
                 z-index: 999999 !important;
                 background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
                 color: white !important;
-                width: 56px !important;
-                height: 56px !important;
+                width: 64px !important;
+                height: 64px !important;
                 border-radius: 50% !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
-                font-size: 34px !important;
+                box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4) !important;
+                font-size: 38px !important;
                 line-height: 1 !important;
                 padding: 0 !important;
                 border: none !important;
                 cursor: pointer !important;
                 transition: transform 0.2s, background-color 0.2s;
+                animation: pdpCloseBounce 3s ease-in-out infinite;
             }
 
             .pdp-close-btn:hover,
             .pdp-close-btn:active {
                 background: #1e293b !important;
-                transform: scale(1.1);
+                transform: scale(1.15) !important;
+                animation: none !important;
                 color: white !important;
             }
         }
@@ -1706,6 +1717,88 @@
             overflow-y: auto;
             padding: 20px;
         }
+
+        /* PDP Info Button and Popover */
+        .pdp-info-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0, 143, 255, 0.12);
+            border: 2px solid rgba(0, 143, 255, 0.4);
+            color: var(--accent);
+            font-size: 20px;
+            font-weight: 700;
+            display: none; /* dynamically flex/none */
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
+            z-index: 10;
+        }
+        .pdp-info-btn:hover {
+            background: rgba(0, 143, 255, 0.25);
+            border-color: var(--accent);
+            transform: scale(1.08);
+        }
+        .pdp-info-btn:active {
+            transform: scale(0.96);
+        }
+        .pdp-info-tooltip {
+            position: absolute;
+            top: 65px;
+            right: 15px;
+            width: 320px;
+            max-height: 280px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 16px;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            text-align: left;
+        }
+        body.dark-theme .pdp-info-tooltip {
+            background: rgba(39, 39, 42, 0.85); /* Zinc 800 with opacity */
+        }
+        body:not(.dark-theme) .pdp-info-tooltip {
+            background: rgba(255, 255, 255, 0.9);
+        }
+        .pdp-info-tooltip::-webkit-scrollbar {
+            width: 6px;
+        }
+        .pdp-info-tooltip::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .pdp-info-tooltip::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+        .pdp-info-tooltip::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .pdp-info-btn {
+                width: 44px !important;
+                height: 44px !important;
+                font-size: 20px !important;
+            }
+            .pdp-info-tooltip {
+                width: auto !important;
+                right: 15px !important;
+                left: 15px !important;
+                max-height: 180px !important;
+            }
+        }
     </style>
 </head>
 
@@ -1938,8 +2031,15 @@
                     </div>
 
                     <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
-                        <div class="pdp-main-img-wrapper">
+                        <div class="pdp-main-img-wrapper" style="position: relative;">
                             <img id="modal-producto-foto" src="" alt="Foto del Producto">
+                            <button type="button" class="pdp-info-btn" id="pdp-info-btn" onclick="togglePdpInfo(event)" onmouseenter="showPdpInfo()" onmouseleave="hidePdpInfo()">i</button>
+                            <div id="pdp-info-tooltip" class="pdp-info-tooltip">
+                                <div style="font-weight: bold; color: var(--accent); display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                                    <span style="font-size: 16px;">ℹ️</span> <span>Descripción del Producto</span>
+                                </div>
+                                <div id="pdp-info-tooltip-content" style="white-space: pre-line; color: var(--text-main); font-size: 13.5px; line-height: 1.5; font-family: inherit;"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -3007,6 +3107,13 @@
         }
 
         function abrirModalCredito(id, modelo, esFijo, foto, cuota26, cuota52, link, precioContado, engancheMinimo, color, memoria, triggerElement) {
+            // Reset Info button & tooltip
+            const pdpInfoBtn = document.getElementById('pdp-info-btn');
+            const pdpInfoTooltip = document.getElementById('pdp-info-tooltip');
+            if (pdpInfoBtn) pdpInfoBtn.style.display = 'none';
+            if (pdpInfoTooltip) pdpInfoTooltip.style.display = 'none';
+            pdpInfoLocked = false;
+
             // Reset modal pricing warning state and form visibility
             const warningEl = document.getElementById('pdp-price-anomaly-warning');
             if (warningEl) warningEl.style.display = 'none';
@@ -3207,6 +3314,32 @@
             cargarVariantesRealesML(id);
         }
 
+        let pdpInfoLocked = false;
+
+        function showPdpInfo() {
+            if (pdpInfoLocked) return;
+            const tooltip = document.getElementById('pdp-info-tooltip');
+            if (tooltip) tooltip.style.display = 'flex';
+        }
+
+        function hidePdpInfo() {
+            if (pdpInfoLocked) return;
+            const tooltip = document.getElementById('pdp-info-tooltip');
+            if (tooltip) tooltip.style.display = 'none';
+        }
+
+        function togglePdpInfo(event) {
+            event.stopPropagation();
+            const tooltip = document.getElementById('pdp-info-tooltip');
+            if (!tooltip) return;
+            pdpInfoLocked = !pdpInfoLocked;
+            if (pdpInfoLocked) {
+                tooltip.style.display = 'flex';
+            } else {
+                tooltip.style.display = 'none';
+            }
+        }
+
         function actualizarPlazosYPrecioPDP() {
             const freq = document.getElementById('cliFrecuencia').value;
             const selectPlazo = document.getElementById('cliPlazo');
@@ -3364,6 +3497,11 @@
         }
 
         function cerrarModal() {
+            // Cerrar info tooltip
+            const pdpInfoTooltip = document.getElementById('pdp-info-tooltip');
+            if (pdpInfoTooltip) pdpInfoTooltip.style.display = 'none';
+            pdpInfoLocked = false;
+
             document.getElementById('modalCredito').style.display = 'none';
             document.getElementById('formInteresado').reset();
 
@@ -3385,6 +3523,16 @@
 
         // Cerrar modal al hacer clic en el fondo oscuro exterior
         window.addEventListener('click', function (event) {
+            // Cerrar tooltip de info si se hace clic fuera del botón y del propio tooltip
+            const pdpInfoBtn = document.getElementById('pdp-info-btn');
+            const pdpInfoTooltip = document.getElementById('pdp-info-tooltip');
+            if (pdpInfoBtn && pdpInfoTooltip && pdpInfoTooltip.style.display !== 'none') {
+                if (!pdpInfoBtn.contains(event.target) && !pdpInfoTooltip.contains(event.target)) {
+                    pdpInfoTooltip.style.display = 'none';
+                    pdpInfoLocked = false;
+                }
+            }
+
             const modal = document.getElementById('modalCredito');
             if (event.target === modal) {
                 const resPanel = document.getElementById('modalCredito-resultado');
@@ -4281,7 +4429,9 @@
         function isProductTagOutOfStock(tags) {
             if (!tags) return false;
             return tags.includes("out-of-stock") ||
-                tags.includes("disabled");
+                tags.includes("disabled") ||
+                tags.includes("no-bids") ||
+                tags.includes("no-winner");
         }
 
         // Obtiene el grupo o familia principal de un color para homologar traducciones
@@ -4289,23 +4439,65 @@
             if (!colorName) return "";
             const name = colorName.toLowerCase().trim();
 
+            // Mapeos específicos prioritarios
+            const mapeosEspecificos = {
+                "matte charcoal": "negro",
+                "phantom black": "negro",
+                "midnight": "negro",
+                "charcoal": "negro",
+                "graphite": "negro",
+                "grafito": "negro",
+                "awesome graphite": "negro",
+                "space gray": "gris",
+                "space grey": "gris",
+                "gris oscuro": "gris",
+                "gris espacial": "gris",
+                "awesome iceblue": "azul",
+                "awesome lemon": "amarillo",
+                "lime green": "verde",
+                "awesome lime": "verde",
+                "mint": "verde",
+                "menta": "verde",
+                "mint green": "verde",
+                "starlight": "blanco",
+                "silver": "plata",
+                "plata": "plata"
+            };
+
+            if (mapeosEspecificos[name]) {
+                return mapeosEspecificos[name];
+            }
+
             const groups = {
-                "negro": ["negro", "black", "oscuro", "dark", "space", "carbono", "carbon", "grafito", "graphite", "phantom black"],
-                "blanco": ["blanco", "white", "claro", "light", "plata", "silver"],
+                "plata": ["plata", "silver"],
+                "gris": ["gris", "grey", "gray"],
                 "crema": ["cream", "crema", "marfil", "ivory", "beige"],
                 "azul": ["azul", "blue", "celeste", "sky", "indigo", "marino"],
                 "verde": ["verde", "green", "lima", "lime", "menta", "mint", "musgo"],
                 "rojo": ["rojo", "red", "naranja", "orange", "coral", "atardecer"],
                 "rosa": ["rosa", "pink", "gold", "oro", "dorado", "bronce", "bronze"],
                 "violeta": ["violeta", "violet", "purpura", "púrpura", "purple", "morado", "lavanda", "lavender", "lila", "lilac"],
-                "gris": ["gris", "grey", "gray", "plata", "silver"]
+                "negro": ["negro", "black", "space", "carbono", "carbon", "oscur"],
+                "blanco": ["blanco", "white", "claro", "light"]
             };
 
-            for (const canonical in groups) {
+            // Buscamos primero en los colores base prioritarios (evitando falsos positivos de oscur/claro)
+            const gruposPrioritarios = ["plata", "gris", "crema", "azul", "verde", "rojo", "rosa", "violeta"];
+            for (const canonical of gruposPrioritarios) {
                 if (groups[canonical].some(key => name.includes(key))) {
                     return canonical;
                 }
             }
+
+            // Buscamos en negro y blanco
+            for (const canonical in groups) {
+                if (!gruposPrioritarios.includes(canonical)) {
+                    if (groups[canonical].some(key => name.includes(key))) {
+                        return canonical;
+                    }
+                }
+            }
+
             return name;
         }
 
@@ -6678,6 +6870,30 @@
                             });
                     } else {
                         warningDiv.style.display = "none";
+                    }
+                }
+
+                // Populate description / short description if available
+                let desc = "";
+                if (data.short_description && data.short_description.content) {
+                    desc = data.short_description.content;
+                } else if (data.description && typeof data.description === 'string') {
+                    desc = data.description;
+                } else if (data.description && data.description.content) {
+                    desc = data.description.content;
+                }
+
+                const pdpInfoBtn = document.getElementById('pdp-info-btn');
+                const pdpInfoTooltip = document.getElementById('pdp-info-tooltip');
+                const pdpInfoTooltipContent = document.getElementById('pdp-info-tooltip-content');
+                if (pdpInfoBtn && pdpInfoTooltip && pdpInfoTooltipContent) {
+                    if (desc && desc.trim()) {
+                        pdpInfoTooltipContent.innerText = desc.trim();
+                        pdpInfoBtn.style.display = 'flex';
+                    } else {
+                        pdpInfoBtn.style.display = 'none';
+                        pdpInfoTooltip.style.display = 'none';
+                        pdpInfoLocked = false;
                     }
                 }
             } catch (e) {
