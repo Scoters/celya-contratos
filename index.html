@@ -8027,34 +8027,7 @@
         });
     })();
 
-    // Control de la barra de búsqueda auto-expandible en el header
-    (function () {
-        const input = document.getElementById('inputBusqueda');
-        const wrapper = document.querySelector('.header-search-wrapper');
-        const clearBtn = document.getElementById('clearSearchBtn');
-        if (!input || !wrapper) return;
-
-        function updateState() {
-            if (input.value.trim() !== "") {
-                wrapper.classList.add('has-text');
-                if (clearBtn) clearBtn.style.display = 'flex';
-            } else {
-                wrapper.classList.remove('has-text');
-                if (clearBtn) clearBtn.style.display = 'none';
-            }
-        }
-
-        input.addEventListener('input', updateState);
-        input.addEventListener('focus', updateState);
-        input.addEventListener('blur', updateState);
-
-        window.clearSearch = function () {
-            input.value = "";
-            updateState();
-            solicitarBusqueda();
-            input.focus();
-        };
-
+    // Control de la barra de búsqueda auto-e
         // Inicializar por si ya tiene valor
         updateState();
     })();
@@ -8068,7 +8041,7 @@
             const btnWhatsapp = document.querySelector('.whatsapp-float');
             const dropdown = document.getElementById('floatingSolicitudDropdown');
             if (!btnBackToTop) return;
-            
+
             const currentScroll = window.scrollY || document.documentElement.scrollTop;
 
             // Toggle visibility of Back-to-Top based on scroll position
@@ -8078,62 +8051,52 @@
                 btnBackToTop.classList.remove('visible');
             }
 
-            // Mobile-only hide on scroll down, show on scroll up
+            // Mobile-only: botón solicitud se oculta al bajar, back-to-top y whatsapp aparecen al bajar
             if (window.innerWidth <= 900) {
                 if (currentScroll > lastScrollTop && currentScroll > 60) {
-                    // Scroll abajo: ocultar
+                    // Scroll abajo: ocultar solicitud
                     if (btnSolicitud) {
                         btnSolicitud.style.transform = 'translate(-50%, 100px)';
                         btnSolicitud.style.opacity = '0';
                         btnSolicitud.style.pointerEvents = 'none';
                     }
-                    if (btnWhatsapp) {
-                        btnWhatsapp.style.transform = 'translateY(100px)';
-                        btnWhatsapp.style.opacity = '0';
-                        btnWhatsapp.style.pointerEvents = 'none';
+                    if (dropdown) dropdown.style.display = 'none';
+                    // Back-to-top y WhatsApp: mostrar al bajar (si ya pasó 300px)
+                    if (btnBackToTop && currentScroll > 300) {
+                        btnBackToTop.style.transform = '';
+                        btnBackToTop.style.opacity = '';
+                        btnBackToTop.style.pointerEvents = '';
+                    }
+                    if (btnWhatsapp && currentScroll > 300) {
+                        btnWhatsapp.style.transform = '';
+                        btnWhatsapp.style.opacity = '';
+                        btnWhatsapp.style.pointerEvents = '';
+                    }
+                } else {
+                    // Scroll arriba: mostrar solicitud, ocultar back-to-top y whatsapp
+                    if (btnSolicitud) {
+                        btnSolicitud.style.transform = 'translateX(-50%)';
+                        btnSolicitud.style.opacity = '';
+                        btnSolicitud.style.pointerEvents = '';
                     }
                     if (btnBackToTop) {
                         btnBackToTop.style.transform = 'translateY(100px)';
                         btnBackToTop.style.opacity = '0';
                         btnBackToTop.style.pointerEvents = 'none';
                     }
-                    if (dropdown) dropdown.style.display = 'none';
-                } else {
-                    // Scroll arriba: mostrar
-                    if (btnSolicitud) {
-                        btnSolicitud.style.transform = 'translateX(-50%)';
-                        btnSolicitud.style.opacity = '';
-                        btnSolicitud.style.pointerEvents = '';
-                    }
                     if (btnWhatsapp) {
-                        btnWhatsapp.style.transform = '';
-                        btnWhatsapp.style.opacity = '';
-                        btnWhatsapp.style.pointerEvents = '';
-                    }
-                    if (btnBackToTop && currentScroll > 300) {
-                        btnBackToTop.style.transform = '';
-                        btnBackToTop.style.opacity = '';
-                        btnBackToTop.style.pointerEvents = '';
+                        btnWhatsapp.style.transform = 'translateY(100px)';
+                        btnWhatsapp.style.opacity = '0';
+                        btnWhatsapp.style.pointerEvents = 'none';
                     }
                 }
             } else {
-                // Restore defaults if resized back to desktop
-                if (btnSolicitud) {
-                    btnSolicitud.style.transform = '';
-                    btnSolicitud.style.opacity = '';
-                    btnSolicitud.style.pointerEvents = '';
-                }
-                if (btnWhatsapp) {
-                    btnWhatsapp.style.transform = '';
-                    btnWhatsapp.style.opacity = '';
-                    btnWhatsapp.style.pointerEvents = '';
-                }
-                if (btnBackToTop) {
-                    btnBackToTop.style.transform = '';
-                    btnBackToTop.style.opacity = '';
-                    btnBackToTop.style.pointerEvents = '';
-                }
+                // Restaurar en desktop
+                if (btnSolicitud) { btnSolicitud.style.transform = ''; btnSolicitud.style.opacity = ''; btnSolicitud.style.pointerEvents = ''; }
+                if (btnWhatsapp) { btnWhatsapp.style.transform = ''; btnWhatsapp.style.opacity = ''; btnWhatsapp.style.pointerEvents = ''; }
+                if (btnBackToTop) { btnBackToTop.style.transform = ''; btnBackToTop.style.opacity = ''; btnBackToTop.style.pointerEvents = ''; }
             }
+
             lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
         });
     })();
