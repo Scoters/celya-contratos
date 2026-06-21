@@ -303,20 +303,22 @@
 
         .freq-btn {
             background: transparent;
-            border: none;
-            padding: 5px 12px;
-            font-size: 12px;
-            font-weight: 600;
+            border: 1px solid transparent;
+            padding: 7px 16px;
+            font-size: 14px;
+            font-weight: 700;
             color: var(--text-muted);
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: 6px;
             transition: all 0.2s ease;
+            letter-spacing: 0.3px;
         }
 
         .freq-btn.active {
             background: white;
-            color: var(--primary);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            color: #0369a1;
+            box-shadow: 0 2px 6px rgba(3, 105, 161, 0.18);
+            border-color: #0369a1;
         }
 
         header {
@@ -655,13 +657,15 @@
         }
 
         .cuota-item span.plan-label {
-            color: var(--text-muted);
-            font-weight: 500;
+            color: #0369a1;
+            font-weight: 700;
+            font-size: 14px;
         }
 
         .cuota-item span.plan-val {
-            font-weight: 700;
-            color: var(--primary);
+            font-weight: 800;
+            font-size: 15px;
+            color: #16a34a;
         }
 
         .btn-solicitar {
@@ -3479,14 +3483,14 @@
                                             <span class="plan-label">⏱️ Plan Rápido (26 semanas):</span>
                                             <div style="text-align: right;">
                                                 <span class="plan-val">$${cuotaSem26.toLocaleString('es-MX')} MXN/semana</span><br>
-                                                <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Enganche: $${engSem26.toLocaleString('es-MX')}</span>
+                                                <span style="font-size: 12px; color: #16a34a; font-weight: 600;">Enganche: $${engSem26.toLocaleString('es-MX')}</span>
                                             </div>
                                         </div>
                                         <div class="cuota-item" style="align-items: center; margin-top: 8px;">
                                             <span class="plan-label">🗓️ Plan Cómodo (52 semanas):</span>
                                             <div style="text-align: right;">
                                                 <span class="plan-val">$${cuotaSem52.toLocaleString('es-MX')} MXN/semana</span><br>
-                                                <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Enganche: $${engSem52.toLocaleString('es-MX')}</span>
+                                                <span style="font-size: 12px; color: #16a34a; font-weight: 600;">Enganche: $${engSem52.toLocaleString('es-MX')}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -3495,14 +3499,14 @@
                                             <span class="plan-label">⏱️ Plan Rápido (13 quincenas):</span>
                                             <div style="text-align: right;">
                                                 <span class="plan-val">$${cuotaQuin13.toLocaleString('es-MX')} MXN/quincena</span><br>
-                                                <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Enganche: $${engQuin13.toLocaleString('es-MX')}</span>
+                                                <span style="font-size: 12px; color: #16a34a; font-weight: 600;">Enganche: $${engQuin13.toLocaleString('es-MX')}</span>
                                             </div>
                                         </div>
                                         <div class="cuota-item" style="align-items: center; margin-top: 8px;">
                                             <span class="plan-label">🗓️ Plan Cómodo (26 quincenas):</span>
                                             <div style="text-align: right;">
                                                 <span class="plan-val">$${cuotaQuin26.toLocaleString('es-MX')} MXN/quincena</span><br>
-                                                <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Enganche: $${engQuin26.toLocaleString('es-MX')}</span>
+                                                <span style="font-size: 12px; color: #16a34a; font-weight: 600;">Enganche: $${engQuin26.toLocaleString('es-MX')}</span>
                                             </div>
                                         </div>
                                     </div>
