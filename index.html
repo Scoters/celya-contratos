@@ -8094,7 +8094,7 @@
         }
     });
 
-    // Ocultar botones de PDP al hacer scroll
+    // Ocultar/Colapsar elementos de PDP al hacer scroll
     (function() {
         const pdpContent = document.querySelector('#modalCredito .modal-content');
         if (pdpContent) {
@@ -8102,23 +8102,28 @@
             pdpContent.addEventListener('scroll', function() {
                 const currentScroll = pdpContent.scrollTop;
                 
-                // Desaparecer botón de llenar solicitud al hacer scroll
+                // Colapsar botón de llenar solicitud a su forma pequeña al hacer scroll
                 const pdpFloatBtn = document.getElementById('pdpFloatingSolicitudBtn');
                 if (pdpFloatBtn) {
                     if (currentScroll > 50) {
-                        pdpFloatBtn.style.opacity = '0';
-                        pdpFloatBtn.style.pointerEvents = 'none';
+                        pdpFloatBtn.classList.remove('expanded');
                     } else {
-                        // Volver a mostrar si regresa al inicio
+                        // Si regresa al inicio, asegurarse de que sea visible por si se había ocultado al hacer clic
                         pdpFloatBtn.style.opacity = '1';
                         pdpFloatBtn.style.pointerEvents = 'auto';
                     }
                 }
 
+                // Cerrar tooltip de info al hacer scroll para que no estorbe
+                const tooltip = document.getElementById('pdp-info-tooltip');
+                if (tooltip && currentScroll > 50) {
+                    tooltip.style.display = 'none';
+                    pdpInfoLocked = false;
+                }
+
                 if (window.innerWidth > 900) return;
                 const closeBtn = document.querySelector('#modalCredito .pdp-close-btn');
                 const infoBtn = document.getElementById('pdp-info-btn');
-                const tooltip = document.getElementById('pdp-info-tooltip');
                 
                 if (currentScroll > lastPdpScrollTop && currentScroll > 40) {
                     // Scroll abajo: esconder
@@ -8132,11 +8137,6 @@
                         infoBtn.style.opacity = '0';
                         infoBtn.style.pointerEvents = 'none';
                     }
-                    // Ocultar tooltip incondicionalmente
-                    if (tooltip) {
-                        tooltip.style.display = 'none';
-                    }
-                    pdpInfoLocked = false;
                 } else {
                     // Scroll arriba: mostrar
                     if (closeBtn) {
