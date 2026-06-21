@@ -826,6 +826,100 @@
             color: #16a34a !important;
         }
         
+        /* Estilo premium para los sliders de enganche */
+        .enganche-personalizado-pdp input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+            width: 100%;
+        }
+        .enganche-personalizado-pdp input[type="range"]::-webkit-slider-runnable-track {
+            background: var(--border-color);
+            height: 6px;
+            border-radius: 3px;
+        }
+        .enganche-personalizado-pdp input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -5px;
+            background-color: var(--primary);
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            border: 2px solid var(--bg-card);
+            box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+            transition: transform 0.1s;
+        }
+        .enganche-personalizado-pdp input[type="range"]:active::-webkit-slider-thumb {
+            transform: scale(1.25);
+        }
+        .enganche-personalizado-pdp input[type="range"]::-moz-range-track {
+            background: var(--border-color);
+            height: 6px;
+            border-radius: 3px;
+        }
+        .enganche-personalizado-pdp input[type="range"]::-moz-range-thumb {
+            background-color: var(--primary);
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            border: 2px solid var(--bg-card);
+            box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+            transition: transform 0.1s;
+        }
+        .enganche-personalizado-pdp input[type="range"]:active::-moz-range-thumb {
+            transform: scale(1.25);
+        }
+        
+        /* Estilos premium para selectores interactivos (Segmented Control) */
+        .segment-control {
+            display: flex;
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            padding: 4px;
+            border-radius: 10px;
+            gap: 4px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .segment-control .segment-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 10px 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+            min-height: 40px;
+        }
+        .segment-control .segment-btn:hover {
+            color: var(--text-main);
+            background: rgba(var(--accent-rgb), 0.06);
+        }
+        .segment-control .segment-btn.active {
+            background: var(--accent-gradient);
+            color: #ffffff !important;
+            box-shadow: 0 4px 10px rgba(var(--accent-rgb), 0.25);
+            transform: translateY(-0.5px);
+        }
+        
+        /* Ajuste específico para el plazo o etiquetas más largas */
+        .plazo-control .segment-btn {
+            font-size: 12.5px;
+        }
+        
         /* Frecuencia de pagos semanales con tono azul */
         #pdp-weekly-term {
             color: #2563eb !important;
@@ -2716,16 +2810,19 @@
                             <span style="font-size: 14px; color: var(--text-muted);">▼</span>
                         </summary>
                         <div style="margin-top: 12px;">
-                            <label style="display: block; font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 8px;" id="lbl-cliEnganchePersonalizado">
-                                Mínimo requerido: <strong id="pdp-enganche-minimo-label" style="color: var(--text-main);">$0</strong>
-                            </label>
-                            <div style="display: flex; gap: 8px; align-items: center;">
-                                <span style="font-weight: bold; color: var(--text-main); font-size: 17px;">$</span>
-                                <input type="number" id="cliEnganchePersonalizado"
-                                    placeholder="Monto mayor para abonos más bajos..."
-                                    oninput="actualizarPrecioCalculadoPDP()"
-                                    style="flex: 1; padding: 9px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 15px; outline: none; background: var(--bg-card); color: var(--text-main); box-sizing: border-box;">
-                                <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">MXN</span>
+                            <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">
+                                <span>Mínimo: <strong id="pdp-enganche-minimo-label" style="color: var(--text-main);">$0</strong></span>
+                                <span>Máximo: <strong id="pdp-enganche-maximo-label" style="color: var(--text-main);">$0</strong></span>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <input type="range" id="cliEnganchePersonalizadoSlider" 
+                                    style="width: 100%; height: 6px; border-radius: 3px; accent-color: var(--primary); cursor: pointer;"
+                                    oninput="syncSliderToInput(this.value)">
+                                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 6px;">
+                                    <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Monto seleccionado:</span>
+                                    <span style="font-size: 15px; font-weight: bold; color: var(--text-main);"><span id="pdp-enganche-seleccionado-val">$0</span> MXN</span>
+                                </div>
+                                <input type="hidden" id="cliEnganchePersonalizado" oninput="actualizarPrecioCalculadoPDP()">
                             </div>
                         </div>
                     </details>
@@ -2800,18 +2897,27 @@
                                 </select>
                             </div>
 
-                            <label style="margin-top: 10px;">Frecuencia de Pago de tu Preferencia:</label>
-                            <select id="cliFrecuencia" onchange="actualizarPlazosYPrecioPDP()">
-                                <option value="SEMANAL">Semanal (Cada Semana)</option>
-                                <option value="QUINCENAL">Quincenal (Cada 15 días)</option>
-                                <option value="CONTADO">De Contado (Pago Único)</option>
-                            </select>
-
-                            <label style="margin-top: 10px;">Plazo de Pago de tu Preferencia:</label>
-                            <select id="cliPlazo" onchange="actualizarPrecioCalculadoPDP()">
-                                <option value="26 Semanas">Plan Rápido (26 Pagos Semanales)</option>
-                                <option value="52 Semanas">Plan Cómodo (52 Pagos Semanales)</option>
-                            </select>
+                            <label style="margin-top: 10px; display: block; font-weight: 600; font-size: 14px; color: var(--text-main); margin-bottom: 6px;">Frecuencia de Pago de tu Preferencia:</label>
+                             <select id="cliFrecuencia" onchange="actualizarPlazosYPrecioPDP()" style="display: none;">
+                                 <option value="SEMANAL">Semanal (Cada Semana)</option>
+                                 <option value="QUINCENAL">Quincenal (Cada 15 días)</option>
+                                 <option value="CONTADO">De Contado (Pago Único)</option>
+                             </select>
+                             <div class="segment-control frequency-control" id="pdp-frequency-selector">
+                                 <button type="button" class="segment-btn active" data-val="SEMANAL">Semanal</button>
+                                 <button type="button" class="segment-btn" data-val="QUINCENAL">Quincenal</button>
+                                 <button type="button" class="segment-btn" data-val="CONTADO">De Contado</button>
+                             </div>
+ 
+                             <label id="lbl-cliPlazo" style="margin-top: 14px; display: block; font-weight: 600; font-size: 14px; color: var(--text-main); margin-bottom: 6px;">Plazo de Pago de tu Preferencia:</label>
+                             <select id="cliPlazo" onchange="actualizarPrecioCalculadoPDP()" style="display: none;">
+                                 <option value="26 Semanas">Plan Rápido (26 Pagos Semanales)</option>
+                                 <option value="52 Semanas">Plan Cómodo (52 Pagos Semanales)</option>
+                             </select>
+                             <div class="segment-control plazo-control" id="pdp-plazo-selector">
+                                 <button type="button" class="segment-btn" data-val="26 Semanas">Plan Rápido</button>
+                                 <button type="button" class="segment-btn active" data-val="52 Semanas">Plan Cómodo</button>
+                             </div>
 
 
 
@@ -2909,16 +3015,19 @@
                         <span style="font-size: 12px; color: var(--text-muted);">▼</span>
                     </summary>
                     <div style="margin-top: 8px;">
-                        <label style="display: block; font-size: 11px; font-weight: 500; color: var(--text-muted); margin-bottom: 4px;" id="lbl-pe-cliEnganchePersonalizado">
-                            Mínimo requerido: <strong id="pe-enganche-minimo-label" style="color: var(--text-main);">$0</strong>
-                        </label>
-                        <div style="display: flex; gap: 6px; align-items: center;">
-                            <span style="font-weight: bold; color: var(--text-main); font-size: 14px;">$</span>
-                            <input type="number" id="pe-cliEnganchePersonalizado"
-                                placeholder="Monto mayor para abonos más bajos..."
-                                oninput="actualizarPreciosPedidoEspecial()"
-                                style="flex: 1; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; outline: none; background: var(--bg-card); color: var(--text-main); box-sizing: border-box;">
-                            <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">MXN</span>
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
+                            <span>Mínimo: <strong id="pe-enganche-minimo-label" style="color: var(--text-main);">$0</strong></span>
+                            <span>Máximo: <strong id="pe-enganche-maximo-label" style="color: var(--text-main);">$0</strong></span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <input type="range" id="pe-cliEnganchePersonalizadoSlider" 
+                                style="width: 100%; height: 5px; border-radius: 2.5px; accent-color: var(--primary); cursor: pointer;"
+                                oninput="syncPESliderToInput(this.value)">
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px;">
+                                <span style="font-size: 10px; color: var(--text-muted); font-weight: 500;">Monto seleccionado:</span>
+                                <span style="font-size: 13px; font-weight: bold; color: var(--text-main);"><span id="pe-enganche-seleccionado-val">$0</span> MXN</span>
+                            </div>
+                            <input type="hidden" id="pe-cliEnganchePersonalizado" oninput="actualizarPreciosPedidoEspecial()">
                         </div>
                     </div>
                 </details>
@@ -2973,23 +3082,32 @@
                         </div>
 
                         <label
-                            style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">Frecuencia
+                            style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main); display: block; margin-bottom: 6px;">Frecuencia
                             de Pago:</label>
                         <select id="pe-cliFrecuencia" onchange="actualizarPlazosYPreciosPedidoEspecial()"
-                            style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
+                            style="display: none;">
                             <option value="SEMANAL">Semanal (Cada Semana)</option>
                             <option value="QUINCENAL">Quincenal (Cada 15 días)</option>
                             <option value="CONTADO">De Contado (Pago Único)</option>
                         </select>
+                        <div class="segment-control frequency-control" id="pe-frequency-selector">
+                            <button type="button" class="segment-btn active" data-val="SEMANAL">Semanal</button>
+                            <button type="button" class="segment-btn" data-val="QUINCENAL">Quincenal</button>
+                            <button type="button" class="segment-btn" data-val="CONTADO">De Contado</button>
+                        </div>
 
-                        <label
-                            style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">Plazo
+                        <label id="pe-lbl-cliPlazo"
+                            style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main); display: block; margin-bottom: 6px;">Plazo
                             Deseado:</label>
                         <select id="pe-cliPlazo" onchange="actualizarPreciosPedidoEspecial()"
-                            style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
+                            style="display: none;">
                             <option value="26 Semanas">Plan Rápido (26 Pagos Semanales)</option>
                             <option value="52 Semanas">Plan Cómodo (52 Pagos Semanales)</option>
                         </select>
+                        <div class="segment-control plazo-control" id="pe-plazo-selector">
+                            <button type="button" class="segment-btn" data-val="26 Semanas">Plan Rápido</button>
+                            <button type="button" class="segment-btn active" data-val="52 Semanas">Plan Cómodo</button>
+                        </div>
 
 
 
@@ -3190,6 +3308,12 @@
         // 🚀 Carga inicial
         async function cargarPantallaInicial() {
             await sincronizarTasas();
+
+            // Inicializar botones interactivos segmentados
+            setupSelectButtons('cliFrecuencia', '#pdp-frequency-selector');
+            setupSelectButtons('cliPlazo', '#pdp-plazo-selector');
+            setupSelectButtons('pe-cliFrecuencia', '#pe-frequency-selector');
+            setupSelectButtons('pe-cliPlazo', '#pe-plazo-selector');
 
             const inputBusqueda = document.getElementById('inputBusqueda');
             if (inputBusqueda) {
@@ -4035,6 +4159,64 @@
             }
         }
 
+        // --- SISTEMA DE SELECTORES PREMIUM TIPO BOTONES SEGMENTADOS ---
+        function syncSelectButtons(selectId, buttonGroupSelector) {
+            const select = document.getElementById(selectId);
+            const container = document.querySelector(buttonGroupSelector);
+            if (!select || !container) return;
+
+            const currentVal = select.value;
+            const buttons = container.querySelectorAll('.segment-btn');
+            
+            buttons.forEach(btn => {
+                const val = btn.getAttribute('data-val');
+                const opt = select.querySelector(`option[value="${val}"]`);
+                if (opt) {
+                    // Actualizar el texto según el option del select
+                    btn.innerText = opt.text;
+                    
+                    // Sincronizar estado activo
+                    if (val === currentVal) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                    
+                    // Sincronizar visibilidad y estados habilitados
+                    if (opt.disabled || opt.style.display === 'none') {
+                        btn.style.display = 'none';
+                    } else {
+                        btn.style.display = 'block';
+                    }
+                }
+            });
+        }
+
+        function setupSelectButtons(selectId, buttonGroupSelector) {
+            const select = document.getElementById(selectId);
+            const container = document.querySelector(buttonGroupSelector);
+            if (!select || !container) return;
+            
+            const buttons = container.querySelectorAll('.segment-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const val = btn.getAttribute('data-val');
+                    const opt = select.querySelector(`option[value="${val}"]`);
+                    if (opt && !opt.disabled && opt.style.display !== 'none') {
+                        select.value = val;
+                        if (typeof select.onchange === 'function') {
+                            select.onchange();
+                        } else {
+                            select.dispatchEvent(new Event('change'));
+                        }
+                    }
+                });
+            });
+            
+            // Sincronización inicial
+            syncSelectButtons(selectId, buttonGroupSelector);
+        }
+
         function actualizarPlazosYPrecioPDP() {
             const freq = document.getElementById('cliFrecuencia').value;
             const selectPlazo = document.getElementById('cliPlazo');
@@ -4114,6 +4296,32 @@
             }
 
             actualizarPrecioCalculadoPDP();
+            syncSelectButtons('cliFrecuencia', '#pdp-frequency-selector');
+            syncSelectButtons('cliPlazo', '#pdp-plazo-selector');
+        }
+
+        function syncSliderToInput(val) {
+            const inputEng = document.getElementById('cliEnganchePersonalizado');
+            const valLabel = document.getElementById('pdp-enganche-seleccionado-val');
+            if (inputEng) {
+                inputEng.value = val;
+            }
+            if (valLabel) {
+                valLabel.innerText = `$${Math.round(val).toLocaleString('es-MX')}`;
+            }
+            actualizarPrecioCalculadoPDP();
+        }
+
+        function syncPESliderToInput(val) {
+            const inputEng = document.getElementById('pe-cliEnganchePersonalizado');
+            const valLabel = document.getElementById('pe-enganche-seleccionado-val');
+            if (inputEng) {
+                inputEng.value = val;
+            }
+            if (valLabel) {
+                valLabel.innerText = `$${Math.round(val).toLocaleString('es-MX')}`;
+            }
+            actualizarPreciosPedidoEspecial();
         }
 
         function actualizarPrecioCalculadoPDP() {
@@ -4166,13 +4374,32 @@
 
                 const minLabel = document.getElementById('pdp-enganche-minimo-label');
                 if (minLabel) minLabel.innerText = `$${engancheCalculado.toLocaleString('es-MX')} MXN`;
-                if (inputEng) inputEng.min = engancheCalculado;
+                
+                const maxEnganche = Math.round(precioContado);
+                const maxLabel = document.getElementById('pdp-enganche-maximo-label');
+                if (maxLabel) maxLabel.innerText = `$${maxEnganche.toLocaleString('es-MX')} MXN`;
+                
+                const slider = document.getElementById('cliEnganchePersonalizadoSlider');
+                const valLabel = document.getElementById('pdp-enganche-seleccionado-val');
+                if (slider) {
+                    slider.min = engancheCalculado;
+                    slider.max = maxEnganche;
+                    slider.step = 100;
+                }
 
                 let customEnganche = parseFloat(inputEng.value) || 0;
-                let engancheFinal = engancheCalculado;
-                if (customEnganche > engancheCalculado) {
-                    engancheFinal = customEnganche;
+                if (customEnganche < engancheCalculado || customEnganche > maxEnganche) {
+                    customEnganche = engancheCalculado;
+                    inputEng.value = customEnganche;
                 }
+                if (slider) {
+                    slider.value = customEnganche;
+                }
+                if (valLabel) {
+                    valLabel.innerText = `$${Math.round(customEnganche).toLocaleString('es-MX')}`;
+                }
+
+                let engancheFinal = customEnganche;
 
                 let cuotaBase = (plazo === "26 Semanas") ? calcularCuotaSemanal26(precioContado) : calcularCuotaSemanal52(precioContado);
                 if (freq === "QUINCENAL") {
@@ -4211,6 +4438,8 @@
                     resumenBox.style.display = 'block';
                 }
             }
+            syncSelectButtons('cliFrecuencia', '#pdp-frequency-selector');
+            syncSelectButtons('cliPlazo', '#pdp-plazo-selector');
         }
 
         function cerrarModal() {
@@ -4567,6 +4796,8 @@
             }
 
             actualizarPreciosPedidoEspecial();
+            syncSelectButtons('pe-cliFrecuencia', '#pe-frequency-selector');
+            syncSelectButtons('pe-cliPlazo', '#pe-plazo-selector');
         }
 
         function actualizarPreciosPedidoEspecial() {
@@ -4624,14 +4855,32 @@
                 const minLabel = document.getElementById('pe-enganche-minimo-label');
                 if (minLabel) minLabel.innerText = `$${engancheCalculado.toLocaleString('es-MX')} MXN`;
 
-                const inputEng = document.getElementById('pe-cliEnganchePersonalizado');
-                if (inputEng) inputEng.min = engancheCalculado;
-                let customEnganche = parseFloat(inputEng.value) || 0;
-                let engancheFinal = engancheCalculado;
+                const maxEnganche = Math.round(precioContado);
+                const maxLabel = document.getElementById('pe-enganche-maximo-label');
+                if (maxLabel) maxLabel.innerText = `$${maxEnganche.toLocaleString('es-MX')} MXN`;
 
-                if (customEnganche > engancheCalculado) {
-                    engancheFinal = customEnganche;
+                const slider = document.getElementById('pe-cliEnganchePersonalizadoSlider');
+                const valLabel = document.getElementById('pe-enganche-seleccionado-val');
+                if (slider) {
+                    slider.min = engancheCalculado;
+                    slider.max = maxEnganche;
+                    slider.step = 100;
                 }
+
+                const inputEng = document.getElementById('pe-cliEnganchePersonalizado');
+                let customEnganche = parseFloat(inputEng.value) || 0;
+                if (customEnganche < engancheCalculado || customEnganche > maxEnganche) {
+                    customEnganche = engancheCalculado;
+                    if (inputEng) inputEng.value = customEnganche;
+                }
+                if (slider) {
+                    slider.value = customEnganche;
+                }
+                if (valLabel) {
+                    valLabel.innerText = `$${Math.round(customEnganche).toLocaleString('es-MX')}`;
+                }
+
+                let engancheFinal = customEnganche;
 
                 if (freq === "QUINCENAL") {
                     numPagos = numPagos / 2;
@@ -4653,6 +4902,8 @@
                 document.getElementById('pe-preview-enganche').innerText = `$${engancheFinal.toLocaleString('es-MX')} MXN`;
                 document.getElementById('pe-preview-semanal').innerText = `$${Math.round(cuota).toLocaleString('es-MX')} MXN${labelFrecuencia}`;
             }
+            syncSelectButtons('pe-cliFrecuencia', '#pe-frequency-selector');
+            syncSelectButtons('pe-cliPlazo', '#pe-plazo-selector');
         }
 
         async function enviarSolicitudPedidoEspecial() {
