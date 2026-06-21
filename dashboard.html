@@ -1984,13 +1984,23 @@
                                 
                                 let isProduct = idBusqueda.startsWith("MLM") && idBusqueda.length <= 11;
                                 const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${idBusqueda}&isProduct=${isProduct}`;
-                                const resLive = await fetch(proxyUrl);
-                                let liveData = await resLive.json();
                                 
-                                if (liveData.error || liveData.status === 404 || Object.keys(liveData).length === 0) {
-                                    item._stockDetalle = { razon: 'no_data', mensaje: 'No se pudo obtener datos de ML' };
-                                    alertasStockGlobal.push(item);
-                                    actualizarBotonAlertasStock();
+                                let liveData = null;
+                                try {
+                                    const resLive = await fetch(proxyUrl);
+                                    const contentType = resLive.headers.get('content-type') || '';
+                                    if (!resLive.ok || !contentType.includes('application/json')) {
+                                        console.warn(`[STOCK-CHECK] ${item.modelo}: respuesta no válida (${resLive.status})`);
+                                        return procesarSiguiente();
+                                    }
+                                    liveData = await resLive.json();
+                                } catch(fetchErr) {
+                                    console.warn(`[STOCK-CHECK] ${item.modelo}: error de fetch/parse:`, fetchErr.message);
+                                    return procesarSiguiente();
+                                }
+                                
+                                if (!liveData || typeof liveData !== 'object' || liveData.error || Object.keys(liveData).length === 0) {
+                                    console.warn(`[STOCK-CHECK] ${item.modelo}: datos vacíos o error`, liveData?.error || '');
                                     return procesarSiguiente();
                                 }
                                 
@@ -2005,7 +2015,7 @@
                                             liveData = prodData;
                                             isProduct = true;
                                         }
-                                    } catch(e) { console.warn("Re-fetch catalog_product_id failed:", e); }
+                                    } catch(e) { /* silencioso */ }
                                 }
                                 
                                 // Si el link tiene /p/MLM... pero la respuesta no tiene pickers, re-fetch como product
@@ -2022,7 +2032,7 @@
                                                     liveData = prodData2;
                                                     isProduct = true;
                                                 }
-                                            } catch(e) { console.warn("Re-fetch from /p/ URL failed:", e); }
+                                            } catch(e) { /* silencioso */ }
                                         }
                                     }
                                 }
@@ -2190,8 +2200,17 @@
                                 const cacheStr = JSON.stringify(liveData);
                                 const cacheActualStr = JSON.stringify(item.variantesJson);
                                 if (cacheStr !== cacheActualStr) {
-                                    const updateUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}&action=actualizarVariantesJson&row=${item.filaNum}&variantes=${encodeURIComponent(cacheStr)}`;
-                                    fetch(updateUrl).catch(e => console.warn("Error background caching variants:", e));
+                                    const formData = new URLSearchParams();
+                                    formData.append('token', CONFIG.API_TOKEN);
+                                    formData.append('action', 'actualizarVariantesJson');
+                                    formData.append('row', item.filaNum);
+                                    formData.append('variantes', cacheStr);
+                                    
+                                    fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                                        method: 'POST',
+                                        body: formData.toString(),
+                                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                                    }).catch(e => console.warn("Error background caching variants:", e));
                                 }
                                 
                             } catch(err) {
@@ -2417,8 +2436,17 @@
                             return;
                         }
                         
-                        const updateUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}&action=actualizarVariantesJson&row=${row}&variantes=${encodeURIComponent(JSON.stringify(freshData))}`;
-                        const resUpdate = await fetch(updateUrl);
+                        const formData = new URLSearchParams();
+                        formData.append('token', CONFIG.API_TOKEN);
+                        formData.append('action', 'actualizarVariantesJson');
+                        formData.append('row', row);
+                        formData.append('variantes', JSON.stringify(freshData));
+                        
+                        const resUpdate = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                            method: 'POST',
+                            body: formData.toString(),
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                        });
                         const updateResult = await resUpdate.json();
                         
                         if (updateResult.result !== 'success') {
