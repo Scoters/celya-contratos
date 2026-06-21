@@ -5714,7 +5714,9 @@
             const c1 = clean(m1);
             const c2 = clean(m2);
 
-            return c1 === c2 || c1.includes(c2) || c2.includes(c1);
+            // Strict equality only — no substring matching to prevent
+            // "Moto G24" from matching "Moto G24 Power" etc.
+            return c1 === c2;
         }
         function isSpecMatchingLoadedProduct(cleanId, specType, specValue) {
             if (!cleanId || !specValue) return false;
@@ -5966,34 +5968,24 @@
                                     }
                                 }
 
+                                // Race direct ML API vs Google Apps Script proxy in parallel
                                 const endpoint = isProd ? 'products' : 'items';
-                                try {
-                                    const res = await fetchWithTimeout(`https://api.mercadolibre.com/${endpoint}/${id}`, {}, 3000);
-                                    if (res.ok) {
-                                        const data = await res.json();
-                                        if (isProd && (!data.price || !data.buy_box_winner)) {
-                                            console.warn(`Direct fetch for product ${id} lacks price/winner. Falling back to proxy.`);
-                                        } else {
-                                            return data;
-                                        }
-                                    }
-                                } catch (e) {
-                                    console.warn(`Direct fetch failed for ${id}:`, e);
-                                }
+                                const directPromise = fetchWithTimeout(`https://api.mercadolibre.com/${endpoint}/${id}`, {}, 3500)
+                                    .then(res => res.ok ? res.json() : null)
+                                    .then(data => {
+                                        if (isProd && data && (!data.price || !data.buy_box_winner)) return null;
+                                        return data;
+                                    })
+                                    .catch(() => null);
 
-                                try {
-                                    const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${id}&isProduct=${isProd}`;
-                                    const resProxy = await fetchWithTimeout(proxyUrl, {}, 6000);
-                                    if (resProxy.ok) {
-                                        const rawData = await resProxy.json();
-                                        if (rawData && !rawData.error) {
-                                            return rawData;
-                                        }
-                                    }
-                                } catch (e) {
-                                    console.error(`Proxy fetch failed for ${id}:`, e);
-                                }
-                                return null;
+                                const proxyPromise = fetchWithTimeout(`${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${id}&isProduct=${isProd}`, {}, 5000)
+                                    .then(res => res.ok ? res.json() : null)
+                                    .then(data => (data && !data.error) ? data : null)
+                                    .catch(() => null);
+
+                                // Return whichever resolves first with valid data
+                                const result = await Promise.any([directPromise, proxyPromise]).catch(() => null);
+                                return result;
                             }
 
                             let freshData = await fetchMLData(cleanId, isProduct);
