@@ -864,7 +864,13 @@
                 const val = btn.getAttribute('data-plazo');
                 const opt = selectPlazo.querySelector(`option[value="${val}"]`);
                 if (opt) {
-                    btn.innerText = opt.text.split('(')[0].trim();
+                    let label = opt.text;
+                    if (label.includes(' / ')) {
+                        label = label.split(' / ')[0].trim() + ')';
+                    } else if (label.includes('(')) {
+                        label = label.split('(')[0].trim();
+                    }
+                    btn.innerText = label;
                     
                     if (val === currentVal) {
                         btn.classList.add('active');
