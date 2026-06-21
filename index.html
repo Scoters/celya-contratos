@@ -709,7 +709,7 @@
             transform: scale(0.98);
         }
 
-        /* Estilos para círculos de color */
+        /* Estilos para círculos de color y sus tooltips */
         .color-circle {
             width: 32px;
             height: 32px;
@@ -718,6 +718,7 @@
             cursor: pointer;
             transition: all 0.2s ease;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
 
         .color-circle:hover {
@@ -728,6 +729,56 @@
             border-color: var(--accent);
             outline: 2px solid var(--accent);
             outline-offset: 2px;
+        }
+
+        /* Tooltips premium para círculos de color */
+        .color-circle::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 135%;
+            left: 50%;
+            transform: translateX(-50%) scale(0.85);
+            background-color: rgba(15, 23, 42, 0.95);
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            z-index: 100;
+        }
+
+        .color-circle::before {
+            content: '';
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%) translateY(3px);
+            border-width: 5px;
+            border-style: solid;
+            border-color: rgba(15, 23, 42, 0.95) transparent transparent transparent;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+        }
+
+        .color-circle:hover::after {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) scale(1);
+        }
+
+        .color-circle:hover::before {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
         }
 
         /* Estilos para las pastillas de memoria */
@@ -7069,8 +7120,17 @@
                                 divColor.className = `color-circle ${isSelected ? 'selected' : ''} ${!isAvailable ? 'unavailable' : ''}`;
                                 divColor.title = colorInfo.name + (!isAvailable ? ' (No disponible en esta combinación)' : '');
                                 divColor.setAttribute('data-color', colorInfo.name);
+                                divColor.setAttribute('data-tooltip', colorInfo.name + (!isAvailable ? ' (No disponible)' : ''));
 
                                 divColor.style.backgroundColor = obtenerCodigoColor(colorInfo.name);
+
+                                // Hover to show name in header label
+                                divColor.onmouseenter = function() {
+                                    document.getElementById('color-seleccionado-txt').innerText = colorInfo.name;
+                                };
+                                divColor.onmouseleave = function() {
+                                    document.getElementById('color-seleccionado-txt').innerText = colorSeleccionado || "";
+                                };
 
                                 if (isSelected) {
                                     colorSeleccionado = colorInfo.name;
@@ -7670,8 +7730,17 @@
                 divColor.className = "color-circle selected";
                 divColor.title = defaultColor;
                 divColor.setAttribute('data-color', defaultColor);
+                divColor.setAttribute('data-tooltip', defaultColor);
 
                 divColor.style.backgroundColor = obtenerCodigoColor(defaultColor);
+
+                // Hover to show name in header label
+                divColor.onmouseenter = function() {
+                    document.getElementById('color-seleccionado-txt').innerText = defaultColor;
+                };
+                divColor.onmouseleave = function() {
+                    document.getElementById('color-seleccionado-txt').innerText = colorSeleccionado || "";
+                };
 
                 colorSeleccionado = defaultColor;
                 document.getElementById('color-seleccionado-txt').innerText = defaultColor;
