@@ -3358,36 +3358,39 @@
         }
 
         // Función unificada de cálculo de cuotas — recibe los factores correctos según frecuencia y plazo
-        function calcularCuotaUnificada(precioContado, factorEng, factorInt, numPagos) {
+        function calcularCuotaUnificada(precioContado, factorEng, factorInt, numPagos, _caller) {
             const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
             const totalFinanciado = (precioContado * (1 + factorInt)) - eng;
-            return Math.round(totalFinanciado / numPagos);
+            const cuotaSinRedondear = totalFinanciado / numPagos;
+            const cuotaRedondeada = Math.round(cuotaSinRedondear);
+            console.log(`[CUOTA-DEBUG ${_caller || '?'}] precio=${precioContado}, fEng=${factorEng}, fInt=${factorInt}, eng=${eng}, totalFin=${totalFinanciado}, pagos=${numPagos}, cuotaRaw=${cuotaSinRedondear}, cuotaFinal=${cuotaRedondeada}`);
+            return cuotaRedondeada;
         }
 
         // Funciones auxiliares que delegan a la unificada (para semanal)
         function calcularCuotaSemanal26(precioContado) {
             const factorEng = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
             const factorInt = CONFIG_TASAS.interes26 !== undefined ? CONFIG_TASAS.interes26 : 0.66;
-            return calcularCuotaUnificada(precioContado, factorEng, factorInt, 26);
+            return calcularCuotaUnificada(precioContado, factorEng, factorInt, 26, 'Sem26');
         }
 
         function calcularCuotaSemanal52(precioContado) {
             const factorEng = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
             const factorInt = CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90;
-            return calcularCuotaUnificada(precioContado, factorEng, factorInt, 52);
+            return calcularCuotaUnificada(precioContado, factorEng, factorInt, 52, 'Sem52');
         }
 
         // Quincenal: usa factores de enganche PROPIOS (no los semanales)
         function calcularCuotaQuincenal13(precioContado) {
             const factorEng = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
             const factorInt = CONFIG_TASAS.interes26 !== undefined ? CONFIG_TASAS.interes26 : 0.66;
-            return calcularCuotaUnificada(precioContado, factorEng, factorInt, 13);
+            return calcularCuotaUnificada(precioContado, factorEng, factorInt, 13, 'Quin13');
         }
 
         function calcularCuotaQuincenal26(precioContado) {
             const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
             const factorInt = CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90;
-            return calcularCuotaUnificada(precioContado, factorEngCom * 2, factorInt, 26);
+            return calcularCuotaUnificada(precioContado, factorEngCom * 2, factorInt, 26, 'Quin26');
         }
 
         // Extrae la marca del título del modelo de forma inteligente
@@ -3728,10 +3731,12 @@
 
                     // Dynamically calculate weekly and quincenal payments matching PDP logic
                     const priceContadoNum = item.precioContado || 0;
+                    console.log(`%c[TARJETA] === Calculando cuotas para ${item.modelo} (precio=${priceContadoNum}) ===`, 'color: #ff6b00; font-weight: bold');
                     const cuotaSem26 = calcularCuotaSemanal26(priceContadoNum);
                     const cuotaSem52 = calcularCuotaSemanal52(priceContadoNum);
                     const cuotaQuin13 = calcularCuotaQuincenal13(priceContadoNum);
                     const cuotaQuin26 = calcularCuotaQuincenal26(priceContadoNum);
+                    console.log(`%c[TARJETA] Resultados: Sem26=$${cuotaSem26}, Sem52=$${cuotaSem52}, Quin13=$${cuotaQuin13}, Quin26=$${cuotaQuin26}`, 'color: #ff6b00');
 
                     const engSem26 = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165)) / 10) * 10;
                     const engSem52 = Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11)) / 10) * 10;
@@ -4451,13 +4456,16 @@
 
                 let engancheFinal = customEnganche;
 
-                let cuotaBase = calcularCuotaUnificada(precioContado, factorEnganche, factorInteres, numPagos);
+                console.log(`%c[PDP] === actualizarPrecioCalculadoPDP === freq=${freq}, plazo=${plazo}, precio=${precioContado}, fEng=${factorEnganche}, fInt=${factorInteres}, numPagos=${numPagos}, engCalc=${engancheCalculado}, engFinal=${engancheFinal}`, 'color: #00bcd4; font-weight: bold');
+                let cuotaBase = calcularCuotaUnificada(precioContado, factorEnganche, factorInteres, numPagos, 'PDP-' + freq + '-' + plazo);
 
                 let cuotaActiva = cuotaBase;
                 if (engancheFinal > engancheCalculado) {
                     const extraEnganche = engancheFinal - engancheCalculado;
                     cuotaActiva = cuotaBase - Math.round(extraEnganche / numPagos);
+                    console.log(`[PDP] extraEnganche=${extraEnganche}, ajuste=${Math.round(extraEnganche / numPagos)}, cuotaActiva=${cuotaActiva}`);
                 }
+                console.log(`%c[PDP] RESULTADO FINAL: cuotaBase=$${cuotaBase}, cuotaMostrada=$${Math.round(cuotaActiva)}`, 'color: #00bcd4; font-weight: bold');
 
                 document.getElementById('pdp-enganche-grande').innerText = `$${engancheFinal.toLocaleString('es-MX')} MXN`;
                 document.getElementById('pdp-weekly-amount').innerText = `$${Math.round(cuotaActiva).toLocaleString('es-MX')} MXN`;
