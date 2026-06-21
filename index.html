@@ -2947,7 +2947,7 @@
                         <label
                             style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">Teléfono
                             Celular (WhatsApp):</label>
-                        <input type="tel" id="pe-cliTelefono" required placeholder="10 dígitos"
+                        <input type="tel" id="pe-cliTelefono" required placeholder="Ej. 667 123 4567"
                             style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
 
                         <div id="seccionPreguntasPedidoEspecial">
@@ -2957,7 +2957,7 @@
                                 style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
                                 <option value="Menos de $1,500">Menos de $1,500</option>
                                 <option value="$1,500 a $3,000">$1,500 a $3,000</option>
-                                <option value="$3,000 a $5,000" selected>$3,000 a $5,000</option>
+                                <option value="$3,000 a $5,000">$3,000 a $5,000</option>
                                 <option value="Más de $5,000">Más de $5,000</option>
                             </select>
 
@@ -2987,8 +2987,8 @@
                             Deseado:</label>
                         <select id="pe-cliPlazo" onchange="actualizarPreciosPedidoEspecial()"
                             style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
-                            <option value="26 Semanas">Plan Rápido (26 Semanas)</option>
-                            <option value="52 Semanas">Plan Cómodo (52 Semanas)</option>
+                            <option value="26 Semanas">Plan Rápido (26 Pagos Semanales)</option>
+                            <option value="52 Semanas">Plan Cómodo (52 Pagos Semanales)</option>
                         </select>
 
 
@@ -4452,7 +4452,7 @@
                 if (rawData.seller_address && rawData.seller_address.country && rawData.seller_address.country.id && rawData.seller_address.country.id !== "MX") {
                     esImportacion = true;
                 }
-                if (rawData.tags && (rawData.tags.includes("cbt_item") || rawData.tags.includes("imported") || rawData.tags.includes("international_delivery"))) {
+                if (rawData.tags && (rawData.tags.includes("cbt_item") || rawData.tags.includes("international_delivery"))) {
                     esImportacion = true;
                 }
                 if (rawData.buy_box_winner && rawData.buy_box_winner.shipping && (rawData.buy_box_winner.shipping.logistic_type === "remote" || (rawData.buy_box_winner.shipping.tags && (rawData.buy_box_winner.shipping.tags.includes("cbt_fulfillment") || rawData.buy_box_winner.shipping.tags.includes("cbt"))))) {
@@ -4757,8 +4757,8 @@
                 params.append('action', 'registrarCotizacionPublica');
                 params.append('nombre', nombre);
                 params.append('telefono', telefono);
-                params.append('sueldo', sueldo);
-                params.append('prestamos', prestamos);
+                params.append('sueldo', freq === "CONTADO" ? "" : sueldo);
+                params.append('prestamos', freq === "CONTADO" ? "" : prestamos);
                 params.append('cuota', Math.round(cuota));
                 params.append('link', pe_link_actual);
                 params.append('plazo', `${textoPlazoEnvio} (PEDIDO ESPECIAL: ${pe_data_actual.title})`);
@@ -4780,7 +4780,7 @@
                 const data = await res.json();
 
                 if (data.result === 'success') {
-                    showModalResult('modalPE-resultado', true, `¡Tu solicitud ha sido enviada con éxito!`, `Nos pondremos en contacto contigo vía WhatsApp 📲`, cerrarModalPedidoEspecial, 7000);
+                    showModalResult('modalPE-resultado', true, `¡Solicitud enviada con éxito!`, `Hemos recibido tu solicitud para el <strong>${escapeHTMLFront(limpiarNombreModelo(pe_data_actual.title))}</strong>.<br>Te contactaremos vía WhatsApp 📲`, cerrarModalPedidoEspecial, 7000);
 
                 } else {
                     toast('Error al enviar la solicitud: ' + (data.error || 'Reintenta más tarde.'), 'error');
@@ -7751,7 +7751,7 @@
                     if (data.seller_address && data.seller_address.country && data.seller_address.country.id && data.seller_address.country.id !== "MX") {
                         esInternacional = true;
                     }
-                    if (data.tags && (data.tags.includes("cbt_item") || data.tags.includes("imported") || data.tags.includes("international_delivery"))) {
+                    if (data.tags && (data.tags.includes("cbt_item") || data.tags.includes("international_delivery"))) {
                         esInternacional = true;
                     }
 
