@@ -542,10 +542,10 @@
             #card-cierre {
                 order: 2;
             }
-            #card-inventario {
+            #card-agregar {
                 order: 3;
             }
-            #card-agregar {
+            #card-inventario {
                 order: 4;
             }
             #card-vip {
@@ -817,6 +817,40 @@
                     </div>
                 </div>
 
+                <div class="container" id="card-agregar" style="margin-top: 24px;">
+                    <h3>📱 Agregar Celular al Catálogo</h3>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
+                        Pega el enlace de Mercado Libre. Traeremos nombre, foto, precio y especificaciones automáticamente.
+                    </p>
+
+                    <form id="formAgregarCelular">
+                        <label for="nuevoLink">Enlace de Mercado Libre (Se recomienda link de catálogo /p/):</label>
+                        <input type="text" id="nuevoLink" placeholder="https://www.mercadolibre.com.mx/p/MLM..." required>
+
+                        <label for="nuevoImei">IMEI o ID del Celular (Dejar vacío para autogenerar temporal):</label>
+                        <input type="text" id="nuevoImei" placeholder="Ej. 999999000000005">
+
+                        <label for="nuevoEstado">Estado de Disponibilidad:</label>
+                        <select id="nuevoEstado">
+                            <option value="DISPONIBLE">🟢 DISPONIBLE (Entrega inmediata)</option>
+                            <option value="MAS VENDIDO">⭐ DESTACADO (Fila superior / Más vendido)</option>
+                            <option value="BAJO DEMANDA">⏳ BAJO DEMANDA (Sobre pedido)</option>
+                        </select>
+
+                        <div style="margin-top: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="nuevo-es-importacion" style="width: auto; margin: 0; cursor: pointer;" />
+                            <label for="nuevo-es-importacion" style="margin: 0; font-weight: normal; cursor: pointer; color: var(--text-main);">✈️ ¿Es de Importación?</label>
+                        </div>
+
+                        <div id="nuevo-importacion-container" style="display: none; margin-bottom: 15px; background: rgba(230, 126, 34, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed rgba(230, 126, 34, 0.3);">
+                            <label style="margin-top: 0; display: block; font-weight: 600; margin-bottom: 4px; color: var(--text-main);">Costo de Importación Estimado (Mercado Libre):</label>
+                            <input id="nuevo-costo-importacion" type="number" placeholder="Ej. 1022" style="width: 100%; padding: 10px; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; box-sizing: border-box; background: rgba(15, 23, 42, 0.5); color: white;" />
+                        </div>
+
+                        <button type="button" class="btn-pago" id="btnAgregarCelular">➕ Importar y Agregar al Excel</button>
+                    </form>
+                </div>
+
                 <!-- 📦 Módulo de Gestión de Inventario -->
                 <div class="container" id="card-inventario" style="margin-top: 24px;">
                     <h3>📦 Gestión de Inventario</h3>
@@ -871,8 +905,13 @@
                     </div>
                 </div>
 
+
+
+            </div>
+
+            <div class="column-right">
                 <!-- 💰 Módulo de Cierre de Caja Diario -->
-                <div class="container" id="card-cierre" style="margin-top: 24px;">
+                <div class="container" id="card-cierre">
                     <h3>💰 Cierre de Caja Diario</h3>
                     <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
                         Selecciona un día para calcular el dinero cobrado por método de pago e ingresa el efectivo real para cerrar caja.
@@ -917,6 +956,19 @@
                     </button>
                 </div>
 
+                <div class="container vip-search-container" id="card-vip" style="margin-top: 24px;">
+                    <h3>🌟 Renovación de Contrato VIP</h3>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
+                        Busca un cliente existente para clonar sus datos e INE en un nuevo contrato.
+                    </p>
+
+                    <label for="buscarVip">Buscar Cliente (Nombre o IMEI):</label>
+                    <div style="position: relative; width: 100%;">
+                        <input type="text" id="buscarVip" placeholder="🔍 Escribe para buscar cliente..." style="width: 100%; box-sizing: border-box; padding: 12px; font-size: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(15, 23, 42, 0.5); color: #fff; outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='var(--primary-color)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+                        <div id="resultadosVip" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.5); margin-top: 5px;"></div>
+                    </div>
+                </div>
+
                 <!-- 🚨 Reporte de Morosos -->
                 <div class="container" id="card-morosos" style="margin-top: 24px;">
                     <details style="outline: none;">
@@ -952,57 +1004,6 @@
                             </div>
                         </div>
                     </details>
-                </div>
-            </div>
-
-            <div class="column-right">
-                <div class="container vip-search-container" id="card-vip">
-                    <h3>🌟 Renovación de Contrato VIP</h3>
-                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
-                        Busca un cliente existente para clonar sus datos e INE en un nuevo contrato.
-                    </p>
-
-                    <label for="buscarVip">Buscar Cliente (Nombre o IMEI):</label>
-                    <div style="position: relative; width: 100%;">
-                        <input type="text" id="buscarVip" placeholder="🔍 Escribe para buscar cliente..." style="width: 100%; box-sizing: border-box; padding: 12px; font-size: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(15, 23, 42, 0.5); color: #fff; outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='var(--primary-color)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
-                        <div id="resultadosVip" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.5); margin-top: 5px;"></div>
-                    </div>
-                </div>
-
-                <div class="container" id="card-agregar">
-                    <h3>📱 Agregar Celular al Catálogo</h3>
-                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
-                        Pega el enlace de Mercado Libre. Traeremos nombre, foto, precio y especificaciones automáticamente.
-                    </p>
-
-                    <form id="formAgregarCelular">
-                        <label for="nuevoLink">Enlace de Mercado Libre (Se recomienda link de catálogo /p/):</label>
-                        <input type="text" id="nuevoLink" placeholder="https://www.mercadolibre.com.mx/p/MLM..." required>
-
-                        <label for="nuevoImei">IMEI o ID del Celular (Dejar vacío para autogenerar temporal):</label>
-                        <input type="text" id="nuevoImei" placeholder="Ej. 999999000000005">
-
-                        <label for="nuevoEstado">Estado de Disponibilidad:</label>
-                        <select id="nuevoEstado">
-                            <option value="DISPONIBLE">🟢 DISPONIBLE (Entrega inmediata)</option>
-                            <option value="MAS VENDIDO">⭐ DESTACADO (Fila superior / Más vendido)</option>
-                            <option value="BAJO DEMANDA">⏳ BAJO DEMANDA (Sobre pedido)</option>
-                        </select>
-
-                        <div style="margin-top: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" id="nuevo-es-importacion" style="width: auto; margin: 0; cursor: pointer;" />
-                            <label for="nuevo-es-importacion" style="margin: 0; font-weight: normal; cursor: pointer; color: var(--text-main);">✈️ ¿Es de Importación?</label>
-                        </div>
-
-                        <div id="nuevo-importacion-container" style="display: none; margin-bottom: 15px; background: rgba(230, 126, 34, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed rgba(230, 126, 34, 0.3);">
-                            <label style="margin-top: 0; display: block; font-weight: 600; margin-bottom: 4px; color: var(--text-main);">Costo de Importación Estimado (Mercado Libre):</label>
-                            <input id="nuevo-costo-importacion" type="number" placeholder="Ej. 1022" style="width: 100%; padding: 10px; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; box-sizing: border-box; background: rgba(15, 23, 42, 0.5); color: white;" />
-                        </div>
-
-                        <button type="button" class="btn-pago" id="btnAgregarCelular">➕ Importar y Agregar al Excel</button>
-                    </form>
-
-
                 </div>
             </div>
         </main>
