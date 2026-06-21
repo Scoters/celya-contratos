@@ -7710,9 +7710,14 @@
             if (!modelo) return "";
             let clean = modelo.trim();
 
+            // 0. Quitar todo a partir de un dos puntos (:)
+            if (clean.includes(":")) {
+                clean = clean.split(":")[0].trim();
+            }
+
             const isRefurb = /reacondicionado|refurbished|refurb/i.test(modelo);
 
-            // 0. Remover fragmentos de reacondicionado y detalles de caja/condición
+            // 1. Remover fragmentos de reacondicionado y detalles de caja/condición
             clean = clean.replace(/-\s*(excelente|muy\s*bueno|bueno|aceptable|regular)\s*(\(reacondicionado\))?/gi, "");
             clean = clean.replace(/\b(reacondicionado|refurbished|refurb)\b/gi, "");
             clean = clean.replace(/\b(caja\s*(maltratada|dañada|abierta|original|sellada))\b/gi, "");
@@ -7720,7 +7725,13 @@
             clean = clean.replace(/\b(desbloqueado|liberado|unlocked)\b/gi, "");
             clean = clean.replace(/\b(nacional|internacional|global)\b/gi, "");
 
-            // 1. Remover colores conocidos (incluyendo variaciones)
+            // 2. Remover "Smartphone", "Celular", "Teléfono", "Telefono" del inicio del nombre
+            clean = clean.replace(/^(smartphone|celular|teléfono|telefono)\b/gi, "").trim();
+
+            // 3. Remover cualquier paréntesis () que NO contenga "reacondicionado"
+            clean = clean.replace(/\((?!reacondicionado\b)[^)]*\)/gi, "").trim();
+
+            // 4. Remover colores conocidos (incluyendo variaciones)
             const colores = [
                 "black", "negro", "blue", "azul", "white", "blanco", "green", "verde", "silver", "plata",
                 "gray", "gris", "gold", "oro", "purple", "morado", "purpura", "púrpura", "pink", "rosa", "red", "rojo", "light",
@@ -7729,14 +7740,18 @@
                 "phantom", "cream", "crema", "beige", "coral", "titanium", "titanio",
                 "graphite", "grafito", "burgundy", "borgoña", "midnight", "medianoche",
                 "starlight", "ice", "hielo", "bronze", "bronce", "sand", "arena",
-                "indigo", "teal", "mint", "menta", "lime", "lima", "ivory", "marfil"
+                "indigo", "teal", "mint", "menta", "lime", "lima", "ivory", "marfil",
+                "cuero", "vegano", "platino", "platinum", "obsidiana", "obsidian",
+                "naranja", "orange", "amarillo", "yellow", "marrón", "marron", "brown",
+                "tierras", "raras", "aurora", "glowing", "rainbow", "sunset", "sunrise",
+                "glacier", "glaciar"
             ];
             colores.forEach(color => {
                 const regex = new RegExp("\\b" + color + "\\b", "gi");
                 clean = clean.replace(regex, "");
             });
 
-            // 2. Remover capacidades de almacenamiento y RAM por completo
+            // 5. Remover capacidades de almacenamiento y RAM por completo
             const regexGb = /(\d+)\s*(gb|tb|ram)\b/gi;
             clean = clean.replace(regexGb, "");
 
