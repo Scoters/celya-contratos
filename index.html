@@ -711,15 +711,16 @@
 
         /* Estilos para las pastillas de memoria */
         .storage-pill {
-            padding: 8px 16px;
+            padding: 10px 18px !important;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
             background: white;
-            font-size: 14px;
+            font-size: 16px !important;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
             color: #334155;
+            flex-shrink: 0 !important;
         }
 
         .storage-pill:hover {
@@ -732,6 +733,31 @@
             background-color: rgba(var(--accent-rgb), 0.08);
             color: var(--accent);
             font-weight: 600;
+        }
+
+        /* Etiquetas de Color, Capacidad, RAM ampliadas */
+        #ml-colors-section div:first-child,
+        #ml-extra-pickers-container label,
+        #ml-extra-pickers-container div:first-child {
+            font-size: 16px !important;
+            font-weight: 700 !important;
+        }
+        
+        #ml-colors-section div:first-child span,
+        #ml-extra-pickers-container label span {
+            font-size: 16px !important;
+            font-weight: 500 !important;
+        }
+
+        /* Personalizar Enganche summary con tono verde */
+        .enganche-personalizado-pdp summary {
+            color: #16a34a !important;
+        }
+        
+        /* Frecuencia de pagos semanales con tono verde */
+        #pdp-weekly-term {
+            color: #16a34a !important;
+            font-weight: 600 !important;
         }
 
         /* Modal */
@@ -920,7 +946,9 @@
         }
 
         .pdp-main-img-wrapper {
-            flex: 1;
+            width: 380px !important;
+            height: 380px !important;
+            flex-shrink: 0 !important;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -928,13 +956,13 @@
             border-radius: 12px;
             padding: 20px;
             background: var(--bg-card);
-            height: 380px;
+            box-sizing: border-box !important;
         }
 
         .pdp-main-img-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
             display: block;
         }
 
@@ -1113,7 +1141,10 @@
             }
 
             .pdp-main-img-wrapper {
-                height: 250px;
+                width: 320px !important;
+                height: 320px !important;
+                margin: 0 auto;
+                flex-shrink: 0 !important;
             }
 
             .modal-content {
@@ -2201,6 +2232,16 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             font-family: 'Outfit', 'Inter', sans-serif;
+            animation: pdpTooltipFloat 2s infinite ease-in-out !important;
+        }
+        
+        @keyframes pdpTooltipFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
         }
         
         @keyframes pdpWhatsappBounce {
@@ -7686,7 +7727,7 @@
     </button>
 
     <!-- Botón WhatsApp PDP (azul transparente con tooltip rebotante) -->
-    <a href="#" id="pdpWhatsappFloat" class="pdp-whatsapp-float pdp-whatsapp-bounce" target="_blank" rel="noopener noreferrer">
+    <a href="#" id="pdpWhatsappFloat" class="pdp-whatsapp-float" target="_blank" rel="noopener noreferrer">
         <svg viewBox="0 0 24 24">
             <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436.002 9.858-4.42 9.86-9.86.001-2.636-1.024-5.113-2.884-6.978C16.484 1.903 14.004.877 11.4.877c-5.446 0-9.871 4.423-9.873 9.862-.001 1.77.472 3.498 1.372 5.031L1.879 21.5l5.882-1.543zm11.75-4.227c-.31-.154-1.836-.906-2.119-1.01-.283-.102-.49-.153-.696.154-.205.308-.797.997-.976 1.199-.178.203-.357.226-.667.071-3.132-1.558-4.47-3.002-5.3-4.426-.205-.353-.021-.544.152-.715.156-.155.31-.353.465-.53.155-.177.206-.298.31-.497.102-.199.05-.375-.026-.53-.077-.154-.696-1.67-.954-2.285-.25-.604-.503-.522-.696-.532-.179-.009-.384-.01-.59-.01-.205 0-.54.077-.822.385-.283.308-1.079 1.056-1.079 2.574 0 1.519 1.103 2.986 1.258 3.193.154.205 2.17 3.31 5.257 4.637.734.317 1.309.507 1.758.649.738.236 1.412.203 1.944.123.593-.088 1.836-.751 2.094-1.444.258-.693.258-1.288.181-1.413-.076-.124-.282-.199-.592-.353z"/>
         </svg>
