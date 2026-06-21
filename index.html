@@ -2069,6 +2069,89 @@
                 padding-right: 14px;
             }
         }
+
+        /* Botón WhatsApp PDP (azul transparente con tooltip rebotante) */
+        .pdp-whatsapp-float {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            box-sizing: border-box !important;
+            background: rgba(0, 143, 255, 0.12);
+            border: 2px solid rgba(0, 143, 255, 0.4);
+            border-radius: 50%;
+            display: none; /* dynamically flex when modal opens */
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(0, 143, 255, 0.2);
+            z-index: 21000;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            text-decoration: none;
+            outline: none;
+        }
+        .pdp-whatsapp-float:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 8px 24px rgba(0, 143, 255, 0.4);
+            background: rgba(0, 143, 255, 0.22);
+            border-color: var(--accent);
+        }
+        .pdp-whatsapp-float svg {
+            width: 32px;
+            height: 32px;
+            fill: var(--accent);
+        }
+        .pdp-whatsapp-float .pdp-whatsapp-tooltip {
+            position: absolute;
+            right: 76px;
+            background: rgba(0, 143, 255, 0.12);
+            border: 1.5px solid rgba(0, 143, 255, 0.4);
+            color: var(--accent);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            font-family: 'Outfit', 'Inter', sans-serif;
+        }
+        
+        @keyframes pdpWhatsappBounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+        .pdp-whatsapp-bounce {
+            animation: pdpWhatsappBounce 2.5s infinite ease-in-out;
+        }
+        .pdp-whatsapp-bounce:hover {
+            animation: none; /* stop bounce on hover */
+        }
+        
+        @media (max-width: 768px) {
+            .pdp-whatsapp-float {
+                bottom: 20px;
+                right: 20px;
+                width: 52px !important;
+                height: 52px !important;
+            }
+            .pdp-whatsapp-float svg {
+                width: 28px;
+                height: 28px;
+            }
+            .pdp-whatsapp-float .pdp-whatsapp-tooltip {
+                right: 64px;
+                font-size: 11px;
+                padding: 6px 10px;
+            }
+        }
     </style>
 </head>
 
@@ -3604,6 +3687,18 @@
                 pdpFloatBtn.style.pointerEvents = 'auto';
                 pdpFloatBtn.classList.remove('expanded');
             }
+
+            // Mostrar botón flotante de WhatsApp de PDP
+            const pdpWaFloat = document.getElementById('pdpWhatsappFloat');
+            if (pdpWaFloat) {
+                pdpWaFloat.style.display = 'flex';
+                pdpWaFloat.style.opacity = '1';
+                pdpWaFloat.style.pointerEvents = 'auto';
+                
+                const modelName = modelo || "";
+                const encodedMsg = encodeURIComponent(`Hola, tengo dudas o aclaraciones sobre el crédito para el celular ${modelName}`);
+                pdpWaFloat.href = `https://wa.me/525621227408?text=${encodedMsg}`;
+            }
         }
 
         let pdpInfoLocked = false;
@@ -3817,6 +3912,12 @@
             if (pdpFloatBtn) {
                 pdpFloatBtn.style.display = 'none';
                 pdpFloatBtn.classList.remove('expanded');
+            }
+
+            // Ocultar WhatsApp link de PDP
+            const pdpWaFloat = document.getElementById('pdpWhatsappFloat');
+            if (pdpWaFloat) {
+                pdpWaFloat.style.display = 'none';
             }
         }
 
@@ -7494,6 +7595,14 @@
         <span class="btn-icon">📋</span>
         <span class="btn-text">Llenar solicitud de crédito</span>
     </button>
+
+    <!-- Botón WhatsApp PDP (azul transparente con tooltip rebotante) -->
+    <a href="#" id="pdpWhatsappFloat" class="pdp-whatsapp-float pdp-whatsapp-bounce" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436.002 9.858-4.42 9.86-9.86.001-2.636-1.024-5.113-2.884-6.978C16.484 1.903 14.004.877 11.4.877c-5.446 0-9.871 4.423-9.873 9.862-.001 1.77.472 3.498 1.372 5.031L1.879 21.5l5.882-1.543zm11.75-4.227c-.31-.154-1.836-.906-2.119-1.01-.283-.102-.49-.153-.696.154-.205.308-.797.997-.976 1.199-.178.203-.357.226-.667.071-3.132-1.558-4.47-3.002-5.3-4.426-.205-.353-.021-.544.152-.715.156-.155.31-.353.465-.53.155-.177.206-.298.31-.497.102-.199.05-.375-.026-.53-.077-.154-.696-1.67-.954-2.285-.25-.604-.503-.522-.696-.532-.179-.009-.384-.01-.59-.01-.205 0-.54.077-.822.385-.283.308-1.079 1.056-1.079 2.574 0 1.519 1.103 2.986 1.258 3.193.154.205 2.17 3.31 5.257 4.637.734.317 1.309.507 1.758.649.738.236 1.412.203 1.944.123.593-.088 1.836-.751 2.094-1.444.258-.693.258-1.288.181-1.413-.076-.124-.282-.199-.592-.353z"/>
+        </svg>
+        <span class="pdp-whatsapp-tooltip">Dudas o aclaraciones</span>
+    </a>
 </body>
 <!-- ═════════════════════ TOAST + MODAL RESULT SYSTEM ═════════════════════ -->
 <div id="toast-container" style="
