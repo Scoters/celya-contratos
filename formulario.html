@@ -179,7 +179,7 @@
             background: transparent;
             padding: 8px 6px;
             font-family: inherit;
-            font-size: 14px;
+            font-size: 14.5px;
             font-weight: bold;
             color: #495057;
             border-radius: 4px;
@@ -188,9 +188,10 @@
             text-align: center;
             outline: none;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 38px;
+            min-height: 42px;
         }
         .segment-control-form .segment-btn-form:hover {
             background: rgba(0, 0, 0, 0.05);
@@ -866,13 +867,17 @@
                 const val = btn.getAttribute('data-plazo');
                 const opt = selectPlazo.querySelector(`option[value="${val}"]`);
                 if (opt) {
-                    let label = opt.text;
-                    if (label.includes(' / ')) {
-                        label = label.split(' / ')[0].trim() + ')';
-                    } else if (label.includes('(')) {
-                        label = label.split('(')[0].trim();
+                    const parts = opt.text.split('(');
+                    const mainText = parts[0].trim();
+                    const subText = parts[1] ? parts[1].split(' / ')[0].split(')')[0].trim() : "";
+
+                    if (subText) {
+                        btn.innerHTML = `<span style="display:block; font-weight:bold; font-size:14.5px;">${mainText}</span><span class="btn-sub-label" style="display:block; font-size:11.5px; font-weight:500; opacity:0.8; margin-top:2px;">${subText}</span>`;
+                        btn.style.flexDirection = "column";
+                    } else {
+                        btn.innerText = mainText;
+                        btn.style.flexDirection = "row";
                     }
-                    btn.innerText = label;
                     
                     if (val === currentVal) {
                         btn.classList.add('active');
@@ -1157,29 +1162,19 @@
                         engancheEfectivo = engancheIngresado;
                     }
 
-                    // --- CALCULAR CUOTA BASE Y CUOTA ACTIVA EXACTAMENTE COMO EN CATALOGO.HTML ---
-                    const factorEngSemanal = (planElegido === "52")
-                        ? (CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.11)
-                        : (CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.165);
-                    const engSemanalCalculado = Math.ceil((precioContado * factorEngSemanal) / 10) * 10;
-                    
+                    // --- CALCULAR CUOTA BASE Y CUOTA ACTIVA USANDO EL MISMO FACTOR DE ENGANCHE ---
+                    // factorEngancheMinimo (arriba) ya tiene el factor correcto según frecuencia y plazo
                     const factorInteres = (planElegido === "26") ? CONFIG_TASAS_SHEETS.interes26 : CONFIG_TASAS_SHEETS.interes52;
-                    const totalFinanciadoSemanal = (precioContado * (1 + factorInteres)) - engSemanalCalculado;
-                    const numPagosSemanales = (planElegido === "26") ? 26 : 52;
-                    
-                    const cuotaSemanalBase = Math.round(totalFinanciadoSemanal / numPagosSemanales);
-                    
-                    let cuotaBase = cuotaSemanalBase;
-                    if (frecuencia === "QUINCENAL") {
-                        cuotaBase = cuotaSemanalBase * 2;
-                    }
-                    
-                    const numPagos = (frecuencia === "QUINCENAL") ? (numPagosSemanales / 2) : numPagosSemanales;
+                    const numPagosBase = (planElegido === "26") ? 26 : 52;
+                    const numPagos = (frecuencia === "QUINCENAL") ? (numPagosBase / 2) : numPagosBase;
+
+                    const totalFinanciadoCalc = (precioContado * (1 + factorInteres)) - engancheMinimoObligatorio;
+                    const cuotaBase = Math.round(totalFinanciadoCalc / numPagos);
 
                     let cuotaActiva = cuotaBase;
                     if (engancheEfectivo > engancheMinimoObligatorio) {
                         const extraEnganche = engancheEfectivo - engancheMinimoObligatorio;
-                        cuotaActiva = cuotaBase - (extraEnganche / numPagos);
+                        cuotaActiva = cuotaBase - Math.round(extraEnganche / numPagos);
                     }
 
                     const cuotaFinal = Math.round(cuotaActiva);

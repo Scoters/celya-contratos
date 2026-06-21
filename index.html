@@ -897,7 +897,7 @@
             background: transparent;
             padding: 4px 4px;
             font-family: 'Outfit', sans-serif;
-            font-size: 11px;
+            font-size: 11.5px;
             font-weight: 600;
             color: var(--text-muted);
             border-radius: 4px;
@@ -906,10 +906,11 @@
             text-align: center;
             outline: none;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             line-height: 1.2;
-            min-height: 28px;
+            min-height: 32px;
         }
         .segment-control .segment-btn:hover {
             color: var(--text-main);
@@ -924,7 +925,7 @@
         
         /* Ajuste específico para el plazo o etiquetas más largas */
         .plazo-control .segment-btn {
-            font-size: 10px;
+            font-size: 11.5px;
         }
         
         /* Frecuencia de pagos semanales con tono azul */
@@ -3356,30 +3357,37 @@
             renderizarCatalogo(query);
         }
 
-        // Funciones auxiliares para el cálculo dinámico de cuotas (alineado con el modal PDP)
+        // Función unificada de cálculo de cuotas — recibe los factores correctos según frecuencia y plazo
+        function calcularCuotaUnificada(precioContado, factorEng, factorInt, numPagos) {
+            const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
+            const totalFinanciado = (precioContado * (1 + factorInt)) - eng;
+            return Math.round(totalFinanciado / numPagos);
+        }
+
+        // Funciones auxiliares que delegan a la unificada (para semanal)
         function calcularCuotaSemanal26(precioContado) {
             const factorEng = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
             const factorInt = CONFIG_TASAS.interes26 !== undefined ? CONFIG_TASAS.interes26 : 0.66;
-            const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
-            const totalFinanciado = (precioContado * (1 + factorInt)) - eng;
-            const cuota = totalFinanciado / 26;
-            console.log(`[DEBUG - Cuota Quin 26] Precio: ${precioContado}, FactorEng: ${factorEng}, FactorInt: ${factorInt}, Eng: ${eng}, TotalFin: ${totalFinanciado}, Cuota sin redondear: ${cuota}, Cuota redondeada: ${Math.round(cuota)}`);
-            return Math.round(cuota);
+            return calcularCuotaUnificada(precioContado, factorEng, factorInt, 26);
         }
 
         function calcularCuotaSemanal52(precioContado) {
             const factorEng = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
             const factorInt = CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90;
-            const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
-            return Math.round(((precioContado * (1 + factorInt)) - eng) / 52);
+            return calcularCuotaUnificada(precioContado, factorEng, factorInt, 52);
         }
 
+        // Quincenal: usa factores de enganche PROPIOS (no los semanales)
         function calcularCuotaQuincenal13(precioContado) {
-            return calcularCuotaSemanal26(precioContado) * 2;
+            const factorEng = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+            const factorInt = CONFIG_TASAS.interes26 !== undefined ? CONFIG_TASAS.interes26 : 0.66;
+            return calcularCuotaUnificada(precioContado, factorEng, factorInt, 13);
         }
 
         function calcularCuotaQuincenal26(precioContado) {
-            return calcularCuotaSemanal52(precioContado) * 2;
+            const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
+            const factorInt = CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90;
+            return calcularCuotaUnificada(precioContado, factorEngCom * 2, factorInt, 26);
         }
 
         // Extrae la marca del título del modelo de forma inteligente
@@ -4189,9 +4197,6 @@
                 const val = btn.getAttribute('data-val');
                 const opt = select.querySelector(`option[value="${val}"]`);
                 if (opt) {
-                    // Actualizar el texto según el option del select (solo el texto corto antes de paréntesis)
-                    btn.innerText = opt.text.split('(')[0].trim();
-                    
                     // Sincronizar estado activo
                     if (val === currentVal) {
                         btn.classList.add('active');
@@ -4203,7 +4208,30 @@
                     if (opt.disabled || opt.style.display === 'none') {
                         btn.style.display = 'none';
                     } else {
-                        btn.style.display = 'block';
+                        btn.style.display = 'flex';
+                    }
+
+                    // Si es el selector de plazos, queremos poner subtítulo de semanas/quincenas
+                    if (selectId === 'cliPlazo' || selectId === 'pe-cliPlazo') {
+                        const mainText = opt.text.split('(')[0].trim();
+                        let subText = "";
+                        const freqId = selectId === 'cliPlazo' ? 'cliFrecuencia' : 'pe-cliFrecuencia';
+                        const freqEl = document.getElementById(freqId);
+                        const freq = freqEl ? freqEl.value : "SEMANAL";
+
+                        if (freq === "CONTADO") {
+                            subText = "1 pago";
+                        } else if (freq === "QUINCENAL") {
+                            subText = (val === "26 Semanas") ? "13 Quincenas" : "26 Quincenas";
+                        } else {
+                            subText = (val === "26 Semanas") ? "26 Semanas" : "52 Semanas";
+                        }
+
+                        btn.innerHTML = `<span style="display:block; font-weight:700; font-size:11.5px;">${mainText}</span><span class="btn-sub-label" style="display:block; font-size:9.5px; font-weight:500; opacity:0.85; margin-top:2px;">${subText}</span>`;
+                        btn.style.flexDirection = "column";
+                    } else {
+                        btn.innerText = opt.text.split('(')[0].trim();
+                        btn.style.flexDirection = "row";
                     }
                 }
             });
@@ -4423,15 +4451,12 @@
 
                 let engancheFinal = customEnganche;
 
-                let cuotaBase = (plazo === "26 Semanas") ? calcularCuotaSemanal26(precioContado) : calcularCuotaSemanal52(precioContado);
-                if (freq === "QUINCENAL") {
-                    cuotaBase = cuotaBase * 2;
-                }
+                let cuotaBase = calcularCuotaUnificada(precioContado, factorEnganche, factorInteres, numPagos);
 
                 let cuotaActiva = cuotaBase;
                 if (engancheFinal > engancheCalculado) {
                     const extraEnganche = engancheFinal - engancheCalculado;
-                    cuotaActiva = cuotaBase - (extraEnganche / numPagos);
+                    cuotaActiva = cuotaBase - Math.round(extraEnganche / numPagos);
                 }
 
                 document.getElementById('pdp-enganche-grande').innerText = `$${engancheFinal.toLocaleString('es-MX')} MXN`;
@@ -4914,15 +4939,12 @@
                     numPagos = numPagos / 2;
                 }
 
-                let baseCuota = (plazo === "26 Semanas") ? calcularCuotaSemanal26(precioContado) : calcularCuotaSemanal52(precioContado);
-                if (freq === "QUINCENAL") {
-                    baseCuota = baseCuota * 2;
-                }
+                let baseCuota = calcularCuotaUnificada(precioContado, factorEnganche, factorInteres, numPagos);
 
                 let cuota = baseCuota;
                 if (engancheFinal > engancheCalculado) {
                     const extraEnganche = engancheFinal - engancheCalculado;
-                    cuota = baseCuota - (extraEnganche / numPagos);
+                    cuota = baseCuota - Math.round(extraEnganche / numPagos);
                 }
 
                 let labelFrecuencia = (freq === "QUINCENAL") ? "/quin" : "/sem";
@@ -5010,15 +5032,12 @@
                     textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (13 Quincenas)" : "Plan Cómodo (26 Quincenas)";
                 }
 
-                let baseCuota = (plazo === "26 Semanas") ? calcularCuotaSemanal26(precioContado) : calcularCuotaSemanal52(precioContado);
-                if (freq === "QUINCENAL") {
-                    baseCuota = baseCuota * 2;
-                }
+                let baseCuota = calcularCuotaUnificada(precioContado, factorEnganche, factorInteres, numPagos);
 
                 cuota = baseCuota;
                 if (engancheFinal > engancheCalculado) {
                     const extraEnganche = engancheFinal - engancheCalculado;
-                    cuota = baseCuota - (extraEnganche / numPagos);
+                    cuota = baseCuota - Math.round(extraEnganche / numPagos);
                 }
             } else {
                 engancheFinal = precioContado;
@@ -5169,14 +5188,11 @@
                         finalEnganche = customEnganche;
                     }
 
-                    let baseCuota = (plazo === "26 Semanas") ? calcularCuotaSemanal26(precioContado) : calcularCuotaSemanal52(precioContado);
-                    if (freq === "QUINCENAL") {
-                        baseCuota = baseCuota * 2;
-                    }
+                    let baseCuota = calcularCuotaUnificada(precioContado, factorEnganche, factorInteres, numPagos);
 
                     if (finalEnganche > engancheCalculado) {
                         const extraEnganche = finalEnganche - engancheCalculado;
-                        cuotaBase = baseCuota - (extraEnganche / numPagos);
+                        cuotaBase = baseCuota - Math.round(extraEnganche / numPagos);
                     } else {
                         cuotaBase = baseCuota;
                     }
