@@ -883,21 +883,21 @@
             display: flex;
             background: var(--bg-light);
             border: 1px solid var(--border-color);
-            padding: 3px;
+            padding: 2.5px;
             border-radius: 6px;
-            gap: 3px;
+            gap: 2.5px;
             margin-bottom: 8px;
             box-sizing: border-box;
             width: 100%;
-            max-width: 350px;
+            max-width: 300px;
         }
         .segment-control .segment-btn {
             flex: 1;
             border: none;
             background: transparent;
-            padding: 6px 4px;
+            padding: 4px 4px;
             font-family: 'Outfit', sans-serif;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             color: var(--text-muted);
             border-radius: 4px;
@@ -909,7 +909,7 @@
             align-items: center;
             justify-content: center;
             line-height: 1.2;
-            min-height: 34px;
+            min-height: 28px;
         }
         .segment-control .segment-btn:hover {
             color: var(--text-main);
@@ -918,13 +918,13 @@
         .segment-control .segment-btn.active {
             background: var(--accent-gradient);
             color: #ffffff !important;
-            box-shadow: 0 4px 10px rgba(var(--accent-rgb), 0.2);
+            box-shadow: 0 3px 8px rgba(var(--accent-rgb), 0.2);
             transform: translateY(-0.5px);
         }
         
         /* Ajuste específico para el plazo o etiquetas más largas */
         .plazo-control .segment-btn {
-            font-size: 11px;
+            font-size: 10px;
         }
         
         /* Frecuencia de pagos semanales con tono azul */
@@ -954,7 +954,7 @@
             background: var(--bg-modal);
             padding: 24px;
             border-radius: 16px;
-            max-width: 980px;
+            max-width: 1200px;
             width: 100%;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             border: 1px solid var(--border-color);
@@ -968,20 +968,32 @@
 
         .pdp-close-btn {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 28px;
-            color: #94a3b8;
-            cursor: pointer;
-            border: none;
-            background: none;
-            transition: color 0.2s;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(231, 76, 60, 0.12);
+            border: 2px solid rgba(231, 76, 60, 0.4);
+            color: #e74c3c;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.15);
+            font-size: 32px;
             line-height: 1;
-            z-index: 10;
+            padding: 0;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            outline: none;
         }
 
         .pdp-close-btn:hover {
-            color: var(--primary);
+            background: rgba(231, 76, 60, 0.22);
+            border-color: #e74c3c;
+            transform: scale(1.1);
+            color: #e74c3c;
         }
 
         /* Loading animation for dynamic variants */
