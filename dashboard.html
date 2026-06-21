@@ -106,10 +106,15 @@
         }
 
         .column-left, .column-right {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
+            display: contents;
         }
+
+        #card-cobranza { order: 1; }
+        #card-cierre { order: 2; }
+        #card-agregar { order: 3; margin-top: 0 !important; }
+        #card-vip { order: 4; margin-top: 0 !important; }
+        #card-inventario { order: 5; margin-top: 0 !important; }
+        #card-morosos { order: 6; margin-top: 0 !important; }
 
         .container {
             background: rgba(30, 41, 59, 0.5);
