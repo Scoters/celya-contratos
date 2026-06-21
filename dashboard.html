@@ -530,6 +530,30 @@
             .dashboard-grid {
                 grid-template-columns: 1fr;
             }
+            .column-left, .column-right {
+                display: contents;
+            }
+            .container {
+                margin-top: 0 !important;
+            }
+            #card-cobranza {
+                order: 1;
+            }
+            #card-cierre {
+                order: 2;
+            }
+            #card-inventario {
+                order: 3;
+            }
+            #card-agregar {
+                order: 4;
+            }
+            #card-vip {
+                order: 5;
+            }
+            #card-morosos {
+                order: 6;
+            }
             .dashboard-header {
                 flex-direction: column;
                 text-align: center;
@@ -542,6 +566,37 @@
             }
             body {
                 padding: 10px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .modal-config-content {
+                padding: 20px 15px !important;
+                margin: 15px auto !important;
+                width: 92% !important;
+                box-sizing: border-box !important;
+            }
+            .modal-config-content h2 {
+                font-size: 20px !important;
+                white-space: normal !important;
+                word-wrap: break-word !important;
+            }
+            .form-group-config label {
+                font-size: 12px !important;
+                white-space: normal !important;
+            }
+            .form-group-config input {
+                font-size: 13px !important;
+                padding: 8px 10px !important;
+            }
+            #placeholders-list > div {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 12px !important;
+                padding: 12px !important;
+            }
+            #placeholders-list > div img {
+                margin: 0 auto;
             }
         }
         
@@ -646,7 +701,7 @@
 
         <main class="dashboard-grid">
             <div class="column-left">
-                <div class="container">
+                <div class="container" id="card-cobranza">
                     <h3>💵 Módulo de Cobranza Dinámica</h3>
                     <label for="buscarClienteAbonoInput">Buscar Cliente (Nombre, ID o IMEI):</label>
                     <div style="position: relative; width: 100%;">
@@ -697,8 +752,16 @@
                         <!-- Monto a recibir prominente y visible inmediatamente -->
                         <div id="formMontoCobro" style="display: none; margin-top: 20px; border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 15px;">
                             <label for="montoAbono" style="font-size: 15px; font-weight: bold; color: #34d399; margin-bottom: 8px; display: block;">💵 Monto a Recibir ($):</label>
-                            <input type="number" id="montoAbono" placeholder="Mete la cantidad que te va a pagar" style="font-size: 18px; padding: 12px; font-weight: bold; color: #fff; background: rgba(15, 23, 42, 0.6); border: 2px solid #34d399; border-radius: 8px; box-sizing: border-box; width: 100%;">
-                            <button type="button" id="btnRegistrarCobro" style="margin-top: 12px; background: linear-gradient(135deg, #10b981, #059669); font-size: 15px; font-weight: bold; padding: 12px; width: 100%;">
+                            <input type="number" id="montoAbono" placeholder="Mete la cantidad que te va a pagar" style="font-size: 18px; padding: 12px; font-weight: bold; color: #fff; background: rgba(15, 23, 42, 0.6); border: 2px solid #34d399; border-radius: 8px; box-sizing: border-box; width: 100%; margin-bottom: 12px;">
+                            
+                            <label for="metodoAbono" style="font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 8px; display: block;">💳 Método de Pago:</label>
+                            <select id="metodoAbono" style="font-size: 15px; padding: 10px; font-weight: 600; color: #fff; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; box-sizing: border-box; width: 100%; margin-bottom: 12px; font-family: inherit; outline: none;">
+                                <option value="Efectivo">💵 Efectivo</option>
+                                <option value="Transferencia">🏦 Transferencia Bancaria</option>
+                                <option value="Tarjeta">💳 Tarjeta (Clip/Débito/Crédito)</option>
+                            </select>
+
+                            <button type="button" id="btnRegistrarCobro" style="margin-top: 4px; background: linear-gradient(135deg, #10b981, #059669); font-size: 15px; font-weight: bold; padding: 12px; width: 100%;">
                                 📲 Registrar Abono en la Hoja
                             </button>
                         </div>
@@ -755,7 +818,7 @@
                 </div>
 
                 <!-- 📦 Módulo de Gestión de Inventario -->
-                <div class="container" style="margin-top: 24px;">
+                <div class="container" id="card-inventario" style="margin-top: 24px;">
                     <h3>📦 Gestión de Inventario</h3>
                     <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
                         Busca un equipo y actualiza su estado (por ejemplo, marcar como Robado, Perdido o Devuelto).
@@ -809,7 +872,7 @@
                 </div>
 
                 <!-- 💰 Módulo de Cierre de Caja Diario -->
-                <div class="container" style="margin-top: 24px;">
+                <div class="container" id="card-cierre" style="margin-top: 24px;">
                     <h3>💰 Cierre de Caja Diario</h3>
                     <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
                         Selecciona un día para calcular el dinero cobrado por método de pago e ingresa el efectivo real para cerrar caja.
@@ -855,7 +918,7 @@
                 </div>
 
                 <!-- 🚨 Reporte de Morosos -->
-                <div class="container" style="margin-top: 24px;">
+                <div class="container" id="card-morosos" style="margin-top: 24px;">
                     <details style="outline: none;">
                         <summary style="font-size: 18px; font-weight: 600; color: var(--text-primary); cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--primary-color); padding-bottom: 8px; margin-bottom: 0; outline: none;">
                             <span style="display: flex; align-items: center; gap: 8px;">🚨 Reporte de Morosos</span>
@@ -893,7 +956,7 @@
             </div>
 
             <div class="column-right">
-                <div class="container vip-search-container">
+                <div class="container vip-search-container" id="card-vip">
                     <h3>🌟 Renovación de Contrato VIP</h3>
                     <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
                         Busca un cliente existente para clonar sus datos e INE en un nuevo contrato.
@@ -906,7 +969,7 @@
                     </div>
                 </div>
 
-                <div class="container">
+                <div class="container" id="card-agregar">
                     <h3>📱 Agregar Celular al Catálogo</h3>
                     <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
                         Pega el enlace de Mercado Libre. Traeremos nombre, foto, precio y especificaciones automáticamente.
@@ -1512,6 +1575,7 @@
             document.getElementById('btnRegistrarCobro').addEventListener('click', async function () {
                 if (!clienteSeleccionadoActual) return;
                 const monto = document.getElementById('montoAbono').value;
+                const metodo = document.getElementById('metodoAbono').value;
                 if (!monto || parseFloat(monto) <= 0) {
                     toast('Por favor ingresa un monto válido.', 'warning');
                     return;
@@ -1529,7 +1593,7 @@
                     formData.append('imei', clienteSeleccionadoActual.imei);
                     formData.append('nombreCliente', clienteSeleccionadoActual.cliente);
                     formData.append('monto', monto);
-                    formData.append('metodo', 'Depósito');
+                    formData.append('metodo', metodo);
                     formData.append('semana', 'Abono');
                     formData.append('folio', 'Cobro Dinámico');
                     formData.append('notas', 'Registrado desde Módulo de Cobranza Dinámica');
