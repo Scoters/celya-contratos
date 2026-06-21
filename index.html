@@ -885,21 +885,20 @@
 
         /* Loading animation for dynamic variants */
         .pdp-loading-overlay {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background: var(--bg-variant-loading);
-            backdrop-filter: blur(2px);
+            backdrop-filter: blur(4px);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 100;
+            z-index: 99999;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.2s ease-in-out;
-            border-radius: 16px;
         }
 
         .pdp-loading-overlay.active {
