@@ -355,16 +355,6 @@
             <label for="monto">🏁 Pago Inicial / Enganche Recibido ($):</label>
             <input type="number" id="monto" name="monto" style="color: #c0392b; font-weight: bold;" placeholder="Ej. 1200" min="0">
 
-            <label style="margin-top: 10px; display: block; font-weight: bold;">Plazo de Financiamiento:</label>
-            <select id="plazoSemanas" required class="hidden-select">
-                <option id="optPlazoCorto" value="26" selected>Plan Rápido (26 Semanas / 26 Pagos)</option>
-                <option id="optPlazoLargo" value="52">Plan Cómodo (52 Semanas / 52 Pagos)</option>
-            </select>
-            <div class="segment-control-form" id="form-plazo-selector">
-                <button type="button" class="segment-btn-form" data-plazo="26">Plan Rápido</button>
-                <button type="button" class="segment-btn-form" data-plazo="52">Plan Cómodo</button>
-            </div>
-
             <label for="cuota">Monto del Abono Regular ($):</label>
             <input type="text" id="cuota" name="cuota" readonly
                 style="background-color: #e9ecef; font-weight: bold; color: #2e7d32;">
@@ -416,6 +406,16 @@
                     <button type="button" class="quincenal-btn" data-quin="15 Y 30">📅 Días 15 y 30 (Fijo)</button>
                     <button type="button" class="quincenal-btn" data-quin="SABADO"> Sábado de Raya (Quincenal)</button>
                 </div>
+            </div>
+
+            <label style="margin-top: 10px; display: block; font-weight: bold;">Plazo de Financiamiento:</label>
+            <select id="plazoSemanas" required class="hidden-select">
+                <option id="optPlazoCorto" value="26" selected>Plan Rápido (26 Semanas / 26 Pagos)</option>
+                <option id="optPlazoLargo" value="52">Plan Cómodo (52 Semanas / 52 Pagos)</option>
+            </select>
+            <div class="segment-control-form" id="form-plazo-selector">
+                <button type="button" class="segment-btn-form" data-plazo="26">Plan Rápido</button>
+                <button type="button" class="segment-btn-form" data-plazo="52">Plan Cómodo</button>
             </div>
 
             <label>Nombre del Cliente:</label>
