@@ -1773,8 +1773,8 @@
         }
         #pdp-info-tooltip-content {
             color: #f1f5f9 !important;
-            font-size: 15px !important;
-            line-height: 1.6 !important;
+            font-size: 17px !important;
+            line-height: 1.65 !important;
         }
         .pdp-info-tooltip::-webkit-scrollbar {
             width: 6px;
@@ -2103,7 +2103,7 @@
                             <img id="modal-producto-foto" src="" alt="Foto del Producto">
                             <button type="button" class="pdp-info-btn" id="pdp-info-btn" onclick="togglePdpInfo(event)" onmouseenter="showPdpInfo()" onmouseleave="hidePdpInfo()">i</button>
                             <div id="pdp-info-tooltip" class="pdp-info-tooltip">
-                                <div style="font-weight: bold; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 17px;">
+                                <div style="font-weight: bold; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 19px;">
                                     <span style="font-size: 18px;">ℹ️</span> <span>Descripción del Producto</span>
                                 </div>
                                 <div id="pdp-info-tooltip-content" style="white-space: pre-line; font-family: inherit;"></div>
@@ -7578,10 +7578,11 @@
                         infoBtn.style.opacity = '0';
                         infoBtn.style.pointerEvents = 'none';
                     }
-                    // Ocultar tooltip si no está bloqueado por clic
-                    if (tooltip && !pdpInfoLocked) {
+                    // Ocultar tooltip incondicionalmente
+                    if (tooltip) {
                         tooltip.style.display = 'none';
                     }
+                    pdpInfoLocked = false;
                 } else {
                     // Scroll arriba: mostrar
                     if (closeBtn) {
