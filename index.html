@@ -5819,7 +5819,7 @@
                 // the user's actual color choice (e.g., Green → loads 512GB mock → normalized to
                 // 512GB Black root → reverts to Black). The global state variables are the source
                 // of truth for what the user selected.
-                if (data && hasSpecificFreshData && (isSameMockFamily || isSpecificCache)) {
+                if (data && hasSpecificFreshData) {
                     shouldRestoreUI = true;
                 }
 
@@ -7141,8 +7141,11 @@
                                         return;
                                     }
 
-                                    // Show loading overlay immediately
-                                    mostrarCargandoVariantes();
+                                    const isTargetCached = !!ML_CACHE_VARIANTES[colorInfo.id];
+                                    if (!isTargetCached) {
+                                        // Show loading overlay immediately
+                                        mostrarCargandoVariantes();
+                                    }
 
                                     document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
                                     this.classList.add('selected');
@@ -7197,13 +7200,15 @@
                                     }
 
                                     // Show loading state while switching variant
-                                    if (wrapperColores) {
-                                        wrapperColores.style.opacity = "0.4";
-                                        wrapperColores.style.pointerEvents = "none";
-                                    }
-                                    if (wrapperStorage) {
-                                        wrapperStorage.style.opacity = "0.4";
-                                        wrapperStorage.style.pointerEvents = "none";
+                                    if (!isTargetCached) {
+                                        if (wrapperColores) {
+                                            wrapperColores.style.opacity = "0.4";
+                                            wrapperColores.style.pointerEvents = "none";
+                                        }
+                                        if (wrapperStorage) {
+                                            wrapperStorage.style.opacity = "0.4";
+                                            wrapperStorage.style.pointerEvents = "none";
+                                        }
                                     }
 
                                     cargarVariantesRealesML(colorInfo.id, true, false, false, 'color');
@@ -7396,8 +7401,11 @@
                                             if (ramSeleccionadaGlobal && itemInfo.name.toLowerCase().trim().replace(/\s+/g, "") === ramSeleccionadaGlobal.toLowerCase().trim().replace(/\s+/g, "")) return;
                                         }
 
-                                        // Show loading overlay immediately
-                                        mostrarCargandoVariantes();
+                                        const isTargetCached = !!ML_CACHE_VARIANTES[itemInfo.id];
+                                        if (!isTargetCached) {
+                                            // Show loading overlay immediately
+                                            mostrarCargandoVariantes();
+                                        }
 
                                         pillsWrapper.querySelectorAll('.storage-pill').forEach(s => s.classList.remove('selected'));
                                         this.classList.add('selected');
@@ -7441,7 +7449,6 @@
 
                                         currentMLItemLink = `https://www.mercadolibre.com.mx/p/${itemInfo.id}`;
 
-                                        const isTargetCached = !!ML_CACHE_VARIANTES[itemInfo.id];
                                         if (!isTargetCached) {
                                             if (wrapperColores) {
                                                 wrapperColores.style.opacity = "0.4";
