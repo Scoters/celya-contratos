@@ -661,6 +661,20 @@
             background: linear-gradient(135deg, #dc2626, #991b1b) !important;
             box-shadow: 0 6px 18px rgba(239, 68, 68, 0.4) !important;
         }
+        .btn-stock-alert {
+            transition: all 0.3s ease;
+        }
+        .btn-stock-alert.active {
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4) !important;
+            color: white !important;
+            animation: pulse-red-alert 2s infinite;
+        }
+        @keyframes pulse-red-alert {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+            70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
     </style>
 </head>
 
@@ -694,6 +708,10 @@
                 </div>
             </div>
             <div class="header-actions" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                <button id="btnOpenStockAlerts" class="btn-config-trigger btn-stock-alert" style="background: linear-gradient(135deg, #475569, #334155); border: none; display: flex; align-items: center; gap: 6px; position: relative;">
+                    ⚠️ Alertas de Stock
+                    <span id="badgeStockAlerts" style="background: #ffffff; color: #ef4444; border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: bold; min-width: 15px; text-align: center; display: none;">0</span>
+                </button>
                 <button id="btnOpenPlaceholders" class="btn-config-trigger" style="background: linear-gradient(135deg, #f97316, #ea580c); border: none;">
                     🗂️ Placeholders
                 </button>
@@ -1225,6 +1243,9 @@
                 if (typeof window.inicializarNuevosModulos === 'function') {
                     window.inicializarNuevosModulos();
                 }
+
+                // Inicializar alertas de stock
+                inicializarAlertasStock();
 
             } catch (err) {
                 console.error("Error al cargar datos del dashboard:", err);
@@ -1880,6 +1901,259 @@
                 }
             }
         }
+
+                // --- Alertas de Stock ---
+                function inicializarAlertasStock() {
+                    const btn = document.getElementById('btnOpenStockAlerts');
+                    if (btn) {
+                        btn.addEventListener('click', function() {
+                            abrirModalStockAlerts();
+                        });
+                    }
+                    evaluarAlertasStock();
+                }
+
+                let alertasStockGlobal = [];
+
+                function isProductTagOutOfStock(tags) {
+                    if (!tags) return false;
+                    return tags.includes("out-of-stock") ||
+                        tags.includes("disabled") ||
+                        tags.includes("no-bids") ||
+                        tags.includes("no-winner");
+                }
+
+                async function evaluarAlertasStock() {
+                    try {
+                        const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=buscarModelosCatalogo&q=`);
+                        const data = await response.json();
+                        if (data.result !== 'success' || !data.resultados) {
+                            console.warn("No se pudo cargar el catálogo para verificar alertas de stock.");
+                            return;
+                        }
+                        
+                        alertasStockGlobal = [];
+                        const items = data.resultados;
+                        
+                        items.forEach(item => {
+                            const estadoActivo = ["DISPONIBLE", "MAS VENDIDO", "BAJO DEMANDA"].includes(item.estado);
+                            if (!estadoActivo) return;
+                            
+                            let variantes = item.variantesJson;
+                            if (typeof variantes === 'string') {
+                                try {
+                                    variantes = JSON.parse(variantes);
+                                } catch(e) {
+                                    variantes = null;
+                                }
+                            }
+                            
+                            if (variantes && variantes.pickers && variantes.pickers.length > 0) {
+                                let totalProducts = 0;
+                                let activeProductsCount = 0;
+                                
+                                variantes.pickers.forEach(picker => {
+                                    if (picker.products && picker.products.length > 0) {
+                                        picker.products.forEach(p => {
+                                            totalProducts++;
+                                            const tags = p.tags || [];
+                                            const outOfStock = isProductTagOutOfStock(tags);
+                                            if (!outOfStock) {
+                                                activeProductsCount++;
+                                            }
+                                        });
+                                    }
+                                });
+                                
+                                if (totalProducts > 0 && activeProductsCount === 0) {
+                                    alertasStockGlobal.push(item);
+                                }
+                            }
+                        });
+                        
+                        actualizarBotonAlertasStock();
+                    } catch (err) {
+                        console.error("Error al evaluar alertas de stock:", err);
+                    }
+                }
+
+                function actualizarBotonAlertasStock() {
+                    const btn = document.getElementById('btnOpenStockAlerts');
+                    const badge = document.getElementById('badgeStockAlerts');
+                    if (!btn || !badge) return;
+                    
+                    const count = alertasStockGlobal.length;
+                    if (count > 0) {
+                        btn.classList.add('active');
+                        badge.textContent = count;
+                        badge.style.display = 'inline-block';
+                    } else {
+                        btn.classList.remove('active');
+                        badge.style.display = 'none';
+                    }
+                }
+
+                function abrirModalStockAlerts() {
+                    if (!document.getElementById('modal-stock-alerts')) {
+                        const modalHtml = `
+                        <div id="modal-stock-alerts" class="modal-celya-config">
+                            <div class="modal-config-content" style="max-width:760px; border-top: 5px solid #ef4444;">
+                                <span class="close-config-btn" onclick="cerrarModalStockAlerts()">&times;</span>
+                                <h2 style="display: flex; align-items: center; gap: 8px;">⚠️ Equipos sin Stock / Combinaciones</h2>
+                                <p class="modal-subtitle">Celulares activos en el catálogo pero sin ninguna variante disponible en Mercado Libre. Actualiza el enlace o márcalos como agotados.</p>
+                                <div id="stock-alerts-list" style="max-height:480px; overflow:auto; margin-top: 15px;"></div>
+                            </div>
+                        </div>`;
+                        document.body.insertAdjacentHTML('beforeend', modalHtml);
+                    }
+                    document.getElementById('modal-stock-alerts').style.display = 'block';
+                    renderizarStockAlerts();
+                }
+
+                function cerrarModalStockAlerts() {
+                    const m = document.getElementById('modal-stock-alerts');
+                    if (m) m.style.display = 'none';
+                }
+
+                function renderizarStockAlerts() {
+                    const cont = document.getElementById('stock-alerts-list');
+                    if (!cont) return;
+                    
+                    if (alertasStockGlobal.length === 0) {
+                        cont.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-secondary); font-size: 15px;">🎉 ¡Excelente! No hay celulares activos con combinaciones agotadas.</div>';
+                        return;
+                    }
+                    
+                    cont.innerHTML = '';
+                    alertasStockGlobal.forEach(item => {
+                        const card = document.createElement('div');
+                        card.style.border = '1px solid rgba(255, 255, 255, 0.08)';
+                        card.style.background = 'rgba(30, 41, 59, 0.4)';
+                        card.style.borderRadius = '8px';
+                        card.style.padding = '16px';
+                        card.style.margin = '10px 0';
+                        card.style.display = 'flex';
+                        card.style.gap = '16px';
+                        card.style.alignItems = 'center';
+                        
+                        const nombreLimpio = typeof limpiarNombreModelo === 'function' ? limpiarNombreModelo(item.modelo) : item.modelo;
+                        
+                        let itemMlId = "";
+                        if (item.link) {
+                            const regex = /(MLM\-?\d+)/i;
+                            const match = item.link.match(regex);
+                            if (match) itemMlId = match[0].replace("-", "").toUpperCase();
+                        }
+                        
+                        card.innerHTML = `
+                            <div style="width:72px; height:72px; background:rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius:6px; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-shrink: 0;">
+                                <img src="${item.foto || ''}" style="max-width:100%; max-height:100%; object-fit:contain;" onerror="this.src='https://placehold.co/72x72?text=CelYa';" />
+                            </div>
+                            <div style="flex:1;">
+                                <div style="font-weight:bold; color:var(--text-primary); font-size: 15px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                    <span>${nombreLimpio}</span>
+                                    <span style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 600;">${item.estado}</span>
+                                    <span style="background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: normal;">Fila ${item.filaNum || '—'}</span>
+                                </div>
+                                <div style="font-size:13px; color:var(--text-secondary); margin-top: 4px;">
+                                    Ref: ${item.id || 'S/ID'} • Memoria base: ${item.memoria || '—'} • Color base: ${item.color || '—'}
+                                </div>
+                                <div style="margin-top:10px; display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <a href="${item.link}" target="_blank" class="btn-pago" style="padding:6px 12px; font-size:12px; width:auto; text-decoration:none; display:inline-flex; align-items:center; gap:4px; margin:0; background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                                        🔗 Ver en ML
+                                    </a>
+                                    <button onclick="sincronizarStockItem('${itemMlId || item.id}', ${item.filaNum}, this)" class="btn-pago" style="padding:6px 12px; font-size:12px; width:auto; display:inline-flex; align-items:center; gap:4px; margin:0; background: linear-gradient(135deg, #10b981, #059669);">
+                                        🔄 Sincronizar Stock
+                                    </button>
+                                    <button onclick="marcarAgotadoItem(${item.filaNum}, '${nombreLimpio.replace(/'/g, "\\'")}', this)" class="btn-pago" style="padding:6px 12px; font-size:12px; width:auto; display:inline-flex; align-items:center; gap:4px; margin:0; background: linear-gradient(135deg, #f97316, #ea580c);">
+                                        🚫 Marcar AGOTADO
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        cont.appendChild(card);
+                    });
+                }
+
+                window.sincronizarStockItem = async function(id, row, btnElement) {
+                    if (!id || !row) {
+                        toast("Faltan parámetros para sincronizar", "error");
+                        return;
+                    }
+                    const originalText = btnElement.innerHTML;
+                    btnElement.disabled = true;
+                    btnElement.innerHTML = "⏳ Sincronizando...";
+                    
+                    try {
+                        const isProduct = id.startsWith("MLM") ? false : true;
+                        const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${id}&isProduct=${isProduct}`;
+                        const resML = await fetch(proxyUrl);
+                        const freshData = await resML.json();
+                        
+                        if (freshData.error || freshData.status === 404) {
+                            toast("No se pudo obtener la información desde Mercado Libre", "error");
+                            btnElement.disabled = false;
+                            btnElement.innerHTML = originalText;
+                            return;
+                        }
+                        
+                        const updateUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}&action=actualizarVariantesJson&row=${row}&variantes=${encodeURIComponent(JSON.stringify(freshData))}`;
+                        const resUpdate = await fetch(updateUrl);
+                        const updateResult = await resUpdate.json();
+                        
+                        if (updateResult.result !== 'success') {
+                            toast("Error al guardar variantes en el Google Sheet", "error");
+                            btnElement.disabled = false;
+                            btnElement.innerHTML = originalText;
+                            return;
+                        }
+                        
+                        toast("Sincronización exitosa", "success");
+                        await evaluarAlertasStock();
+                        renderizarStockAlerts();
+                    } catch (err) {
+                        console.error("Error al sincronizar stock:", err);
+                        toast("Error inesperado al sincronizar", "error");
+                        btnElement.disabled = false;
+                        btnElement.innerHTML = originalText;
+                    }
+                };
+
+                window.marcarAgotadoItem = async function(row, nombre, btnElement) {
+                    if (!row) {
+                        toast("Falta el número de fila", "error");
+                        return;
+                    }
+                    if (!confirm(`¿Estás seguro de que quieres marcar "${nombre}" como AGOTADO en el catálogo?`)) {
+                        return;
+                    }
+                    
+                    const originalText = btnElement.innerHTML;
+                    btnElement.disabled = true;
+                    btnElement.innerHTML = "⏳ Actualizando...";
+                    
+                    try {
+                        const url = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}&action=cambiarEstadoCatalogo&row=${row}&estado=AGOTADO`;
+                        const res = await fetch(url);
+                        const data = await res.json();
+                        
+                        if (data.result === 'success') {
+                            toast(`"${nombre}" marcado como AGOTADO exitosamente`, "success");
+                            alertasStockGlobal = alertasStockGlobal.filter(item => item.filaNum !== row);
+                            actualizarBotonAlertasStock();
+                            renderizarStockAlerts();
+                        } else {
+                            toast("Error al actualizar estado en el catálogo: " + (data.message || "desconocido"), "error");
+                            btnElement.disabled = false;
+                            btnElement.innerHTML = originalText;
+                        }
+                    } catch (err) {
+                        console.error("Error al cambiar estado en catálogo:", err);
+                        toast("Error de red o de servidor al cambiar estado", "error");
+                        btnElement.disabled = false;
+                        btnElement.innerHTML = originalText;
+                    }
+                };
 
                 // --- Placeholders / Conversión a Inventario ---
                 document.getElementById('btnOpenPlaceholders').addEventListener('click', function () {
