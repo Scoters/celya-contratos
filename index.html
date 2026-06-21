@@ -1077,30 +1077,33 @@
                 bottom: auto !important;
                 left: auto !important;
                 z-index: 999999 !important;
-                background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
-                color: white !important;
+                background: rgba(231, 76, 60, 0.12) !important;
+                border: 2px solid rgba(231, 76, 60, 0.4) !important;
+                color: #e74c3c !important;
                 width: 64px !important;
                 height: 64px !important;
                 border-radius: 50% !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4) !important;
+                box-shadow: 0 8px 25px rgba(231, 76, 60, 0.25) !important;
                 font-size: 38px !important;
                 line-height: 1 !important;
                 padding: 0 !important;
-                border: none !important;
                 cursor: pointer !important;
-                transition: transform 0.2s, background-color 0.2s;
+                backdrop-filter: blur(8px) !important;
+                -webkit-backdrop-filter: blur(8px) !important;
+                transition: transform 0.2s, background-color 0.2s, border-color 0.2s;
                 animation: pdpCloseBounce 3s ease-in-out infinite;
             }
 
             .pdp-close-btn:hover,
             .pdp-close-btn:active {
-                background: #1e293b !important;
+                background: rgba(231, 76, 60, 0.25) !important;
+                border-color: #e74c3c !important;
                 transform: scale(1.15) !important;
                 animation: none !important;
-                color: white !important;
+                color: #e74c3c !important;
             }
         }
 
@@ -1753,25 +1756,25 @@
             position: absolute;
             top: 70px;
             left: 15px;
-            width: 320px;
-            max-height: 280px;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-            padding: 16px;
+            width: 380px;
+            max-height: 380px;
+            background: rgba(15, 32, 67, 0.95);
+            border: 2px solid rgba(0, 143, 255, 0.5);
+            border-radius: 14px;
+            box-shadow: 0 20px 40px rgba(0, 15, 40, 0.35);
+            padding: 20px;
             z-index: 100;
             display: none;
             flex-direction: column;
             overflow-y: auto;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             text-align: left;
         }
-        body.dark-theme .pdp-info-tooltip {
-            background: rgba(39, 39, 42, 0.85); /* Zinc 800 with opacity */
-        }
-        body:not(.dark-theme) .pdp-info-tooltip {
-            background: rgba(255, 255, 255, 0.9);
+        #pdp-info-tooltip-content {
+            color: #f1f5f9 !important;
+            font-size: 15px !important;
+            line-height: 1.6 !important;
         }
         .pdp-info-tooltip::-webkit-scrollbar {
             width: 6px;
@@ -1798,6 +1801,14 @@
                 height: 64px !important;
                 font-size: 30px !important;
                 box-shadow: 0 8px 25px rgba(0, 143, 255, 0.3) !important;
+                animation: pdpCloseBounce 3s ease-in-out infinite;
+            }
+            .pdp-info-btn:hover,
+            .pdp-info-btn:active {
+                background: rgba(0, 143, 255, 0.25) !important;
+                border-color: var(--accent) !important;
+                transform: scale(1.15) !important;
+                animation: none !important;
             }
             .pdp-info-tooltip {
                 position: fixed !important;
@@ -1805,7 +1816,7 @@
                 left: 20px !important;
                 right: 20px !important;
                 width: auto !important;
-                max-height: 320px !important;
+                max-height: 260px !important;
                 z-index: 999999 !important;
             }
         }
@@ -2045,10 +2056,10 @@
                             <img id="modal-producto-foto" src="" alt="Foto del Producto">
                             <button type="button" class="pdp-info-btn" id="pdp-info-btn" onclick="togglePdpInfo(event)" onmouseenter="showPdpInfo()" onmouseleave="hidePdpInfo()">i</button>
                             <div id="pdp-info-tooltip" class="pdp-info-tooltip">
-                                <div style="font-weight: bold; color: var(--accent); display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
-                                    <span style="font-size: 16px;">ℹ️</span> <span>Descripción del Producto</span>
+                                <div style="font-weight: bold; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 17px;">
+                                    <span style="font-size: 18px;">ℹ️</span> <span>Descripción del Producto</span>
                                 </div>
-                                <div id="pdp-info-tooltip-content" style="white-space: pre-line; color: var(--text-main); font-size: 13.5px; line-height: 1.5; font-family: inherit;"></div>
+                                <div id="pdp-info-tooltip-content" style="white-space: pre-line; font-family: inherit;"></div>
                             </div>
                         </div>
                     </div>
