@@ -2390,6 +2390,7 @@
                         notifDiv.onmouseout = function() { this.style.background = ''; this.style.borderLeftColor = 'transparent'; };
                         
                         const escapedNombre = nombreLimpio.replace(/'/g, "\\'");
+                        const escapedLink = item.link ? item.link.replace(/'/g, "\\'") : "";
                         
                         notifDiv.innerHTML = `
                             <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.08); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
@@ -2406,6 +2407,7 @@
                                 <div style="display: flex; gap: 6px; margin-top: 6px;">
                                     <a href="${item.link}" target="_blank" style="font-size: 10px; color: #60a5fa; text-decoration: none; padding: 2px 8px; background: rgba(96,165,250,0.08); border-radius: 4px; border: 1px solid rgba(96,165,250,0.15); transition: all 0.15s;" onmouseover="this.style.background='rgba(96,165,250,0.15)'" onmouseout="this.style.background='rgba(96,165,250,0.08)'">🔗 Ver ML</a>
                                     <button onclick="event.stopPropagation(); sincronizarStockItem('${itemMlId || item.id}', ${item.filaNum}, this)" style="font-size: 10px; color: #34d399; background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.15); border-radius: 4px; padding: 2px 8px; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.background='rgba(52,211,153,0.15)'" onmouseout="this.style.background='rgba(52,211,153,0.08)'">🔄 Sync</button>
+                                    <button onclick="event.stopPropagation(); editarLinkItem(${item.filaNum}, '${escapedNombre}', '${escapedLink}', this)" style="font-size: 10px; color: #a78bfa; background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.15); border-radius: 4px; padding: 2px 8px; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.background='rgba(167,139,250,0.15)'" onmouseout="this.style.background='rgba(167,139,250,0.08)'">✏️ Link</button>
                                     <button onclick="event.stopPropagation(); marcarAgotadoItem(${item.filaNum}, '${escapedNombre}', this)" style="font-size: 10px; color: #fb923c; background: rgba(251,146,60,0.08); border: 1px solid rgba(251,146,60,0.15); border-radius: 4px; padding: 2px 8px; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.background='rgba(251,146,60,0.15)'" onmouseout="this.style.background='rgba(251,146,60,0.08)'">🚫 Agotar</button>
                                 </div>
                             </div>
@@ -2499,6 +2501,64 @@
                     } catch (err) {
                         console.error("Error al cambiar estado en catálogo:", err);
                         toast("Error de red o de servidor al cambiar estado", "error");
+                        btnElement.disabled = false;
+                        btnElement.innerHTML = originalText;
+                    }
+                };
+
+                window.editarLinkItem = async function(row, nombre, linkActual, btnElement) {
+                    const nuevoLink = prompt(`Actualizar link de Mercado Libre para:\n${nombre}\n\nIntroduce el nuevo enlace:`, linkActual);
+                    if (nuevoLink === null) return; // cancelado
+                    
+                    const urlLimpia = nuevoLink.trim();
+                    if (!urlLimpia) {
+                        toast("El enlace no puede estar vacío.", "warning");
+                        return;
+                    }
+                    
+                    if (!urlLimpia.includes("mercadolibre")) {
+                        toast("El enlace debe ser un link válido de Mercado Libre.", "warning");
+                        return;
+                    }
+                    
+                    const originalText = btnElement.innerHTML;
+                    btnElement.disabled = true;
+                    btnElement.innerHTML = "⏳ Guardando...";
+                    
+                    try {
+                        const formData = new URLSearchParams();
+                        formData.append('token', CONFIG.API_TOKEN);
+                        formData.append('action', 'actualizarLinkCatalogo');
+                        formData.append('row', row);
+                        formData.append('link', urlLimpia);
+                        
+                        const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                            method: 'POST',
+                            body: formData.toString(),
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                        });
+                        const data = await res.json();
+                        
+                        if (data.result === 'success') {
+                            toast(data.message || "Link actualizado con éxito.", "success");
+                            
+                            // Remover temporalmente de las alertas mientras se re-evalúa
+                            alertasStockGlobal = alertasStockGlobal.filter(p => p.filaNum !== row);
+                            actualizarBotonAlertasStock();
+                            renderizarStockAlerts();
+                            
+                            // Re-evaluar de inmediato el stock del equipo con el nuevo link
+                            setTimeout(async () => {
+                                await evaluarAlertasStock();
+                            }, 500);
+                        } else {
+                            toast("Error al actualizar link: " + (data.message || "Error desconocido"), "error");
+                            btnElement.disabled = false;
+                            btnElement.innerHTML = originalText;
+                        }
+                    } catch (err) {
+                        console.error("Error al actualizar link:", err);
+                        toast("Error de red al actualizar el link.", "error");
                         btnElement.disabled = false;
                         btnElement.innerHTML = originalText;
                     }
