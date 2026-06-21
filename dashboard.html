@@ -2037,6 +2037,7 @@
                                     }
                                 }
                                 
+                                const isCatalog = isProduct || liveData.type === "catalog_product" || !!liveData.catalog_product_id;
                                 let tieneStock = false;
                                 let detalle = { razon: '', coloresAgotados: [], memoriasAgotadas: [], ramsAgotadas: [], totalVariantes: 0, activasVariantes: 0 };
                                 
@@ -2136,7 +2137,7 @@
                                     if (!tieneStock) {
                                         detalle.razon = 'all_pickers_out';
                                         detalle.mensaje = `${allProductIds.length} variantes, todas agotadas`;
-                                    } else if (isProduct && !liveData.buy_box_winner && !liveData.price) {
+                                    } else if (isCatalog && !liveData.buy_box_winner && !liveData.price) {
                                         // Catalog product con pickers "activos" pero sin buy_box_winner = no hay vendedor con stock real
                                         tieneStock = false;
                                         detalle.razon = 'no_buy_box';
@@ -2147,7 +2148,7 @@
                                     }
                                 }
                                 // 1b. Catalog Product con buy_box_winner (sin pickers visibles)
-                                else if (isProduct && liveData.buy_box_winner) {
+                                else if (isCatalog && liveData.buy_box_winner) {
                                     tieneStock = true;
                                 }
                                 // 2. Item con variations
@@ -2175,7 +2176,7 @@
                                         detalle.mensaje = `Estado: ${liveData.status || 'inactivo'}`;
                                     } else if (!isNaN(qty) && qty > 0) {
                                         tieneStock = true;
-                                    } else if (isProduct && !liveData.buy_box_winner && (!liveData.pickers || liveData.pickers.length === 0)) {
+                                    } else if (isCatalog && !liveData.buy_box_winner && (!liveData.pickers || liveData.pickers.length === 0)) {
                                         // Product sin buy_box_winner ni pickers = no disponible
                                         tieneStock = false;
                                         detalle.razon = 'no_buy_box';
