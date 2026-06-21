@@ -206,6 +206,23 @@
             color: #4ade80;
         }
 
+        /* Dark-theme overrides for plan-labels, plan-vals, and PDP info elements */
+        body.dark-theme .cuota-item span.plan-label {
+            color: #38bdf8 !important; /* Sky 400 */
+        }
+        body.dark-theme .cuota-item span.plan-val {
+            color: #4ade80 !important;
+        }
+        body.dark-theme #pdp-weekly-term {
+            color: #4ade80 !important;
+        }
+        body.dark-theme .enganche-personalizado-pdp summary {
+            color: #4ade80 !important;
+        }
+        body.dark-theme .pdp-features-list li svg {
+            color: #4ade80 !important;
+        }
+
         body.dark-theme .storage-pill {
             background: var(--bg-card);
             border-color: var(--border-color);
@@ -1008,7 +1025,7 @@
 
         /* Label Pago Inicial (Enganche) en tono azulado */
         .pdp-price-container div:first-child span:last-child {
-            color: rgba(0, 143, 255, 0.8) !important;
+            color: rgba(var(--accent-rgb), 0.8) !important;
             font-weight: 600 !important;
         }
 
@@ -1023,6 +1040,29 @@
         }
 
         body.dark-theme .pdp-weekly-payments {
+            color: #4ade80;
+        }
+
+        /* Resumen del plan de pago en el formulario */
+        .pdp-summary-enganche-val, .pdp-summary-enganche-lbl {
+            color: var(--accent) !important;
+        }
+        
+        .pdp-summary-cuota-val, .pdp-summary-cuota-lbl {
+            color: #16a34a !important;
+        }
+        body.dark-theme .pdp-summary-cuota-val, 
+        body.dark-theme .pdp-summary-cuota-lbl {
+            color: #4ade80 !important;
+        }
+
+        /* Enganche mínimo en tarjetas */
+        .card-enganche-minimo {
+            font-size: 12px;
+            color: #16a34a;
+            font-weight: 600;
+        }
+        body.dark-theme .card-enganche-minimo {
             color: #4ade80;
         }
 
@@ -2670,17 +2710,17 @@
 
 
                             <!-- Resumen de pago seleccionado -->
-                            <div id="pdp-form-resumen-pago" style="display:none; margin-top:18px; background: linear-gradient(135deg, rgba(0,191,255,0.08) 0%, rgba(22,163,74,0.08) 100%); border: 2px solid rgba(0,191,255,0.3); border-radius: 14px; padding: 18px 20px;">
+                            <div id="pdp-form-resumen-pago" style="display:none; margin-top:18px; background: linear-gradient(135deg, rgba(var(--accent-rgb),0.08) 0%, rgba(22,163,74,0.08) 100%); border: 2px solid rgba(var(--accent-rgb),0.3); border-radius: 14px; padding: 18px 20px;">
                                 <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); margin-bottom: 14px;">📋 Tu plan de pago</div>
                                 <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
                                     <div>
-                                        <div id="pdp-resumen-enganche" style="font-size:26px; font-weight:900; color:#16a34a; line-height:1;">$0 MXN</div>
-                                        <div style="font-size:16px; font-weight:700; color:#16a34a; margin-top:5px;">Pago Inicial (Enganche)</div>
+                                        <div id="pdp-resumen-enganche" class="pdp-summary-enganche-val" style="font-size:26px; font-weight:900; line-height:1;">$0 MXN</div>
+                                        <div class="pdp-summary-enganche-lbl" style="font-size:16px; font-weight:700; margin-top:5px;">Pago Inicial (Enganche)</div>
                                     </div>
                                     <div style="font-size:22px; color:var(--text-muted); font-weight:300;">+</div>
                                     <div style="text-align:right;">
-                                        <div id="pdp-resumen-cuota" style="font-size:26px; font-weight:900; color:#0369a1; line-height:1;">$0 MXN</div>
-                                        <div id="pdp-resumen-termino" style="font-size:16px; font-weight:700; color:#0369a1; margin-top:5px;">a la semana</div>
+                                        <div id="pdp-resumen-cuota" class="pdp-summary-cuota-val" style="font-size:26px; font-weight:900; line-height:1;">$0 MXN</div>
+                                        <div id="pdp-resumen-termino" class="pdp-summary-cuota-lbl" style="font-size:16px; font-weight:700; margin-top:5px;">a la semana</div>
                                     </div>
                                 </div>
                             </div>
@@ -3500,14 +3540,14 @@
                                             <span class="plan-label">⏱️ Plan Rápido (26 semanas):</span>
                                             <div style="text-align: right;">
                                                 <span class="plan-val">$${cuotaSem26.toLocaleString('es-MX')} MXN/semana</span><br>
-                                                <span style="font-size: 12px; color: #16a34a; font-weight: 600;">Enganche: $${engSem26.toLocaleString('es-MX')}</span>
+                                                <span class="card-enganche-minimo">Enganche: $${engSem26.toLocaleString('es-MX')}</span>
                                             </div>
                                         </div>
                                         <div class="cuota-item" style="align-items: center; margin-top: 8px;">
                                             <span class="plan-label">🗓️ Plan Cómodo (52 semanas):</span>
                                             <div style="text-align: right;">
                                                 <span class="plan-val">$${cuotaSem52.toLocaleString('es-MX')} MXN/semana</span><br>
-                                                <span style="font-size: 12px; color: #16a34a; font-weight: 600;">Enganche: $${engSem52.toLocaleString('es-MX')}</span>
+                                                <span class="card-enganche-minimo">Enganche: $${engSem52.toLocaleString('es-MX')}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -3516,14 +3556,14 @@
                                             <span class="plan-label">⏱️ Plan Rápido (13 quincenas):</span>
                                             <div style="text-align: right;">
                                                 <span class="plan-val">$${cuotaQuin13.toLocaleString('es-MX')} MXN/quincena</span><br>
-                                                <span style="font-size: 12px; color: #16a34a; font-weight: 600;">Enganche: $${engQuin13.toLocaleString('es-MX')}</span>
+                                                <span class="card-enganche-minimo">Enganche: $${engQuin13.toLocaleString('es-MX')}</span>
                                             </div>
                                         </div>
                                         <div class="cuota-item" style="align-items: center; margin-top: 8px;">
                                             <span class="plan-label">🗓️ Plan Cómodo (26 quincenas):</span>
                                             <div style="text-align: right;">
                                                 <span class="plan-val">$${cuotaQuin26.toLocaleString('es-MX')} MXN/quincena</span><br>
-                                                <span style="font-size: 12px; color: #16a34a; font-weight: 600;">Enganche: $${engQuin26.toLocaleString('es-MX')}</span>
+                                                <span class="card-enganche-minimo">Enganche: $${engQuin26.toLocaleString('es-MX')}</span>
                                             </div>
                                         </div>
                                     </div>
