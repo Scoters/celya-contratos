@@ -345,6 +345,35 @@
             <label>Modelo Seleccionado:</label>
             <input type="text" id="modeloDisplay" name="modelo" readonly>
 
+
+            <h3>Estructura del Crédito</h3>
+
+            <label for="precioContado">💰 Precio de Contado:</label>
+            <input type="text" id="precioContado" readonly
+                style="background-color: #e9ecef; font-weight: bold; color: #1a5276;">
+
+            <label for="monto">🏁 Pago Inicial / Enganche Recibido ($):</label>
+            <input type="number" id="monto" name="monto" style="color: #c0392b; font-weight: bold;" placeholder="Ej. 1200" min="0">
+
+            <label style="margin-top: 10px; display: block; font-weight: bold;">Plazo de Financiamiento:</label>
+            <select id="plazoSemanas" required class="hidden-select">
+                <option id="optPlazoCorto" value="26" selected>Plan Rápido (26 Semanas / 26 Pagos)</option>
+                <option id="optPlazoLargo" value="52">Plan Cómodo (52 Semanas / 52 Pagos)</option>
+            </select>
+            <div class="segment-control-form" id="form-plazo-selector">
+                <button type="button" class="segment-btn-form" data-plazo="26">Plan Rápido</button>
+                <button type="button" class="segment-btn-form" data-plazo="52">Plan Cómodo</button>
+            </div>
+
+            <label for="cuota">Monto del Abono Regular ($):</label>
+            <input type="text" id="cuota" name="cuota" readonly
+                style="background-color: #e9ecef; font-weight: bold; color: #2e7d32;">
+
+            <label for="totalFinanciado">Total Financiado (Monto + Interés):</label>
+            <input type="text" id="totalFinanciado" name="totalFinanciado" readonly style="background-color: #e9ecef;">
+
+            <input type="hidden" id="totalLetraHidden" name="totalLetra">
+
             <label style="margin-top: 10px; display: block; font-weight: bold;">📆 Frecuencia de Pago Obligatoria:</label>
             <select id="agendaCobro" required class="hidden-select">
                 <option value="">-- Selecciona cómo y cuándo pagará --</option>
@@ -388,34 +417,6 @@
                     <button type="button" class="quincenal-btn" data-quin="SABADO"> Sábado de Raya (Quincenal)</button>
                 </div>
             </div>
-
-            <h3>Estructura del Crédito</h3>
-
-            <label for="precioContado">💰 Precio de Contado:</label>
-            <input type="text" id="precioContado" readonly
-                style="background-color: #e9ecef; font-weight: bold; color: #1a5276;">
-
-            <label for="monto">🏁 Pago Inicial / Enganche Recibido ($):</label>
-            <input type="number" id="monto" name="monto" style="color: #c0392b; font-weight: bold;" placeholder="Ej. 1200" min="0">
-
-            <label style="margin-top: 10px; display: block; font-weight: bold;">Plazo de Financiamiento:</label>
-            <select id="plazoSemanas" required class="hidden-select">
-                <option id="optPlazoCorto" value="26" selected>Plan Rápido (26 Semanas / 26 Pagos)</option>
-                <option id="optPlazoLargo" value="52">Plan Cómodo (52 Semanas / 52 Pagos)</option>
-            </select>
-            <div class="segment-control-form" id="form-plazo-selector">
-                <button type="button" class="segment-btn-form" data-plazo="26">Plan Rápido</button>
-                <button type="button" class="segment-btn-form" data-plazo="52">Plan Cómodo</button>
-            </div>
-
-            <label for="cuota">Monto del Abono Regular ($):</label>
-            <input type="text" id="cuota" name="cuota" readonly
-                style="background-color: #e9ecef; font-weight: bold; color: #2e7d32;">
-
-            <label for="totalFinanciado">Total Financiado (Monto + Interés):</label>
-            <input type="text" id="totalFinanciado" name="totalFinanciado" readonly style="background-color: #e9ecef;">
-
-            <input type="hidden" id="totalLetraHidden" name="totalLetra">
 
             <label>Nombre del Cliente:</label>
             <input type="text" id="cliente" name="cliente" required placeholder="Ej. Juan Pérez">
@@ -927,8 +928,24 @@
                 buttons.forEach(btn => {
                     if (btn.getAttribute('data-freq') === freq) {
                         btn.classList.add('active');
+                        if (freq === "SEMANAL" && subVal) {
+                            const dayName = subVal.charAt(0).toUpperCase() + subVal.slice(1).toLowerCase();
+                            btn.innerText = `📅 Semanal (${dayName})`;
+                        } else if (freq === "SEMANAL") {
+                            btn.innerText = `📅 Semanal`;
+                        } else if (freq === "QUINCENAL" && subVal) {
+                            const quinName = subVal === "15 Y 30" ? "15 y 30" : "Sábado de Raya";
+                            btn.innerText = `💸 Quincenal (${quinName})`;
+                        } else if (freq === "QUINCENAL") {
+                            btn.innerText = `💸 Quincenal`;
+                        }
                     } else {
                         btn.classList.remove('active');
+                        if (btn.getAttribute('data-freq') === "SEMANAL") {
+                            btn.innerText = `📅 Semanal`;
+                        } else if (btn.getAttribute('data-freq') === "QUINCENAL") {
+                            btn.innerText = `💸 Quincenal`;
+                        }
                     }
                 });
             }
@@ -937,7 +954,9 @@
             const quincenalOpt = document.getElementById('sub-quincenal-options');
 
             if (freq === "SEMANAL") {
-                if (semanalCal) semanalCal.style.display = "grid";
+                if (semanalCal) {
+                    semanalCal.style.display = (window.calendarAbierto !== false) ? "grid" : "none";
+                }
                 if (quincenalOpt) quincenalOpt.style.display = "none";
             } else if (freq === "QUINCENAL") {
                 if (semanalCal) semanalCal.style.display = "none";
@@ -981,13 +1000,22 @@
                     btn.addEventListener('click', () => {
                         const freq = btn.getAttribute('data-freq');
                         if (freq === "SEMANAL") {
-                            select.value = "SEMANAL|SABADO";
+                            const partes = select.value.split('|');
+                            if (partes[0] === "SEMANAL") {
+                                window.calendarAbierto = !window.calendarAbierto;
+                            } else {
+                                select.value = "SEMANAL|SABADO";
+                                window.calendarAbierto = true;
+                            }
                         } else if (freq === "QUINCENAL") {
                             select.value = "QUINCENAL|15 Y 30";
+                            window.calendarAbierto = false;
                         } else if (freq === "CONTADO") {
                             select.value = "CONTADO|UNICO";
+                            window.calendarAbierto = false;
                         }
                         triggerSelectChange(select);
+                        syncAgendaCobro();
                     });
                 });
             }
@@ -999,7 +1027,9 @@
                     btn.addEventListener('click', () => {
                         const day = btn.getAttribute('data-day');
                         select.value = `SEMANAL|${day}`;
+                        window.calendarAbierto = false; // Cerrar el calendario al elegir el día
                         triggerSelectChange(select);
+                        syncAgendaCobro();
                     });
                 });
             }
@@ -1012,8 +1042,14 @@
                         const quin = btn.getAttribute('data-quin');
                         select.value = `QUINCENAL|${quin}`;
                         triggerSelectChange(select);
+                        syncAgendaCobro();
                     });
                 });
+            }
+
+            // Inicialmente cerrado si ya viene un día pre-seleccionado
+            if (select.value.startsWith("SEMANAL")) {
+                window.calendarAbierto = false;
             }
 
             syncAgendaCobro();
