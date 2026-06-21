@@ -848,6 +848,17 @@
             gap: 8px;
             width: 60px;
             flex-shrink: 0;
+            overflow-y: auto;
+            max-height: 380px;
+            scroll-behavior: smooth;
+        }
+        .pdp-gallery-thumbs::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .pdp-gallery-thumbs::-webkit-scrollbar-thumb {
+            background: rgba(0, 143, 255, 0.3);
+            border-radius: 2px;
         }
 
         .pdp-thumb {
@@ -860,12 +871,52 @@
             padding: 2px;
             background: var(--bg-card);
             transition: border-color 0.2s;
+            flex-shrink: 0 !important;
         }
 
         .pdp-thumb.active,
         .pdp-thumb:hover {
             border-color: #3483fa;
             border-width: 2px;
+        }
+
+        /* Flechas de navegación para fotos */
+        .pdp-gallery-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: bold;
+            display: none; /* dynamically flex when pictures count > 1 */
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            transition: all 0.2s ease;
+            user-select: none;
+            outline: none;
+        }
+        .pdp-gallery-arrow:hover {
+            background: rgba(0, 143, 255, 0.4);
+            border-color: var(--accent);
+            transform: translateY(-50%) scale(1.1);
+        }
+        .pdp-gallery-arrow:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        .pdp-gallery-arrow.prev {
+            left: 12px;
+        }
+        .pdp-gallery-arrow.next {
+            right: 12px;
         }
 
         .pdp-main-img-wrapper {
@@ -919,8 +970,14 @@
 
         .pdp-price-amount {
             font-size: 32px;
-            font-weight: 300;
-            color: var(--text-main);
+            font-weight: 700;
+            color: var(--accent) !important;
+        }
+
+        /* Label Pago Inicial (Enganche) en tono azulado */
+        .pdp-price-container div:first-child span:last-child {
+            color: rgba(0, 143, 255, 0.8) !important;
+            font-weight: 600 !important;
         }
 
         .pdp-weekly-payments {
@@ -975,12 +1032,32 @@
 
         .pdp-form-card h4 {
             margin: 0 0 15px 0;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 22px !important;
+            font-weight: 700 !important;
             color: var(--text-main);
             border-bottom: 2px solid var(--accent);
             padding-bottom: 6px;
             display: inline-block;
+        }
+
+        /* Tamaños de texto de formulario ampliados */
+        #pdp-credit-form-card label {
+            font-size: 17px !important;
+            font-weight: 700 !important;
+            margin-top: 16px !important;
+            color: var(--text-main) !important;
+        }
+
+        #pdp-credit-form-card input,
+        #pdp-credit-form-card select {
+            font-size: 17px !important;
+            padding: 12px !important;
+            height: auto !important;
+        }
+
+        #pdp-credit-form-card button {
+            font-size: 19px !important;
+            padding: 16px !important;
         }
 
         .modal-content label {
@@ -1027,7 +1104,12 @@
             .pdp-gallery-thumbs {
                 flex-direction: row;
                 width: 100%;
-                justify-content: center;
+                justify-content: flex-start;
+                overflow-x: auto;
+                overflow-y: hidden;
+                max-height: none;
+                scroll-behavior: smooth;
+                -webkit-overflow-scrolling: touch;
             }
 
             .pdp-main-img-wrapper {
@@ -2387,7 +2469,9 @@
 
                     <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
                         <div class="pdp-main-img-wrapper" style="position: relative;">
+                            <button type="button" class="pdp-gallery-arrow prev" onclick="navigatePdpImages(-1)" aria-label="Foto anterior">‹</button>
                             <img id="modal-producto-foto" src="" alt="Foto del Producto">
+                            <button type="button" class="pdp-gallery-arrow next" onclick="navigatePdpImages(1)" aria-label="Foto siguiente">›</button>
                             <button type="button" class="pdp-info-btn" id="pdp-info-btn" onclick="togglePdpInfo(event)" onmouseenter="showPdpInfo()" onmouseleave="hidePdpInfo()">i</button>
                             <div id="pdp-info-tooltip" class="pdp-info-tooltip">
                                 <div style="font-weight: bold; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 19px;">
@@ -3614,6 +3698,8 @@
                     document.getElementById('modal-producto-foto').src = this.src;
                 };
                 thumbsContainer.appendChild(imgThumb);
+                
+                if (window.updatePdpGalleryArrows) window.updatePdpGalleryArrows();
             }
 
             document.getElementById('modalCredito').style.display = 'flex';
@@ -6561,6 +6647,7 @@
                             };
                             thumbsContainer.appendChild(imgThumb);
                         }
+                        if (window.updatePdpGalleryArrows) window.updatePdpGalleryArrows();
                     }
                 }
 
@@ -8104,13 +8191,21 @@
             pdpContent.addEventListener('scroll', function() {
                 const currentScroll = pdpContent.scrollTop;
                 
-                // Colapsar botón de llenar solicitud a su forma pequeña al hacer scroll
+                // Colapsar botón de llenar solicitud a su forma pequeña al hacer scroll o esconder al llegar al formulario
                 const pdpFloatBtn = document.getElementById('pdpFloatingSolicitudBtn');
                 if (pdpFloatBtn) {
-                    if (currentScroll > 50) {
+                    const formCard = document.getElementById('pdp-credit-form-card');
+                    if (formCard && currentScroll >= formCard.offsetTop - 150) {
+                        // Desaparece por completo al estar en la sección del formulario
+                        pdpFloatBtn.style.opacity = '0';
+                        pdpFloatBtn.style.pointerEvents = 'none';
+                    } else if (currentScroll > 50) {
+                        // Colapsa a su forma pequeña si está haciendo scroll pero no ha llegado al formulario
                         pdpFloatBtn.classList.remove('expanded');
+                        pdpFloatBtn.style.opacity = '1';
+                        pdpFloatBtn.style.pointerEvents = 'auto';
                     } else {
-                        // Si regresa al inicio, asegurarse de que sea visible por si se había ocultado al hacer clic
+                        // Totalmente visible al inicio
                         pdpFloatBtn.style.opacity = '1';
                         pdpFloatBtn.style.pointerEvents = 'auto';
                     }
@@ -8155,6 +8250,66 @@
                 lastPdpScrollTop = currentScroll <= 0 ? 0 : currentScroll;
             });
         }
+    })();
+
+    // Navegación de imágenes en la galería PDP
+    window.navigatePdpImages = function(direction) {
+        const thumbs = Array.from(document.querySelectorAll('#pdp-thumbs-container .pdp-thumb'));
+        if (thumbs.length === 0) return;
+        
+        let activeIdx = thumbs.findIndex(t => t.classList.contains('active'));
+        if (activeIdx === -1) {
+            activeIdx = 0;
+        }
+        
+        let nextIdx = activeIdx + direction;
+        if (nextIdx < 0) {
+            nextIdx = thumbs.length - 1;
+        } else if (nextIdx >= thumbs.length) {
+            nextIdx = 0;
+        }
+        
+        thumbs[nextIdx].click();
+        
+        // Centrar el thumbnail en el scroll
+        thumbs[nextIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    };
+
+    window.updatePdpGalleryArrows = function() {
+        const thumbs = document.querySelectorAll('#pdp-thumbs-container .pdp-thumb');
+        const arrows = document.querySelectorAll('.pdp-gallery-arrow');
+        if (thumbs.length <= 1) {
+            arrows.forEach(a => a.style.display = 'none');
+        } else {
+            arrows.forEach(a => a.style.display = 'flex');
+        }
+    };
+
+    // Soporte para gestos de deslizamiento (Swipe) en móvil sobre la foto principal del PDP
+    (function() {
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        window.addEventListener('load', () => {
+            const mainImgWrapper = document.querySelector('.pdp-main-img-wrapper');
+            if (mainImgWrapper) {
+                mainImgWrapper.addEventListener('touchstart', e => {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, { passive: true });
+                
+                mainImgWrapper.addEventListener('touchend', e => {
+                    touchEndX = e.changedTouches[0].screenX;
+                    const diffX = touchEndX - touchStartX;
+                    if (Math.abs(diffX) > 50) {
+                        if (diffX < 0) {
+                            window.navigatePdpImages(1); // Deslizar izquierda -> siguiente
+                        } else {
+                            window.navigatePdpImages(-1); // Deslizar derecha -> anterior
+                        }
+                    }
+                }, { passive: true });
+            }
+        });
     })();
 </script>
 
