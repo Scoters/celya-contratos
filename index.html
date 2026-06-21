@@ -964,48 +964,64 @@
 
         .modal-content {
             background: var(--bg-modal);
-            padding: 24px;
-            border-radius: 16px;
-            max-width: 1200px;
-            width: 100%;
+            padding: 28px;
+            border-radius: 18px;
+            max-width: 1400px;
+            width: 95%;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             border: 1px solid var(--border-color);
             position: relative;
-            max-height: 90vh;
+            max-height: 95vh;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
         }
 
+        @keyframes pdpCloseBounce {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-8px) scale(1.05);
+            }
+        }
+
         .pdp-close-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
-            background: rgba(231, 76, 60, 0.12);
-            border: 2px solid rgba(231, 76, 60, 0.4);
-            color: #e74c3c;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.15);
-            font-size: 32px;
-            line-height: 1;
-            padding: 0;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            bottom: auto !important;
+            left: auto !important;
+            z-index: 999999 !important;
+            background: rgba(231, 76, 60, 0.12) !important;
+            border: 2px solid rgba(231, 76, 60, 0.4) !important;
+            color: #e74c3c !important;
+            width: 64px !important;
+            height: 64px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.25) !important;
+            font-size: 38px !important;
+            line-height: 1 !important;
+            padding: 0 !important;
+            cursor: pointer !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            transition: transform 0.2s, background-color 0.2s, border-color 0.2s;
+            animation: pdpCloseBounce 3s ease-in-out infinite;
             outline: none;
         }
 
-        .pdp-close-btn:hover {
-            background: rgba(231, 76, 60, 0.22);
-            border-color: #e74c3c;
-            transform: scale(1.1);
-            color: #e74c3c;
+        .pdp-close-btn:hover,
+        .pdp-close-btn:active {
+            background: rgba(231, 76, 60, 0.25) !important;
+            border-color: #e74c3c !important;
+            transform: scale(1.15) !important;
+            animation: none !important;
+            color: #e74c3c !important;
         }
 
         /* Loading animation for dynamic variants */
@@ -1099,7 +1115,7 @@
             width: 60px;
             flex-shrink: 0;
             overflow-y: auto;
-            max-height: 380px;
+            max-height: 440px;
             scroll-behavior: smooth;
         }
         .pdp-gallery-thumbs::-webkit-scrollbar {
@@ -1170,8 +1186,8 @@
         }
 
         .pdp-main-img-wrapper {
-            width: 460px !important;
-            height: 460px !important;
+            width: 520px !important;
+            height: 520px !important;
             flex-shrink: 0 !important;
             display: flex;
             justify-content: center;
@@ -1447,51 +1463,7 @@
                 box-sizing: border-box;
             }
 
-            /* Botón de Salida en la Esquina Superior Derecha en Mobile (Flotante y más grande) */
-            @keyframes pdpCloseBounce {
-                0%, 100% {
-                    transform: translateY(0) scale(1);
-                }
-                50% {
-                    transform: translateY(-8px) scale(1.05);
-                }
-            }
-
-            .pdp-close-btn {
-                position: fixed !important;
-                top: 20px !important;
-                right: 20px !important;
-                bottom: auto !important;
-                left: auto !important;
-                z-index: 999999 !important;
-                background: rgba(231, 76, 60, 0.12) !important;
-                border: 2px solid rgba(231, 76, 60, 0.4) !important;
-                color: #e74c3c !important;
-                width: 64px !important;
-                height: 64px !important;
-                border-radius: 50% !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                box-shadow: 0 8px 25px rgba(231, 76, 60, 0.25) !important;
-                font-size: 38px !important;
-                line-height: 1 !important;
-                padding: 0 !important;
-                cursor: pointer !important;
-                backdrop-filter: blur(8px) !important;
-                -webkit-backdrop-filter: blur(8px) !important;
-                transition: transform 0.2s, background-color 0.2s, border-color 0.2s;
-                animation: pdpCloseBounce 3s ease-in-out infinite;
-            }
-
-            .pdp-close-btn:hover,
-            .pdp-close-btn:active {
-                background: rgba(231, 76, 60, 0.25) !important;
-                border-color: #e74c3c !important;
-                transform: scale(1.15) !important;
-                animation: none !important;
-                color: #e74c3c !important;
-            }
+            /* Botón de Salida heredado del estilo base unificado */
         }
 
         @media (max-width: 600px) {
@@ -3970,6 +3942,9 @@
 
             // Save the base model's default cash price for fallback resolved pricing checks
             window.pdpBasePrecioContado = precioContado || 0;
+            window.pdpInitialColor = color || "";
+            window.pdpInitialMemoria = memoria || "";
+            window.pdpUserHasChangedVariant = false;
 
             document.getElementById('hiddenId').value = id;
             document.getElementById('hiddenModelo').value = modelo;
@@ -5559,10 +5534,14 @@
                 "graphite": "negro",
                 "grafito": "negro",
                 "awesome graphite": "negro",
-                "space gray": "gris",
-                "space grey": "gris",
-                "gris oscuro": "gris",
-                "gris espacial": "gris",
+                "space gray": "negro",
+                "space grey": "negro",
+                "gris oscuro": "negro",
+                "gris espacial": "negro",
+                "dark gray": "negro",
+                "dark grey": "negro",
+                "matte gray": "negro",
+                "matte grey": "negro",
                 "awesome iceblue": "azul",
                 "awesome lemon": "amarillo",
                 "lime green": "verde",
@@ -6404,17 +6383,24 @@
                                 // Race direct ML API vs Google Apps Script proxy in parallel
                                 const endpoint = isProd ? 'products' : 'items';
                                 const directPromise = fetchWithTimeout(`https://api.mercadolibre.com/${endpoint}/${id}`, {}, 3500)
-                                    .then(res => res.ok ? res.json() : null)
-                                    .then(data => {
-                                        if (isProd && data && (!data.price || !data.buy_box_winner)) return null;
-                                        return data;
+                                    .then(res => {
+                                        if (!res.ok) throw new Error(`ML API error: ${res.status}`);
+                                        return res.json();
                                     })
-                                    .catch(() => null);
+                                    .then(data => {
+                                        if (isProd && data && (!data.price || !data.buy_box_winner)) throw new Error("Product missing price/winner");
+                                        return data;
+                                    });
 
                                 const proxyPromise = fetchWithTimeout(`${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${id}&isProduct=${isProd}`, {}, 5000)
-                                    .then(res => res.ok ? res.json() : null)
-                                    .then(data => (data && !data.error) ? data : null)
-                                    .catch(() => null);
+                                    .then(res => {
+                                        if (!res.ok) throw new Error(`Proxy error: ${res.status}`);
+                                        return res.json();
+                                    })
+                                    .then(data => {
+                                        if (!data || data.error) throw new Error("Proxy returned error or empty");
+                                        return data;
+                                    });
 
                                 // Return whichever resolves first with valid data
                                 const result = await Promise.any([directPromise, proxyPromise]).catch(() => null);
@@ -7152,15 +7138,18 @@
                         console.log(`[VARIANT AUTO-REDIRECT] Redirecting from ${cleanId} to ${redirectId} to preserve user selections.`);
                         currentMLItemLink = `https://www.mercadolibre.com.mx/p/${redirectId}`;
 
-                        try {
-                            const localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memoriaSeleccionadaGlobal, gradingSeleccionadoGlobal, true);
-                            if (localPrice && localPrice > 0) {
-                                const hidden = document.getElementById('hiddenPrecioContado');
-                                if (hidden) hidden.value = localPrice;
-                                if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
-                                document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(localPrice).toLocaleString('es-MX')} MXN</strong>`;
-                            }
-                        } catch (e) { }
+                        // Only update price on redirect if user has changed variant (not initial load)
+                        if (window.pdpUserHasChangedVariant) {
+                            try {
+                                const localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memoriaSeleccionadaGlobal, gradingSeleccionadoGlobal, true);
+                                if (localPrice && localPrice > 0) {
+                                    const hidden = document.getElementById('hiddenPrecioContado');
+                                    if (hidden) hidden.value = localPrice;
+                                    if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
+                                    document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(localPrice).toLocaleString('es-MX')} MXN</strong>`;
+                                }
+                            } catch (e) { }
+                        }
 
                         shouldRestoreUI = false;
                         cargarVariantesRealesML(redirectId, true, true, false, clickSource);
@@ -7409,6 +7398,7 @@
                                 if (color === colorSeleccionadoGlobal) btn.classList.add('selected');
 
                                 btn.onclick = function () {
+                                    window.pdpUserHasChangedVariant = true;
                                     wrapperColores.querySelectorAll('.color-pill').forEach(b => b.classList.remove('selected'));
                                     this.classList.add('selected');
                                     colorSeleccionadoGlobal = color;
@@ -7441,6 +7431,7 @@
                                 if (memoria === memoriaSeleccionadaGlobal) btn.classList.add('selected');
 
                                 btn.onclick = function () {
+                                    window.pdpUserHasChangedVariant = true;
                                     wrapperStorage.querySelectorAll('.storage-pill').forEach(b => b.classList.remove('selected'));
                                     this.classList.add('selected');
                                     memoriaSeleccionadaGlobal = memoria;
@@ -7471,7 +7462,8 @@
 
                     // Actualizar el precio para productos de catálogo de Mercado Libre (/p/MLM...)
                     // Prefer local catalog price (with grading factors) as the primary source of truth
-                    let localPrice = buscarPrecioEquivalenteLocal(activeColorVal, activeStorageVal, gradingSeleccionadoGlobal, true);
+                    let isInitialVariant = !window.pdpUserHasChangedVariant;
+                    let localPrice = isInitialVariant ? window.pdpBasePrecioContado : buscarPrecioEquivalenteLocal(activeColorVal, activeStorageVal, gradingSeleccionadoGlobal, true);
                     let priceReal = 0;
                     let priceNeedsGradingFactor = false;
                     if (localPrice && localPrice > 0) {
@@ -7484,6 +7476,12 @@
                                 priceNeedsGradingFactor = true;
                             } else if (data.buy_box_winner && data.buy_box_winner.price) {
                                 priceReal = data.buy_box_winner.price;
+                                priceNeedsGradingFactor = true;
+                            }
+                        } else {
+                            const found = findOptimalBuyBoxProduct(data);
+                            if (found && found.price) {
+                                priceReal = found.price;
                                 priceNeedsGradingFactor = true;
                             }
                         }
@@ -7526,12 +7524,20 @@
 
                     if (priceReal > 0) {
                         try {
-                            const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
-                            const precioContadoFinal = Math.round(priceReal * gananciaFactor);
-                            const hidden = document.getElementById('hiddenPrecioContado');
-                            if (hidden) hidden.value = precioContadoFinal;
-                            if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
-                            document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(precioContadoFinal || 0).toLocaleString('es-MX')} MXN</strong>`;
+                            // On initial variant load, preserve the card's original price to avoid rounding discrepancies
+                            if (isInitialVariant && window.pdpBasePrecioContado > 0) {
+                                const hidden = document.getElementById('hiddenPrecioContado');
+                                if (hidden) hidden.value = window.pdpBasePrecioContado;
+                                if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
+                                document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(window.pdpBasePrecioContado).toLocaleString('es-MX')} MXN</strong>`;
+                            } else {
+                                const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
+                                const precioContadoFinal = (localPrice && localPrice > 0) ? localPrice : Math.round(priceReal * gananciaFactor);
+                                const hidden = document.getElementById('hiddenPrecioContado');
+                                if (hidden) hidden.value = precioContadoFinal;
+                                if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
+                                document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(precioContadoFinal || 0).toLocaleString('es-MX')} MXN</strong>`;
+                            }
                         } catch (e) {
                             console.warn('No se pudo fijar precio contado final desde picker producto:', e);
                         }
@@ -8256,7 +8262,8 @@
             almacenamientoSeleccionado = memoriaSeleccionadaGlobal || "";
 
             // Prefer local catalog price (with grading factors) as the primary source of truth
-            let localPrice = buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memoriaSeleccionadaGlobal, gradingSeleccionadoGlobal, true);
+            let isInitialVariant = !window.pdpUserHasChangedVariant;
+            let localPrice = isInitialVariant ? window.pdpBasePrecioContado : buscarPrecioEquivalenteLocal(colorSeleccionadoGlobal, memoriaSeleccionadaGlobal, gradingSeleccionadoGlobal, true);
             let precioReal = 0;
             if (localPrice && localPrice > 0) {
                 const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
@@ -8290,14 +8297,22 @@
                 }
                 // Calcular y fijar el precio de contado final que usará el modal y el formulario
                 try {
-                    const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
-                    const precioContadoFinal = Math.round(precioReal * gananciaFactor);
-                    const hidden = document.getElementById('hiddenPrecioContado');
-                    if (hidden) hidden.value = precioContadoFinal;
-                    // Recalcular enganche/pagos en el PDP con el precio recién fijado
-                    if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
-                    // También actualizar el precio de contado mostrado en el modal
-                    document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(precioContadoFinal || 0).toLocaleString('es-MX')} MXN</strong>`;
+                    // On initial variant load, preserve the card's original price to avoid rounding discrepancies
+                    if (isInitialVariant && window.pdpBasePrecioContado > 0) {
+                        const hidden = document.getElementById('hiddenPrecioContado');
+                        if (hidden) hidden.value = window.pdpBasePrecioContado;
+                        if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
+                        document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(window.pdpBasePrecioContado).toLocaleString('es-MX')} MXN</strong>`;
+                    } else {
+                        const gananciaFactor = (typeof CONFIG_TASAS !== 'undefined' && CONFIG_TASAS.gananciaContadoFactor) ? CONFIG_TASAS.gananciaContadoFactor : 1;
+                        const precioContadoFinal = (localPrice && localPrice > 0) ? localPrice : Math.round(precioReal * gananciaFactor);
+                        const hidden = document.getElementById('hiddenPrecioContado');
+                        if (hidden) hidden.value = precioContadoFinal;
+                        // Recalcular enganche/pagos en el PDP con el precio recién fijado
+                        if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
+                        // También actualizar el precio de contado mostrado en el modal
+                        document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(precioContadoFinal || 0).toLocaleString('es-MX')} MXN</strong>`;
+                    }
                 } catch (e) {
                     console.warn('No se pudo fijar precio contado final desde variante:', e);
                 }
