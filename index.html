@@ -2190,19 +2190,19 @@
         /* Botón WhatsApp PDP (azul transparente con tooltip rebotante) */
         .pdp-whatsapp-float {
             position: fixed;
-            bottom: 24px;
-            left: 24px;
-            right: auto;
-            width: 60px;
-            height: 60px;
+            top: calc(50% + 44px);
+            right: 24px;
+            left: auto;
+            width: 48px;
+            height: 48px;
             box-sizing: border-box !important;
-            background: rgba(0, 143, 255, 0.12);
-            border: 2px solid rgba(0, 143, 255, 0.4);
+            background: rgba(0, 143, 255, 0.08);
+            border: 1.5px solid rgba(0, 143, 255, 0.3);
             border-radius: 50%;
             display: none; /* dynamically flex when modal opens */
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 16px rgba(0, 143, 255, 0.2);
+            box-shadow: 0 2px 10px rgba(0, 143, 255, 0.12);
             z-index: 21000;
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
@@ -2217,36 +2217,38 @@
             border-color: var(--accent);
         }
         .pdp-whatsapp-float svg {
-            width: 32px;
-            height: 32px;
+            width: 26px;
+            height: 26px;
             fill: var(--accent);
+            opacity: 0.8;
         }
         .pdp-whatsapp-float .pdp-whatsapp-tooltip {
             position: absolute;
-            bottom: 72px;
-            left: 0;
-            right: auto;
-            background: rgba(0, 143, 255, 0.12);
-            border: 1.5px solid rgba(0, 143, 255, 0.4);
+            top: 50%;
+            right: 56px;
+            left: auto;
+            transform: translateY(-50%);
+            background: rgba(0, 143, 255, 0.10);
+            border: 1px solid rgba(0, 143, 255, 0.3);
             color: var(--accent);
-            padding: 8px 14px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
             white-space: nowrap;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             font-family: 'Outfit', 'Inter', sans-serif;
             will-change: transform;
-            animation: pdpTooltipFloat 1.8s ease-in-out infinite !important;
+            animation: pdpTooltipFloat 3s ease-in-out infinite !important;
             transform-origin: center center;
         }
         
         @keyframes pdpTooltipFloat {
-            0%   { transform: translateY(0px); }
-            50%  { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
+            0%   { transform: translateY(calc(-50% + 0px)); }
+            50%  { transform: translateY(calc(-50% - 4px)); }
+            100% { transform: translateY(calc(-50% + 0px)); }
         }
         
         @keyframes pdpWhatsappBounce {
@@ -2266,22 +2268,20 @@
         
         @media (max-width: 768px) {
             .pdp-whatsapp-float {
-                bottom: 20px;
-                left: 16px;
-                right: auto;
-                width: 52px !important;
-                height: 52px !important;
+                top: calc(50% + 38px);
+                right: 16px;
+                left: auto;
+                width: 44px !important;
+                height: 44px !important;
             }
             .pdp-whatsapp-float svg {
-                width: 28px;
-                height: 28px;
+                width: 22px;
+                height: 22px;
             }
             .pdp-whatsapp-float .pdp-whatsapp-tooltip {
-                bottom: 64px;
-                left: 0;
-                right: auto;
-                font-size: 11px;
-                padding: 6px 10px;
+                right: 52px;
+                font-size: 10px;
+                padding: 4px 8px;
             }
         }
     </style>
