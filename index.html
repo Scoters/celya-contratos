@@ -1145,10 +1145,11 @@
             }
 
             .pdp-main-img-wrapper {
-                width: 390px !important;
-                height: 390px !important;
+                width: min(390px, calc(100vw - 32px)) !important;
+                height: min(390px, calc(100vw - 32px)) !important;
                 margin: 0 auto;
                 flex-shrink: 0 !important;
+                box-sizing: border-box !important;
             }
 
             .modal-content {
