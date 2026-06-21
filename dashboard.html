@@ -675,6 +675,23 @@
             70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
+        @keyframes stockDropIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #stock-alerts-dropdown::-webkit-scrollbar,
+        #stock-alerts-list::-webkit-scrollbar {
+            width: 5px;
+        }
+        #stock-alerts-dropdown::-webkit-scrollbar-track,
+        #stock-alerts-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #stock-alerts-dropdown::-webkit-scrollbar-thumb,
+        #stock-alerts-list::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
     </style>
 </head>
 
@@ -1965,38 +1982,151 @@
                                     return procesarSiguiente();
                                 }
                                 
-                                const isProduct = idBusqueda.startsWith("MLM") && idBusqueda.length <= 11;
+                                let isProduct = idBusqueda.startsWith("MLM") && idBusqueda.length <= 11;
                                 const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${idBusqueda}&isProduct=${isProduct}`;
                                 const resLive = await fetch(proxyUrl);
-                                const liveData = await resLive.json();
+                                let liveData = await resLive.json();
                                 
                                 if (liveData.error || liveData.status === 404 || Object.keys(liveData).length === 0) {
+                                    item._stockDetalle = { razon: 'no_data', mensaje: 'No se pudo obtener datos de ML' };
                                     alertasStockGlobal.push(item);
                                     actualizarBotonAlertasStock();
                                     return procesarSiguiente();
                                 }
                                 
-                                let tieneStock = false;
+                                // Si es un item que tiene catalog_product_id pero no tiene pickers ni variaciones,
+                                // re-fetch como producto catálogo (igual que index.html línea 6140)
+                                if (!isProduct && liveData.catalog_product_id && (!liveData.pickers || liveData.pickers.length === 0) && (!liveData.variations || liveData.variations.length === 0)) {
+                                    try {
+                                        const prodUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${liveData.catalog_product_id}&isProduct=true`;
+                                        const resProd = await fetch(prodUrl);
+                                        const prodData = await resProd.json();
+                                        if (prodData && !prodData.error && prodData.pickers) {
+                                            liveData = prodData;
+                                            isProduct = true;
+                                        }
+                                    } catch(e) { console.warn("Re-fetch catalog_product_id failed:", e); }
+                                }
                                 
-                                // 1. Catalog Product con pickers
+                                // Si el link tiene /p/MLM... pero la respuesta no tiene pickers, re-fetch como product
+                                if (!isProduct && item.link && item.link.includes("/p/") && (!liveData.pickers || liveData.pickers.length === 0)) {
+                                    const pMatch = item.link.match(/\/p\/(MLM\-?\d+)/i);
+                                    if (pMatch) {
+                                        const parentProductId = pMatch[1].replace("-", "").toUpperCase();
+                                        if (parentProductId !== idBusqueda) {
+                                            try {
+                                                const prodUrl2 = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${parentProductId}&isProduct=true`;
+                                                const resProd2 = await fetch(prodUrl2);
+                                                const prodData2 = await resProd2.json();
+                                                if (prodData2 && !prodData2.error && prodData2.pickers) {
+                                                    liveData = prodData2;
+                                                    isProduct = true;
+                                                }
+                                            } catch(e) { console.warn("Re-fetch from /p/ URL failed:", e); }
+                                        }
+                                    }
+                                }
+                                
+                                let tieneStock = false;
+                                let detalle = { razon: '', coloresAgotados: [], memoriasAgotadas: [], ramsAgotadas: [], totalVariantes: 0, activasVariantes: 0 };
+                                
+                                // 1. Catalog Product con pickers (usar unique product_ids, no contar duplicados entre pickers)
                                 if (liveData.pickers && liveData.pickers.length > 0) {
-                                    let totalProducts = 0;
-                                    let activeProductsCount = 0;
+                                    // Recopilar todos los product_ids únicos con su estado
+                                    const productMap = {};
                                     
                                     liveData.pickers.forEach(picker => {
-                                        if (picker.products && picker.products.length > 0) {
-                                            picker.products.forEach(p => {
-                                                totalProducts++;
-                                                const tags = p.tags || [];
-                                                const outOfStock = isProductTagOutOfStock(tags);
-                                                if (!outOfStock) {
-                                                    activeProductsCount++;
-                                                }
-                                            });
+                                        if (!picker.products) return;
+                                        const pIdUpper = picker.picker_id ? picker.picker_id.toUpperCase() : "";
+                                        
+                                        // Clasificar tipo de picker (mismos patrones que index.html)
+                                        let attributeType = "";
+                                        if (pIdUpper.includes("COLOR") || pIdUpper === "FINISH" || pIdUpper === "ACABADO") {
+                                            attributeType = "color";
+                                        } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY") || pIdUpper.includes("CAPACIDAD")) {
+                                            attributeType = "memory";
+                                        } else if (pIdUpper.includes("RAM")) {
+                                            attributeType = "ram";
+                                        } else if (pIdUpper === "GRADING") {
+                                            attributeType = "grading";
+                                        }
+                                        
+                                        picker.products.forEach(p => {
+                                            if (!p.product_id) return;
+                                            const tags = p.tags || [];
+                                            const outOfStock = isProductTagOutOfStock(tags);
+                                            
+                                            if (!productMap[p.product_id]) {
+                                                productMap[p.product_id] = {
+                                                    isOutOfStock: outOfStock,
+                                                    color: "", memory: "", ram: "", grading: "",
+                                                    tags: tags
+                                                };
+                                            } else {
+                                                // Actualizar tags si este picker dice out-of-stock
+                                                if (outOfStock) productMap[p.product_id].isOutOfStock = true;
+                                                tags.forEach(t => {
+                                                    if (!productMap[p.product_id].tags.includes(t)) {
+                                                        productMap[p.product_id].tags.push(t);
+                                                    }
+                                                });
+                                                // Re-evaluate con todos los tags acumulados
+                                                productMap[p.product_id].isOutOfStock = isProductTagOutOfStock(productMap[p.product_id].tags);
+                                            }
+                                            
+                                            // Asignar atributo del picker
+                                            if (attributeType && p.picker_label) {
+                                                productMap[p.product_id][attributeType] = p.picker_label.trim();
+                                            }
+                                        });
+                                    });
+                                    
+                                    const allProductIds = Object.keys(productMap);
+                                    const activeProducts = allProductIds.filter(pid => !productMap[pid].isOutOfStock);
+                                    const outOfStockProducts = allProductIds.filter(pid => productMap[pid].isOutOfStock);
+                                    
+                                    detalle.totalVariantes = allProductIds.length;
+                                    detalle.activasVariantes = activeProducts.length;
+                                    
+                                    if (activeProducts.length > 0) {
+                                        tieneStock = true;
+                                    }
+                                    
+                                    // Extraer detalle de qué colores/memorias/rams están agotados
+                                    const coloresVivos = new Set();
+                                    const coloresAgotados = new Set();
+                                    const memoriasVivas = new Set();
+                                    const memoriasAgotadas = new Set();
+                                    const ramsVivas = new Set();
+                                    const ramsAgotadas = new Set();
+                                    
+                                    allProductIds.forEach(pid => {
+                                        const p = productMap[pid];
+                                        if (p.color) {
+                                            if (p.isOutOfStock) coloresAgotados.add(p.color);
+                                            else coloresVivos.add(p.color);
+                                        }
+                                        if (p.memory) {
+                                            if (p.isOutOfStock) memoriasAgotadas.add(p.memory);
+                                            else memoriasVivas.add(p.memory);
+                                        }
+                                        if (p.ram) {
+                                            if (p.isOutOfStock) ramsAgotadas.add(p.ram);
+                                            else ramsVivas.add(p.ram);
                                         }
                                     });
-                                    if (totalProducts > 0 && activeProductsCount > 0) {
-                                        tieneStock = true;
+                                    
+                                    // Solo reportar como agotado colores/memorias/rams que NO tienen ninguna variante activa
+                                    detalle.coloresAgotados = [...coloresAgotados].filter(c => !coloresVivos.has(c));
+                                    detalle.memoriasAgotadas = [...memoriasAgotadas].filter(m => !memoriasVivas.has(m));
+                                    detalle.ramsAgotadas = [...ramsAgotadas].filter(r => !ramsVivas.has(r));
+                                    
+                                    if (!tieneStock) {
+                                        detalle.razon = 'all_pickers_out';
+                                        detalle.mensaje = `${allProductIds.length} variantes, todas agotadas`;
+                                    } else if (outOfStockProducts.length > 0) {
+                                        // Tiene stock parcial — reportar si hay combinaciones completamente agotadas
+                                        detalle.razon = 'partial_stock';
                                     }
                                 }
                                 // 1b. Catalog Product con buy_box_winner (sin pickers visibles)
@@ -2005,29 +2135,46 @@
                                 }
                                 // 2. Item con variations
                                 else if (liveData.variations && liveData.variations.length > 0) {
+                                    const totalVars = liveData.variations.length;
                                     const activeVariations = liveData.variations.filter(v => parseInt(v.available_quantity, 10) > 0);
+                                    detalle.totalVariantes = totalVars;
+                                    detalle.activasVariantes = activeVariations.length;
+                                    
                                     if (activeVariations.length > 0) {
                                         tieneStock = true;
+                                    } else {
+                                        detalle.razon = 'all_variations_out';
+                                        detalle.mensaje = `${totalVars} variaciones, todas sin stock`;
                                     }
                                 }
-                                // 3. Single product
+                                // 3. Single product/item
                                 else {
                                     const status = (liveData.status || "").toLowerCase();
                                     const qty = parseInt(liveData.available_quantity, 10);
                                     
                                     if (status && status !== "active") {
                                         tieneStock = false;
+                                        detalle.razon = 'inactive';
+                                        detalle.mensaje = `Estado: ${liveData.status || 'inactivo'}`;
                                     } else if (!isNaN(qty) && qty > 0) {
                                         tieneStock = true;
+                                    } else if (isProduct && !liveData.buy_box_winner && (!liveData.pickers || liveData.pickers.length === 0)) {
+                                        // Product sin buy_box_winner ni pickers = no disponible
+                                        tieneStock = false;
+                                        detalle.razon = 'no_buy_box';
+                                        detalle.mensaje = 'Sin buy_box_winner ni pickers';
                                     } else if (status === "" && isNaN(qty)) {
+                                        // Asumimos disponible si no hay info negativa
                                         tieneStock = true;
                                     }
                                 }
                                 
                                 if (!tieneStock) {
+                                    item._stockDetalle = detalle;
                                     alertasStockGlobal.push(item);
                                     actualizarBotonAlertasStock();
-                                    if (document.getElementById('modal-stock-alerts') && document.getElementById('modal-stock-alerts').style.display === 'block') {
+                                    const dropdownPanel = document.getElementById('stock-alerts-dropdown');
+                                    if (dropdownPanel && dropdownPanel.style.display === 'block') {
                                         renderizarStockAlerts();
                                     }
                                 }
@@ -2082,48 +2229,97 @@
                 }
 
                 function abrirModalStockAlerts() {
-                    if (!document.getElementById('modal-stock-alerts')) {
-                        const modalHtml = `
-                        <div id="modal-stock-alerts" class="modal-celya-config">
-                            <div class="modal-config-content" style="max-width:760px; border-top: 5px solid #ef4444;">
-                                <span class="close-config-btn" onclick="cerrarModalStockAlerts()">&times;</span>
-                                <h2 style="display: flex; align-items: center; gap: 8px;">⚠️ Equipos sin Stock / Combinaciones</h2>
-                                <p class="modal-subtitle">Celulares activos en el catálogo pero sin ninguna variante disponible en Mercado Libre. Actualiza el enlace o márcalos como agotados.</p>
-                                <div id="stock-alerts-list" style="max-height:480px; overflow:auto; margin-top: 15px;"></div>
-                            </div>
-                        </div>`;
-                        document.body.insertAdjacentHTML('beforeend', modalHtml);
+                    let panel = document.getElementById('stock-alerts-dropdown');
+                    if (panel) {
+                        // Toggle: si ya está abierto, cerrarlo
+                        if (panel.style.display === 'block') {
+                            panel.style.display = 'none';
+                            return;
+                        }
+                        panel.style.display = 'block';
+                        renderizarStockAlerts();
+                        return;
                     }
-                    document.getElementById('modal-stock-alerts').style.display = 'block';
+                    
+                    // Crear el panel dropdown estilo Facebook
+                    const btn = document.getElementById('btnOpenStockAlerts');
+                    const panelHtml = `
+                    <div id="stock-alerts-dropdown" style="
+                        position: absolute;
+                        top: calc(100% + 10px);
+                        right: 0;
+                        width: 420px;
+                        max-height: 520px;
+                        background: rgba(22, 28, 45, 0.98);
+                        backdrop-filter: blur(20px);
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        border-radius: 14px;
+                        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+                        z-index: 99999;
+                        display: block;
+                        overflow: hidden;
+                        animation: stockDropIn 0.2s ease-out;
+                    ">
+                        <!-- Flecha -->
+                        <div style="position: absolute; top: -7px; right: 22px; width: 14px; height: 14px; background: rgba(22, 28, 45, 0.98); border-left: 1px solid rgba(255, 255, 255, 0.1); border-top: 1px solid rgba(255, 255, 255, 0.1); transform: rotate(45deg);"></div>
+                        
+                        <!-- Header -->
+                        <div style="padding: 16px 18px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-size: 16px; font-weight: 700; color: var(--text-primary);">Alertas de Stock</div>
+                                <div id="stock-alerts-subtitle" style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Verificando...</div>
+                            </div>
+                            <button onclick="cerrarModalStockAlerts()" style="background: rgba(255,255,255,0.06); border: none; color: var(--text-secondary); font-size: 18px; cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.15s;">✕</button>
+                        </div>
+                        
+                        <!-- Lista de notificaciones -->
+                        <div id="stock-alerts-list" style="max-height: 420px; overflow-y: auto; overflow-x: hidden; padding: 6px 0;"></div>
+                    </div>`;
+                    
+                    // Insertar relativo al botón padre
+                    const wrapper = btn.parentElement;
+                    wrapper.style.position = 'relative';
+                    wrapper.insertAdjacentHTML('beforeend', panelHtml);
+                    
                     renderizarStockAlerts();
+                    
+                    // Cerrar al hacer click fuera
+                    setTimeout(() => {
+                        document.addEventListener('click', function cerrarFuera(e) {
+                            const panel = document.getElementById('stock-alerts-dropdown');
+                            const btnAlerts = document.getElementById('btnOpenStockAlerts');
+                            if (panel && !panel.contains(e.target) && !btnAlerts.contains(e.target)) {
+                                panel.style.display = 'none';
+                                document.removeEventListener('click', cerrarFuera);
+                            }
+                        });
+                    }, 50);
                 }
 
                 function cerrarModalStockAlerts() {
-                    const m = document.getElementById('modal-stock-alerts');
-                    if (m) m.style.display = 'none';
+                    const p = document.getElementById('stock-alerts-dropdown');
+                    if (p) p.style.display = 'none';
                 }
 
                 function renderizarStockAlerts() {
                     const cont = document.getElementById('stock-alerts-list');
+                    const subtitle = document.getElementById('stock-alerts-subtitle');
                     if (!cont) return;
                     
                     if (alertasStockGlobal.length === 0) {
-                        cont.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-secondary); font-size: 15px;">🎉 ¡Excelente! No hay celulares activos con combinaciones agotadas.</div>';
+                        cont.innerHTML = `<div style="padding: 40px 20px; text-align: center;">
+                            <div style="font-size: 36px; margin-bottom: 8px;">🎉</div>
+                            <div style="color: var(--text-primary); font-size: 14px; font-weight: 600;">¡Todo en orden!</div>
+                            <div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">No hay equipos con problemas de stock</div>
+                        </div>`;
+                        if (subtitle) subtitle.textContent = 'Sin problemas detectados';
                         return;
                     }
                     
+                    if (subtitle) subtitle.textContent = `${alertasStockGlobal.length} equipo${alertasStockGlobal.length > 1 ? 's' : ''} con problemas`;
+                    
                     cont.innerHTML = '';
                     alertasStockGlobal.forEach(item => {
-                        const card = document.createElement('div');
-                        card.style.border = '1px solid rgba(255, 255, 255, 0.08)';
-                        card.style.background = 'rgba(30, 41, 59, 0.4)';
-                        card.style.borderRadius = '8px';
-                        card.style.padding = '16px';
-                        card.style.margin = '10px 0';
-                        card.style.display = 'flex';
-                        card.style.gap = '16px';
-                        card.style.alignItems = 'center';
-                        
                         const nombreLimpio = typeof limpiarNombreModelo === 'function' ? limpiarNombreModelo(item.modelo) : item.modelo;
                         
                         let itemMlId = "";
@@ -2133,33 +2329,63 @@
                             if (match) itemMlId = match[0].replace("-", "").toUpperCase();
                         }
                         
-                        card.innerHTML = `
-                            <div style="width:72px; height:72px; background:rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius:6px; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-shrink: 0;">
-                                <img src="${item.foto || ''}" style="max-width:100%; max-height:100%; object-fit:contain;" onerror="this.src='https://placehold.co/72x72?text=CelYa';" />
+                        const det = item._stockDetalle || {};
+                        
+                        // Texto de detalle
+                        let detTexto = '';
+                        if (det.totalVariantes > 0) {
+                            detTexto = `${det.activasVariantes}/${det.totalVariantes} variantes activas`;
+                        }
+                        if (det.mensaje) {
+                            detTexto = det.mensaje;
+                        }
+                        
+                        // Tags de combinaciones agotadas
+                        let tagsHtml = '';
+                        if (det.coloresAgotados && det.coloresAgotados.length > 0) {
+                            det.coloresAgotados.forEach(c => {
+                                tagsHtml += `<span style="background: rgba(239,68,68,0.1); color: #fca5a5; font-size: 10px; padding: 1px 6px; border-radius: 3px; border: 1px solid rgba(239,68,68,0.15);">🎨 ${c}</span>`;
+                            });
+                        }
+                        if (det.memoriasAgotadas && det.memoriasAgotadas.length > 0) {
+                            det.memoriasAgotadas.forEach(m => {
+                                tagsHtml += `<span style="background: rgba(251,146,60,0.1); color: #fdba74; font-size: 10px; padding: 1px 6px; border-radius: 3px; border: 1px solid rgba(251,146,60,0.15);">💾 ${m}</span>`;
+                            });
+                        }
+                        if (det.ramsAgotadas && det.ramsAgotadas.length > 0) {
+                            det.ramsAgotadas.forEach(r => {
+                                tagsHtml += `<span style="background: rgba(168,85,247,0.1); color: #c4b5fd; font-size: 10px; padding: 1px 6px; border-radius: 3px; border: 1px solid rgba(168,85,247,0.15);">🔧 ${r}</span>`;
+                            });
+                        }
+                        
+                        const notifDiv = document.createElement('div');
+                        notifDiv.style.cssText = 'padding: 10px 16px; display: flex; gap: 12px; align-items: flex-start; cursor: pointer; transition: background 0.15s; border-left: 3px solid transparent;';
+                        notifDiv.onmouseover = function() { this.style.background = 'rgba(255,255,255,0.04)'; this.style.borderLeftColor = '#ef4444'; };
+                        notifDiv.onmouseout = function() { this.style.background = ''; this.style.borderLeftColor = 'transparent'; };
+                        
+                        const escapedNombre = nombreLimpio.replace(/'/g, "\\'");
+                        
+                        notifDiv.innerHTML = `
+                            <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.08); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <img src="${item.foto || ''}" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.src='https://placehold.co/44x44/1e293b/475569?text=📱';" />
                             </div>
-                            <div style="flex:1;">
-                                <div style="font-weight:bold; color:var(--text-primary); font-size: 15px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                                    <span>${nombreLimpio}</span>
-                                    <span style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 600;">${item.estado}</span>
-                                    <span style="background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: normal;">Fila ${item.filaNum || '—'}</span>
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                    <span style="font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">${nombreLimpio}</span>
+                                    <span style="background: rgba(239,68,68,0.12); color: #ef4444; font-size: 10px; padding: 1px 5px; border-radius: 3px; font-weight: 600;">${item.estado}</span>
+                                    <span style="color: var(--text-secondary); font-size: 10px;">F${item.filaNum || '—'}</span>
                                 </div>
-                                <div style="font-size:13px; color:var(--text-secondary); margin-top: 4px;">
-                                    Ref: ${item.id || 'S/ID'} • Memoria base: ${item.memoria || '—'} • Color base: ${item.color || '—'}
-                                </div>
-                                <div style="margin-top:10px; display: flex; gap: 8px; flex-wrap: wrap;">
-                                    <a href="${item.link}" target="_blank" class="btn-pago" style="padding:6px 12px; font-size:12px; width:auto; text-decoration:none; display:inline-flex; align-items:center; gap:4px; margin:0; background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
-                                        🔗 Ver en ML
-                                    </a>
-                                    <button onclick="sincronizarStockItem('${itemMlId || item.id}', ${item.filaNum}, this)" class="btn-pago" style="padding:6px 12px; font-size:12px; width:auto; display:inline-flex; align-items:center; gap:4px; margin:0; background: linear-gradient(135deg, #10b981, #059669);">
-                                        🔄 Sincronizar Stock
-                                    </button>
-                                    <button onclick="marcarAgotadoItem(${item.filaNum}, '${nombreLimpio.replace(/'/g, "\\'")}', this)" class="btn-pago" style="padding:6px 12px; font-size:12px; width:auto; display:inline-flex; align-items:center; gap:4px; margin:0; background: linear-gradient(135deg, #f97316, #ea580c);">
-                                        🚫 Marcar AGOTADO
-                                    </button>
+                                ${detTexto ? `<div style="font-size: 11px; color: #f87171; margin-top: 2px;">⚡ ${detTexto}</div>` : ''}
+                                ${tagsHtml ? `<div style="display: flex; gap: 3px; flex-wrap: wrap; margin-top: 4px;">${tagsHtml}</div>` : ''}
+                                <div style="display: flex; gap: 6px; margin-top: 6px;">
+                                    <a href="${item.link}" target="_blank" style="font-size: 10px; color: #60a5fa; text-decoration: none; padding: 2px 8px; background: rgba(96,165,250,0.08); border-radius: 4px; border: 1px solid rgba(96,165,250,0.15); transition: all 0.15s;" onmouseover="this.style.background='rgba(96,165,250,0.15)'" onmouseout="this.style.background='rgba(96,165,250,0.08)'">🔗 Ver ML</a>
+                                    <button onclick="event.stopPropagation(); sincronizarStockItem('${itemMlId || item.id}', ${item.filaNum}, this)" style="font-size: 10px; color: #34d399; background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.15); border-radius: 4px; padding: 2px 8px; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.background='rgba(52,211,153,0.15)'" onmouseout="this.style.background='rgba(52,211,153,0.08)'">🔄 Sync</button>
+                                    <button onclick="event.stopPropagation(); marcarAgotadoItem(${item.filaNum}, '${escapedNombre}', this)" style="font-size: 10px; color: #fb923c; background: rgba(251,146,60,0.08); border: 1px solid rgba(251,146,60,0.15); border-radius: 4px; padding: 2px 8px; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.background='rgba(251,146,60,0.15)'" onmouseout="this.style.background='rgba(251,146,60,0.08)'">🚫 Agotar</button>
                                 </div>
                             </div>
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444; flex-shrink: 0; margin-top: 6px; box-shadow: 0 0 6px rgba(239,68,68,0.5);"></div>
                         `;
-                        cont.appendChild(card);
+                        cont.appendChild(notifDiv);
                     });
                 }
 
