@@ -5144,20 +5144,16 @@
                 return "#94a3b8";
             }
             const colorMap = {
-                // Negros, Oscuros, Grises Oscuros
-                "negro": "#1e293b", "black": "#1e293b", "oscuro": "#0f172a", "dark": "#0f172a", "space": "#334155",
+                // Negros y Grises Oscuros
+                "negro": "#1e293b", "black": "#1e293b", "space": "#334155",
                 "titanio": "#78716c", "titanium": "#78716c", "carbono": "#475569", "carbon": "#475569", "grafito": "#3f3f46", "graphite": "#3f3f46",
                 "gris": "#94a3b8", "gray": "#94a3b8",
 
-                // Blancos, Claros, Plateados
-                "blanco": "#ffffff", "white": "#ffffff", "claro": "#f8fafc", "light": "#f8fafc", "plata": "#cbd5e1", "silver": "#cbd5e1",
-                "cream": "#fef08a", "crema": "#fef08a", "marfil": "#fffbeb", "ivory": "#fffbeb", "beige": "#f5f5dc",
-
-                // Azules y Celestes
-                "azul": "#3b82f6", "blue": "#3b82f6", "celeste": "#60a5fa", "sky": "#60a5fa", "indigo": "#6366f1", "marino": "#1e3a8a",
-
                 // Verdes
                 "verde": "#10b981", "green": "#10b981", "lima": "#84cc16", "lime": "#84cc16", "menta": "#a7f3d0", "mint": "#a7f3d0",
+
+                // Azules y Celestes
+                "azul oscuro": "#1e3a8a", "dark blue": "#1e3a8a", "azul": "#3b82f6", "blue": "#3b82f6", "celeste": "#60a5fa", "sky": "#60a5fa", "indigo": "#6366f1", "marino": "#1e3a8a",
 
                 // Rojos y Naranjas
                 "rojo": "#ef4444", "red": "#ef4444", "naranja": "#f97316", "orange": "#f97316", "coral": "#fb7185",
@@ -5167,7 +5163,14 @@
 
                 // Morados y Violetas
                 "violeta": "#8b5cf6", "violet": "#8b5cf6", "purpura": "#a855f7", "púrpura": "#a855f7", "purple": "#a855f7", "morado": "#a855f7", "lavanda": "#e9d5ff", "lavender": "#e9d5ff",
-                "lila": "#d8b4fe", "lilac": "#d8b4fe"
+                "lila": "#d8b4fe", "lilac": "#d8b4fe",
+
+                // Blancos, Cremas y Plateados
+                "blanco": "#ffffff", "white": "#ffffff", "plata": "#cbd5e1", "silver": "#cbd5e1",
+                "cream": "#fef08a", "crema": "#fef08a", "marfil": "#fffbeb", "ivory": "#fffbeb", "beige": "#f5f5dc",
+
+                // Modificadores generales (al final para evitar falsos positivos)
+                "oscuro": "#0f172a", "dark": "#0f172a", "claro": "#f8fafc", "light": "#f8fafc"
             };
 
             const nombreLower = nombreColor.toLowerCase().trim();
