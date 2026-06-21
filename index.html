@@ -746,7 +746,7 @@
             backdrop-filter: blur(4px);
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 20000;
             padding: 15px;
             box-sizing: border-box;
         }
@@ -1517,6 +1517,7 @@
             right: 24px;
             width: 60px;
             height: 60px;
+            box-sizing: border-box !important;
             background: linear-gradient(135deg, #00E6D6 0%, #00BFFF 100%);
             color: #ffffff !important;
             border-radius: 50%;
@@ -1588,8 +1589,9 @@
             .whatsapp-float {
                 bottom: 20px;
                 right: 20px;
-                width: 52px;
-                height: 52px;
+                width: 52px !important;
+                height: 52px !important;
+                box-sizing: border-box !important;
             }
             .whatsapp-float svg {
                 width: 28px;
@@ -1824,15 +1826,16 @@
         /* Botón Volver Arriba (Back to Top) */
         .back-to-top-btn {
             position: fixed;
-            bottom: 30px;
-            left: 30px;
-            width: 50px;
-            height: 50px;
+            bottom: 24px;
+            left: 24px;
+            width: 60px;
+            height: 60px;
+            box-sizing: border-box !important;
             border-radius: 50%;
             background: rgba(0, 143, 255, 0.12);
             border: 2px solid rgba(0, 143, 255, 0.4);
             color: var(--accent);
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
             display: none; /* dynamically flex/none */
             align-items: center;
@@ -1840,31 +1843,150 @@
             cursor: pointer;
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            transition: opacity 0.3s, transform 0.2s, background-color 0.2s, border-color 0.2s;
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
             z-index: 9999;
             opacity: 0;
             outline: none;
+            box-shadow: 0 4px 16px rgba(0, 143, 255, 0.2);
         }
         .back-to-top-btn.visible {
             display: flex;
             opacity: 1;
         }
         .back-to-top-btn:hover {
+            transform: scale(1.1) rotate(-5deg);
+            box-shadow: 0 8px 24px rgba(0, 143, 255, 0.4);
             background: rgba(0, 143, 255, 0.25);
             border-color: var(--accent);
-            transform: scale(1.08);
         }
         .back-to-top-btn:active {
             transform: scale(0.95);
+        }
+
+        /* Botón Central Llenar Solicitud Desplegable */
+        .floating-solicitud-container {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+        }
+        .floating-solicitud-btn {
+            height: 60px;
+            padding: 0 28px;
+            border-radius: 30px;
+            background: rgba(0, 143, 255, 0.12);
+            border: 2px solid rgba(0, 143, 255, 0.4);
+            color: var(--accent);
+            font-size: 16px;
+            font-weight: 700;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 4px 16px rgba(0, 143, 255, 0.2);
+            outline: none;
+            white-space: nowrap;
+        }
+        .floating-solicitud-btn:hover {
+            background: rgba(0, 143, 255, 0.25);
+            border-color: var(--accent);
+            transform: scale(1.06);
+            box-shadow: 0 8px 24px rgba(0, 143, 255, 0.4);
+        }
+        .floating-solicitud-btn:active {
+            transform: scale(0.96);
+        }
+        .floating-solicitud-dropdown {
+            position: absolute;
+            bottom: 75px; /* floats above the 60px button */
+            width: 280px;
+            max-height: 350px;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            display: none; /* dynamically flex */
+            flex-direction: column;
+            overflow-y: auto;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 10000;
+            animation: dropdownFadeIn 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        @keyframes dropdownFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        body.dark-theme .floating-solicitud-dropdown {
+            background: rgba(39, 39, 42, 0.95);
+        }
+        body:not(.dark-theme) .floating-solicitud-dropdown {
+            background: rgba(255, 255, 255, 0.95);
+        }
+        .floating-solicitud-dropdown .dropdown-header {
+            padding: 14px 16px;
+            font-weight: 700;
+            font-size: 13.5px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+        .floating-solicitud-dropdown .dropdown-options {
+            display: flex;
+            flex-direction: column;
+        }
+        .floating-solicitud-dropdown .dropdown-option {
+            padding: 12px 16px;
+            font-size: 14.5px;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            text-align: left;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        .floating-solicitud-dropdown .dropdown-option:last-child {
+            border-bottom: none;
+        }
+        .floating-solicitud-dropdown .dropdown-option:hover {
+            background: rgba(0, 143, 255, 0.1);
+            color: var(--accent);
         }
 
         @media (max-width: 768px) {
             .back-to-top-btn {
                 bottom: 20px;
                 left: 20px;
-                width: 46px;
-                height: 46px;
-                font-size: 20px;
+                width: 52px !important;
+                height: 52px !important;
+                font-size: 24px;
+                box-sizing: border-box !important;
+            }
+            .floating-solicitud-container {
+                bottom: 20px;
+            }
+            .floating-solicitud-btn {
+                height: 52px;
+                padding: 0 20px;
+                font-size: 14.5px;
+            }
+            .floating-solicitud-dropdown {
+                bottom: 65px;
+                width: 250px;
+                max-height: 280px;
             }
         }
     </style>
@@ -6997,6 +7119,10 @@
                         // ignore
                     }
                 }
+                if (window.shouldScrollToFormOnLoad) {
+                    window.scrollToPDPForm();
+                    window.shouldScrollToFormOnLoad = false;
+                }
             }
         }
 
@@ -7253,6 +7379,19 @@
 
     <!-- Botón Volver Arriba (Back to Top) -->
     <button type="button" id="backToTopBtn" class="back-to-top-btn" onclick="scrollToTop()" aria-label="Volver arriba">↑</button>
+
+    <!-- Botón Central de Llenar Solicitud -->
+    <div id="floatingSolicitudContainer" class="floating-solicitud-container">
+        <button type="button" id="floatingSolicitudBtn" class="floating-solicitud-btn" onclick="toggleSolicitudDropdown(event)">
+            <span class="btn-icon">📋</span> <span class="btn-text">Llenar Solicitud</span>
+        </button>
+        <div id="floatingSolicitudDropdown" class="floating-solicitud-dropdown">
+            <div class="dropdown-header">Selecciona tu equipo:</div>
+            <div id="floatingSolicitudOptions" class="dropdown-options">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+    </div>
 </body>
 <!-- ═════════════════════ TOAST + MODAL RESULT SYSTEM ═════════════════════ -->
 <div id="toast-container" style="
@@ -7536,16 +7675,84 @@
         updateState();
     })();
 
-    // Lógica del botón Volver Arriba
-    window.addEventListener('scroll', function() {
-        const btn = document.getElementById('backToTopBtn');
-        if (!btn) return;
-        if (window.scrollY > 300) {
-            btn.classList.add('visible');
-        } else {
-            btn.classList.remove('visible');
-        }
-    });
+    // Lógica del botón Volver Arriba y Scroll Hiding de Botones Flotantes en la Página Principal
+    (function() {
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', function() {
+            const btnBackToTop = document.getElementById('backToTopBtn');
+            const btnSolicitud = document.getElementById('floatingSolicitudContainer');
+            const btnWhatsapp = document.querySelector('.whatsapp-float');
+            const dropdown = document.getElementById('floatingSolicitudDropdown');
+            if (!btnBackToTop) return;
+            
+            const currentScroll = window.scrollY || document.documentElement.scrollTop;
+
+            // Toggle visibility of Back-to-Top based on scroll position
+            if (currentScroll > 300) {
+                btnBackToTop.classList.add('visible');
+            } else {
+                btnBackToTop.classList.remove('visible');
+            }
+
+            // Mobile-only hide on scroll down, show on scroll up
+            if (window.innerWidth <= 900) {
+                if (currentScroll > lastScrollTop && currentScroll > 60) {
+                    // Scroll abajo: ocultar
+                    if (btnSolicitud) {
+                        btnSolicitud.style.transform = 'translate(-50%, 100px)';
+                        btnSolicitud.style.opacity = '0';
+                        btnSolicitud.style.pointerEvents = 'none';
+                    }
+                    if (btnWhatsapp) {
+                        btnWhatsapp.style.transform = 'translateY(100px)';
+                        btnWhatsapp.style.opacity = '0';
+                        btnWhatsapp.style.pointerEvents = 'none';
+                    }
+                    if (btnBackToTop) {
+                        btnBackToTop.style.transform = 'translateY(100px)';
+                        btnBackToTop.style.opacity = '0';
+                        btnBackToTop.style.pointerEvents = 'none';
+                    }
+                    if (dropdown) dropdown.style.display = 'none';
+                } else {
+                    // Scroll arriba: mostrar
+                    if (btnSolicitud) {
+                        btnSolicitud.style.transform = 'translateX(-50%)';
+                        btnSolicitud.style.opacity = '';
+                        btnSolicitud.style.pointerEvents = '';
+                    }
+                    if (btnWhatsapp) {
+                        btnWhatsapp.style.transform = '';
+                        btnWhatsapp.style.opacity = '';
+                        btnWhatsapp.style.pointerEvents = '';
+                    }
+                    if (btnBackToTop && currentScroll > 300) {
+                        btnBackToTop.style.transform = '';
+                        btnBackToTop.style.opacity = '';
+                        btnBackToTop.style.pointerEvents = '';
+                    }
+                }
+            } else {
+                // Restore defaults if resized back to desktop
+                if (btnSolicitud) {
+                    btnSolicitud.style.transform = '';
+                    btnSolicitud.style.opacity = '';
+                    btnSolicitud.style.pointerEvents = '';
+                }
+                if (btnWhatsapp) {
+                    btnWhatsapp.style.transform = '';
+                    btnWhatsapp.style.opacity = '';
+                    btnWhatsapp.style.pointerEvents = '';
+                }
+                if (btnBackToTop) {
+                    btnBackToTop.style.transform = '';
+                    btnBackToTop.style.opacity = '';
+                    btnBackToTop.style.pointerEvents = '';
+                }
+            }
+            lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+        });
+    })();
 
     window.scrollToTop = function() {
         window.scrollTo({
@@ -7554,7 +7761,103 @@
         });
     };
 
-    // Ocultar botones en móvil al hacer scroll hacia abajo y mostrarlos al subir
+    // Funciones del Dropdown Desplegable de Llenar Solicitud
+    window.toggleSolicitudDropdown = function(event) {
+        if (event) event.stopPropagation();
+        const dropdown = document.getElementById('floatingSolicitudDropdown');
+        if (!dropdown) return;
+        
+        const isVisible = dropdown.style.display === 'flex';
+        if (isVisible) {
+            dropdown.style.display = 'none';
+        } else {
+            window.populateSolicitudDropdown();
+            dropdown.style.display = 'flex';
+        }
+    };
+
+    window.closeSolicitudDropdown = function() {
+        const dropdown = document.getElementById('floatingSolicitudDropdown');
+        if (dropdown) dropdown.style.display = 'none';
+    };
+
+    // Cerrar dropdown al hacer click fuera del contenedor
+    window.addEventListener('click', function(event) {
+        const container = document.getElementById('floatingSolicitudContainer');
+        if (container && !container.contains(event.target)) {
+            window.closeSolicitudDropdown();
+        }
+    });
+
+    window.populateSolicitudDropdown = function() {
+        const container = document.getElementById('floatingSolicitudOptions');
+        if (!container) return;
+        container.innerHTML = "";
+        
+        if (!window.equiposCargados || window.equiposCargados.length === 0) {
+            container.innerHTML = `<div style="padding: 14px 16px; color: var(--text-muted); font-size: 13.5px; text-align: left;">Cargando catálogo...</div>`;
+            return;
+        }
+
+        const uniqueModels = [];
+        const seenModels = new Set();
+
+        window.equiposCargados.forEach(item => {
+            if (!item.modelo) return;
+            const modelKey = item.modelo.trim();
+            if (seenModels.has(modelKey)) return;
+            seenModels.add(modelKey);
+            uniqueModels.push(item);
+        });
+
+        uniqueModels.forEach(item => {
+            const optionEl = document.createElement('div');
+            optionEl.className = 'dropdown-option';
+            optionEl.innerText = item.modelo;
+            optionEl.onclick = function() {
+                window.closeSolicitudDropdown();
+                
+                // Calcular cuotas o usar fórmulas
+                const cuotaSem26 = window.calcularCuotaSemanal26 ? window.calcularCuotaSemanal26(item.precioContado) : 0;
+                const cuotaSem52 = window.calcularCuotaSemanal52 ? window.calcularCuotaSemanal52(item.precioContado) : 0;
+                const engancheComodoCalculado = window.calcularEngancheComodo ? window.calcularEngancheComodo(item.precioContado) : 0;
+                const isFijo = item.esFijo === 'true' || item.esFijo === true;
+                
+                // Primer tap abre, el segundo (este clic en la opción) abre modal y lleva al formulario
+                window.shouldScrollToFormOnLoad = true;
+                
+                abrirModalCredito(
+                    item.id,
+                    item.modelo,
+                    isFijo,
+                    item.foto,
+                    cuotaSem26,
+                    cuotaSem52,
+                    item.link || "",
+                    item.precioContado || 0,
+                    engancheComodoCalculado,
+                    item.color || "",
+                    item.memoria || "",
+                    null
+                );
+                
+                window.scrollToPDPForm();
+            };
+            container.appendChild(optionEl);
+        });
+    };
+
+    window.scrollToPDPForm = function() {
+        setTimeout(() => {
+            const formCard = document.getElementById('pdp-credit-form-card');
+            const pdpContent = document.querySelector('#modalCredito .modal-content');
+            if (formCard && pdpContent) {
+                formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 600);
+    };
+
+    // Ocultar botones de PDP en móvil al hacer scroll hacia abajo y mostrarlos al subir
     (function() {
         const pdpContent = document.querySelector('#modalCredito .modal-content');
         if (pdpContent) {
