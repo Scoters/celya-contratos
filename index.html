@@ -883,21 +883,21 @@
             display: flex;
             background: var(--bg-light);
             border: 1px solid var(--border-color);
-            padding: 1.5px;
-            border-radius: 5px;
-            gap: 1.5px;
-            margin-bottom: 6px;
+            padding: 3px;
+            border-radius: 6px;
+            gap: 3px;
+            margin-bottom: 8px;
             box-sizing: border-box;
             width: 100%;
-            max-width: 250px;
+            max-width: 350px;
         }
         .segment-control .segment-btn {
             flex: 1;
             border: none;
             background: transparent;
-            padding: 2.5px 2px;
+            padding: 6px 4px;
             font-family: 'Outfit', sans-serif;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 600;
             color: var(--text-muted);
             border-radius: 4px;
@@ -909,7 +909,7 @@
             align-items: center;
             justify-content: center;
             line-height: 1.2;
-            min-height: 20px;
+            min-height: 34px;
         }
         .segment-control .segment-btn:hover {
             color: var(--text-main);
@@ -918,13 +918,13 @@
         .segment-control .segment-btn.active {
             background: var(--accent-gradient);
             color: #ffffff !important;
-            box-shadow: 0 2px 6px rgba(var(--accent-rgb), 0.2);
+            box-shadow: 0 4px 10px rgba(var(--accent-rgb), 0.2);
             transform: translateY(-0.5px);
         }
         
         /* Ajuste específico para el plazo o etiquetas más largas */
         .plazo-control .segment-btn {
-            font-size: 9px;
+            font-size: 11px;
         }
         
         /* Frecuencia de pagos semanales con tono azul */
@@ -2917,7 +2917,7 @@
                              </div>
  
                              <label id="lbl-cliPlazo" style="margin-top: 10px; display: block; font-weight: 600; font-size: 12.5px; color: var(--text-main); margin-bottom: 4px;">Plazo de Pago:</label>
-                             <select id="cliPlazo" onchange="actualizarPrecioCalculadoPDP()" style="display: none;">
+                             <select id="cliPlazo" onchange="document.getElementById('cliEnganchePersonalizado').value=''; actualizarPrecioCalculadoPDP()" style="display: none;">
                                  <option value="26 Semanas">Plan Rápido (26 Pagos Semanales)</option>
                                  <option value="52 Semanas">Plan Cómodo (52 Pagos Semanales)</option>
                              </select>
@@ -3104,7 +3104,7 @@
 
                         <label id="pe-lbl-cliPlazo"
                             style="margin-top: 8px; font-weight: 600; font-size: 12.5px; color: var(--text-main); display: block; margin-bottom: 4px;">Plazo Deseado:</label>
-                        <select id="pe-cliPlazo" onchange="actualizarPreciosPedidoEspecial()"
+                        <select id="pe-cliPlazo" onchange="document.getElementById('pe-cliEnganchePersonalizado').value=''; actualizarPreciosPedidoEspecial()"
                             style="display: none;">
                             <option value="26 Semanas">Plan Rápido (26 Pagos Semanales)</option>
                             <option value="52 Semanas">Plan Cómodo (52 Pagos Semanales)</option>
@@ -4223,6 +4223,10 @@
         }
 
         function actualizarPlazosYPrecioPDP() {
+            const inputEng = document.getElementById('cliEnganchePersonalizado');
+            if (inputEng) {
+                inputEng.value = "";
+            }
             const freq = document.getElementById('cliFrecuencia').value;
             const selectPlazo = document.getElementById('cliPlazo');
             const seccionPreguntas = document.getElementById('seccionPreguntasCredito');
@@ -4723,6 +4727,10 @@
         }
 
         function actualizarPlazosYPreciosPedidoEspecial() {
+            const inputEng = document.getElementById('pe-cliEnganchePersonalizado');
+            if (inputEng) {
+                inputEng.value = "";
+            }
             const freq = document.getElementById('pe-cliFrecuencia').value;
             const selectPlazo = document.getElementById('pe-cliPlazo');
             const seccionPreguntas = document.getElementById('seccionPreguntasPedidoEspecial');
