@@ -147,6 +147,155 @@
             50% { opacity: 0.65; }
             100% { opacity: 1; }
         }
+
+        /* Ocultar elementos de forma accesible */
+        .hidden-select {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        /* Segmented buttons control in Formulario */
+        .segment-control-form {
+            display: flex;
+            background: #e9ecef;
+            border: 1px solid #ced4da;
+            padding: 4px;
+            border-radius: 6px;
+            gap: 4px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .segment-control-form .segment-btn-form {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 8px 6px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: bold;
+            color: #495057;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            text-align: center;
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+        }
+        .segment-control-form .segment-btn-form:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: #212529;
+        }
+        .segment-control-form .segment-btn-form.active {
+            background: #9b59b6;
+            color: #ffffff;
+            box-shadow: 0 2px 5px rgba(155, 89, 182, 0.3);
+        }
+
+        /* Calendar grid for days of week selection */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-top: 5px;
+            margin-bottom: 12px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        @media (max-width: 480px) {
+            .calendar-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        .calendar-day-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            padding: 6px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            outline: none;
+            min-height: 45px;
+        }
+        .calendar-day-btn .day-abbr {
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+        }
+        .calendar-day-btn .day-full {
+            font-size: 8px;
+            color: #666;
+            margin-top: 2px;
+            text-transform: uppercase;
+        }
+        .calendar-day-btn:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+        .calendar-day-btn.active {
+            background: #2ecc71;
+            border-color: #2ecc71;
+            color: #ffffff;
+        }
+        .calendar-day-btn.active .day-abbr,
+        .calendar-day-btn.active .day-full {
+            color: #ffffff;
+        }
+
+        /* Quincenal options grid */
+        .quincenal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 5px;
+            margin-bottom: 12px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        .quincenal-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            padding: 10px 8px;
+            border-radius: 4px;
+            font-size: 12.5px;
+            font-weight: bold;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            outline: none;
+            text-align: center;
+            min-height: 40px;
+        }
+        .quincenal-btn:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+        .quincenal-btn.active {
+            background: #3498db;
+            border-color: #3498db;
+            color: #ffffff;
+        }
     </style>
 </head>
 
@@ -196,8 +345,8 @@
             <label>Modelo Seleccionado:</label>
             <input type="text" id="modeloDisplay" name="modelo" readonly>
 
-            <label for="agendaCobro">📆 Frecuencia y Día de Pago Obligatorio:</label>
-            <select id="agendaCobro" required>
+            <label style="margin-top: 10px; display: block; font-weight: bold;">📆 Frecuencia de Pago Obligatoria:</label>
+            <select id="agendaCobro" required class="hidden-select">
                 <option value="">-- Selecciona cómo y cuándo pagará --</option>
                 <option value="SEMANAL|LUNES">Semanal — Cada Lunes</option>
                 <option value="SEMANAL|MARTES">Semanal — Cada Martes</option>
@@ -211,6 +360,35 @@
                 <option value="CONTADO|UNICO">De Contado — Pago Único</option>
             </select>
 
+            <!-- Selector de Frecuencia interactivo -->
+            <div class="segment-control-form" id="form-frecuencia-selector">
+                <button type="button" class="segment-btn-form" data-freq="SEMANAL">📅 Semanal</button>
+                <button type="button" class="segment-btn-form" data-freq="QUINCENAL">💸 Quincenal</button>
+                <button type="button" class="segment-btn-form" data-freq="CONTADO">💰 Contado</button>
+            </div>
+
+            <!-- Panel para sub-opciones dependientes de la frecuencia -->
+            <div id="form-sub-opciones-container">
+                <!-- Días de la semana para Semanal (tipo calendario) -->
+                <div id="sub-semanal-calendar" class="calendar-grid" style="display: none;">
+                    <div style="grid-column: 1 / -1; font-size: 12px; font-weight: bold; color: #555; margin-bottom: 4px;">Selecciona el día de cobro semanal (tipo calendario):</div>
+                    <button type="button" class="calendar-day-btn" data-day="LUNES"><span class="day-abbr">Lun</span><span class="day-full">Lunes</span></button>
+                    <button type="button" class="calendar-day-btn" data-day="MARTES"><span class="day-abbr">Mar</span><span class="day-full">Martes</span></button>
+                    <button type="button" class="calendar-day-btn" data-day="MIERCOLES"><span class="day-abbr">Mié</span><span class="day-full">Miércoles</span></button>
+                    <button type="button" class="calendar-day-btn" data-day="JUEVES"><span class="day-abbr">Jue</span><span class="day-full">Jueves</span></button>
+                    <button type="button" class="calendar-day-btn" data-day="VIERNES"><span class="day-abbr">Vie</span><span class="day-full">Viernes</span></button>
+                    <button type="button" class="calendar-day-btn" data-day="SABADO"><span class="day-abbr">Sáb</span><span class="day-full">Sábado</span></button>
+                    <button type="button" class="calendar-day-btn" data-day="DOMINGO"><span class="day-abbr">Dom</span><span class="day-full">Domingo</span></button>
+                </div>
+
+                <!-- Opciones para Quincenal -->
+                <div id="sub-quincenal-options" class="quincenal-grid" style="display: none;">
+                    <div style="grid-column: 1 / -1; font-size: 12px; font-weight: bold; color: #555; margin-bottom: 4px;">Selecciona la agenda quincenal:</div>
+                    <button type="button" class="quincenal-btn" data-quin="15 Y 30">📅 Días 15 y 30 (Fijo)</button>
+                    <button type="button" class="quincenal-btn" data-quin="SABADO"> Sábado de Raya (Quincenal)</button>
+                </div>
+            </div>
+
             <h3>Estructura del Crédito</h3>
 
             <label for="precioContado">💰 Precio de Contado:</label>
@@ -220,11 +398,15 @@
             <label for="monto">🏁 Pago Inicial / Enganche Recibido ($):</label>
             <input type="number" id="monto" name="monto" style="color: #c0392b; font-weight: bold;" placeholder="Ej. 1200" min="0">
 
-            <label for="plazoSemanas">Plazo de Financiamiento:</label>
-            <select id="plazoSemanas" required>
+            <label style="margin-top: 10px; display: block; font-weight: bold;">Plazo de Financiamiento:</label>
+            <select id="plazoSemanas" required class="hidden-select">
                 <option id="optPlazoCorto" value="26" selected>Plan Rápido (26 Semanas / 26 Pagos)</option>
                 <option id="optPlazoLargo" value="52">Plan Cómodo (52 Semanas / 52 Pagos)</option>
             </select>
+            <div class="segment-control-form" id="form-plazo-selector">
+                <button type="button" class="segment-btn-form" data-plazo="26">Plan Rápido</button>
+                <button type="button" class="segment-btn-form" data-plazo="52">Plan Cómodo</button>
+            </div>
 
             <label for="cuota">Monto del Abono Regular ($):</label>
             <input type="text" id="cuota" name="cuota" readonly
@@ -655,9 +837,207 @@
             } catch (err) {
                 document.getElementById('selectDispositivo').innerHTML = '<option value="">❌ Error al conectar con inventario</option>';
             }
+            
+            // Inicializar selectores interactivos segmentados al cargar
+            setupAgendaCobro();
+            setupFormPlazoButtons();
+            
+            // Forzar interceptores de propiedades .value
+            interceptSelectValueProperty('agendaCobro', () => {
+                syncAgendaCobro();
+                syncFormPlazoButtons();
+            });
+            interceptSelectValueProperty('plazoSemanas', syncFormPlazoButtons);
         };
 
-        document.getElementById('selectDispositivo').addEventListener('change', actualizarFormularioPrecios);
+        // --- SISTEMA DE SELECTORES PREMIUM EN FORMULARIO ---
+        function syncFormPlazoButtons() {
+            const selectPlazo = document.getElementById('plazoSemanas');
+            const container = document.getElementById('form-plazo-selector');
+            if (!selectPlazo || !container) return;
+
+            const currentVal = selectPlazo.value;
+            const buttons = container.querySelectorAll('.segment-btn-form');
+            
+            buttons.forEach(btn => {
+                const val = btn.getAttribute('data-plazo');
+                const opt = selectPlazo.querySelector(`option[value="${val}"]`);
+                if (opt) {
+                    btn.innerText = opt.text;
+                    
+                    if (val === currentVal) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                    
+                    if (opt.disabled || opt.style.display === 'none') {
+                        btn.style.display = 'none';
+                    } else {
+                        btn.style.display = 'flex';
+                    }
+                }
+            });
+        }
+
+        function setupFormPlazoButtons() {
+            const selectPlazo = document.getElementById('plazoSemanas');
+            const container = document.getElementById('form-plazo-selector');
+            if (!selectPlazo || !container) return;
+
+            const buttons = container.querySelectorAll('.segment-btn-form');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const val = btn.getAttribute('data-plazo');
+                    const opt = selectPlazo.querySelector(`option[value="${val}"]`);
+                    if (opt && !opt.disabled && opt.style.display !== 'none') {
+                        selectPlazo.value = val;
+                        triggerSelectChange(selectPlazo);
+                    }
+                });
+            });
+
+            syncFormPlazoButtons();
+        }
+
+        function syncAgendaCobro() {
+            const select = document.getElementById('agendaCobro');
+            if (!select) return;
+
+            const currentVal = select.value;
+            
+            let freq = "";
+            let subVal = "";
+            if (currentVal) {
+                const parts = currentVal.split('|');
+                freq = parts[0];
+                subVal = parts[1] || "";
+            }
+
+            const freqContainer = document.getElementById('form-frecuencia-selector');
+            if (freqContainer) {
+                const buttons = freqContainer.querySelectorAll('.segment-btn-form');
+                buttons.forEach(btn => {
+                    if (btn.getAttribute('data-freq') === freq) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+
+            const semanalCal = document.getElementById('sub-semanal-calendar');
+            const quincenalOpt = document.getElementById('sub-quincenal-options');
+
+            if (freq === "SEMANAL") {
+                if (semanalCal) semanalCal.style.display = "grid";
+                if (quincenalOpt) quincenalOpt.style.display = "none";
+            } else if (freq === "QUINCENAL") {
+                if (semanalCal) semanalCal.style.display = "none";
+                if (quincenalOpt) quincenalOpt.style.display = "grid";
+            } else {
+                if (semanalCal) semanalCal.style.display = "none";
+                if (quincenalOpt) quincenalOpt.style.display = "none";
+            }
+
+            if (freq === "SEMANAL" && semanalCal) {
+                const buttons = semanalCal.querySelectorAll('.calendar-day-btn');
+                buttons.forEach(btn => {
+                    if (btn.getAttribute('data-day') === subVal) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+
+            if (freq === "QUINCENAL" && quincenalOpt) {
+                const buttons = quincenalOpt.querySelectorAll('.quincenal-btn');
+                buttons.forEach(btn => {
+                    if (btn.getAttribute('data-quin') === subVal) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+        }
+
+        function setupAgendaCobro() {
+            const select = document.getElementById('agendaCobro');
+            if (!select) return;
+
+            const freqContainer = document.getElementById('form-frecuencia-selector');
+            if (freqContainer) {
+                const buttons = freqContainer.querySelectorAll('.segment-btn-form');
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const freq = btn.getAttribute('data-freq');
+                        if (freq === "SEMANAL") {
+                            select.value = "SEMANAL|SABADO";
+                        } else if (freq === "QUINCENAL") {
+                            select.value = "QUINCENAL|15 Y 30";
+                        } else if (freq === "CONTADO") {
+                            select.value = "CONTADO|UNICO";
+                        }
+                        triggerSelectChange(select);
+                    });
+                });
+            }
+
+            const semanalCal = document.getElementById('sub-semanal-calendar');
+            if (semanalCal) {
+                const buttons = semanalCal.querySelectorAll('.calendar-day-btn');
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const day = btn.getAttribute('data-day');
+                        select.value = `SEMANAL|${day}`;
+                        triggerSelectChange(select);
+                    });
+                });
+            }
+
+            const quincenalOpt = document.getElementById('sub-quincenal-options');
+            if (quincenalOpt) {
+                const buttons = quincenalOpt.querySelectorAll('.quincenal-btn');
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const quin = btn.getAttribute('data-quin');
+                        select.value = `QUINCENAL|${quin}`;
+                        triggerSelectChange(select);
+                    });
+                });
+            }
+
+            syncAgendaCobro();
+        }
+
+        function triggerSelectChange(select) {
+            if (typeof select.onchange === 'function') {
+                select.onchange();
+            } else {
+                select.dispatchEvent(new Event('change'));
+            }
+        }
+
+        function interceptSelectValueProperty(elementId, syncCallback) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            
+            const originalDescriptor = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
+            
+            Object.defineProperty(el, 'value', {
+                get() {
+                    return originalDescriptor.get.call(this);
+                },
+                set(val) {
+                    originalDescriptor.set.call(this, val);
+                    syncCallback();
+                }
+            });
+        }
+
+        document.getElementById('selectDispositivo').addEventListener('change', actualizarFormularioPrecios');
         document.getElementById('agendaCobro').addEventListener('change', procesarAgendaCobro);
         document.getElementById('plazoSemanas').addEventListener('change', function () {
             actualizarEngancheYFinanciamientoPorPlazo(true);
@@ -847,6 +1227,11 @@
 
             // 2. Ejecutamos la matemática de la cuota dinero
             actualizarEngancheYFinanciamientoPorPlazo(true);
+            
+            // Sincronizar botones de plazo
+            if (typeof syncFormPlazoButtons === 'function') {
+                syncFormPlazoButtons();
+            }
         }
 
         function recalcularCuotaPorFrecuenciaModificada(frecuencia) {
