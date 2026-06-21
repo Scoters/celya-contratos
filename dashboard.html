@@ -1901,7 +1901,6 @@
                 }
             }
         }
-
                 // --- Alertas de Stock ---
                 function inicializarAlertasStock() {
                     const btn = document.getElementById('btnOpenStockAlerts');
@@ -1911,7 +1910,9 @@
                         });
                     }
                     evaluarAlertasStock();
-                      async function evaluarAlertasStock() {
+                }
+
+                async function evaluarAlertasStock() {
                     const btn = document.getElementById('btnOpenStockAlerts');
                     const originalBtnHtml = btn ? btn.innerHTML : '';
                     if (btn) {
