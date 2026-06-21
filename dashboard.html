@@ -1959,8 +1959,8 @@
                         
                         alertasStockGlobal = [];
                         
-                        // Limitamos a 3 peticiones paralelas para no sobrecargar el servidor
-                        const limiteConcurrencia = 3;
+                        // Limitamos a 6 peticiones paralelas para no sobrecargar el servidor
+                        const limiteConcurrencia = 6;
                         let itemIndex = 0;
                         
                         async function procesarSiguiente() {
@@ -2506,6 +2506,219 @@
                     }
                 };
 
+                async function evaluarStockUnicoItem(item) {
+                    try {
+                        let itemMlId = "";
+                        if (item.link) {
+                            const regex = /(MLM\-?\d+)/i;
+                            const match = item.link.match(regex);
+                            if (match) itemMlId = match[0].replace("-", "").toUpperCase();
+                        }
+                        
+                        const idBusqueda = itemMlId || item.id;
+                        if (!idBusqueda) return false;
+                        
+                        let isProduct = idBusqueda.startsWith("MLM") && idBusqueda.length <= 11;
+                        const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${idBusqueda}&isProduct=${isProduct}`;
+                        
+                        const resLive = await fetch(proxyUrl);
+                        const contentType = resLive.headers.get('content-type') || '';
+                        if (!resLive.ok || !contentType.includes('application/json')) {
+                            return false;
+                        }
+                        let liveData = await resLive.json();
+                        if (!liveData || typeof liveData !== 'object' || liveData.error || Object.keys(liveData).length === 0) {
+                            return false;
+                        }
+                        
+                        if (!isProduct && liveData.catalog_product_id && (!liveData.pickers || liveData.pickers.length === 0) && (!liveData.variations || liveData.variations.length === 0)) {
+                            try {
+                                const prodUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${liveData.catalog_product_id}&isProduct=true`;
+                                const resProd = await fetch(prodUrl);
+                                const prodData = await resProd.json();
+                                if (prodData && !prodData.error && prodData.pickers) {
+                                    liveData = prodData;
+                                    isProduct = true;
+                                }
+                            } catch(e) {}
+                        }
+                        
+                        if (!isProduct && item.link && item.link.includes("/p/") && (!liveData.pickers || liveData.pickers.length === 0)) {
+                            const pMatch = item.link.match(/\/p\/(MLM\-?\d+)/i);
+                            if (pMatch) {
+                                const parentProductId = pMatch[1].replace("-", "").toUpperCase();
+                                if (parentProductId !== idBusqueda) {
+                                    try {
+                                        const prodUrl2 = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${parentProductId}&isProduct=true`;
+                                        const resProd2 = await fetch(prodUrl2);
+                                        const prodData2 = await resProd2.json();
+                                        if (prodData2 && !prodData2.error && prodData2.pickers) {
+                                            liveData = prodData2;
+                                            isProduct = true;
+                                        }
+                                    } catch(e) {}
+                                }
+                            }
+                        }
+                        
+                        const isCatalog = isProduct || liveData.type === "catalog_product" || !!liveData.catalog_product_id;
+                        let tieneStock = false;
+                        let detalle = { razon: '', coloresAgotados: [], memoriasAgotadas: [], ramsAgotadas: [], totalVariantes: 0, activasVariantes: 0 };
+                        
+                        if (liveData.pickers && liveData.pickers.length > 0) {
+                            const productMap = {};
+                            liveData.pickers.forEach(picker => {
+                                if (!picker.products) return;
+                                const pIdUpper = picker.picker_id ? picker.picker_id.toUpperCase() : "";
+                                
+                                let attributeType = "";
+                                if (pIdUpper.includes("COLOR") || pIdUpper === "FINISH" || pIdUpper === "ACABADO") {
+                                    attributeType = "color";
+                                } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY") || pIdUpper.includes("CAPACIDAD")) {
+                                    attributeType = "memory";
+                                } else if (pIdUpper.includes("RAM")) {
+                                    attributeType = "ram";
+                                } else if (pIdUpper === "GRADING") {
+                                    attributeType = "grading";
+                                }
+                                
+                                picker.products.forEach(p => {
+                                    if (!p.product_id) return;
+                                    const tags = p.tags || [];
+                                    const outOfStock = isProductTagOutOfStock(tags);
+                                    
+                                    if (!productMap[p.product_id]) {
+                                        productMap[p.product_id] = {
+                                            isOutOfStock: outOfStock,
+                                            color: "", memory: "", ram: "", grading: "",
+                                            tags: tags
+                                        };
+                                    } else {
+                                        if (outOfStock) productMap[p.product_id].isOutOfStock = true;
+                                        tags.forEach(t => {
+                                            if (!productMap[p.product_id].tags.includes(t)) {
+                                                productMap[p.product_id].tags.push(t);
+                                            }
+                                        });
+                                        productMap[p.product_id].isOutOfStock = isProductTagOutOfStock(productMap[p.product_id].tags);
+                                    }
+                                    
+                                    if (attributeType && p.picker_label) {
+                                        productMap[p.product_id][attributeType] = p.picker_label.trim();
+                                    }
+                                });
+                            });
+                            
+                            const allProductIds = Object.keys(productMap);
+                            const activeProducts = allProductIds.filter(pid => !productMap[pid].isOutOfStock);
+                            const outOfStockProducts = allProductIds.filter(pid => productMap[pid].isOutOfStock);
+                            
+                            detalle.totalVariantes = allProductIds.length;
+                            detalle.activasVariantes = activeProducts.length;
+                            
+                            if (activeProducts.length > 0) {
+                                tieneStock = true;
+                            }
+                            
+                            const coloresVivos = new Set();
+                            const coloresAgotados = new Set();
+                            const memoriasVivas = new Set();
+                            const memoriasAgotadas = new Set();
+                            const ramsVivas = new Set();
+                            const ramsAgotadas = new Set();
+                            
+                            allProductIds.forEach(pid => {
+                                const p = productMap[pid];
+                                if (p.color) {
+                                    if (p.isOutOfStock) coloresAgotados.add(p.color);
+                                    else coloresVivos.add(p.color);
+                                }
+                                if (p.memory) {
+                                    if (p.isOutOfStock) memoriasAgotadas.add(p.memory);
+                                    else memoriasVivas.add(p.memory);
+                                }
+                                if (p.ram) {
+                                    if (p.isOutOfStock) ramsAgotadas.add(p.ram);
+                                    else ramsVivas.add(p.ram);
+                                }
+                            });
+                            
+                            detalle.coloresAgotados = [...coloresAgotados].filter(c => !coloresVivos.has(c));
+                            detalle.memoriasAgotadas = [...memoriasAgotadas].filter(m => !memoriasVivas.has(m));
+                            detalle.ramsAgotadas = [...ramsAgotadas].filter(r => !ramsVivas.has(r));
+                            
+                            if (!tieneStock) {
+                                detalle.razon = 'all_pickers_out';
+                                detalle.mensaje = `${allProductIds.length} variantes, todas agotadas`;
+                            } else if (isCatalog && !liveData.buy_box_winner && !liveData.price) {
+                                tieneStock = false;
+                                detalle.razon = 'no_buy_box';
+                                detalle.mensaje = `Pickers activos pero sin vendedor disponible (sin buy_box_winner)`;
+                            } else if (outOfStockProducts.length > 0) {
+                                detalle.razon = 'partial_stock';
+                            }
+                        }
+                        else if (isCatalog && liveData.buy_box_winner) {
+                            tieneStock = true;
+                        }
+                        else if (liveData.variations && liveData.variations.length > 0) {
+                            const totalVars = liveData.variations.length;
+                            const activeVariations = liveData.variations.filter(v => parseInt(v.available_quantity, 10) > 0);
+                            detalle.totalVariantes = totalVars;
+                            detalle.activasVariantes = activeVariations.length;
+                            
+                            if (activeVariations.length > 0) {
+                                tieneStock = true;
+                            } else {
+                                detalle.razon = 'all_variations_out';
+                                detalle.mensaje = `${totalVars} variaciones, todas sin stock`;
+                            }
+                        }
+                        else {
+                            const status = (liveData.status || "").toLowerCase();
+                            const qty = parseInt(liveData.available_quantity, 10);
+                            
+                            if (status && status !== "active") {
+                                tieneStock = false;
+                                detalle.razon = 'inactive';
+                                detalle.mensaje = `Estado: ${liveData.status || 'inactivo'}`;
+                            } else if (!isNaN(qty) && qty > 0) {
+                                tieneStock = true;
+                            } else if (isCatalog && !liveData.buy_box_winner && (!liveData.pickers || liveData.pickers.length === 0)) {
+                                tieneStock = false;
+                                detalle.razon = 'no_buy_box';
+                                detalle.mensaje = 'Sin buy_box_winner ni pickers';
+                            } else if (status === "" && isNaN(qty)) {
+                                tieneStock = true;
+                            }
+                        }
+                        
+                        item._stockDetalle = detalle;
+                        
+                        const cacheStr = JSON.stringify(liveData);
+                        const cacheActualStr = JSON.stringify(item.variantesJson);
+                        if (cacheStr !== cacheActualStr) {
+                            item.variantesJson = liveData;
+                            const formData = new URLSearchParams();
+                            formData.append('token', CONFIG.API_TOKEN);
+                            formData.append('action', 'actualizarVariantesJson');
+                            formData.append('row', item.filaNum);
+                            formData.append('variantes', cacheStr);
+                            
+                            fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                                method: 'POST',
+                                body: formData.toString(),
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                            }).catch(e => console.warn("Error background caching variants:", e));
+                        }
+                        
+                        return tieneStock;
+                    } catch (err) {
+                        console.error("Error en evaluarStockUnicoItem:", err);
+                        return false;
+                    }
+                }
+
                 window.editarLinkItem = async function(row, nombre, linkActual, btnElement) {
                     const nuevoLink = prompt(`Actualizar link de Mercado Libre para:\n${nombre}\n\nIntroduce el nuevo enlace:`, linkActual);
                     if (nuevoLink === null) return; // cancelado
@@ -2542,15 +2755,25 @@
                         if (data.result === 'success') {
                             toast(data.message || "Link actualizado con éxito.", "success");
                             
-                            // Remover temporalmente de las alertas mientras se re-evalúa
-                            alertasStockGlobal = alertasStockGlobal.filter(p => p.filaNum !== row);
+                            const item = alertasStockGlobal.find(p => p.filaNum === row);
+                            if (item) {
+                                item.link = urlLimpia;
+                                btnElement.disabled = true;
+                                btnElement.innerHTML = "⏳ Validando...";
+                                
+                                const tieneStock = await evaluarStockUnicoItem(item);
+                                if (tieneStock) {
+                                    alertasStockGlobal = alertasStockGlobal.filter(p => p.filaNum !== row);
+                                    toast(`"${nombre}" ahora tiene stock y se eliminó de las alertas.`, "success");
+                                } else {
+                                    toast(`"${nombre}" sigue sin stock en el nuevo enlace.`, "warning");
+                                    btnElement.disabled = false;
+                                    btnElement.innerHTML = "✏️ Link";
+                                }
+                            }
+                            
                             actualizarBotonAlertasStock();
                             renderizarStockAlerts();
-                            
-                            // Re-evaluar de inmediato el stock del equipo con el nuevo link
-                            setTimeout(async () => {
-                                await evaluarAlertasStock();
-                            }, 500);
                         } else {
                             toast("Error al actualizar link: " + (data.message || "Error desconocido"), "error");
                             btnElement.disabled = false;
