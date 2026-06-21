@@ -4423,7 +4423,9 @@
                     factorEnganche = 0; // No hay enganche para contado
                 }
                 console.log(`[DEBUG - actualizarPrecioCalculadoPDP] Determined factorEnganche: ${factorEnganche}`);
-                const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
+                const factorInteres = (plazo === "26 Semanas")
+                    ? (CONFIG_TASAS.interes26 !== undefined ? CONFIG_TASAS.interes26 : 0.66)
+                    : (CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90);
 
                 const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
 
@@ -4908,7 +4910,9 @@
                         ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11)
                         : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
                 }
-                const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
+                const factorInteres = (plazo === "26 Semanas")
+                    ? (CONFIG_TASAS.interes26 !== undefined ? CONFIG_TASAS.interes26 : 0.66)
+                    : (CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90);
                 let numPagos = (plazo === "26 Semanas") ? 26 : 52;
 
                 const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
@@ -5022,7 +5026,9 @@
                         ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11)
                         : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
                 }
-                const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
+                const factorInteres = (plazo === "26 Semanas")
+                    ? (CONFIG_TASAS.interes26 !== undefined ? CONFIG_TASAS.interes26 : 0.66)
+                    : (CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90);
                 numPagos = (plazo === "26 Semanas") ? 26 : 52;
                 textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (26 Semanas)" : "Plan Cómodo (52 Semanas)";
 
@@ -5185,7 +5191,9 @@
                             ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11)
                             : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
                     }
-                    const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
+                    const factorInteres = (plazo === "26 Semanas")
+                        ? (CONFIG_TASAS.interes26 !== undefined ? CONFIG_TASAS.interes26 : 0.66)
+                        : (CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90);
 
                     const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
 
