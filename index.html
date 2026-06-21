@@ -2669,17 +2669,17 @@
 
 
                             <!-- Resumen de pago seleccionado -->
-                            <div id="pdp-form-resumen-pago" style="display:none; margin-top:16px; background: linear-gradient(135deg, rgba(0,191,255,0.07) 0%, rgba(22,163,74,0.07) 100%); border: 1.5px solid rgba(0,191,255,0.25); border-radius: 12px; padding: 14px 16px;">
-                                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 10px;">📋 Tu plan de pago</div>
-                                <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap;">
+                            <div id="pdp-form-resumen-pago" style="display:none; margin-top:18px; background: linear-gradient(135deg, rgba(0,191,255,0.08) 0%, rgba(22,163,74,0.08) 100%); border: 2px solid rgba(0,191,255,0.3); border-radius: 14px; padding: 18px 20px;">
+                                <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); margin-bottom: 14px;">📋 Tu plan de pago</div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
                                     <div>
-                                        <div id="pdp-resumen-enganche" style="font-size:20px; font-weight:800; color:#16a34a; line-height:1;">$0 MXN</div>
-                                        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Pago Inicial (Enganche)</div>
+                                        <div id="pdp-resumen-enganche" style="font-size:26px; font-weight:900; color:#16a34a; line-height:1;">$0 MXN</div>
+                                        <div style="font-size:16px; font-weight:700; color:#16a34a; margin-top:5px;">Pago Inicial (Enganche)</div>
                                     </div>
-                                    <div style="font-size:18px; color:var(--text-muted);">+</div>
+                                    <div style="font-size:22px; color:var(--text-muted); font-weight:300;">+</div>
                                     <div style="text-align:right;">
-                                        <div id="pdp-resumen-cuota" style="font-size:20px; font-weight:800; color:#0369a1; line-height:1;">$0 MXN</div>
-                                        <div id="pdp-resumen-termino" style="font-size:11px; color:var(--text-muted); margin-top:2px;">en -- pagos</div>
+                                        <div id="pdp-resumen-cuota" style="font-size:26px; font-weight:900; color:#0369a1; line-height:1;">$0 MXN</div>
+                                        <div id="pdp-resumen-termino" style="font-size:16px; font-weight:700; color:#0369a1; margin-top:5px;">a la semana</div>
                                     </div>
                                 </div>
                             </div>
@@ -4045,10 +4045,10 @@
                 } else {
                     const engVal   = parseFloat(document.getElementById('pdp-enganche-grande').innerText.replace(/[^0-9.]/g,'')) || 0;
                     const cuotaVal = parseFloat(document.getElementById('pdp-weekly-amount').innerText.replace(/[^0-9.]/g,'')) || 0;
-                    const termVal  = document.getElementById('pdp-weekly-term').innerText || '';
+                    const freqLabel = (freq === 'QUINCENAL') ? 'a la quincena' : 'a la semana';
                     resumenEng.innerText     = `$${Math.round(engVal).toLocaleString('es-MX')} MXN`;
                     resumenCuota.innerText   = `$${Math.round(cuotaVal).toLocaleString('es-MX')} MXN`;
-                    resumenTermino.innerText = termVal;
+                    resumenTermino.innerText = freqLabel;
                     resumenBox.style.display = 'block';
                 }
             }
