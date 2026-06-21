@@ -7261,6 +7261,14 @@
                                 btnSubmit.style.opacity = "";
                                 btnSubmit.style.cursor = "pointer";
                             }
+                        } else {
+                            if (warningEl) warningEl.style.display = 'block';
+                            if (formCard) formCard.style.display = 'none';
+                            if (btnSubmit) {
+                                btnSubmit.disabled = true;
+                                btnSubmit.style.opacity = "0.5";
+                                btnSubmit.style.cursor = "not-allowed";
+                            }
                         }
                     }
 
