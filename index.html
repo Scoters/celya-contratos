@@ -1344,7 +1344,7 @@
             height: auto !important;
         }
 
-        #pdp-credit-form-card button {
+        #pdp-credit-form-card button:not(.segment-btn) {
             font-size: 19px !important;
             padding: 16px !important;
         }
@@ -4368,6 +4368,7 @@
                 document.getElementById('pdp-weekly-amount').innerText = `$0 MXN`;
                 document.getElementById('pdp-weekly-term').innerText = `en 1 pago de contado`;
                 if (containerEng) containerEng.style.display = "none";
+                if (inputEng) inputEng.value = Math.round(precioContado);
             } else {
                 if (lblEnganche) lblEnganche.innerText = "Pago Inicial (Enganche)";
                 if (containerEng) containerEng.style.display = "block";
@@ -4848,6 +4849,8 @@
                 document.getElementById('pe-preview-enganche').innerText = `$${Math.round(precioContado).toLocaleString('es-MX')} MXN`;
                 document.getElementById('pe-preview-semanal').innerText = `$0 MXN`;
                 if (containerEng) containerEng.style.display = "none";
+                const inputEng = document.getElementById('pe-cliEnganchePersonalizado');
+                if (inputEng) inputEng.value = Math.round(precioContado);
             } else {
                 if (containerEng) containerEng.style.display = "block";
                 if (lblEnganche) lblEnganche.innerText = "Pago Inicial (Enganche):";

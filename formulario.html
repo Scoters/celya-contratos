@@ -739,6 +739,7 @@
                 if (preEnganche !== null && preEnganche.trim() !== "") {
                     const parsedEng = parseFloat(preEnganche);
                     document.getElementById('monto').value = isNaN(parsedEng) ? "" : parsedEng;
+                    window.prefilledEnganche = isNaN(parsedEng) ? null : parsedEng;
                 }
 
                 const preClientId = urlParams.get('pre_client_id');
@@ -1135,7 +1136,12 @@
                     const inputMonto = document.getElementById('monto');
                     
                     if (forceReset) {
-                        inputMonto.value = engancheMinimoObligatorio;
+                        if (window.prefilledEnganche !== undefined && window.prefilledEnganche !== null) {
+                            inputMonto.value = window.prefilledEnganche;
+                            window.prefilledEnganche = null;
+                        } else {
+                            inputMonto.value = engancheMinimoObligatorio;
+                        }
                     } else {
                         let engancheIngresado = parseFloat(inputMonto.value) || 0;
                         if (engancheIngresado < engancheMinimoObligatorio) {
