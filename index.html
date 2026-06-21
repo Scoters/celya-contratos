@@ -3472,6 +3472,12 @@
                 filtrados.sort((a, b) => (a.cuota52 || 0) - (b.cuota52 || 0));
             } else if (sortSelected === "MODEL_ASC") {
                 filtrados.sort((a, b) => a.modelo.localeCompare(b.modelo));
+            } else if (sortSelected === "DEFAULT") {
+                filtrados.sort((a, b) => {
+                    const isFeatA = a.estado === "MAS VENDIDO" ? 1 : 0;
+                    const isFeatB = b.estado === "MAS VENDIDO" ? 1 : 0;
+                    return isFeatB - isFeatA;
+                });
             }
 
             // Actualizar badge contador
