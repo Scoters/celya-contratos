@@ -1116,6 +1116,22 @@
             color: #38bdf8 !important;
         }
 
+        /* Special Order Preview colors aligned with light/dark theme */
+        #pe-preview-enganche-label, #pe-preview-enganche {
+            color: #16a34a !important;
+        }
+        body.dark-theme #pe-preview-enganche-label, 
+        body.dark-theme #pe-preview-enganche {
+            color: #4ade80 !important;
+        }
+        #pe-preview-semanal-label, #pe-preview-semanal {
+            color: #2563eb !important;
+        }
+        body.dark-theme #pe-preview-semanal-label, 
+        body.dark-theme #pe-preview-semanal {
+            color: #38bdf8 !important;
+        }
+
         /* Enganche mínimo en tarjetas */
         .card-enganche-minimo {
             font-size: 12px;
@@ -2642,7 +2658,7 @@
                     <div class="pdp-price-container">
                         <div style="display: flex; align-items: baseline; gap: 8px;">
                             <span class="pdp-price-amount" id="pdp-enganche-grande">$0</span>
-                            <span style="font-size: 14px; color: var(--text-muted);">Pago Inicial (Enganche)</span>
+                            <span style="font-size: 14px; color: var(--text-muted);" id="pdp-enganche-label">Pago Inicial (Enganche)</span>
                         </div>
 
                         <div class="pdp-weekly-payments">
@@ -2775,9 +2791,9 @@
                                 <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
                                     <div>
                                         <div id="pdp-resumen-enganche" class="pdp-summary-enganche-val" style="font-size:26px; font-weight:900; line-height:1;">$0 MXN</div>
-                                        <div class="pdp-summary-enganche-lbl" style="font-size:16px; font-weight:700; margin-top:5px;">Pago Inicial (Enganche)</div>
+                                        <div class="pdp-summary-enganche-lbl" style="font-size:16px; font-weight:700; margin-top:5px;">pago inicial (enganche)</div>
                                     </div>
-                                    <div style="font-size:22px; color:var(--text-muted); font-weight:300;">+</div>
+                                    <div style="font-size:16px; color:var(--text-muted); font-weight:600; text-transform:lowercase;">y después</div>
                                     <div style="text-align:right;">
                                         <div id="pdp-resumen-cuota" class="pdp-summary-cuota-val" style="font-size:26px; font-weight:900; line-height:1;">$0 MXN</div>
                                         <div id="pdp-resumen-termino" class="pdp-summary-cuota-lbl" style="font-size:16px; font-weight:700; margin-top:5px;">a la semana</div>
@@ -2844,14 +2860,14 @@
                             style="margin: 0; font-size: 15px; color: var(--primary); font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">
                             Cargando...</h4>
                         <div style="display: flex; gap: 8px; margin-top: 8px; align-items: baseline;">
-                            <span style="font-size: 12px; color: var(--text-muted);">Pago Inicial (Enganche):</span>
+                            <span id="pe-preview-enganche-label" style="font-size: 12px; color: var(--text-muted);">Pago Inicial (Enganche):</span>
                             <span id="pe-preview-enganche"
-                                style="font-size: 18px; font-weight: bold; color: #16a34a;">$0</span>
+                                style="font-size: 18px; font-weight: bold;">$0</span>
                         </div>
                         <div style="display: flex; gap: 8px; margin-top: 2px; align-items: baseline;">
-                            <span style="font-size: 12px; color: var(--text-muted);">Abono Semanal:</span>
+                            <span id="pe-preview-semanal-label" style="font-size: 12px; color: var(--text-muted);">Abono Semanal:</span>
                             <span id="pe-preview-semanal"
-                                style="font-size: 16px; font-weight: bold; color: #2563eb;">$0</span>
+                                style="font-size: 16px; font-weight: bold;">$0</span>
                         </div>
                     </div>
                 </div>
@@ -4076,13 +4092,16 @@
 
             const containerEng = document.getElementById('pdp-enganche-personalizado-container');
             const inputEng = document.getElementById('cliEnganchePersonalizado');
+            const lblEnganche = document.getElementById('pdp-enganche-label');
 
             if (freq === "CONTADO") {
+                if (lblEnganche) lblEnganche.innerText = "Pago de Contado";
                 document.getElementById('pdp-enganche-grande').innerText = `$${Math.round(precioContado).toLocaleString('es-MX')} MXN`;
                 document.getElementById('pdp-weekly-amount').innerText = `$0 MXN`;
                 document.getElementById('pdp-weekly-term').innerText = `en 1 pago de contado`;
                 if (containerEng) containerEng.style.display = "none";
             } else {
+                if (lblEnganche) lblEnganche.innerText = "Pago Inicial (Enganche)";
                 if (containerEng) containerEng.style.display = "block";
 
                 let factorEnganche;
@@ -4525,13 +4544,24 @@
             const freq = document.getElementById('pe-cliFrecuencia').value;
 
             const containerEng = document.getElementById('pe-enganche-personalizado-container');
+            const lblEnganche = document.getElementById('pe-preview-enganche-label');
+            const lblSemanal = document.getElementById('pe-preview-semanal-label');
 
             if (freq === "CONTADO") {
+                if (lblEnganche) lblEnganche.innerText = "Total de Contado:";
+                if (lblSemanal) lblSemanal.innerText = "Abono:";
                 document.getElementById('pe-preview-enganche').innerText = `$${Math.round(precioContado).toLocaleString('es-MX')} MXN`;
                 document.getElementById('pe-preview-semanal').innerText = `$0 MXN`;
                 if (containerEng) containerEng.style.display = "none";
             } else {
                 if (containerEng) containerEng.style.display = "block";
+                if (lblEnganche) lblEnganche.innerText = "Pago Inicial (Enganche):";
+
+                if (freq === "QUINCENAL") {
+                    if (lblSemanal) lblSemanal.innerText = "Abono Quincenal:";
+                } else {
+                    if (lblSemanal) lblSemanal.innerText = "Abono Semanal:";
+                }
 
                 // Matemática
                 let factorEnganche;
@@ -4594,6 +4624,7 @@
             const sueldo = document.getElementById('pe-cliSueldo').value;
             const prestamos = document.getElementById('pe-cliPrestamos').value;
             const freq = document.getElementById('pe-cliFrecuencia').value;
+            const plazo = document.getElementById('pe-cliPlazo').value;
 
             if (freq !== "CONTADO") {
                 if (!nombre || !telefono || !sueldo) {
@@ -4630,7 +4661,6 @@
             let textoPlazoEnvio = "Pago de Contado";
 
             if (freq !== "CONTADO") {
-                const plazo = document.getElementById('pe-cliPlazo').value;
                 let factorEnganche;
                 if (freq === "QUINCENAL") {
                     if (plazo === "52 Semanas") {
