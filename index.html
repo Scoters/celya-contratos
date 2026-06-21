@@ -946,8 +946,8 @@
         }
 
         .pdp-main-img-wrapper {
-            width: 380px !important;
-            height: 380px !important;
+            width: 460px !important;
+            height: 460px !important;
             flex-shrink: 0 !important;
             display: flex;
             justify-content: center;
@@ -1141,8 +1141,8 @@
             }
 
             .pdp-main-img-wrapper {
-                width: 320px !important;
-                height: 320px !important;
+                width: 390px !important;
+                height: 390px !important;
                 margin: 0 auto;
                 flex-shrink: 0 !important;
             }
@@ -2187,7 +2187,8 @@
         .pdp-whatsapp-float {
             position: fixed;
             bottom: 24px;
-            right: 24px;
+            left: 24px;
+            right: auto;
             width: 60px;
             height: 60px;
             box-sizing: border-box !important;
@@ -2219,7 +2220,8 @@
         .pdp-whatsapp-float .pdp-whatsapp-tooltip {
             position: absolute;
             bottom: 72px;
-            right: 0;
+            left: 0;
+            right: auto;
             background: rgba(0, 143, 255, 0.12);
             border: 1.5px solid rgba(0, 143, 255, 0.4);
             color: var(--accent);
@@ -2232,16 +2234,15 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             font-family: 'Outfit', 'Inter', sans-serif;
-            animation: pdpTooltipFloat 2s infinite ease-in-out !important;
+            will-change: transform;
+            animation: pdpTooltipFloat 1.8s ease-in-out infinite !important;
+            transform-origin: center center;
         }
         
         @keyframes pdpTooltipFloat {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-8px);
-            }
+            0%   { transform: translateY(0px); }
+            50%  { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
         }
         
         @keyframes pdpWhatsappBounce {
@@ -2262,7 +2263,8 @@
         @media (max-width: 768px) {
             .pdp-whatsapp-float {
                 bottom: 20px;
-                right: 20px;
+                left: 16px;
+                right: auto;
                 width: 52px !important;
                 height: 52px !important;
             }
@@ -2272,7 +2274,8 @@
             }
             .pdp-whatsapp-float .pdp-whatsapp-tooltip {
                 bottom: 64px;
-                right: 0;
+                left: 0;
+                right: auto;
                 font-size: 11px;
                 padding: 6px 10px;
             }
@@ -2556,22 +2559,22 @@
                     </div>
 
                     <details class="enganche-personalizado-pdp" id="pdp-enganche-personalizado-container"
-                        style="margin-top: 10px; margin-bottom: 10px; text-align: left; background: var(--bg-card); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color);">
-                        <summary style="cursor: pointer; font-size: 13px; font-weight: 600; color: var(--primary); outline: none; list-style: none; display: flex; align-items: center; justify-content: space-between;">
-                            <span>🏁 Personalizar Enganche <span style="font-size: 11px; font-weight: 400; color: var(--text-muted);">(Opcional)</span></span>
-                            <span style="font-size: 12px; color: var(--text-muted);">▼</span>
+                        style="margin-top: 10px; margin-bottom: 10px; text-align: left; background: var(--bg-card); padding: 14px 18px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <summary style="cursor: pointer; font-size: 16px; font-weight: 600; color: var(--primary); outline: none; list-style: none; display: flex; align-items: center; justify-content: space-between;">
+                            <span>🏁 Personalizar Enganche <span style="font-size: 13px; font-weight: 400; color: var(--text-muted);">(Opcional)</span></span>
+                            <span style="font-size: 14px; color: var(--text-muted);">▼</span>
                         </summary>
-                        <div style="margin-top: 8px;">
-                            <label style="display: block; font-size: 11px; font-weight: 500; color: var(--text-muted); margin-bottom: 4px;" id="lbl-cliEnganchePersonalizado">
+                        <div style="margin-top: 12px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 8px;" id="lbl-cliEnganchePersonalizado">
                                 Mínimo requerido: <strong id="pdp-enganche-minimo-label" style="color: var(--text-main);">$0</strong>
                             </label>
-                            <div style="display: flex; gap: 6px; align-items: center;">
-                                <span style="font-weight: bold; color: var(--text-main); font-size: 14px;">$</span>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <span style="font-weight: bold; color: var(--text-main); font-size: 17px;">$</span>
                                 <input type="number" id="cliEnganchePersonalizado"
                                     placeholder="Monto mayor para abonos más bajos..."
                                     oninput="actualizarPrecioCalculadoPDP()"
-                                    style="flex: 1; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; outline: none; background: var(--bg-card); color: var(--text-main); box-sizing: border-box;">
-                                <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">MXN</span>
+                                    style="flex: 1; padding: 9px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 15px; outline: none; background: var(--bg-card); color: var(--text-main); box-sizing: border-box;">
+                                <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">MXN</span>
                             </div>
                         </div>
                     </details>
@@ -7731,7 +7734,7 @@
         <svg viewBox="0 0 24 24">
             <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436.002 9.858-4.42 9.86-9.86.001-2.636-1.024-5.113-2.884-6.978C16.484 1.903 14.004.877 11.4.877c-5.446 0-9.871 4.423-9.873 9.862-.001 1.77.472 3.498 1.372 5.031L1.879 21.5l5.882-1.543zm11.75-4.227c-.31-.154-1.836-.906-2.119-1.01-.283-.102-.49-.153-.696.154-.205.308-.797.997-.976 1.199-.178.203-.357.226-.667.071-3.132-1.558-4.47-3.002-5.3-4.426-.205-.353-.021-.544.152-.715.156-.155.31-.353.465-.53.155-.177.206-.298.31-.497.102-.199.05-.375-.026-.53-.077-.154-.696-1.67-.954-2.285-.25-.604-.503-.522-.696-.532-.179-.009-.384-.01-.59-.01-.205 0-.54.077-.822.385-.283.308-1.079 1.056-1.079 2.574 0 1.519 1.103 2.986 1.258 3.193.154.205 2.17 3.31 5.257 4.637.734.317 1.309.507 1.758.649.738.236 1.412.203 1.944.123.593-.088 1.836-.751 2.094-1.444.258-.693.258-1.288.181-1.413-.076-.124-.282-.199-.592-.353z"/>
         </svg>
-        <span class="pdp-whatsapp-tooltip">Dudas o aclaraciones</span>
+        <span class="pdp-whatsapp-tooltip">Dudas</span>
     </a>
 </body>
 <!-- ═════════════════════ TOAST + MODAL RESULT SYSTEM ═════════════════════ -->
