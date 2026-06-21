@@ -3490,7 +3490,7 @@
                     const displayQuin = freqPrevia === "quincenal" ? "" : "display: none;";
                     const displayCont = freqPrevia === "contado" ? "" : "display: none;";
 
-                    const textSolicitar = freqPrevia === "contado" ? "Comprar de Contado" : "Pedir a Crédito";
+                    const textSolicitar = freqPrevia === "contado" ? "Comprar de Contado" : "Más Información";
 
                     let contentEnganche = "";
                     if (freqPrevia === "contado") {
@@ -3613,7 +3613,7 @@
                 if (cuotasSemanal) cuotasSemanal.style.display = 'block';
                 if (cuotasQuincenal) cuotasQuincenal.style.display = 'none';
                 if (cuotasContado) cuotasContado.style.display = 'none';
-                if (btnSolicitar) btnSolicitar.innerText = 'Pedir a Crédito';
+                if (btnSolicitar) btnSolicitar.innerText = 'Más Información';
                 if (divEnganche) {
                     divEnganche.style.opacity = '1';
                     const precioContado = parseFloat((divEnganche.getAttribute('data-precio') || '').replace(/[\$,]/g, '')) || 0;
@@ -3629,7 +3629,7 @@
                 if (cuotasSemanal) cuotasSemanal.style.display = 'none';
                 if (cuotasQuincenal) cuotasQuincenal.style.display = 'block';
                 if (cuotasContado) cuotasContado.style.display = 'none';
-                if (btnSolicitar) btnSolicitar.innerText = 'Pedir a Crédito';
+                if (btnSolicitar) btnSolicitar.innerText = 'Más Información';
                 if (divEnganche) {
                     divEnganche.style.opacity = '1';
                     const precioContado = parseFloat((divEnganche.getAttribute('data-precio') || '').replace(/[\$,]/g, '')) || 0;
