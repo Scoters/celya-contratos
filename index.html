@@ -3600,6 +3600,8 @@
             const pdpFloatBtn = document.getElementById('pdpFloatingSolicitudBtn');
             if (pdpFloatBtn) {
                 pdpFloatBtn.style.display = 'flex';
+                pdpFloatBtn.style.opacity = '1';
+                pdpFloatBtn.style.pointerEvents = 'auto';
                 pdpFloatBtn.classList.remove('expanded');
             }
         }
@@ -7968,6 +7970,9 @@
         if (!isExpanded) {
             btn.classList.add('expanded');
         } else {
+            // Desaparecer al darle click para llevar al formulario
+            btn.style.opacity = '0';
+            btn.style.pointerEvents = 'none';
             window.scrollToPDPForm(true);
         }
     };
@@ -7980,14 +7985,28 @@
         }
     });
 
-    // Ocultar botones de PDP en móvil al hacer scroll hacia abajo y mostrarlos al subir
+    // Ocultar botones de PDP al hacer scroll
     (function() {
         const pdpContent = document.querySelector('#modalCredito .modal-content');
         if (pdpContent) {
             let lastPdpScrollTop = 0;
             pdpContent.addEventListener('scroll', function() {
-                if (window.innerWidth > 900) return;
                 const currentScroll = pdpContent.scrollTop;
+                
+                // Desaparecer botón de llenar solicitud al hacer scroll
+                const pdpFloatBtn = document.getElementById('pdpFloatingSolicitudBtn');
+                if (pdpFloatBtn) {
+                    if (currentScroll > 50) {
+                        pdpFloatBtn.style.opacity = '0';
+                        pdpFloatBtn.style.pointerEvents = 'none';
+                    } else {
+                        // Volver a mostrar si regresa al inicio
+                        pdpFloatBtn.style.opacity = '1';
+                        pdpFloatBtn.style.pointerEvents = 'auto';
+                    }
+                }
+
+                if (window.innerWidth > 900) return;
                 const closeBtn = document.querySelector('#modalCredito .pdp-close-btn');
                 const infoBtn = document.getElementById('pdp-info-btn');
                 const tooltip = document.getElementById('pdp-info-tooltip');
