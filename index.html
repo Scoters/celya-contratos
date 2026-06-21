@@ -8027,7 +8027,34 @@
         });
     })();
 
-    // Control de la barra de búsqueda auto-e
+    // Control de la barra de búsqueda auto-expandible en el header
+    (function () {
+        const input = document.getElementById('inputBusqueda');
+        const wrapper = document.querySelector('.header-search-wrapper');
+        const clearBtn = document.getElementById('clearSearchBtn');
+        if (!input || !wrapper) return;
+
+        function updateState() {
+            if (input.value.trim() !== "") {
+                wrapper.classList.add('has-text');
+                if (clearBtn) clearBtn.style.display = 'flex';
+            } else {
+                wrapper.classList.remove('has-text');
+                if (clearBtn) clearBtn.style.display = 'none';
+            }
+        }
+
+        input.addEventListener('input', updateState);
+        input.addEventListener('focus', updateState);
+        input.addEventListener('blur', updateState);
+
+        window.clearSearch = function () {
+            input.value = "";
+            updateState();
+            solicitarBusqueda();
+            input.focus();
+        };
+
         // Inicializar por si ya tiene valor
         updateState();
     })();
