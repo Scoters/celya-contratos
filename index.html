@@ -2668,7 +2668,23 @@
 
 
 
-                            <div style="display: flex; gap: 12px; margin-top: 20px;">
+                            <!-- Resumen de pago seleccionado -->
+                            <div id="pdp-form-resumen-pago" style="display:none; margin-top:16px; background: linear-gradient(135deg, rgba(0,191,255,0.07) 0%, rgba(22,163,74,0.07) 100%); border: 1.5px solid rgba(0,191,255,0.25); border-radius: 12px; padding: 14px 16px;">
+                                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 10px;">📋 Tu plan de pago</div>
+                                <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap;">
+                                    <div>
+                                        <div id="pdp-resumen-enganche" style="font-size:20px; font-weight:800; color:#16a34a; line-height:1;">$0 MXN</div>
+                                        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Pago Inicial (Enganche)</div>
+                                    </div>
+                                    <div style="font-size:18px; color:var(--text-muted);">+</div>
+                                    <div style="text-align:right;">
+                                        <div id="pdp-resumen-cuota" style="font-size:20px; font-weight:800; color:#0369a1; line-height:1;">$0 MXN</div>
+                                        <div id="pdp-resumen-termino" style="font-size:11px; color:var(--text-muted); margin-top:2px;">en -- pagos</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 12px; margin-top: 16px;">
                                 <button type="button" onclick="enviarSolicitudFinal()"
                                     style="background:#3483fa; color:white; border:none; padding:14px; flex:1; font-weight:bold; border-radius:8px; cursor:pointer; font-size:16px; transition: background 0.2s;"
                                     onmouseover="this.style.background='#2968c8'"
@@ -4017,6 +4033,25 @@
 
             document.getElementById('hiddenCuota26').value = calcularCuotaSemanal26(precioContado);
             document.getElementById('hiddenCuota52').value = calcularCuotaSemanal52(precioContado);
+
+            // — Resumen de pago en el formulario —
+            const resumenBox     = document.getElementById('pdp-form-resumen-pago');
+            const resumenEng     = document.getElementById('pdp-resumen-enganche');
+            const resumenCuota   = document.getElementById('pdp-resumen-cuota');
+            const resumenTermino = document.getElementById('pdp-resumen-termino');
+            if (resumenBox && resumenEng && resumenCuota && resumenTermino) {
+                if (freq === 'CONTADO') {
+                    resumenBox.style.display = 'none';
+                } else {
+                    const engVal   = parseFloat(document.getElementById('pdp-enganche-grande').innerText.replace(/[^0-9.]/g,'')) || 0;
+                    const cuotaVal = parseFloat(document.getElementById('pdp-weekly-amount').innerText.replace(/[^0-9.]/g,'')) || 0;
+                    const termVal  = document.getElementById('pdp-weekly-term').innerText || '';
+                    resumenEng.innerText     = `$${Math.round(engVal).toLocaleString('es-MX')} MXN`;
+                    resumenCuota.innerText   = `$${Math.round(cuotaVal).toLocaleString('es-MX')} MXN`;
+                    resumenTermino.innerText = termVal;
+                    resumenBox.style.display = 'block';
+                }
+            }
         }
 
         function cerrarModal() {
