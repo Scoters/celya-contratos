@@ -1912,6 +1912,14 @@
                     evaluarAlertasStock();
                 }
 
+                function isProductTagOutOfStock(tags) {
+                    if (!tags) return false;
+                    return tags.includes("out-of-stock") ||
+                        tags.includes("disabled") ||
+                        tags.includes("no-bids") ||
+                        tags.includes("no-winner");
+                }
+
                 async function evaluarAlertasStock() {
                     const btn = document.getElementById('btnOpenStockAlerts');
                     const originalBtnHtml = btn ? btn.innerHTML : '';
@@ -1957,7 +1965,7 @@
                                     return procesarSiguiente();
                                 }
                                 
-                                const isProduct = idBusqueda.startsWith("MLM") ? false : true;
+                                const isProduct = idBusqueda.startsWith("MLM") && idBusqueda.length <= 11;
                                 const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${idBusqueda}&isProduct=${isProduct}`;
                                 const resLive = await fetch(proxyUrl);
                                 const liveData = await resLive.json();
@@ -1990,6 +1998,10 @@
                                     if (totalProducts > 0 && activeProductsCount > 0) {
                                         tieneStock = true;
                                     }
+                                }
+                                // 1b. Catalog Product con buy_box_winner (sin pickers visibles)
+                                else if (isProduct && liveData.buy_box_winner) {
+                                    tieneStock = true;
                                 }
                                 // 2. Item con variations
                                 else if (liveData.variations && liveData.variations.length > 0) {
@@ -2161,7 +2173,7 @@
                     btnElement.innerHTML = "⏳ Sincronizando...";
                     
                     try {
-                        const isProduct = id.startsWith("MLM") ? false : true;
+                        const isProduct = id.startsWith("MLM") && id.length <= 11;
                         const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${id}&isProduct=${isProduct}`;
                         const resML = await fetch(proxyUrl);
                         const freshData = await resML.json();
