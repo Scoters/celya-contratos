@@ -2904,28 +2904,27 @@
                         <input type="tel" id="pe-cliTelefono" required placeholder="10 dígitos"
                             style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
 
-                        <label id="pe-lbl-cliSueldo"
-                            style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">Sueldo
-                            Semanal Libre:</label>
-                        <select id="pe-cliSueldo"
-                            style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
-                            <option value="Menos de $1,500">Menos de $1,500 semanales</option>
-                            <option value="$1,500 a $2,500">$1,500 a $2,500 semanales</option>
-                            <option value="$2,500 a $3,500">$2,500 a $3,500 semanales</option>
-                            <option value="$3,500 a $5,000" selected>$3,500 a $5,000 semanales</option>
-                            <option value="Más de $5,000">Más de $5,000 semanales</option>
-                        </select>
+                        <div id="seccionPreguntasPedidoEspecial">
+                            <label id="pe-lbl-cliSueldo"
+                                style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">¿Cuánto ganas libres a la semana? (Ingresos):</label>
+                            <select id="pe-cliSueldo"
+                                style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
+                                <option value="Menos de $1,500">Menos de $1,500</option>
+                                <option value="$1,500 a $3,000">$1,500 a $3,000</option>
+                                <option value="$3,000 a $5,000" selected>$3,000 a $5,000</option>
+                                <option value="Más de $5,000">Más de $5,000</option>
+                            </select>
 
-                        <label id="pe-lbl-cliPrestamos"
-                            style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">¿Cuánto
-                            pagas de abonos actualmente? (Deudas):</label>
-                        <select id="pe-cliPrestamos"
-                            style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
-                            <option value="Nada, no tengo deudas">Nada, no tengo deudas</option>
-                            <option value="Menos de $500">Menos de $500</option>
-                            <option value="$500 a $1,000">$500 a $1,000</option>
-                            <option value="Más de $1,000">Más de $1,000</option>
-                        </select>
+                            <label id="pe-lbl-cliPrestamos"
+                                style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">¿Cuánto pagas de abonos actualmente a la semana? (Deudas activas):</label>
+                            <select id="pe-cliPrestamos"
+                                style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
+                                <option value="Nada, no tengo deudas">Nada, no tengo deudas</option>
+                                <option value="Menos de $500">Menos de $500</option>
+                                <option value="$500 a $1,000">$500 a $1,000</option>
+                                <option value="Más de $1,000">Más de $1,000</option>
+                            </select>
+                        </div>
 
                         <label
                             style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">Frecuencia
@@ -2934,6 +2933,7 @@
                             style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
                             <option value="SEMANAL">Semanal (Cada Semana)</option>
                             <option value="QUINCENAL">Quincenal (Cada 15 días)</option>
+                            <option value="CONTADO">De Contado (Pago Único)</option>
                         </select>
 
                         <label
@@ -4433,69 +4433,78 @@
         function actualizarPlazosYPreciosPedidoEspecial() {
             const freq = document.getElementById('pe-cliFrecuencia').value;
             const selectPlazo = document.getElementById('pe-cliPlazo');
+            const seccionPreguntas = document.getElementById('seccionPreguntasPedidoEspecial');
 
             const lblSueldo = document.getElementById('pe-lbl-cliSueldo');
             const selectSueldo = document.getElementById('pe-cliSueldo');
             const lblPrestamos = document.getElementById('pe-lbl-cliPrestamos');
             const selectPrestamos = document.getElementById('pe-cliPrestamos');
 
-            if (freq === "QUINCENAL") {
-                selectPlazo.options[0].text = "Plan Rápido (13 Quincenas)";
-                selectPlazo.options[1].text = "Plan Cómodo (26 Quincenas)";
-
-                if (lblSueldo) lblSueldo.innerText = "Sueldo Quincenal Libre:";
-                if (selectSueldo) {
-                    selectSueldo.options[0].text = "Menos de $3,000 quincenales";
-                    selectSueldo.options[0].value = "Menos de $3,000";
-                    selectSueldo.options[1].text = "$3,000 a $5,000 quincenales";
-                    selectSueldo.options[1].value = "$3,000 a $5,000";
-                    selectSueldo.options[2].text = "$5,000 a $7,000 quincenales";
-                    selectSueldo.options[2].value = "$5,000 a $7,000";
-                    selectSueldo.options[3].text = "$7,000 a $10,000 quincenales";
-                    selectSueldo.options[3].value = "$7,000 a $10,000";
-                    selectSueldo.options[4].text = "Más de $10,000 quincenales";
-                    selectSueldo.options[4].value = "Más de $10,000";
-                }
-
-                if (lblPrestamos) lblPrestamos.innerText = "¿Cuánto pagas de abonos actualmente? (Deudas Quincenales):";
-                if (selectPrestamos) {
-                    selectPrestamos.options[0].text = "Nada, no tengo deudas";
-                    selectPrestamos.options[0].value = "Nada, no tengo deudas";
-                    selectPrestamos.options[1].text = "Menos de $1,000";
-                    selectPrestamos.options[1].value = "Menos de $1,000";
-                    selectPrestamos.options[2].text = "$1,000 a $2,000";
-                    selectPrestamos.options[2].value = "$1,000 a $2,000";
-                    selectPrestamos.options[3].text = "Más de $2,000";
-                    selectPrestamos.options[3].value = "Más de $2,000";
-                }
+            if (freq === "CONTADO") {
+                if (seccionPreguntas) seccionPreguntas.style.display = "none";
+                selectPlazo.options[0].text = "Pago Único de Contado";
+                selectPlazo.options[1].style.display = "none";
+                selectPlazo.options[1].disabled = true;
+                selectPlazo.value = "26 Semanas";
             } else {
-                selectPlazo.options[0].text = "Plan Rápido (26 Semanas)";
-                selectPlazo.options[1].text = "Plan Cómodo (52 Semanas)";
+                if (seccionPreguntas) seccionPreguntas.style.display = "block";
+                selectPlazo.options[1].style.display = "block";
+                selectPlazo.options[1].disabled = false;
 
-                if (lblSueldo) lblSueldo.innerText = "Sueldo Semanal Libre:";
-                if (selectSueldo) {
-                    selectSueldo.options[0].text = "Menos de $1,500 semanales";
-                    selectSueldo.options[0].value = "Menos de $1,500";
-                    selectSueldo.options[1].text = "$1,500 a $2,500 semanales";
-                    selectSueldo.options[1].value = "$1,500 a $2,500";
-                    selectSueldo.options[2].text = "$2,500 a $3,500 semanales";
-                    selectSueldo.options[2].value = "$2,500 a $3,500";
-                    selectSueldo.options[3].text = "$3,500 a $5,000 semanales";
-                    selectSueldo.options[3].value = "$3,500 a $5,000";
-                    selectSueldo.options[4].text = "Más de $5,000 semanales";
-                    selectSueldo.options[4].value = "Más de $5,000";
-                }
+                if (freq === "QUINCENAL") {
+                    selectPlazo.options[0].text = "Plan Rápido (13 Pagos Quincenales)";
+                    selectPlazo.options[1].text = "Plan Cómodo (26 Pagos Quincenales)";
 
-                if (lblPrestamos) lblPrestamos.innerText = "¿Cuánto pagas de abonos actualmente? (Deudas):";
-                if (selectPrestamos) {
-                    selectPrestamos.options[0].text = "Nada, no tengo deudas";
-                    selectPrestamos.options[0].value = "Nada, no tengo deudas";
-                    selectPrestamos.options[1].text = "Menos de $500";
-                    selectPrestamos.options[1].value = "Menos de $500";
-                    selectPrestamos.options[2].text = "$500 a $1,000";
-                    selectPrestamos.options[2].value = "$500 a $1,000";
-                    selectPrestamos.options[3].text = "Más de $1,000";
-                    selectPrestamos.options[3].value = "Más de $1,000";
+                    if (lblSueldo) lblSueldo.innerText = "¿Cuánto ganas libres a la quincena? (Ingresos):";
+                    if (selectSueldo) {
+                        selectSueldo.options[0].text = "Menos de $3,000";
+                        selectSueldo.options[0].value = "Menos de $3,000";
+                        selectSueldo.options[1].text = "$3,000 a $6,000";
+                        selectSueldo.options[1].value = "$3,000 a $6,000";
+                        selectSueldo.options[2].text = "$6,000 a $10,000";
+                        selectSueldo.options[2].value = "$6,000 a $10,000";
+                        selectSueldo.options[3].text = "Más de $10,000";
+                        selectSueldo.options[3].value = "Más de $10,000";
+                    }
+
+                    if (lblPrestamos) lblPrestamos.innerText = "¿Cuánto pagas de abonos actualmente a la quincena? (Deudas activas):";
+                    if (selectPrestamos) {
+                        selectPrestamos.options[0].text = "Nada, no tengo deudas";
+                        selectPrestamos.options[0].value = "Nada, no tengo deudas";
+                        selectPrestamos.options[1].text = "Menos de $1,000";
+                        selectPrestamos.options[1].value = "Menos de $1,000";
+                        selectPrestamos.options[2].text = "$1,000 a $2,000";
+                        selectPrestamos.options[2].value = "$1,000 a $2,000";
+                        selectPrestamos.options[3].text = "Más de $2,000";
+                        selectPrestamos.options[3].value = "Más de $2,000";
+                    }
+                } else {
+                    selectPlazo.options[0].text = "Plan Rápido (26 Pagos Semanales)";
+                    selectPlazo.options[1].text = "Plan Cómodo (52 Pagos Semanales)";
+
+                    if (lblSueldo) lblSueldo.innerText = "¿Cuánto ganas libres a la semana? (Ingresos):";
+                    if (selectSueldo) {
+                        selectSueldo.options[0].text = "Menos de $1,500";
+                        selectSueldo.options[0].value = "Menos de $1,500";
+                        selectSueldo.options[1].text = "$1,500 a $3,000";
+                        selectSueldo.options[1].value = "$1,500 a $3,000";
+                        selectSueldo.options[2].text = "$3,000 a $5,000";
+                        selectSueldo.options[2].value = "$3,000 a $5,000";
+                        selectSueldo.options[3].text = "Más de $5,000";
+                        selectSueldo.options[3].value = "Más de $5,000";
+                    }
+
+                    if (lblPrestamos) lblPrestamos.innerText = "¿Cuánto pagas de abonos actualmente a la semana? (Deudas activas):";
+                    if (selectPrestamos) {
+                        selectPrestamos.options[0].text = "Nada, no tengo deudas";
+                        selectPrestamos.options[0].value = "Nada, no tengo deudas";
+                        selectPrestamos.options[1].text = "Menos de $500";
+                        selectPrestamos.options[1].value = "Menos de $500";
+                        selectPrestamos.options[2].text = "$500 a $1,000";
+                        selectPrestamos.options[2].value = "$500 a $1,000";
+                        selectPrestamos.options[3].text = "Más de $1,000";
+                        selectPrestamos.options[3].value = "Más de $1,000";
+                    }
                 }
             }
 
@@ -4515,56 +4524,66 @@
             const plazo = document.getElementById('pe-cliPlazo').value;
             const freq = document.getElementById('pe-cliFrecuencia').value;
 
-            // Matemática
-            let factorEnganche;
-            if (freq === "QUINCENAL") {
-                if (plazo === "52 Semanas") {
-                    const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
-                    factorEnganche = factorEngCom * 2;
-                } else {
-                    factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
-                }
+            const containerEng = document.getElementById('pe-enganche-personalizado-container');
+
+            if (freq === "CONTADO") {
+                document.getElementById('pe-preview-enganche').innerText = `$${Math.round(precioContado).toLocaleString('es-MX')} MXN`;
+                document.getElementById('pe-preview-semanal').innerText = `$0 MXN`;
+                if (containerEng) containerEng.style.display = "none";
             } else {
-                factorEnganche = (plazo === "52 Semanas")
-                    ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11)
-                    : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
+                if (containerEng) containerEng.style.display = "block";
+
+                // Matemática
+                let factorEnganche;
+                if (freq === "QUINCENAL") {
+                    if (plazo === "52 Semanas") {
+                        const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
+                        factorEnganche = factorEngCom * 2;
+                    } else {
+                        factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+                    }
+                } else {
+                    factorEnganche = (plazo === "52 Semanas")
+                        ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11)
+                        : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
+                }
+                const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
+                let numPagos = (plazo === "26 Semanas") ? 26 : 52;
+
+                const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
+
+                const minLabel = document.getElementById('pe-enganche-minimo-label');
+                if (minLabel) minLabel.innerText = `$${engancheCalculado.toLocaleString('es-MX')} MXN`;
+
+                const inputEng = document.getElementById('pe-cliEnganchePersonalizado');
+                if (inputEng) inputEng.min = engancheCalculado;
+                let customEnganche = parseFloat(inputEng.value) || 0;
+                let engancheFinal = engancheCalculado;
+
+                if (customEnganche > engancheCalculado) {
+                    engancheFinal = customEnganche;
+                }
+
+                if (freq === "QUINCENAL") {
+                    numPagos = numPagos / 2;
+                }
+
+                let baseCuota = (plazo === "26 Semanas") ? calcularCuotaSemanal26(precioContado) : calcularCuotaSemanal52(precioContado);
+                if (freq === "QUINCENAL") {
+                    baseCuota = baseCuota * 2;
+                }
+
+                let cuota = baseCuota;
+                if (engancheFinal > engancheCalculado) {
+                    const extraEnganche = engancheFinal - engancheCalculado;
+                    cuota = baseCuota - (extraEnganche / numPagos);
+                }
+
+                let labelFrecuencia = (freq === "QUINCENAL") ? "/quin" : "/sem";
+
+                document.getElementById('pe-preview-enganche').innerText = `$${engancheFinal.toLocaleString('es-MX')} MXN`;
+                document.getElementById('pe-preview-semanal').innerText = `$${Math.round(cuota).toLocaleString('es-MX')} MXN${labelFrecuencia}`;
             }
-            const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
-            let numPagos = (plazo === "26 Semanas") ? 26 : 52;
-
-            const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
-
-            const minLabel = document.getElementById('pe-enganche-minimo-label');
-            if (minLabel) minLabel.innerText = `$${engancheCalculado.toLocaleString('es-MX')} MXN`;
-
-            const inputEng = document.getElementById('pe-cliEnganchePersonalizado');
-            if (inputEng) inputEng.min = engancheCalculado;
-            let customEnganche = parseFloat(inputEng.value) || 0;
-            let engancheFinal = engancheCalculado;
-
-            if (customEnganche > engancheCalculado) {
-                engancheFinal = customEnganche;
-            }
-
-            if (freq === "QUINCENAL") {
-                numPagos = numPagos / 2;
-            }
-
-            let baseCuota = (plazo === "26 Semanas") ? calcularCuotaSemanal26(precioContado) : calcularCuotaSemanal52(precioContado);
-            if (freq === "QUINCENAL") {
-                baseCuota = baseCuota * 2;
-            }
-
-            let cuota = baseCuota;
-            if (engancheFinal > engancheCalculado) {
-                const extraEnganche = engancheFinal - engancheCalculado;
-                cuota = baseCuota - (extraEnganche / numPagos);
-            }
-
-            let labelFrecuencia = (freq === "QUINCENAL") ? "/quin" : "/sem";
-
-            document.getElementById('pe-preview-enganche').innerText = `$${engancheFinal.toLocaleString('es-MX')} MXN`;
-            document.getElementById('pe-preview-semanal').innerText = `$${Math.round(cuota).toLocaleString('es-MX')} MXN${labelFrecuencia}`;
         }
 
         async function enviarSolicitudPedidoEspecial() {
@@ -4574,12 +4593,18 @@
             const telefono = document.getElementById('pe-cliTelefono').value.trim();
             const sueldo = document.getElementById('pe-cliSueldo').value;
             const prestamos = document.getElementById('pe-cliPrestamos').value;
-            const plazo = document.getElementById('pe-cliPlazo').value;
             const freq = document.getElementById('pe-cliFrecuencia').value;
 
-            if (!nombre || !telefono || !sueldo) {
-                toast('Por favor rellena todos tus datos de contacto e ingresos.', 'warning');
-                return;
+            if (freq !== "CONTADO") {
+                if (!nombre || !telefono || !sueldo) {
+                    toast('Por favor rellena todos tus datos de contacto e ingresos.', 'warning');
+                    return;
+                }
+            } else {
+                if (!nombre || !telefono) {
+                    toast('Por favor rellena tus datos de contacto.', 'warning');
+                    return;
+                }
             }
 
             if (!pe_data_actual) return;
@@ -4598,46 +4623,58 @@
 
             const basePrice = parseFloat(pe_data_actual.price) || 0;
             const precioContado = basePrice * CONFIG_TASAS.gananciaContadoFactor;
-            let factorEnganche;
-            if (freq === "QUINCENAL") {
-                if (plazo === "52 Semanas") {
-                    const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
-                    factorEnganche = factorEngCom * 2;
+
+            let cuota = 0;
+            let engancheFinal = 0;
+            let numPagos = 1;
+            let textoPlazoEnvio = "Pago de Contado";
+
+            if (freq !== "CONTADO") {
+                const plazo = document.getElementById('pe-cliPlazo').value;
+                let factorEnganche;
+                if (freq === "QUINCENAL") {
+                    if (plazo === "52 Semanas") {
+                        const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
+                        factorEnganche = factorEngCom * 2;
+                    } else {
+                        factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+                    }
                 } else {
-                    factorEnganche = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
+                    factorEnganche = (plazo === "52 Semanas")
+                        ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11)
+                        : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
+                }
+                const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
+                numPagos = (plazo === "26 Semanas") ? 26 : 52;
+                textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (26 Semanas)" : "Plan Cómodo (52 Semanas)";
+
+                const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
+
+                const inputEng = document.getElementById('pe-cliEnganchePersonalizado');
+                let customEnganche = parseFloat(inputEng.value) || 0;
+                engancheFinal = engancheCalculado;
+                if (customEnganche > engancheCalculado) {
+                    engancheFinal = customEnganche;
+                }
+
+                if (freq === "QUINCENAL") {
+                    numPagos = numPagos / 2;
+                    textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (13 Quincenas)" : "Plan Cómodo (26 Quincenas)";
+                }
+
+                let baseCuota = (plazo === "26 Semanas") ? calcularCuotaSemanal26(precioContado) : calcularCuotaSemanal52(precioContado);
+                if (freq === "QUINCENAL") {
+                    baseCuota = baseCuota * 2;
+                }
+
+                cuota = baseCuota;
+                if (engancheFinal > engancheCalculado) {
+                    const extraEnganche = engancheFinal - engancheCalculado;
+                    cuota = baseCuota - (extraEnganche / numPagos);
                 }
             } else {
-                factorEnganche = (plazo === "52 Semanas")
-                    ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11)
-                    : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
-            }
-            const factorInteres = (plazo === "26 Semanas") ? CONFIG_TASAS.interes26 : CONFIG_TASAS.interes52;
-            let numPagos = (plazo === "26 Semanas") ? 26 : 52;
-            let textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (26 Semanas)" : "Plan Cómodo (52 Semanas)";
-
-            const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
-
-            const inputEng = document.getElementById('pe-cliEnganchePersonalizado');
-            let customEnganche = parseFloat(inputEng.value) || 0;
-            let engancheFinal = engancheCalculado;
-            if (customEnganche > engancheCalculado) {
-                engancheFinal = customEnganche;
-            }
-
-            if (freq === "QUINCENAL") {
-                numPagos = numPagos / 2;
-                textoPlazoEnvio = (plazo === "26 Semanas") ? "Plan Rápido (13 Quincenas)" : "Plan Cómodo (26 Quincenas)";
-            }
-
-            let baseCuota = (plazo === "26 Semanas") ? calcularCuotaSemanal26(precioContado) : calcularCuotaSemanal52(precioContado);
-            if (freq === "QUINCENAL") {
-                baseCuota = baseCuota * 2;
-            }
-
-            let cuota = baseCuota;
-            if (engancheFinal > engancheCalculado) {
-                const extraEnganche = engancheFinal - engancheCalculado;
-                cuota = baseCuota - (extraEnganche / numPagos);
+                engancheFinal = precioContado;
+                cuota = 0;
             }
 
             let pathname = window.location.pathname;
