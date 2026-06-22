@@ -2415,7 +2415,18 @@
                     const badge = document.getElementById('badgeStockAlerts');
                     if (!btn || !badge) return;
                     
-                    const coun                function abrirModalStockAlerts() {
+                    const count = alertasStockGlobal.length;
+                    badge.textContent = count;
+                    if (count > 0) {
+                        badge.style.display = 'inline-block';
+                        btn.classList.add('active');
+                    } else {
+                        badge.style.display = 'none';
+                        btn.classList.remove('active');
+                    }
+                }
+
+                function abrirModalStockAlerts() {
                     let panel = document.getElementById('stock-alerts-dropdown');
                     if (panel) {
                         // Toggle: si ya está abierto, cerrarlo
@@ -2488,15 +2499,6 @@
                     }
                 };
  
-                function cerrarModalStockAlerts() {nStockAlerts');
-                            if (panel && !panel.contains(e.target) && !btnAlerts.contains(e.target)) {
-                                panel.style.display = 'none';
-                                document.removeEventListener('click', cerrarFuera);
-                            }
-                        });
-                    }, 50);
-                }
-
                 function cerrarModalStockAlerts() {
                     const p = document.getElementById('stock-alerts-dropdown');
                     if (p) p.style.display = 'none';

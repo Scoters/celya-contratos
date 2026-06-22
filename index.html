@@ -2923,7 +2923,7 @@
                              <label id="lbl-cliPlazo" style="margin-top: 10px; display: block; font-weight: 600; font-size: 12.5px; color: var(--text-main); margin-bottom: 4px;">Plazo de Pago:</label>
                              <select id="cliPlazo" onchange="document.getElementById('cliEnganchePersonalizado').value=''; actualizarPrecioCalculadoPDP()" style="display: none;">
                                  <option value="26 Semanas">Plan Rápido (26 Pagos Semanales)</option>
-                                 <option value="52 Semanas">Plan Cómodo (52 Pagos Semanales)</option>
+                                 <option value="52 Semanas" selected>Plan Cómodo (52 Pagos Semanales)</option>
                              </select>
                              <div class="segment-control plazo-control" id="pdp-plazo-selector">
                                  <button type="button" class="segment-btn" data-val="26 Semanas">Plan Rápido</button>
@@ -3111,7 +3111,7 @@
                         <select id="pe-cliPlazo" onchange="document.getElementById('pe-cliEnganchePersonalizado').value=''; actualizarPreciosPedidoEspecial()"
                             style="display: none;">
                             <option value="26 Semanas">Plan Rápido (26 Pagos Semanales)</option>
-                            <option value="52 Semanas">Plan Cómodo (52 Pagos Semanales)</option>
+                            <option value="52 Semanas" selected>Plan Cómodo (52 Pagos Semanales)</option>
                         </select>
                         <div class="segment-control plazo-control" id="pe-plazo-selector">
                             <button type="button" class="segment-btn" data-val="26 Semanas">Plan Rápido</button>
@@ -3891,7 +3891,11 @@
                     divEnganche.style.opacity = '1';
                     const precioContado = parseFloat((divEnganche.getAttribute('data-precio') || '').replace(/[\$,]/g, '')) || 0;
                     const factorEngQuin = CONFIG_TASAS.engancheQuincenal !== undefined ? CONFIG_TASAS.engancheQuincenal : 0.33;
-                    const quinEnganche = Math.ceil((precioContado * factorEngQuin) / 10) * 10;
+                    const factorEngCom = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
+                    const quinEnganche = Math.min(
+                        Math.ceil((precioContado * factorEngQuin) / 10) * 10,
+                        Math.ceil((precioContado * (factorEngCom * 2)) / 10) * 10
+                    );
                     divEnganche.innerHTML = `<span>Pago Inicial</span> Enganche desde: $${quinEnganche.toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
                 }
             } else { // contado
