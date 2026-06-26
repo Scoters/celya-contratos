@@ -409,6 +409,7 @@
 
             <label for="monto">🏁 Pago Inicial / Enganche Recibido ($):</label>
             <input type="number" id="monto" name="monto" style="color: #c0392b; font-weight: bold;" placeholder="Ej. 1200" min="0">
+            <div id="cfg-interes-feedback" style="font-size: 13.5px; font-weight: 600; color: #16a34a; margin-top: 4px; margin-bottom: 8px; display: none;"></div>
 
             <label for="cuota">Monto del Abono Regular ($):</label>
             <input type="text" id="cuota" name="cuota" readonly
@@ -1128,6 +1129,8 @@
                     totalFinanciadoActual = 0;
                     document.getElementById('totalFinanciado').value = "$0";
                     document.getElementById('cuota').value = "$0";
+                    const feedbackEl = document.getElementById('cfg-interes-feedback');
+                    if (feedbackEl) feedbackEl.style.display = 'none';
                 } else {
                     const factorEngancheMinimo = (frecuencia === "QUINCENAL")
                         ? ((planElegido === "52")
@@ -1162,29 +1165,50 @@
                         engancheEfectivo = engancheIngresado;
                     }
 
-                    // --- CALCULAR CUOTA BASE Y CUOTA ACTIVA USANDO EL MISMO FACTOR DE ENGANCHE ---
-                    // factorEngancheMinimo (arriba) ya tiene el factor correcto según frecuencia y plazo
-                    const factorInteres = (planElegido === "26")
+                    // --- CALCULAR DESCUENTO DE TASA SEGÚN EL ENGANCHE EFECTIVO ---
+                    const pctEnganche = (engancheEfectivo / precioContado) * 100;
+                    let descuentoInteres = 0;
+                    let mensajeDescuento = "";
+                    if (pctEnganche >= 45) {
+                        descuentoInteres = 0.15;
+                        mensajeDescuento = "¡Tasa con 15% desc. aplicada! 🔥";
+                    } else if (pctEnganche >= 35) {
+                        descuentoInteres = 0.10;
+                        mensajeDescuento = "¡Tasa con 10% desc. aplicada! ⭐";
+                    } else if (pctEnganche >= 25) {
+                        descuentoInteres = 0.05;
+                        mensajeDescuento = "¡Tasa con 5% desc. aplicada! 🟢";
+                    }
+
+                    const factorInteresBase = (planElegido === "26")
                         ? (CONFIG_TASAS_SHEETS.interes26 !== undefined ? CONFIG_TASAS_SHEETS.interes26 : 0.66)
                         : (CONFIG_TASAS_SHEETS.interes52 !== undefined ? CONFIG_TASAS_SHEETS.interes52 : 0.90);
+                    const factorInteres = Math.max(0, factorInteresBase - descuentoInteres);
+                    
                     const numPagosBase = (planElegido === "26") ? 26 : 52;
                     const numPagos = (frecuencia === "QUINCENAL") ? (numPagosBase / 2) : numPagosBase;
 
-                    const totalFinanciadoCalc = (precioContado * (1 + factorInteres)) - engancheMinimoObligatorio;
-                    const cuotaBase = Math.round(totalFinanciadoCalc / numPagos);
+                    const totalFinanciadoCalc = (precioContado * (1 + factorInteres)) - engancheEfectivo;
+                    const cuotaFinal = Math.max(0, Math.round(totalFinanciadoCalc / numPagos));
 
-                    let cuotaActiva = cuotaBase;
-                    if (engancheEfectivo > engancheMinimoObligatorio) {
-                        const extraEnganche = engancheEfectivo - engancheMinimoObligatorio;
-                        cuotaActiva = cuotaBase - Math.round(extraEnganche / numPagos);
-                    }
-
-                    const cuotaFinal = Math.round(cuotaActiva);
                     document.getElementById('cuota').value = "$" + cuotaFinal.toLocaleString('es-MX');
 
                     const totalFinanciadoCalculado = cuotaFinal * numPagos;
                     totalFinanciadoActual = totalFinanciadoCalculado;
                     document.getElementById('totalFinanciado').value = "$" + totalFinanciadoCalculado.toLocaleString('es-MX');
+
+                    // --- RETROALIMENTACIÓN VISUAL EN FORMULARIO ---
+                    const feedbackEl = document.getElementById('cfg-interes-feedback');
+                    if (feedbackEl) {
+                        feedbackEl.style.display = 'block';
+                        const tasaPorcentajeActual = Math.round(factorInteres * 100);
+                        const tasaPorcentajeBase = Math.round(factorInteresBase * 100);
+                        if (descuentoInteres > 0) {
+                            feedbackEl.innerHTML = `📉 Tasa aplicada: <strong style="color: #16a34a;">${tasaPorcentajeActual}%</strong> (Tasa base: ${tasaPorcentajeBase}% - ${mensajeDescuento})`;
+                        } else {
+                            feedbackEl.innerHTML = `📊 Tasa aplicada: <strong style="color: #2b6cb0;">${tasaPorcentajeActual}%</strong> (Aporta &ge; 25% de enganche para recibir descuento)`;
+                        }
+                    }
                 }
             }
         }
@@ -1203,6 +1227,8 @@
                 document.getElementById('cuota').value = "";
                 document.getElementById('totalFinanciado').value = "";
                 document.getElementById('totalLetraHidden').value = "";
+                const feedbackEl = document.getElementById('cfg-interes-feedback');
+                if (feedbackEl) feedbackEl.style.display = 'none';
                 return;
             }
 

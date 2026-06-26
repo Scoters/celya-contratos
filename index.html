@@ -2802,6 +2802,7 @@
                                 style="font-size: 14px; font-weight: normal; color: var(--text-muted);">en
                                 -- pagos semanales</span>
                         </div>
+                        <div id="pdp-tasa-interes-badge" style="font-size: 13.5px; font-weight: 600; color: #16a34a; margin-top: 5px; display: none;"></div>
                         <div style="font-size: 13px; color: var(--text-muted); margin-top: 6px;"
                             id="pdp-contado-chico-texto">
                             Precio de Contado: <strong>$0</strong>
@@ -3016,6 +3017,7 @@
                             <span id="pe-preview-semanal"
                                 style="font-size: 16px; font-weight: bold;">$0</span>
                         </div>
+                        <div id="pe-tasa-interes-badge" style="font-size: 11px; font-weight: bold; color: #16a34a; margin-top: 4px; display: none;"></div>
                     </div>
                 </div>
 
@@ -4400,6 +4402,8 @@
                 document.getElementById('pdp-weekly-term').innerText = `en 1 pago de contado`;
                 if (containerEng) containerEng.style.display = "none";
                 if (inputEng) inputEng.value = Math.round(precioContado);
+                const rateBadge = document.getElementById('pdp-tasa-interes-badge');
+                if (rateBadge) rateBadge.style.display = 'none';
             } else {
                 if (lblEnganche) lblEnganche.innerText = "Pago Inicial (Enganche)";
                 if (containerEng) containerEng.style.display = "block";
@@ -4421,9 +4425,6 @@
                     factorEnganche = 0; // No hay enganche para contado
                 }
                 console.log(`[DEBUG - actualizarPrecioCalculadoPDP] Determined factorEnganche: ${factorEnganche}`);
-                const factorInteres = (plazo === "26 Semanas")
-                    ? (CONFIG_TASAS.interes26 !== undefined ? CONFIG_TASAS.interes26 : 0.66)
-                    : (CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90);
 
                 const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
 
@@ -4456,20 +4457,51 @@
 
                 let engancheFinal = customEnganche;
 
-                console.log(`%c[PDP] === actualizarPrecioCalculadoPDP === freq=${freq}, plazo=${plazo}, precio=${precioContado}, fEng=${factorEnganche}, fInt=${factorInteres}, numPagos=${numPagos}, engCalc=${engancheCalculado}, engFinal=${engancheFinal}`, 'color: #00bcd4; font-weight: bold');
-                let cuotaBase = calcularCuotaUnificada(precioContado, factorEnganche, factorInteres, numPagos, 'PDP-' + freq + '-' + plazo);
-
-                let cuotaActiva = cuotaBase;
-                if (engancheFinal > engancheCalculado) {
-                    const extraEnganche = engancheFinal - engancheCalculado;
-                    cuotaActiva = cuotaBase - Math.round(extraEnganche / numPagos);
-                    console.log(`[PDP] extraEnganche=${extraEnganche}, ajuste=${Math.round(extraEnganche / numPagos)}, cuotaActiva=${cuotaActiva}`);
+                // --- CALCULAR DESCUENTO DE TASA SEGÚN EL ENGANCHE SELECCIONADO ---
+                const pctEnganche = (engancheFinal / precioContado) * 100;
+                let descuentoInteres = 0;
+                let mensajeDescuento = "";
+                if (pctEnganche >= 45) {
+                    descuentoInteres = 0.15;
+                    mensajeDescuento = "¡Tasa con 15% desc. aplicada! 🔥";
+                } else if (pctEnganche >= 35) {
+                    descuentoInteres = 0.10;
+                    mensajeDescuento = "¡Tasa con 10% desc. aplicada! ⭐";
+                } else if (pctEnganche >= 25) {
+                    descuentoInteres = 0.05;
+                    mensajeDescuento = "¡Tasa con 5% desc. aplicada! 🟢";
                 }
-                console.log(`%c[PDP] RESULTADO FINAL: cuotaBase=$${cuotaBase}, cuotaMostrada=$${Math.round(cuotaActiva)}`, 'color: #00bcd4; font-weight: bold');
+
+                const factorInteresBase = (plazo === "26 Semanas")
+                    ? (CONFIG_TASAS.interes26 !== undefined ? CONFIG_TASAS.interes26 : 0.66)
+                    : (CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90);
+                const factorInteres = Math.max(0, factorInteresBase - descuentoInteres);
+
+                console.log(`%c[PDP] === actualizarPrecioCalculadoPDP === freq=${freq}, plazo=${plazo}, precio=${precioContado}, fEng=${factorEnganche}, fInt=${factorInteres}, numPagos=${numPagos}, engCalc=${engancheCalculado}, engFinal=${engancheFinal}`, 'color: #00bcd4; font-weight: bold');
+                
+                const totalFinanciadoCalc = (precioContado * (1 + factorInteres)) - engancheFinal;
+                const cuotaFinal = Math.max(0, Math.round(totalFinanciadoCalc / numPagos));
+
+                console.log(`%c[PDP] RESULTADO FINAL: cuotaMostrada=$${cuotaFinal}`, 'color: #00bcd4; font-weight: bold');
 
                 document.getElementById('pdp-enganche-grande').innerText = `$${engancheFinal.toLocaleString('es-MX')} MXN`;
-                document.getElementById('pdp-weekly-amount').innerText = `$${Math.round(cuotaActiva).toLocaleString('es-MX')} MXN`;
+                document.getElementById('pdp-weekly-amount').innerText = `$${cuotaFinal.toLocaleString('es-MX')} MXN`;
                 document.getElementById('pdp-weekly-term').innerText = `en ${numPagos} pagos ${labelFrecuencia}`;
+
+                // --- RETROALIMENTACIÓN VISUAL EN PDP MODAL ---
+                const rateBadge = document.getElementById('pdp-tasa-interes-badge');
+                if (rateBadge) {
+                    rateBadge.style.display = 'block';
+                    const tasaPorcentajeActual = Math.round(factorInteres * 100);
+                    const tasaPorcentajeBase = Math.round(factorInteresBase * 100);
+                    if (descuentoInteres > 0) {
+                        rateBadge.style.color = '#16a34a';
+                        rateBadge.innerHTML = `📉 Interés: <strong>${tasaPorcentajeActual}%</strong> (Tasa base: ${tasaPorcentajeBase}% - ${mensajeDescuento})`;
+                    } else {
+                        rateBadge.style.color = '#7f8c8d';
+                        rateBadge.innerHTML = `📊 Interés: <strong>${tasaPorcentajeActual}%</strong> (Ahorra dando &ge; 25% de enganche)`;
+                    }
+                }
             }
 
             document.getElementById('hiddenCuota26').value = calcularCuotaSemanal26(precioContado);
@@ -4884,6 +4916,8 @@
                 if (containerEng) containerEng.style.display = "none";
                 const inputEng = document.getElementById('pe-cliEnganchePersonalizado');
                 if (inputEng) inputEng.value = Math.round(precioContado);
+                const rateBadge = document.getElementById('pe-tasa-interes-badge');
+                if (rateBadge) rateBadge.style.display = 'none';
             } else {
                 if (containerEng) containerEng.style.display = "block";
                 if (lblEnganche) lblEnganche.innerText = "Pago Inicial (Enganche):";
@@ -4908,10 +4942,11 @@
                         ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11)
                         : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
                 }
-                const factorInteres = (plazo === "26 Semanas")
-                    ? (CONFIG_TASAS.interes26 !== undefined ? CONFIG_TASAS.interes26 : 0.66)
-                    : (CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90);
+                
                 let numPagos = (plazo === "26 Semanas") ? 26 : 52;
+                if (freq === "QUINCENAL") {
+                    numPagos = numPagos / 2;
+                }
 
                 const engancheCalculado = Math.ceil((precioContado * factorEnganche) / 10) * 10;
 
@@ -4945,22 +4980,48 @@
 
                 let engancheFinal = customEnganche;
 
-                if (freq === "QUINCENAL") {
-                    numPagos = numPagos / 2;
+                // --- CALCULAR DESCUENTO DE TASA SEGÚN EL ENGANCHE SELECCIONADO ---
+                const pctEnganche = (engancheFinal / precioContado) * 100;
+                let descuentoInteres = 0;
+                let mensajeDescuento = "";
+                if (pctEnganche >= 45) {
+                    descuentoInteres = 0.15;
+                    mensajeDescuento = "¡Tasa con 15% desc. aplicada! 🔥";
+                } else if (pctEnganche >= 35) {
+                    descuentoInteres = 0.10;
+                    mensajeDescuento = "¡Tasa con 10% desc. aplicada! ⭐";
+                } else if (pctEnganche >= 25) {
+                    descuentoInteres = 0.05;
+                    mensajeDescuento = "¡Tasa con 5% desc. aplicada! 🟢";
                 }
 
-                let baseCuota = calcularCuotaUnificada(precioContado, factorEnganche, factorInteres, numPagos);
+                const factorInteresBase = (plazo === "26 Semanas")
+                    ? (CONFIG_TASAS.interes26 !== undefined ? CONFIG_TASAS.interes26 : 0.66)
+                    : (CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.90);
+                const factorInteres = Math.max(0, factorInteresBase - descuentoInteres);
 
-                let cuota = baseCuota;
-                if (engancheFinal > engancheCalculado) {
-                    const extraEnganche = engancheFinal - engancheCalculado;
-                    cuota = baseCuota - Math.round(extraEnganche / numPagos);
-                }
+                const totalFinanciadoCalc = (precioContado * (1 + factorInteres)) - engancheFinal;
+                const cuotaFinal = Math.max(0, Math.round(totalFinanciadoCalc / numPagos));
 
                 let labelFrecuencia = (freq === "QUINCENAL") ? "/quin" : "/sem";
 
                 document.getElementById('pe-preview-enganche').innerText = `$${engancheFinal.toLocaleString('es-MX')} MXN`;
-                document.getElementById('pe-preview-semanal').innerText = `$${Math.round(cuota).toLocaleString('es-MX')} MXN${labelFrecuencia}`;
+                document.getElementById('pe-preview-semanal').innerText = `$${cuotaFinal.toLocaleString('es-MX')} MXN${labelFrecuencia}`;
+
+                // --- RETROALIMENTACIÓN VISUAL EN PEDIDO ESPECIAL ---
+                const rateBadge = document.getElementById('pe-tasa-interes-badge');
+                if (rateBadge) {
+                    rateBadge.style.display = 'block';
+                    const tasaPorcentajeActual = Math.round(factorInteres * 100);
+                    const tasaPorcentajeBase = Math.round(factorInteresBase * 100);
+                    if (descuentoInteres > 0) {
+                        rateBadge.style.color = '#16a34a';
+                        rateBadge.innerHTML = `📉 Interés: <strong>${tasaPorcentajeActual}%</strong> (Tasa base: ${tasaPorcentajeBase}% - ${mensajeDescuento})`;
+                    } else {
+                        rateBadge.style.color = '#7f8c8d';
+                        rateBadge.innerHTML = `📊 Interés: <strong>${tasaPorcentajeActual}%</strong> (Ahorra dando &ge; 25% de enganche)`;
+                    }
+                }
             }
             syncSelectButtons('pe-cliFrecuencia', '#pe-frequency-selector');
             syncSelectButtons('pe-cliPlazo', '#pe-plazo-selector');
