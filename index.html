@@ -3342,7 +3342,7 @@
                     if (debounceTimeout) clearTimeout(debounceTimeout);
                     debounceTimeout = setTimeout(() => {
                         solicitarBusqueda();
-                    }, 350);
+                    }, 50);
                 });
             }
 
@@ -3353,11 +3353,10 @@
             const query = document.getElementById('inputBusqueda').value.trim();
             if (!query) {
                 document.getElementById('tituloSeccion').innerText = "✨ Modelos Destacados y Favoritos CelYa!";
-                renderizarCatalogo("");
-                return;
+            } else {
+                document.getElementById('tituloSeccion').innerText = `🔍 Opciones Encontradas para: "${query}"`;
             }
-            document.getElementById('tituloSeccion').innerText = `🔍 Opciones Encontradas para: "${query}"`;
-            renderizarCatalogo(query);
+            aplicarFiltrosYOrden();
         }
 
         // Función unificada de cálculo de cuotas — recibe los factores correctos según frecuencia y plazo
@@ -3609,6 +3608,15 @@
 
             // 1. Filtrar
             let filtrados = [...window.equiposCargados];
+            
+            const queryText = document.getElementById('inputBusqueda') ? document.getElementById('inputBusqueda').value.toLowerCase().trim() : "";
+            if (queryText) {
+                filtrados = filtrados.filter(item => 
+                    (item.modelo || '').toLowerCase().includes(queryText) || 
+                    obtenerMarca(item.modelo).toLowerCase().includes(queryText)
+                );
+            }
+
             if (brandSelected !== "ALL") {
                 filtrados = filtrados.filter(item => obtenerMarca(item.modelo) === brandSelected);
             }
