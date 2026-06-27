@@ -1312,10 +1312,6 @@
                     <input type="number" step="0.1" id="cfg-enganche-quin-comodo" name="engancheMinimoQuincenalComodo" min="0" placeholder="Ej. 35">
                 </div>
 
-                <div class="form-group-config">
-                    <label for="cfg-enganche-quincenal">💸 % Enganche Plan Rápido Quincenal (Obsoleto) (%)</label>
-                    <input type="number" step="0.1" id="cfg-enganche-quincenal" name="engancheQuincenal" min="0" placeholder="Ej. 33">
-                </div>
 
                 <div class="form-group-config">
                     <label for="cfg-descuento-liquidacion">🚀 % Descuento Liquidación Anticipada</label>
@@ -1463,7 +1459,7 @@
                 document.getElementById('cfg-enganche-comodo').value = datos.config.engancheComodo !== undefined ? datos.config.engancheComodo : 30;
                 document.getElementById('cfg-enganche-quin-rapido').value = datos.config.engancheMinimoQuincenalRapido !== undefined ? datos.config.engancheMinimoQuincenalRapido : 25;
                 document.getElementById('cfg-enganche-quin-comodo').value = datos.config.engancheMinimoQuincenalComodo !== undefined ? datos.config.engancheMinimoQuincenalComodo : 35;
-                document.getElementById('cfg-enganche-quincenal').value = datos.config.engancheQuincenal !== undefined ? datos.config.engancheQuincenal : 33;
+
                 document.getElementById('cfg-descuento-liquidacion').value = datos.config.descuentoLiquidacion !== undefined ? datos.config.descuentoLiquidacion : 15;
 
                 dbClientesActivos = datos.clientesActivos || [];
@@ -1972,7 +1968,7 @@
                     document.getElementById('cfg-enganche-comodo').value = data.config.engancheComodo || 30;
                     document.getElementById('cfg-enganche-quin-rapido').value = data.config.engancheMinimoQuincenalRapido || 25;
                     document.getElementById('cfg-enganche-quin-comodo').value = data.config.engancheMinimoQuincenalComodo || 35;
-                    document.getElementById('cfg-enganche-quincenal').value = data.config.engancheQuincenal || 33;
+
                     document.getElementById('cfg-descuento-liquidacion').value = data.config.descuentoLiquidacion || 15;
                     document.getElementById('cfg-telegram-token').value = data.config.telegramBotToken || '';
                     document.getElementById('cfg-telegram-chatid').value = data.config.telegramChatId || '';
@@ -2003,7 +1999,7 @@
             params.append('engancheComodo', document.getElementById('cfg-enganche-comodo').value);
             params.append('engancheMinimoQuincenalRapido', document.getElementById('cfg-enganche-quin-rapido').value);
             params.append('engancheMinimoQuincenalComodo', document.getElementById('cfg-enganche-quin-comodo').value);
-            params.append('engancheQuincenal', document.getElementById('cfg-enganche-quincenal').value);
+
             params.append('descuentoLiquidacion', document.getElementById('cfg-descuento-liquidacion').value);
             params.append('telegramBotToken', document.getElementById('cfg-telegram-token').value);
             params.append('telegramChatId', document.getElementById('cfg-telegram-chatid').value);
@@ -2032,7 +2028,7 @@
                     configGlobal.engancheComodo = document.getElementById('cfg-enganche-comodo').value;
                     configGlobal.engancheMinimoQuincenalRapido = document.getElementById('cfg-enganche-quin-rapido').value;
                     configGlobal.engancheMinimoQuincenalComodo = document.getElementById('cfg-enganche-quin-comodo').value;
-                    configGlobal.engancheQuincenal = document.getElementById('cfg-enganche-quincenal').value;
+
                     configGlobal.descuentoLiquidacion = document.getElementById('cfg-descuento-liquidacion').value;
 
                     cerrarModalConfig();
