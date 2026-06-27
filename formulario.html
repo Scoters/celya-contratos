@@ -1316,6 +1316,14 @@
                 optLargo.disabled = false;
             }
 
+            // Sincronizar plazo por defecto según frecuencia si es necesario
+            const selectPlazo = document.getElementById('plazoSemanas');
+            if (frecuencia === "QUINCENAL" && selectPlazo.value === "52") {
+                selectPlazo.value = "26"; // 13 quincenas = 25% enganche menor
+            } else if (frecuencia === "SEMANAL" && selectPlazo.value === "26") {
+                selectPlazo.value = "52"; // 52 semanas = 11% enganche menor
+            }
+
             // 2. Ejecutamos la matemática de la cuota dinero
             actualizarEngancheYFinanciamientoPorPlazo(true);
             

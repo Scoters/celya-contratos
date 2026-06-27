@@ -4062,10 +4062,14 @@
                 cliFrecuencia.value = freqInicial;
             }
 
-            // Establecer plazo por defecto a Plan Cómodo (52 Semanas)
+            // Establecer plazo por defecto coincidiendo con el plan de enganche menor
             const cliPlazo = document.getElementById('cliPlazo');
             if (cliPlazo) {
-                cliPlazo.value = "52 Semanas";
+                if (freqInicial === "QUINCENAL") {
+                    cliPlazo.value = "26 Semanas"; // Plan Rápido quincenal (13 pagos) = 25% enganche menor
+                } else {
+                    cliPlazo.value = "52 Semanas"; // Plan Cómodo semanal (52 pagos) = 11% enganche menor
+                }
             }
 
             const inputEng = document.getElementById('cliEnganchePersonalizado');
@@ -4824,6 +4828,14 @@
             }
             const freq = document.getElementById('pe-cliFrecuencia').value;
             const selectPlazo = document.getElementById('pe-cliPlazo');
+            
+            // Sincronizar plazo por defecto según frecuencia si es necesario
+            if (freq === "QUINCENAL" && selectPlazo.value === "52 Semanas") {
+                selectPlazo.value = "26 Semanas"; // 13 quincenas = 25% enganche menor
+            } else if (freq === "SEMANAL" && selectPlazo.value === "26 Semanas") {
+                selectPlazo.value = "52 Semanas"; // 52 semanas = 11% enganche menor
+            }
+
             const seccionPreguntas = document.getElementById('seccionPreguntasPedidoEspecial');
 
             const lblSueldo = document.getElementById('pe-lbl-cliSueldo');
