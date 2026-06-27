@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CelYa! - Catálogo Oficial</title>
-    <link rel="shortcut icon" href="logo-modified.webp" type="image/webp">
+    <link rel="shortcut icon" href="logo-modified.webp?v=3" type="image/webp">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Microsoft Clarity -->
     <script type="text/javascript">
         (function(c,l,a,r,i,t,y){
@@ -2565,6 +2567,11 @@
                         <span class="menu-icon">⚖️</span> Términos y Condiciones
                     </a>
                 </li>
+                <li>
+                    <a href="javascript:void(0)" onclick="abrirModalMapa()">
+                        <span class="menu-icon">🗺️</span> Área de Servicio
+                    </a>
+                </li>
                 <li class="menu-divider"></li>
                 <li>
                     <a href="javascript:void(0)" onclick="cerrarMenuLateral(); abrirModalPedidoEspecial()"
@@ -2724,14 +2731,17 @@
                     class="footer-logo">
                 <p>El camino más rápido y confiable para estrenar tu smartphone a crédito con pagos semanales y
                     quincenales a tu medida.</p>
+                <p style="font-size: 13px; color: var(--text-muted); margin-top: 12px; display: flex; align-items: center; gap: 6px;">
+                    <span>📍</span> <span>Av. Lázaro Cárdenas s/n, Col. Lázaro Cárdenas, 54189 Tlalnepantla de Baz, Estado de México.</span>
+                </p>
             </div>
             <div class="footer-links-group">
                 <h4 class="footer-title">Información y Ayuda</h4>
                 <ul class="footer-links">
                     <li><a href="javascript:void(0)" onclick="abrirModalInfoLegal('faq')">Preguntas Frecuentes (FAQ)</a>
                     </li>
-                    <li><a href="javascript:void(0)" onclick="abrirModalInfoLegal('terminos')">Términos y
-                            Condiciones</a></li>
+                    <li><a href="javascript:void(0)" onclick="abrirModalInfoLegal('terminos')">Términos y Condiciones</a></li>
+                    <li><a href="javascript:void(0)" onclick="abrirModalMapa()">Área de Servicio (Cobertura)</a></li>
                     <li><a href="javascript:void(0)" onclick="abrirModalPedidoEspecial()">Cotizar Pedido Especial</a>
                     </li>
                 </ul>
@@ -3291,6 +3301,18 @@
                     <p><strong>SEXTA: Exclusión de Responsabilidad por Errores de Terceros (MercadoLibre)</strong><br>El Cliente acepta y reconoce que el catálogo de productos y precios se sincroniza con sistemas de terceros, incluyendo MercadoLibre. CelYa! no se hace responsable por errores de precios, inconsistencias en especificaciones de almacenamiento/RAM, o fallas técnicas en dicha sincronización. En caso de detectarse un error manifiesto en el precio cotizado o mostrado, CelYa! se reserva el derecho de cancelar la cotización o suspender el trámite de financiamiento sin ninguna responsabilidad para la empresa.</p>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal Área de Servicio (Mapa de Cobertura) -->
+    <div id="modalMapa" class="modal-solicitud">
+        <div class="modal-content" style="max-width: 800px; width: 90%;">
+            <button type="button" class="pdp-close-btn" onclick="cerrarModalMapa()">×</button>
+            <h3 style="color: var(--primary); font-size: 1.5rem; margin-bottom: 10px; text-align: center; font-weight: 700;">🗺️ Área de Cobertura CelYa!</h3>
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem; line-height: 1.4;">
+                Entregas personales e inmediatas exclusivamente dentro de la zona marcada en rojo (CDMX y Zona Metropolitana).
+            </p>
+            <div id="mapa-cobertura" style="width: 100%; height: clamp(300px, 50vh, 450px); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); z-index: 1;"></div>
         </div>
     </div>
 
@@ -4665,6 +4687,88 @@
                 cerrarMenuLateral();
             }
         });
+
+        // --- FUNCIONES MODAL MAPA (ÁREA DE SERVICIO) ---
+        let mapaLeaflet = null;
+        let mapaInicializado = false;
+
+        function abrirModalMapa() {
+            document.getElementById('modalMapa').style.display = 'flex';
+            cerrarMenuLateral();
+            
+            // Inicializar mapa si es la primera vez que se abre
+            if (!mapaInicializado) {
+                setTimeout(() => {
+                    inicializarMapaCobertura();
+                }, 100);
+            } else {
+                setTimeout(() => {
+                    if (mapaLeaflet) mapaLeaflet.invalidateSize();
+                }, 100);
+            }
+        }
+
+        function cerrarModalMapa() {
+            document.getElementById('modalMapa').style.display = 'none';
+        }
+
+        function inicializarMapaCobertura() {
+            mapaLeaflet = L.map('mapa-cobertura', {
+                center: [19.54, -99.1], // Centro estratégico del Valle de México
+                zoom: 10,
+                minZoom: 9,
+                maxBounds: [
+                    [18.9, -99.7],
+                    [20.1, -98.5]
+                ]
+            });
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap',
+                subdomains: 'abcd',
+                maxZoom: 18
+            }).addTo(mapaLeaflet);
+
+            var zonaCelYa = {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "properties": {},
+                        "geometry": {
+                            "type": "Polygon",
+                            "coordinates": [
+                                [
+                                    [-99.2518104, 19.3205721],
+                                    [-99.209391, 19.2526275],
+                                    [-99.0962726, 19.2162171],
+                                    [-98.8610377, 19.2526275],
+                                    [-98.8481833, 19.8038547],
+                                    [-99.1116978, 19.8800295],
+                                    [-99.2775191, 19.8256227],
+                                    [-99.3225094, 19.346044],
+                                    [-99.3495036, 19.3023754],
+                                    [-99.2518104, 19.3205721]
+                                ]
+                             ]
+                         }
+                     }
+                 ]
+             };
+
+            L.geoJSON(zonaCelYa, {
+                style: function (feature) {
+                    return {
+                        color: "#e11d48",
+                        weight: 2,
+                        fillColor: "#e11d48",
+                        fillOpacity: 0.25
+                    };
+                }
+            }).addTo(mapaLeaflet);
+
+            mapaInicializado = true;
+        }
 
         // --- FUNCIONES MODAL INFO LEGAL (FAQ / TÉRMINOS) ---
         function abrirModalInfoLegal(tabName) {
