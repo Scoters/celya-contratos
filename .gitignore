@@ -4,6 +4,9 @@ CelYa Design/
 mercadolibre
 script.txt
 script.gs
+mapa.html
 portal.html
 rescindir.html
 Contrato_y_Pagare_CelYa.html
+Contrato_y_Pagare_CelYa/
+patch_compose.py

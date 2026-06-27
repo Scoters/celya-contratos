@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Contrato - CelYa</title>
-    <link rel="shortcut icon" href="logo-modified.webp" type="image/webp">
+    <link rel="shortcut icon" href="logo-modified.webp?v=3" type="image/webp">
     <script src="config.js?v=2"></script>
     <style>
         body {
@@ -425,7 +425,7 @@
             <input type="text" id="cliente" name="cliente" required placeholder="Ej. Juan Pérez">
 
             <label>Teléfono Celular:</label>
-            <input type="tel" name="telefono" required placeholder="10 dígitos">
+            <input type="tel" name="telefono" required placeholder="10 dígitos" maxlength="10">
 
             <label>Fecha de Nacimiento:</label>
             <input type="date" name="fechaNacimiento" required>
@@ -435,7 +435,7 @@
                 placeholder="Calle, Número, Colonia, Municipio"></textarea>
 
             <label>Teléfono de Aval / Referencia:</label>
-            <input type="tel" name="telefonoAval" required placeholder="10 dígitos">
+            <input type="tel" name="telefonoAval" required placeholder="10 dígitos" maxlength="10">
 
             <div class="foto-seccion">
                 <label>📸 Fotografía de INE (Frente):</label>
@@ -1343,6 +1343,18 @@
 
         document.getElementById('contratoForm').addEventListener('submit', async function (e) {
             e.preventDefault();
+
+            // Validación estricta de 10 dígitos para teléfono de cliente y aval
+            const telInput = document.querySelector('[name="telefono"]');
+            const avalInput = document.querySelector('[name="telefonoAval"]');
+            if (telInput && telInput.value.replace(/[^0-9]/g, "").length !== 10) {
+                toast('El número de celular del cliente debe tener exactamente 10 dígitos.', 'error', '🚫 Celular inválido');
+                return;
+            }
+            if (avalInput && avalInput.value.replace(/[^0-9]/g, "").length !== 10) {
+                toast('El número de celular del aval debe tener exactamente 10 dígitos.', 'error', '🚫 Celular del Aval inválido');
+                return;
+            }
 
             // ⛔ --- CANDADO DE ENGANCHE AUTOMÁTICO (D2 Y E2 DE CONFIGURACIÓN) ---
             const planElegido = document.getElementById('plazoSemanas').value; // Toma "26" o "52"
