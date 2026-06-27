@@ -10,3 +10,5 @@ rescindir.html
 Contrato_y_Pagare_CelYa.html
 Contrato_y_Pagare_CelYa/
 patch_compose.py
+.env
+config.js
