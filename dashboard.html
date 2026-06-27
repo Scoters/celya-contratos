@@ -2153,289 +2153,39 @@
                     }
                     
                     try {
-                        const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=buscarModelosCatalogo&q=`);
-                        const data = await response.json();
-                        if (data.result !== 'success' || !data.resultados) {
-                            console.warn("No se pudo cargar el catálogo para verificar alertas de stock.");
-                            if (btn) btn.innerHTML = originalBtnHtml;
-                            return;
-                        }
-                        
-                        const items = data.resultados.filter(item => 
-                            ["DISPONIBLE", "MAS VENDIDO", "BAJO DEMANDA"].includes(item.estado)
-                        );
+                        const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=verificarStockGlobal&token=${CONFIG.API_TOKEN}`);
+                        const resultados = await response.json();
                         
                         alertasStockGlobal = [];
                         
-                        // Limitamos a 6 peticiones paralelas para no sobrecargar el servidor
-                        const limiteConcurrencia = 6;
-                        let itemIndex = 0;
-                        
-                        async function procesarSiguiente() {
-                            if (itemIndex >= items.length) return;
-                            const item = items[itemIndex++];
-                            
-                            try {
-                                let itemMlId = "";
-                                if (item.link) {
-                                    const regex = /(MLM\-?\d+)/i;
-                                    const match = item.link.match(regex);
-                                    if (match) itemMlId = match[0].replace("-", "").toUpperCase();
-                                }
-                                
-                                const idBusqueda = itemMlId || item.id;
-                                if (!idBusqueda) {
-                                    alertasStockGlobal.push(item);
-                                    actualizarBotonAlertasStock();
-                                    return procesarSiguiente();
-                                }
-                                
-                                let isProduct = idBusqueda.startsWith("MLM") && idBusqueda.length <= 11;
-                                const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${idBusqueda}&isProduct=${isProduct}`;
-                                
-                                let liveData = null;
-                                try {
-                                    const resLive = await fetch(proxyUrl);
-                                    const contentType = resLive.headers.get('content-type') || '';
-                                    if (!resLive.ok || !contentType.includes('application/json')) {
-                                        console.warn(`[STOCK-CHECK] ${item.modelo}: respuesta no válida (${resLive.status})`);
-                                        return procesarSiguiente();
-                                    }
-                                    liveData = await resLive.json();
-                                } catch(fetchErr) {
-                                    console.warn(`[STOCK-CHECK] ${item.modelo}: error de fetch/parse:`, fetchErr.message);
-                                    return procesarSiguiente();
-                                }
-                                
-                                if (!liveData || typeof liveData !== 'object' || liveData.error || Object.keys(liveData).length === 0) {
-                                    console.warn(`[STOCK-CHECK] ${item.modelo}: datos vacíos o error`, liveData?.error || '');
-                                    return procesarSiguiente();
-                                }
-                                
-                                // Si es un item que tiene catalog_product_id pero no tiene pickers ni variaciones,
-                                // re-fetch como producto catálogo (igual que index.html línea 6140)
-                                if (!isProduct && liveData.catalog_product_id && (!liveData.pickers || liveData.pickers.length === 0) && (!liveData.variations || liveData.variations.length === 0)) {
-                                    try {
-                                        const prodUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${liveData.catalog_product_id}&isProduct=true`;
-                                        const resProd = await fetch(prodUrl);
-                                        const prodData = await resProd.json();
-                                        if (prodData && !prodData.error && prodData.pickers) {
-                                            liveData = prodData;
-                                            isProduct = true;
+                        if (Array.isArray(resultados)) {
+                            resultados.forEach(res => {
+                                if (!res.tieneStock) {
+                                    const itemConAlerta = {
+                                        filaNum: res.filaNum,
+                                        modelo: res.modelo,
+                                        link: res.link,
+                                        id: res.id,
+                                        estado: res.estado,
+                                        variantesJson: res.liveData,
+                                        _stockDetalle: {
+                                            razon: res.razon,
+                                            mensaje: res.mensaje,
+                                            coloresAgotados: [],
+                                            memoriasAgotadas: [],
+                                            ramsAgotadas: []
                                         }
-                                    } catch(e) { /* silencioso */ }
+                                    };
+                                    alertasStockGlobal.push(itemConAlerta);
                                 }
-                                
-                                // Si el link tiene /p/MLM... pero la respuesta no tiene pickers, re-fetch como product
-                                if (!isProduct && item.link && item.link.includes("/p/") && (!liveData.pickers || liveData.pickers.length === 0)) {
-                                    const pMatch = item.link.match(/\/p\/(MLM\-?\d+)/i);
-                                    if (pMatch) {
-                                        const parentProductId = pMatch[1].replace("-", "").toUpperCase();
-                                        if (parentProductId !== idBusqueda) {
-                                            try {
-                                                const prodUrl2 = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${parentProductId}&isProduct=true`;
-                                                const resProd2 = await fetch(prodUrl2);
-                                                const prodData2 = await resProd2.json();
-                                                if (prodData2 && !prodData2.error && prodData2.pickers) {
-                                                    liveData = prodData2;
-                                                    isProduct = true;
-                                                }
-                                            } catch(e) { /* silencioso */ }
-                                        }
-                                    }
-                                }
-                                
-                                const isCatalog = isProduct || liveData.type === "catalog_product" || !!liveData.catalog_product_id;
-                                let tieneStock = false;
-                                let detalle = { razon: '', coloresAgotados: [], memoriasAgotadas: [], ramsAgotadas: [], totalVariantes: 0, activasVariantes: 0 };
-                                
-                                // 1. Catalog Product con pickers (usar unique product_ids, no contar duplicados entre pickers)
-                                if (liveData.pickers && liveData.pickers.length > 0) {
-                                    // Recopilar todos los product_ids únicos con su estado
-                                    const productMap = {};
-                                    
-                                    liveData.pickers.forEach(picker => {
-                                        if (!picker.products) return;
-                                        const pIdUpper = picker.picker_id ? picker.picker_id.toUpperCase() : "";
-                                        
-                                        // Clasificar tipo de picker (mismos patrones que index.html)
-                                        let attributeType = "";
-                                        if (pIdUpper.includes("COLOR") || pIdUpper === "FINISH" || pIdUpper === "ACABADO") {
-                                            attributeType = "color";
-                                        } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY") || pIdUpper.includes("CAPACIDAD")) {
-                                            attributeType = "memory";
-                                        } else if (pIdUpper.includes("RAM")) {
-                                            attributeType = "ram";
-                                        } else if (pIdUpper === "GRADING") {
-                                            attributeType = "grading";
-                                        }
-                                        
-                                        picker.products.forEach(p => {
-                                            if (!p.product_id) return;
-                                            const tags = p.tags || [];
-                                            const outOfStock = isProductTagOutOfStock(tags);
-                                            
-                                            if (!productMap[p.product_id]) {
-                                                productMap[p.product_id] = {
-                                                    isOutOfStock: outOfStock,
-                                                    color: "", memory: "", ram: "", grading: "",
-                                                    tags: tags
-                                                };
-                                            } else {
-                                                // Actualizar tags si este picker dice out-of-stock
-                                                if (outOfStock) productMap[p.product_id].isOutOfStock = true;
-                                                tags.forEach(t => {
-                                                    if (!productMap[p.product_id].tags.includes(t)) {
-                                                        productMap[p.product_id].tags.push(t);
-                                                    }
-                                                });
-                                                // Re-evaluate con todos los tags acumulados
-                                                productMap[p.product_id].isOutOfStock = isProductTagOutOfStock(productMap[p.product_id].tags);
-                                            }
-                                            
-                                            // Asignar atributo del picker
-                                            if (attributeType && p.picker_label) {
-                                                productMap[p.product_id][attributeType] = p.picker_label.trim();
-                                            }
-                                        });
-                                    });
-                                    
-                                    const allProductIds = Object.keys(productMap);
-                                    const activeProducts = allProductIds.filter(pid => !productMap[pid].isOutOfStock);
-                                    const outOfStockProducts = allProductIds.filter(pid => productMap[pid].isOutOfStock);
-                                    
-                                    detalle.totalVariantes = allProductIds.length;
-                                    detalle.activasVariantes = activeProducts.length;
-                                    
-                                    console.log(`[STOCK-CHECK] ${item.modelo} | ID: ${idBusqueda} | isProduct: ${isProduct} | pickers: ${liveData.pickers.length} | unique products: ${allProductIds.length} | active: ${activeProducts.length} | out: ${outOfStockProducts.length} | buy_box: ${!!liveData.buy_box_winner} | price: ${liveData.price || 'N/A'}`);
-                                    
-                                    if (activeProducts.length > 0) {
-                                        tieneStock = true;
-                                    }
-                                    
-                                    // Extraer detalle de qué colores/memorias/rams están agotados
-                                    const coloresVivos = new Set();
-                                    const coloresAgotados = new Set();
-                                    const memoriasVivas = new Set();
-                                    const memoriasAgotadas = new Set();
-                                    const ramsVivas = new Set();
-                                    const ramsAgotadas = new Set();
-                                    
-                                    allProductIds.forEach(pid => {
-                                        const p = productMap[pid];
-                                        if (p.color) {
-                                            if (p.isOutOfStock) coloresAgotados.add(p.color);
-                                            else coloresVivos.add(p.color);
-                                        }
-                                        if (p.memory) {
-                                            if (p.isOutOfStock) memoriasAgotadas.add(p.memory);
-                                            else memoriasVivas.add(p.memory);
-                                        }
-                                        if (p.ram) {
-                                            if (p.isOutOfStock) ramsAgotadas.add(p.ram);
-                                            else ramsVivas.add(p.ram);
-                                        }
-                                    });
-                                    
-                                    // Solo reportar como agotado colores/memorias/rams que NO tienen ninguna variante activa
-                                    detalle.coloresAgotados = [...coloresAgotados].filter(c => !coloresVivos.has(c));
-                                    detalle.memoriasAgotadas = [...memoriasAgotadas].filter(m => !memoriasVivas.has(m));
-                                    detalle.ramsAgotadas = [...ramsAgotadas].filter(r => !ramsVivas.has(r));
-                                    
-                                    if (!tieneStock) {
-                                        detalle.razon = 'all_pickers_out';
-                                        detalle.mensaje = `${allProductIds.length} variantes, todas agotadas`;
-                                    } else if (isCatalog && !liveData.buy_box_winner && !liveData.price) {
-                                        // Catalog product con pickers "activos" pero sin buy_box_winner = no hay vendedor con stock real
-                                        tieneStock = false;
-                                        detalle.razon = 'no_buy_box';
-                                        detalle.mensaje = `Pickers activos pero sin vendedor disponible (sin buy_box_winner)`;
-                                    } else if (outOfStockProducts.length > 0) {
-                                        // Tiene stock parcial — reportar si hay combinaciones completamente agotadas
-                                        detalle.razon = 'partial_stock';
-                                    }
-                                }
-                                // 1b. Catalog Product con buy_box_winner (sin pickers visibles)
-                                else if (isCatalog && liveData.buy_box_winner) {
-                                    tieneStock = true;
-                                }
-                                // 2. Item con variations
-                                else if (liveData.variations && liveData.variations.length > 0) {
-                                    const totalVars = liveData.variations.length;
-                                    const activeVariations = liveData.variations.filter(v => parseInt(v.available_quantity, 10) > 0);
-                                    detalle.totalVariantes = totalVars;
-                                    detalle.activasVariantes = activeVariations.length;
-                                    
-                                    if (activeVariations.length > 0) {
-                                        tieneStock = true;
-                                    } else {
-                                        detalle.razon = 'all_variations_out';
-                                        detalle.mensaje = `${totalVars} variaciones, todas sin stock`;
-                                    }
-                                }
-                                // 3. Single product/item
-                                else {
-                                    const status = (liveData.status || "").toLowerCase();
-                                    const qty = parseInt(liveData.available_quantity, 10);
-                                    
-                                    if (status && status !== "active") {
-                                        tieneStock = false;
-                                        detalle.razon = 'inactive';
-                                        detalle.mensaje = `Estado: ${liveData.status || 'inactivo'}`;
-                                    } else if (!isNaN(qty) && qty > 0) {
-                                        tieneStock = true;
-                                    } else if (isCatalog && !liveData.buy_box_winner && (!liveData.pickers || liveData.pickers.length === 0)) {
-                                        // Product sin buy_box_winner ni pickers = no disponible
-                                        tieneStock = false;
-                                        detalle.razon = 'no_buy_box';
-                                        detalle.mensaje = 'Sin buy_box_winner ni pickers';
-                                    } else if (status === "" && isNaN(qty)) {
-                                        // Asumimos disponible si no hay info negativa
-                                        tieneStock = true;
-                                    }
-                                }
-                                
-                                if (!tieneStock) {
-                                    item._stockDetalle = detalle;
-                                    alertasStockGlobal.push(item);
-                                    actualizarBotonAlertasStock();
-                                    const dropdownPanel = document.getElementById('stock-alerts-dropdown');
-                                    if (dropdownPanel && dropdownPanel.style.display === 'block') {
-                                        renderizarStockAlerts();
-                                    }
-                                }
-                                
-                                // Actualizar el cache en el Google Sheet si la información en vivo difiere de la almacenada
-                                const cacheStr = JSON.stringify(liveData);
-                                const cacheActualStr = JSON.stringify(item.variantesJson);
-                                if (cacheStr !== cacheActualStr) {
-                                    const formData = new URLSearchParams();
-                                    formData.append('token', CONFIG.API_TOKEN);
-                                    formData.append('action', 'actualizarVariantesJson');
-                                    formData.append('row', item.filaNum);
-                                    formData.append('variantes', cacheStr);
-                                    
-                                    fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                                        method: 'POST',
-                                        body: formData.toString(),
-                                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                                    }).catch(e => console.warn("Error background caching variants:", e));
-                                }
-                                
-                            } catch(err) {
-                                console.error(`Error verificando stock en vivo para ${item.modelo}:`, err);
-                                alertasStockGlobal.push(item);
-                                actualizarBotonAlertasStock();
-                            }
-                            
-                            return procesarSiguiente();
+                            });
                         }
                         
-                        const promesas = [];
-                        for (let i = 0; i < limiteConcurrencia; i++) {
-                            promesas.push(procesarSiguiente());
+                        actualizarBotonAlertasStock();
+                        const dropdownPanel = document.getElementById('stock-alerts-dropdown');
+                        if (dropdownPanel && dropdownPanel.style.display === 'block') {
+                            renderizarStockAlerts();
                         }
-                        await Promise.all(promesas);
                         
                     } catch (err) {
                         console.error("Error al evaluar alertas de stock:", err);
