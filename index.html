@@ -3336,6 +3336,14 @@
                         solicitarBusqueda();
                     }
                 });
+
+                let debounceTimeout = null;
+                inputBusqueda.addEventListener('input', function () {
+                    if (debounceTimeout) clearTimeout(debounceTimeout);
+                    debounceTimeout = setTimeout(() => {
+                        solicitarBusqueda();
+                    }, 350);
+                });
             }
 
             renderizarCatalogo("");
