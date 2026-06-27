@@ -1072,6 +1072,12 @@
                             <option value="BAJO DEMANDA">⏳ BAJO DEMANDA (Sobre pedido)</option>
                         </select>
 
+                        <label for="nuevoCondicion">Condición del Equipo (Mercado Libre):</label>
+                        <select id="nuevoCondicion">
+                            <option value="new">🆕 NUEVO (Buscar mejor precio en nuevo)</option>
+                            <option value="used">🔧 REACONDICIONADO / USADO (Buscar mejor precio en usados)</option>
+                        </select>
+
                         <div style="margin-top: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
                             <input type="checkbox" id="nuevo-es-importacion" style="width: auto; margin: 0; cursor: pointer;" />
                             <label for="nuevo-es-importacion" style="margin: 0; font-weight: normal; cursor: pointer; color: var(--text-main);">✈️ ¿Es de Importación?</label>
@@ -3128,34 +3134,36 @@
                 });
             }
 
-            if (btnAgregar) {
-                btnAgregar.addEventListener('click', async function () {
-                    const link = document.getElementById('nuevoLink').value.trim();
-                    const imei = document.getElementById('nuevoImei').value.trim();
-                    const estado = document.getElementById('nuevoEstado').value;
-                    const esImport = chkNuevoImport ? chkNuevoImport.checked : false;
-                    const costoImport = (esImport && inputNuevoImport) ? inputNuevoImport.value.trim() : "";
-
-                    if (!link) {
-                        toast('Por favor introduce el enlace de Mercado Libre.', 'warning');
-                        return;
-                    }
-
-                    const originalText = btnAgregar.innerText;
-                    btnAgregar.innerText = "⏳ Consultando e inyectando...";
-                    btnAgregar.disabled = true;
-
-                    try {
-                        const formData = new URLSearchParams();
-                        formData.append('action', 'agregarCelularCatalogo');
-                        formData.append('token', CONFIG.API_TOKEN);
-                        formData.append('link', link);
-                        formData.append('imei', imei);
-                        formData.append('estado', estado);
-                        formData.append('esImportacion', esImport ? 'true' : 'false');
-                        if (costoImport) {
-                            formData.append('costoImportacion', costoImport);
-                        }
+             if (btnAgregar) {
+                 btnAgregar.addEventListener('click', async function () {
+                     const link = document.getElementById('nuevoLink').value.trim();
+                     const imei = document.getElementById('nuevoImei').value.trim();
+                     const estado = document.getElementById('nuevoEstado').value;
+                     const condicion = document.getElementById('nuevoCondicion').value;
+                     const esImport = chkNuevoImport ? chkNuevoImport.checked : false;
+                     const costoImport = (esImport && inputNuevoImport) ? inputNuevoImport.value.trim() : "";
+ 
+                     if (!link) {
+                         toast('Por favor introduce el enlace de Mercado Libre.', 'warning');
+                         return;
+                     }
+ 
+                     const originalText = btnAgregar.innerText;
+                     btnAgregar.innerText = "⏳ Consultando e inyectando...";
+                     btnAgregar.disabled = true;
+ 
+                     try {
+                         const formData = new URLSearchParams();
+                         formData.append('action', 'agregarCelularCatalogo');
+                         formData.append('token', CONFIG.API_TOKEN);
+                         formData.append('link', link);
+                         formData.append('imei', imei);
+                         formData.append('estado', estado);
+                         formData.append('condicion', condicion);
+                         formData.append('esImportacion', esImport ? 'true' : 'false');
+                         if (costoImport) {
+                             formData.append('costoImportacion', costoImport);
+                         }
 
                         const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
                             method: 'POST',
