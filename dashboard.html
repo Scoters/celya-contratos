@@ -3646,8 +3646,14 @@
                     if (data.result === 'success') {
                         // Guardar token temporal de sesión
                         sessionStorage.setItem('celya_authenticated', 'true');
+                        sessionStorage.setItem('celya_api_token', data.token);
+                        CONFIG.API_TOKEN = data.token;
+                        
                         // Desvanecer pantalla de bloqueo
                         document.getElementById('lockscreen-celya').style.display = 'none';
+                        
+                        // Cargar datos del dashboard de inmediato con el nuevo token
+                        cargarDatosDashboard();
                     } else {
                         errorTxt.innerText = "❌ Contraseña incorrecta";
                         errorTxt.style.display = 'block';
