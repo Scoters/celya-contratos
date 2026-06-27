@@ -814,6 +814,26 @@
             animation: stockAlertsSpin 1s linear infinite;
         }
 
+        /* Centrar como modal responsivo en móviles */
+        @media (max-width: 767px) {
+            .stock-alerts-panel {
+                position: fixed !important;
+                top: 50% !important;
+                left: 50% !important;
+                right: auto !important;
+                bottom: auto !important;
+                transform: translate(-50%, -50%) !important;
+                width: 94vw !important;
+                max-width: 440px !important;
+                max-height: 85vh !important;
+                border-radius: 16px !important;
+                box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8) !important;
+            }
+            .stock-alerts-panel > div[style*="transform: rotate(45deg)"] {
+                display: none !important;
+            }
+        }
+
         /* 15% más grande en PC */
         @media (min-width: 768px) {
             .stock-alerts-panel {
