@@ -4062,13 +4062,18 @@
                 cliFrecuencia.value = freqInicial;
             }
 
-            // Establecer plazo por defecto coincidiendo con el plan de enganche menor
+            // Establecer plazo por defecto: elegir dinámicamente el plan con enganche menor
+            // para que coincida exactamente con el "Enganche desde" de la tarjeta (Math.min)
             const cliPlazo = document.getElementById('cliPlazo');
             if (cliPlazo) {
                 if (freqInicial === "QUINCENAL") {
-                    cliPlazo.value = "26 Semanas"; // Plan Rápido quincenal (13 pagos) = 25% enganche menor
+                    const fQR = CONFIG_TASAS.engancheQuin26 !== undefined ? CONFIG_TASAS.engancheQuin26 : 0.25;
+                    const fQC = CONFIG_TASAS.engancheQuin52 !== undefined ? CONFIG_TASAS.engancheQuin52 : 0.35;
+                    cliPlazo.value = (fQR <= fQC) ? "26 Semanas" : "52 Semanas";
                 } else {
-                    cliPlazo.value = "52 Semanas"; // Plan Cómodo semanal (52 pagos) = 11% enganche menor
+                    const fSR = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
+                    const fSC = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
+                    cliPlazo.value = (fSC <= fSR) ? "52 Semanas" : "26 Semanas";
                 }
             }
 
@@ -4352,6 +4357,18 @@
                         selectPrestamos.options[3].text = "Más de $1,000";
                         selectPrestamos.options[3].value = "Más de $1,000";
                     }
+                }
+            }
+            // Elegir dinámicamente el plan con enganche menor al cambiar frecuencia
+            if (freq !== "CONTADO") {
+                if (freq === "QUINCENAL") {
+                    const fQR = CONFIG_TASAS.engancheQuin26 !== undefined ? CONFIG_TASAS.engancheQuin26 : 0.25;
+                    const fQC = CONFIG_TASAS.engancheQuin52 !== undefined ? CONFIG_TASAS.engancheQuin52 : 0.35;
+                    selectPlazo.value = (fQR <= fQC) ? "26 Semanas" : "52 Semanas";
+                } else {
+                    const fSR = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
+                    const fSC = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
+                    selectPlazo.value = (fSC <= fSR) ? "52 Semanas" : "26 Semanas";
                 }
             }
 
@@ -4827,11 +4844,15 @@
             const freq = document.getElementById('pe-cliFrecuencia').value;
             const selectPlazo = document.getElementById('pe-cliPlazo');
             
-            // Sincronizar plazo por defecto según frecuencia si es necesario
-            if (freq === "QUINCENAL" && selectPlazo.value === "52 Semanas") {
-                selectPlazo.value = "26 Semanas"; // 13 quincenas = 25% enganche menor
-            } else if (freq === "SEMANAL" && selectPlazo.value === "26 Semanas") {
-                selectPlazo.value = "52 Semanas"; // 52 semanas = 11% enganche menor
+            // Sincronizar plazo: elegir dinámicamente el plan con enganche menor
+            if (freq === "QUINCENAL") {
+                const fQR = CONFIG_TASAS.engancheQuin26 !== undefined ? CONFIG_TASAS.engancheQuin26 : 0.25;
+                const fQC = CONFIG_TASAS.engancheQuin52 !== undefined ? CONFIG_TASAS.engancheQuin52 : 0.35;
+                selectPlazo.value = (fQR <= fQC) ? "26 Semanas" : "52 Semanas";
+            } else if (freq === "SEMANAL") {
+                const fSR = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
+                const fSC = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
+                selectPlazo.value = (fSC <= fSR) ? "52 Semanas" : "26 Semanas";
             }
 
             const seccionPreguntas = document.getElementById('seccionPreguntasPedidoEspecial');

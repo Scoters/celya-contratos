@@ -1316,12 +1316,16 @@
                 optLargo.disabled = false;
             }
 
-            // Sincronizar plazo por defecto según frecuencia si es necesario
+            // Sincronizar plazo: elegir dinámicamente el plan con enganche menor
             const selectPlazo = document.getElementById('plazoSemanas');
-            if (frecuencia === "QUINCENAL" && selectPlazo.value === "52") {
-                selectPlazo.value = "26"; // 13 quincenas = 25% enganche menor
-            } else if (frecuencia === "SEMANAL" && selectPlazo.value === "26") {
-                selectPlazo.value = "52"; // 52 semanas = 11% enganche menor
+            if (frecuencia === "QUINCENAL") {
+                const fQR = CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.25;
+                const fQC = CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.35;
+                selectPlazo.value = (fQR <= fQC) ? "26" : "52";
+            } else if (frecuencia === "SEMANAL") {
+                const fSR = CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.165;
+                const fSC = CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.11;
+                selectPlazo.value = (fSC <= fSR) ? "52" : "26";
             }
 
             // 2. Ejecutamos la matemática de la cuota dinero
