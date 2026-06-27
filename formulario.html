@@ -513,7 +513,7 @@
         let ineTraseraB64 = "";
         let fotoEvidenciaB64 = "";
 
-        let CONFIG_TASAS_SHEETS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, engancheSemanal: 0.165, engancheQuincenal: 0.33, engancheComodo: 0.11 }; // Aquí caen en vivo el 66% y 90% del Sheets
+        let CONFIG_TASAS_SHEETS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, engancheSemanal: 0.165, engancheQuincenal: 0.33, engancheComodo: 0.11, interesQuin26: 0.45, interesQuin52: 0.65, engancheQuin26: 0.25, engancheQuin52: 0.35 }; // Aquí caen en vivo el 66% y 90% del Sheets
 
         // Conexión directa al backend para traer los intereses de D2 y E2
         async function sincronizarTasasDesdeSheets() {
@@ -527,7 +527,7 @@
             } catch (err) {
                 console.error("⚠️ Error de red al sincronizar tasas, usando respaldo local:", err);
                 // Respaldo de seguridad por si falla la conexión un segundo
-                CONFIG_TASAS_SHEETS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, engancheSemanal: 0.165, engancheQuincenal: 0.33, engancheComodo: 0.11 };
+                CONFIG_TASAS_SHEETS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, engancheSemanal: 0.165, engancheQuincenal: 0.33, engancheComodo: 0.11, interesQuin26: 0.45, interesQuin52: 0.65, engancheQuin26: 0.25, engancheQuin52: 0.35 };
             }
         }
 
@@ -1134,8 +1134,8 @@
                 } else {
                     const factorEngancheMinimo = (frecuencia === "QUINCENAL")
                         ? ((planElegido === "52")
-                            ? ((CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.11) * 2)
-                            : (CONFIG_TASAS_SHEETS.engancheQuincenal !== undefined ? CONFIG_TASAS_SHEETS.engancheQuincenal : 0.33))
+                            ? (CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.35)
+                            : (CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.25))
                         : ((planElegido === "52")
                             ? (CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.11)
                             : (CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.165));
@@ -1180,9 +1180,13 @@
                         mensajeDescuento = "¡Tasa con 5% desc. aplicada! 🟢";
                     }
 
-                    const factorInteresBase = (planElegido === "26")
-                        ? (CONFIG_TASAS_SHEETS.interes26 !== undefined ? CONFIG_TASAS_SHEETS.interes26 : 0.66)
-                        : (CONFIG_TASAS_SHEETS.interes52 !== undefined ? CONFIG_TASAS_SHEETS.interes52 : 0.90);
+                    const factorInteresBase = (frecuencia === "QUINCENAL")
+                        ? ((planElegido === "26")
+                            ? (CONFIG_TASAS_SHEETS.interesQuin26 !== undefined ? CONFIG_TASAS_SHEETS.interesQuin26 : 0.45)
+                            : (CONFIG_TASAS_SHEETS.interesQuin52 !== undefined ? CONFIG_TASAS_SHEETS.interesQuin52 : 0.65))
+                        : ((planElegido === "26")
+                            ? (CONFIG_TASAS_SHEETS.interes26 !== undefined ? CONFIG_TASAS_SHEETS.interes26 : 0.66)
+                            : (CONFIG_TASAS_SHEETS.interes52 !== undefined ? CONFIG_TASAS_SHEETS.interes52 : 0.90));
                     const factorInteres = Math.max(0, factorInteresBase - descuentoInteres);
                     
                     const numPagosBase = (planElegido === "26") ? 26 : 52;
@@ -1349,8 +1353,8 @@
                 const frecuencia = partes[0] || "SEMANAL";
                 const factorEngancheMinimo = (frecuencia === "QUINCENAL")
                     ? ((planElegido === "52")
-                        ? ((CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.11) * 2)
-                        : (CONFIG_TASAS_SHEETS.engancheQuincenal !== undefined ? CONFIG_TASAS_SHEETS.engancheQuincenal : 0.33))
+                        ? (CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.35)
+                        : (CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.25))
                     : ((planElegido === "52")
                         ? (CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.11)
                         : (CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.165));
