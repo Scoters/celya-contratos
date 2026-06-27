@@ -4509,14 +4509,12 @@
                 const rateBadge = document.getElementById('pdp-tasa-interes-badge');
                 if (rateBadge) {
                     rateBadge.style.display = 'block';
-                    const tasaPorcentajeActual = Math.round(factorInteres * 100);
-                    const tasaPorcentajeBase = Math.round(factorInteresBase * 100);
                     if (descuentoInteres > 0) {
-                        rateBadge.style.color = '#16a34a';
-                        rateBadge.innerHTML = `📉 Interés: <strong>${tasaPorcentajeActual}%</strong> (Tasa base: ${tasaPorcentajeBase}% - ${mensajeDescuento})`;
+                        rateBadge.style.color = '#059669';
+                        rateBadge.innerHTML = `🔥 ¡Se aplicó un descuento del <strong>${Math.round(descuentoInteres * 100)}%</strong> en tu financiamiento!`;
                     } else {
                         rateBadge.style.color = '#7f8c8d';
-                        rateBadge.innerHTML = `📊 Interés: <strong>${tasaPorcentajeActual}%</strong> (Ahorra dando &ge; 25% de enganche)`;
+                        rateBadge.innerHTML = `💡 ¡Da 25% o más de enganche y obtén un descuento en tu tasa!`;
                     }
                 }
             }
@@ -5040,14 +5038,12 @@
                 const rateBadge = document.getElementById('pe-tasa-interes-badge');
                 if (rateBadge) {
                     rateBadge.style.display = 'block';
-                    const tasaPorcentajeActual = Math.round(factorInteres * 100);
-                    const tasaPorcentajeBase = Math.round(factorInteresBase * 100);
                     if (descuentoInteres > 0) {
-                        rateBadge.style.color = '#16a34a';
-                        rateBadge.innerHTML = `📉 Interés: <strong>${tasaPorcentajeActual}%</strong> (Tasa base: ${tasaPorcentajeBase}% - ${mensajeDescuento})`;
+                        rateBadge.style.color = '#059669';
+                        rateBadge.innerHTML = `🔥 ¡Se aplicó un descuento del <strong>${Math.round(descuentoInteres * 100)}%</strong> en tu financiamiento!`;
                     } else {
                         rateBadge.style.color = '#7f8c8d';
-                        rateBadge.innerHTML = `📊 Interés: <strong>${tasaPorcentajeActual}%</strong> (Ahorra dando &ge; 25% de enganche)`;
+                        rateBadge.innerHTML = `💡 ¡Da 25% o más de enganche y obtén un descuento en tu tasa!`;
                     }
                 }
             }
