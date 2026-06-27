@@ -5,15 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CelYa! - Catálogo Oficial</title>
+    <meta name="description"
+        content="Estrena el celular que deseas hoy mismo con CelYa. Financiamiento de smartphones con enganches bajos, pagos semanales y entregas personales en CDMX y Estado de México.">
+    <meta name="keywords"
+        content="estrena celya, celulares a credito, pagos semanales, celulares cdmx, celulares estado de mexico, financiamiento celulares">
     <link rel="shortcut icon" href="logo-modified.webp?v=3" type="image/webp">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Microsoft Clarity -->
     <script type="text/javascript">
-        (function(c,l,a,r,i,t,y){
-            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        (function (c, l, a, r, i, t, y) {
+            c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
+            t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
+            y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
         })(window, document, "clarity", "script", "xa8n4m6myx");
     </script>
     <!-- Google Fonts Outfit -->
@@ -213,17 +216,22 @@
 
         /* Dark-theme overrides for plan-labels, plan-vals, and PDP info elements */
         body.dark-theme .cuota-item span.plan-label {
-            color: #38bdf8 !important; /* Sky 400 */
+            color: #38bdf8 !important;
+            /* Sky 400 */
         }
+
         body.dark-theme .cuota-item span.plan-val {
             color: #38bdf8 !important;
         }
+
         body.dark-theme #pdp-weekly-term {
             color: #38bdf8 !important;
         }
+
         body.dark-theme .enganche-personalizado-pdp summary {
             color: #4ade80 !important;
         }
+
         body.dark-theme .pdp-features-list li svg {
             color: #4ade80 !important;
         }
@@ -826,7 +834,7 @@
             font-size: 16px !important;
             font-weight: 700 !important;
         }
-        
+
         #ml-colors-section div:first-child span,
         #ml-extra-pickers-container label span {
             font-size: 16px !important;
@@ -837,7 +845,7 @@
         .enganche-personalizado-pdp summary {
             color: #16a34a !important;
         }
-        
+
         /* Estilo premium para los sliders de enganche */
         .enganche-personalizado-pdp input[type="range"] {
             -webkit-appearance: none;
@@ -846,11 +854,13 @@
             cursor: pointer;
             width: 100%;
         }
+
         .enganche-personalizado-pdp input[type="range"]::-webkit-slider-runnable-track {
             background: var(--border-color);
             height: 6px;
             border-radius: 3px;
         }
+
         .enganche-personalizado-pdp input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
@@ -863,14 +873,17 @@
             box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
             transition: transform 0.1s;
         }
+
         .enganche-personalizado-pdp input[type="range"]:active::-webkit-slider-thumb {
             transform: scale(1.25);
         }
+
         .enganche-personalizado-pdp input[type="range"]::-moz-range-track {
             background: var(--border-color);
             height: 6px;
             border-radius: 3px;
         }
+
         .enganche-personalizado-pdp input[type="range"]::-moz-range-thumb {
             background-color: #16a34a;
             height: 16px;
@@ -880,10 +893,11 @@
             box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
             transition: transform 0.1s;
         }
+
         .enganche-personalizado-pdp input[type="range"]:active::-moz-range-thumb {
             transform: scale(1.25);
         }
-        
+
         /* Números verdes de enganche */
         #pdp-enganche-minimo-label,
         #pdp-enganche-maximo-label,
@@ -893,7 +907,7 @@
         #pe-enganche-seleccionado-val-parent {
             color: #16a34a !important;
         }
-        
+
         /* Estilos premium para selectores interactivos (Segmented Control) */
         .segment-control {
             display: flex;
@@ -907,6 +921,7 @@
             width: 100%;
             max-width: 330px;
         }
+
         .segment-control .segment-btn {
             flex: 1;
             border: none;
@@ -928,22 +943,24 @@
             line-height: 1.2;
             min-height: 35px;
         }
+
         .segment-control .segment-btn:hover {
             color: var(--text-main);
             background: rgba(var(--accent-rgb), 0.06);
         }
+
         .segment-control .segment-btn.active {
             background: var(--accent-gradient);
             color: #ffffff !important;
             box-shadow: 0 3px 8px rgba(var(--accent-rgb), 0.2);
             transform: translateY(-0.5px);
         }
-        
+
         /* Ajuste específico para el plazo o etiquetas más largas */
         .plazo-control .segment-btn {
             font-size: 12.5px;
         }
-        
+
         /* Frecuencia de pagos semanales con tono azul */
         #pdp-weekly-term {
             color: #2563eb !important;
@@ -984,9 +1001,12 @@
         }
 
         @keyframes pdpCloseBounce {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translateY(0) scale(1);
             }
+
             50% {
                 transform: translateY(-8px) scale(1.05);
             }
@@ -1073,9 +1093,11 @@
             cursor: pointer;
             transition: background 0.15s, transform 0.1s;
         }
+
         .pdp-loading-close-btn:hover {
             background: var(--bg-light);
         }
+
         .pdp-loading-close-btn:active {
             transform: scale(0.96);
         }
@@ -1123,10 +1145,12 @@
             max-height: 440px;
             scroll-behavior: smooth;
         }
+
         .pdp-gallery-thumbs::-webkit-scrollbar {
             width: 4px;
             height: 4px;
         }
+
         .pdp-gallery-thumbs::-webkit-scrollbar-thumb {
             background: rgba(0, 143, 255, 0.3);
             border-radius: 2px;
@@ -1164,7 +1188,8 @@
             color: #ffffff;
             font-size: 24px;
             font-weight: bold;
-            display: none; /* dynamically flex when pictures count > 1 */
+            display: none;
+            /* dynamically flex when pictures count > 1 */
             align-items: center;
             justify-content: center;
             cursor: pointer;
@@ -1175,17 +1200,21 @@
             user-select: none;
             outline: none;
         }
+
         .pdp-gallery-arrow:hover {
             background: rgba(0, 143, 255, 0.4);
             border-color: var(--accent);
             transform: translateY(-50%) scale(1.1);
         }
+
         .pdp-gallery-arrow:active {
             transform: translateY(-50%) scale(0.95);
         }
+
         .pdp-gallery-arrow.prev {
             left: 12px;
         }
+
         .pdp-gallery-arrow.next {
             right: 12px;
         }
@@ -1246,6 +1275,7 @@
             font-weight: 700;
             color: #16a34a !important;
         }
+
         body.dark-theme .pdp-price-amount {
             color: #4ade80 !important;
         }
@@ -1255,6 +1285,7 @@
             color: #16a34a !important;
             font-weight: 600 !important;
         }
+
         body.dark-theme .pdp-price-container div:first-child span:last-child {
             color: #4ade80 !important;
         }
@@ -1274,34 +1305,43 @@
         }
 
         /* Resumen del plan de pago en el formulario */
-        .pdp-summary-enganche-val, .pdp-summary-enganche-lbl {
+        .pdp-summary-enganche-val,
+        .pdp-summary-enganche-lbl {
             color: #16a34a !important;
         }
-        body.dark-theme .pdp-summary-enganche-val, 
+
+        body.dark-theme .pdp-summary-enganche-val,
         body.dark-theme .pdp-summary-enganche-lbl {
             color: #4ade80 !important;
         }
-        
-        .pdp-summary-cuota-val, .pdp-summary-cuota-lbl {
+
+        .pdp-summary-cuota-val,
+        .pdp-summary-cuota-lbl {
             color: #2563eb !important;
         }
-        body.dark-theme .pdp-summary-cuota-val, 
+
+        body.dark-theme .pdp-summary-cuota-val,
         body.dark-theme .pdp-summary-cuota-lbl {
             color: #38bdf8 !important;
         }
 
         /* Special Order Preview colors aligned with light/dark theme */
-        #pe-preview-enganche-label, #pe-preview-enganche {
+        #pe-preview-enganche-label,
+        #pe-preview-enganche {
             color: #16a34a !important;
         }
-        body.dark-theme #pe-preview-enganche-label, 
+
+        body.dark-theme #pe-preview-enganche-label,
         body.dark-theme #pe-preview-enganche {
             color: #4ade80 !important;
         }
-        #pe-preview-semanal-label, #pe-preview-semanal {
+
+        #pe-preview-semanal-label,
+        #pe-preview-semanal {
             color: #2563eb !important;
         }
-        body.dark-theme #pe-preview-semanal-label, 
+
+        body.dark-theme #pe-preview-semanal-label,
         body.dark-theme #pe-preview-semanal {
             color: #38bdf8 !important;
         }
@@ -1312,6 +1352,7 @@
             color: #16a34a;
             font-weight: 600;
         }
+
         body.dark-theme .card-enganche-minimo {
             color: #4ade80;
         }
@@ -1876,7 +1917,9 @@
             .card-badges {
                 gap: 4px;
             }
-            .brand-badge, .status-badge {
+
+            .brand-badge,
+            .status-badge {
                 font-size: 11px;
                 padding: 3px 6px;
             }
@@ -1945,9 +1988,11 @@
             0% {
                 box-shadow: 0 0 0 0 rgba(0, 191, 255, 0.7);
             }
+
             70% {
                 box-shadow: 0 0 0 15px rgba(0, 191, 255, 0);
             }
+
             100% {
                 box-shadow: 0 0 0 0 rgba(0, 191, 255, 0);
             }
@@ -1965,12 +2010,15 @@
                 height: 52px !important;
                 box-sizing: border-box !important;
             }
+
             .whatsapp-float svg {
                 width: 28px;
                 height: 28px;
             }
+
             .whatsapp-float::after {
-                display: none; /* Hide tooltip on mobile */
+                display: none;
+                /* Hide tooltip on mobile */
             }
         }
 
@@ -2109,7 +2157,8 @@
             color: var(--accent);
             font-size: 22px;
             font-weight: 700;
-            display: none; /* dynamically flex/none */
+            display: none;
+            /* dynamically flex/none */
             align-items: center;
             justify-content: center;
             cursor: pointer;
@@ -2118,14 +2167,17 @@
             transition: background 0.2s, border-color 0.2s, transform 0.2s;
             z-index: 10;
         }
+
         .pdp-info-btn:hover {
             background: rgba(0, 143, 255, 0.25);
             border-color: var(--accent);
             transform: scale(1.08);
         }
+
         .pdp-info-btn:active {
             transform: scale(0.96);
         }
+
         .pdp-info-tooltip {
             position: absolute;
             top: 70px;
@@ -2145,21 +2197,26 @@
             -webkit-backdrop-filter: blur(16px);
             text-align: left;
         }
+
         #pdp-info-tooltip-content {
             color: #f1f5f9 !important;
             font-size: 17px !important;
             line-height: 1.65 !important;
         }
+
         .pdp-info-tooltip::-webkit-scrollbar {
             width: 6px;
         }
+
         .pdp-info-tooltip::-webkit-scrollbar-track {
             background: transparent;
         }
+
         .pdp-info-tooltip::-webkit-scrollbar-thumb {
             background: var(--border-color);
             border-radius: 3px;
         }
+
         .pdp-info-tooltip::-webkit-scrollbar-thumb:hover {
             background: var(--text-muted);
         }
@@ -2177,6 +2234,7 @@
                 box-shadow: 0 8px 25px rgba(0, 143, 255, 0.3) !important;
                 animation: pdpCloseBounce 3s ease-in-out infinite;
             }
+
             .pdp-info-btn:hover,
             .pdp-info-btn:active {
                 background: rgba(0, 143, 255, 0.25) !important;
@@ -2184,6 +2242,7 @@
                 transform: scale(1.15) !important;
                 animation: none !important;
             }
+
             .pdp-info-tooltip {
                 position: fixed !important;
                 top: 96px !important;
@@ -2209,7 +2268,8 @@
             color: var(--accent);
             font-size: 28px;
             font-weight: 700;
-            display: none; /* dynamically flex/none */
+            display: none;
+            /* dynamically flex/none */
             align-items: center;
             justify-content: center;
             cursor: pointer;
@@ -2221,16 +2281,19 @@
             outline: none;
             box-shadow: 0 4px 16px rgba(0, 143, 255, 0.2);
         }
+
         .back-to-top-btn.visible {
             display: flex;
             opacity: 1;
         }
+
         .back-to-top-btn:hover {
             transform: scale(1.1) rotate(-5deg);
             box-shadow: 0 8px 24px rgba(0, 143, 255, 0.4);
             background: rgba(0, 143, 255, 0.25);
             border-color: var(--accent);
         }
+
         .back-to-top-btn:active {
             transform: scale(0.95);
         }
@@ -2239,6 +2302,7 @@
         .floating-solicitud-container {
             display: none !important;
         }
+
         .floating-solicitud-btn {
             height: 60px;
             padding: 0 28px;
@@ -2260,24 +2324,29 @@
             outline: none;
             white-space: nowrap;
         }
+
         .floating-solicitud-btn:hover {
             background: rgba(0, 143, 255, 0.25);
             border-color: var(--accent);
             transform: scale(1.06);
             box-shadow: 0 8px 24px rgba(0, 143, 255, 0.4);
         }
+
         .floating-solicitud-btn:active {
             transform: scale(0.96);
         }
+
         .floating-solicitud-dropdown {
             position: absolute;
-            bottom: 75px; /* floats above the 60px button */
+            bottom: 75px;
+            /* floats above the 60px button */
             width: 280px;
             max-height: 350px;
             border: 1px solid var(--border-color);
             border-radius: 14px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            display: none; /* dynamically flex */
+            display: none;
+            /* dynamically flex */
             flex-direction: column;
             overflow-y: auto;
             backdrop-filter: blur(12px);
@@ -2285,22 +2354,27 @@
             z-index: 10000;
             animation: dropdownFadeIn 0.22s cubic-bezier(0.22, 1, 0.36, 1);
         }
+
         @keyframes dropdownFadeIn {
             from {
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
+
         body.dark-theme .floating-solicitud-dropdown {
             background: rgba(39, 39, 42, 0.95);
         }
+
         body:not(.dark-theme) .floating-solicitud-dropdown {
             background: rgba(255, 255, 255, 0.95);
         }
+
         .floating-solicitud-dropdown .dropdown-header {
             padding: 14px 16px;
             font-weight: 700;
@@ -2309,10 +2383,12 @@
             border-bottom: 1px solid var(--border-color);
             text-align: left;
         }
+
         .floating-solicitud-dropdown .dropdown-options {
             display: flex;
             flex-direction: column;
         }
+
         .floating-solicitud-dropdown .dropdown-option {
             padding: 12px 16px;
             font-size: 14.5px;
@@ -2322,9 +2398,11 @@
             text-align: left;
             border-bottom: 1px dashed var(--border-color);
         }
+
         .floating-solicitud-dropdown .dropdown-option:last-child {
             border-bottom: none;
         }
+
         .floating-solicitud-dropdown .dropdown-option:hover {
             background: rgba(0, 143, 255, 0.1);
             color: var(--accent);
@@ -2339,14 +2417,17 @@
                 font-size: 24px;
                 box-sizing: border-box !important;
             }
+
             .floating-solicitud-container {
                 bottom: 20px;
             }
+
             .floating-solicitud-btn {
                 height: 52px;
                 padding: 0 20px;
                 font-size: 14.5px;
             }
+
             .floating-solicitud-dropdown {
                 bottom: 65px;
                 width: 250px;
@@ -2366,7 +2447,8 @@
             background: linear-gradient(135deg, #00E6D6 0%, #00BFFF 100%);
             color: #ffffff !important;
             border: none;
-            display: none; /* dynamically flex when modal opens */
+            display: none;
+            /* dynamically flex when modal opens */
             align-items: center;
             justify-content: center;
             cursor: pointer;
@@ -2382,13 +2464,16 @@
             box-sizing: border-box !important;
             outline: none;
         }
+
         .pdp-floating-solicitud-btn:hover {
             transform: translateY(-50%) scale(1.05);
             box-shadow: 0 6px 20px rgba(0, 191, 255, 0.5);
         }
+
         .pdp-floating-solicitud-btn:active {
             transform: translateY(-50%) scale(0.96);
         }
+
         .pdp-floating-solicitud-btn .btn-icon {
             font-size: 20px;
             display: flex;
@@ -2397,6 +2482,7 @@
             min-width: 48px;
             height: 48px;
         }
+
         .pdp-floating-solicitud-btn .btn-text {
             max-width: 0;
             opacity: 0;
@@ -2406,7 +2492,7 @@
             letter-spacing: 0.5px;
             padding-right: 0;
         }
-        
+
         /* Expanded State */
         .pdp-floating-solicitud-btn.expanded {
             width: 280px;
@@ -2415,12 +2501,13 @@
             padding-left: 0;
             background: linear-gradient(135deg, #00C8BB 0%, #009FFF 100%);
         }
+
         .pdp-floating-solicitud-btn.expanded .btn-text {
             max-width: 220px;
             opacity: 1;
             padding-right: 20px;
         }
-        
+
         @media (max-width: 768px) {
             .pdp-floating-solicitud-btn {
                 right: 16px;
@@ -2428,14 +2515,17 @@
                 height: 44px;
                 border-radius: 22px;
             }
+
             .pdp-floating-solicitud-btn .btn-icon {
                 min-width: 44px;
                 height: 44px;
                 font-size: 18px;
             }
+
             .pdp-floating-solicitud-btn.expanded {
                 width: 250px;
             }
+
             .pdp-floating-solicitud-btn.expanded .btn-text {
                 font-size: 12.5px;
                 padding-right: 14px;
@@ -2454,7 +2544,8 @@
             background: rgba(0, 143, 255, 0.08);
             border: 1.5px solid rgba(0, 143, 255, 0.3);
             border-radius: 50%;
-            display: none; /* dynamically flex when modal opens */
+            display: none;
+            /* dynamically flex when modal opens */
             align-items: center;
             justify-content: center;
             box-shadow: 0 2px 10px rgba(0, 143, 255, 0.12);
@@ -2465,18 +2556,21 @@
             text-decoration: none;
             outline: none;
         }
+
         .pdp-whatsapp-float:hover {
             transform: scale(1.1) rotate(5deg);
             box-shadow: 0 8px 24px rgba(0, 143, 255, 0.4);
             background: rgba(0, 143, 255, 0.22);
             border-color: var(--accent);
         }
+
         .pdp-whatsapp-float svg {
             width: 28px;
             height: 28px;
             fill: var(--accent);
             opacity: 0.8;
         }
+
         .pdp-whatsapp-float .pdp-whatsapp-tooltip {
             position: absolute;
             top: 50%;
@@ -2499,28 +2593,42 @@
             animation: pdpTooltipFloat 3s ease-in-out infinite !important;
             transform-origin: center center;
         }
-        
+
         @keyframes pdpTooltipFloat {
-            0%   { transform: translateY(calc(-50% + 0px)); }
-            50%  { transform: translateY(calc(-50% - 4px)); }
-            100% { transform: translateY(calc(-50% + 0px)); }
+            0% {
+                transform: translateY(calc(-50% + 0px));
+            }
+
+            50% {
+                transform: translateY(calc(-50% - 4px));
+            }
+
+            100% {
+                transform: translateY(calc(-50% + 0px));
+            }
         }
-        
+
         @keyframes pdpWhatsappBounce {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translateY(0);
             }
+
             50% {
                 transform: translateY(-8px);
             }
         }
+
         .pdp-whatsapp-bounce {
             animation: pdpWhatsappBounce 2.5s infinite ease-in-out;
         }
+
         .pdp-whatsapp-bounce:hover {
-            animation: none; /* stop bounce on hover */
+            animation: none;
+            /* stop bounce on hover */
         }
-        
+
         @media (max-width: 768px) {
             .pdp-whatsapp-float {
                 top: calc(50% + 42px);
@@ -2529,10 +2637,12 @@
                 width: 48px !important;
                 height: 48px !important;
             }
+
             .pdp-whatsapp-float svg {
                 width: 24px;
                 height: 24px;
             }
+
             .pdp-whatsapp-float .pdp-whatsapp-tooltip {
                 right: 56px;
                 font-size: 10px;
@@ -2598,25 +2708,37 @@
             <button type="button" class="filters-sidebar-close-btn" onclick="cerrarMenuFiltros()">×</button>
         </div>
         <div class="filters-sidebar-content">
-            <div class="sidebar-control-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px;">
-                <label for="filterBrand" style="font-size: 12px; font-weight: 600; color: var(--text-muted); font-family: inherit;">🏷️ Filtrar Marca:</label>
-                <select id="filterBrand" onchange="aplicarFiltrosYOrden()" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); font-family: inherit; font-size: 14px; font-weight: 500; outline: none; color: var(--text-input); background-color: var(--bg-input);">
+            <div class="sidebar-control-group"
+                style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px;">
+                <label for="filterBrand"
+                    style="font-size: 12px; font-weight: 600; color: var(--text-muted); font-family: inherit;">🏷️
+                    Filtrar Marca:</label>
+                <select id="filterBrand" onchange="aplicarFiltrosYOrden()"
+                    style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); font-family: inherit; font-size: 14px; font-weight: 500; outline: none; color: var(--text-input); background-color: var(--bg-input);">
                     <option value="ALL">Todas las marcas</option>
                 </select>
             </div>
-            
-            <div class="sidebar-control-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px;">
-                <label for="filterImport" style="font-size: 12px; font-weight: 600; color: var(--text-muted); font-family: inherit;">✈️ Tipo de Envío:</label>
-                <select id="filterImport" onchange="aplicarFiltrosYOrden()" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); font-family: inherit; font-size: 14px; font-weight: 500; outline: none; color: var(--text-input); background-color: var(--bg-input);">
+
+            <div class="sidebar-control-group"
+                style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px;">
+                <label for="filterImport"
+                    style="font-size: 12px; font-weight: 600; color: var(--text-muted); font-family: inherit;">✈️ Tipo
+                    de Envío:</label>
+                <select id="filterImport" onchange="aplicarFiltrosYOrden()"
+                    style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); font-family: inherit; font-size: 14px; font-weight: 500; outline: none; color: var(--text-input); background-color: var(--bg-input);">
                     <option value="NO_IMPORT" selected>Ocultar importados</option>
                     <option value="ALL">Todos los equipos</option>
                     <option value="ONLY_IMPORT">Solo importados</option>
                 </select>
             </div>
-            
-            <div class="sidebar-control-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
-                <label for="sortBy" style="font-size: 12px; font-weight: 600; color: var(--text-muted); font-family: inherit;">↕️ Ordenar por:</label>
-                <select id="sortBy" onchange="aplicarFiltrosYOrden()" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); font-family: inherit; font-size: 14px; font-weight: 500; outline: none; color: var(--text-input); background-color: var(--bg-input);">
+
+            <div class="sidebar-control-group"
+                style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
+                <label for="sortBy"
+                    style="font-size: 12px; font-weight: 600; color: var(--text-muted); font-family: inherit;">↕️
+                    Ordenar por:</label>
+                <select id="sortBy" onchange="aplicarFiltrosYOrden()"
+                    style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border-color); font-family: inherit; font-size: 14px; font-weight: 500; outline: none; color: var(--text-input); background-color: var(--bg-input);">
                     <option value="ENGANCHE_ASC" selected>Enganche Mínimo: Menor a Mayor</option>
                     <option value="DEFAULT">Destacados (Recomendado)</option>
                     <option value="PLAN_26_ASC">Pago Semanal (Plan Rápido): Menor a Mayor</option>
@@ -2657,9 +2779,10 @@
                 <input type="text" id="inputBusqueda" placeholder="Buscar celular...">
                 <button type="button" class="clear-search-btn" id="clearSearchBtn" onclick="clearSearch()">×</button>
             </div>
-            
+
             <!-- Botón de Filtros -->
-            <button type="button" id="filters-toggle" class="filters-toggle-btn" aria-label="Abrir filtros" onclick="abrirMenuFiltros()">
+            <button type="button" id="filters-toggle" class="filters-toggle-btn" aria-label="Abrir filtros"
+                onclick="abrirMenuFiltros()">
                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"
                     stroke-linecap="round" stroke-linejoin="round">
                     <line x1="4" y1="21" x2="4" y2="14"></line>
@@ -2731,8 +2854,10 @@
                     class="footer-logo">
                 <p>El camino más rápido y confiable para estrenar tu smartphone a crédito con pagos semanales y
                     quincenales a tu medida.</p>
-                <p style="font-size: 13px; color: var(--text-muted); margin-top: 12px; display: flex; align-items: center; gap: 6px;">
-                    <span>📍</span> <span>Av. Lázaro Cárdenas s/n, Col. Lázaro Cárdenas, 54189 Tlalnepantla de Baz, Estado de México.</span>
+                <p
+                    style="font-size: 13px; color: var(--text-muted); margin-top: 12px; display: flex; align-items: center; gap: 6px;">
+                    <span>📍</span> <span>Av. Lázaro Cárdenas s/n, Col. Lázaro Cárdenas, 54189 Tlalnepantla de Baz,
+                        Estado de México.</span>
                 </p>
             </div>
             <div class="footer-links-group">
@@ -2740,7 +2865,8 @@
                 <ul class="footer-links">
                     <li><a href="javascript:void(0)" onclick="abrirModalInfoLegal('faq')">Preguntas Frecuentes (FAQ)</a>
                     </li>
-                    <li><a href="javascript:void(0)" onclick="abrirModalInfoLegal('terminos')">Términos y Condiciones</a></li>
+                    <li><a href="javascript:void(0)" onclick="abrirModalInfoLegal('terminos')">Términos y
+                            Condiciones</a></li>
                     <li><a href="javascript:void(0)" onclick="abrirModalMapa()">Área de Servicio (Cobertura)</a></li>
                     <li><a href="javascript:void(0)" onclick="abrirModalPedidoEspecial()">Cotizar Pedido Especial</a>
                     </li>
@@ -2770,7 +2896,8 @@
             <div id="pdp-variants-loading-overlay" class="pdp-loading-overlay">
                 <div class="pdp-spinner"></div>
                 <span class="pdp-loading-label">Cargando variantes...</span>
-                <button type="button" class="pdp-loading-close-btn" onclick="ocultarCargandoVariantes()">✕ Cerrar</button>
+                <button type="button" class="pdp-loading-close-btn" onclick="ocultarCargandoVariantes()">✕
+                    Cerrar</button>
             </div>
 
             <div class="pdp-layout">
@@ -2782,15 +2909,20 @@
 
                     <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
                         <div class="pdp-main-img-wrapper" style="position: relative;">
-                            <button type="button" class="pdp-gallery-arrow prev" onclick="navigatePdpImages(-1)" aria-label="Foto anterior">‹</button>
+                            <button type="button" class="pdp-gallery-arrow prev" onclick="navigatePdpImages(-1)"
+                                aria-label="Foto anterior">‹</button>
                             <img id="modal-producto-foto" src="" alt="Foto del Producto">
-                            <button type="button" class="pdp-gallery-arrow next" onclick="navigatePdpImages(1)" aria-label="Foto siguiente">›</button>
-                            <button type="button" class="pdp-info-btn" id="pdp-info-btn" onclick="togglePdpInfo(event)" onmouseenter="showPdpInfo()" onmouseleave="hidePdpInfo()">i</button>
+                            <button type="button" class="pdp-gallery-arrow next" onclick="navigatePdpImages(1)"
+                                aria-label="Foto siguiente">›</button>
+                            <button type="button" class="pdp-info-btn" id="pdp-info-btn" onclick="togglePdpInfo(event)"
+                                onmouseenter="showPdpInfo()" onmouseleave="hidePdpInfo()">i</button>
                             <div id="pdp-info-tooltip" class="pdp-info-tooltip">
-                                <div style="font-weight: bold; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 19px;">
+                                <div
+                                    style="font-weight: bold; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 19px;">
                                     <span style="font-size: 18px;">ℹ️</span> <span>Descripción del Producto</span>
                                 </div>
-                                <div id="pdp-info-tooltip-content" style="white-space: pre-line; font-family: inherit;"></div>
+                                <div id="pdp-info-tooltip-content" style="white-space: pre-line; font-family: inherit;">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2806,17 +2938,21 @@
                     <div class="pdp-price-container">
                         <div style="display: flex; align-items: baseline; gap: 8px;">
                             <span class="pdp-price-amount" id="pdp-enganche-grande">$0</span>
-                            <span style="font-size: 14px; color: var(--text-muted);" id="pdp-enganche-label">Pago Inicial (Enganche)</span>
+                            <span style="font-size: 14px; color: var(--text-muted);" id="pdp-enganche-label">Pago
+                                Inicial (Enganche)</span>
                         </div>
 
                         <div class="pdp-weekly-payments">
                             <span style="font-size: 24px;" id="pdp-weekly-amount">$0</span>
-                            <span id="pdp-daily-equivalent-label" style="font-size: 14.5px; font-weight: 700; margin-left: 6px; display: none;"></span>
+                            <span id="pdp-daily-equivalent-label"
+                                style="font-size: 14.5px; font-weight: 700; margin-left: 6px; display: none;"></span>
                             <span id="pdp-weekly-term"
                                 style="font-size: 14px; font-weight: normal; color: var(--text-muted);">en
                                 -- pagos semanales</span>
                         </div>
-                        <div id="pdp-tasa-interes-badge" style="font-size: 13.5px; font-weight: 600; color: #16a34a; margin-top: 5px; display: none;"></div>
+                        <div id="pdp-tasa-interes-badge"
+                            style="font-size: 13.5px; font-weight: 600; color: #16a34a; margin-top: 5px; display: none;">
+                        </div>
                         <div style="font-size: 13px; color: var(--text-muted); margin-top: 6px;"
                             id="pdp-contado-chico-texto">
                             Precio de Contado: <strong>$0</strong>
@@ -2831,24 +2967,34 @@
 
                     <details class="enganche-personalizado-pdp" id="pdp-enganche-personalizado-container"
                         style="margin-top: 10px; margin-bottom: 10px; text-align: left; background: var(--bg-card); padding: 14px 18px; border-radius: 8px; border: 1px solid var(--border-color);">
-                        <summary style="cursor: pointer; font-size: 16px; font-weight: 600; color: var(--primary); outline: none; list-style: none; display: flex; align-items: center; justify-content: space-between;">
-                            <span>🏁 Personalizar Enganche <span style="font-size: 13px; font-weight: 400; color: var(--text-muted);">(Opcional)</span></span>
+                        <summary
+                            style="cursor: pointer; font-size: 16px; font-weight: 600; color: var(--primary); outline: none; list-style: none; display: flex; align-items: center; justify-content: space-between;">
+                            <span>🏁 Personalizar Enganche <span
+                                    style="font-size: 13px; font-weight: 400; color: var(--text-muted);">(Opcional)</span></span>
                             <span style="font-size: 14px; color: var(--text-muted);">▼</span>
                         </summary>
                         <div style="margin-top: 12px;">
-                            <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">
-                                <span>Mínimo: <strong id="pdp-enganche-minimo-label" style="color: #16a34a !important;">$0</strong></span>
-                                <span>Máximo: <strong id="pdp-enganche-maximo-label" style="color: #16a34a !important;">$0</strong></span>
+                            <div
+                                style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">
+                                <span>Mínimo: <strong id="pdp-enganche-minimo-label"
+                                        style="color: #16a34a !important;">$0</strong></span>
+                                <span>Máximo: <strong id="pdp-enganche-maximo-label"
+                                        style="color: #16a34a !important;">$0</strong></span>
                             </div>
                             <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <input type="range" id="cliEnganchePersonalizadoSlider" 
+                                <input type="range" id="cliEnganchePersonalizadoSlider"
                                     style="width: 100%; height: 6px; border-radius: 3px; accent-color: #16a34a; cursor: pointer;"
                                     oninput="syncSliderToInput(this.value)">
-                                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 6px;">
-                                    <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Monto seleccionado:</span>
-                                    <span id="pdp-enganche-seleccionado-val-parent" style="font-size: 15px; font-weight: bold; color: #16a34a !important;"><span id="pdp-enganche-seleccionado-val">$0</span> MXN</span>
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 6px;">
+                                    <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Monto
+                                        seleccionado:</span>
+                                    <span id="pdp-enganche-seleccionado-val-parent"
+                                        style="font-size: 15px; font-weight: bold; color: #16a34a !important;"><span
+                                            id="pdp-enganche-seleccionado-val">$0</span> MXN</span>
                                 </div>
-                                <input type="hidden" id="cliEnganchePersonalizado" oninput="actualizarPrecioCalculadoPDP()">
+                                <input type="hidden" id="cliEnganchePersonalizado"
+                                    oninput="actualizarPrecioCalculadoPDP()">
                             </div>
                         </div>
                     </details>
@@ -2879,8 +3025,10 @@
                     </div>
 
                     <!-- Banner de advertencia para anomalías de precio -->
-                    <div id="pdp-price-anomaly-warning" style="display: none; margin-top: 15px; margin-bottom: 15px; padding: 12px; background-color: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; color: #991b1b; font-size: 13px; line-height: 1.4; text-align: left;">
-                        <strong>⚠️ Variación no disponible:</strong> Detectamos una inconsistencia temporal en los precios de MercadoLibre para esta capacidad o RAM. Por favor selecciona otra variante.
+                    <div id="pdp-price-anomaly-warning"
+                        style="display: none; margin-top: 15px; margin-bottom: 15px; padding: 12px; background-color: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; color: #991b1b; font-size: 13px; line-height: 1.4; text-align: left;">
+                        <strong>⚠️ Variación no disponible:</strong> Detectamos una inconsistencia temporal en los
+                        precios de MercadoLibre para esta capacidad o RAM. Por favor selecciona otra variante.
                     </div>
 
                     <!-- Formulario de Crédito CelYa! -->
@@ -2923,42 +3071,60 @@
                                 </select>
                             </div>
 
-                            <label style="margin-top: 8px; display: block; font-weight: 600; font-size: 12.5px; color: var(--text-main); margin-bottom: 4px;">Frecuencia de Pago:</label>
-                             <select id="cliFrecuencia" onchange="actualizarPlazosYPrecioPDP()" style="display: none;">
-                                 <option value="SEMANAL">Semanal (Cada Semana)</option>
-                                 <option value="QUINCENAL">Quincenal (Cada 15 días)</option>
-                                 <option value="CONTADO">De Contado (Pago Único)</option>
-                             </select>
-                             <div class="segment-control frequency-control" id="pdp-frequency-selector">
-                                 <button type="button" class="segment-btn active" data-val="SEMANAL">Semanal</button>
-                                 <button type="button" class="segment-btn" data-val="QUINCENAL">Quincenal</button>
-                                 <button type="button" class="segment-btn" data-val="CONTADO">De Contado</button>
-                             </div>
- 
-                             <label id="lbl-cliPlazo" style="margin-top: 10px; display: block; font-weight: 600; font-size: 12.5px; color: var(--text-main); margin-bottom: 4px;">Plazo de Pago:</label>
-                             <select id="cliPlazo" onchange="document.getElementById('cliEnganchePersonalizado').value=''; actualizarPrecioCalculadoPDP()" style="display: none;">
-                                 <option value="26 Semanas">Plan Rápido (26 Pagos Semanales)</option>
-                                 <option value="52 Semanas" selected>Plan Cómodo (52 Pagos Semanales)</option>
-                             </select>
-                             <div class="segment-control plazo-control" id="pdp-plazo-selector">
-                                 <button type="button" class="segment-btn" data-val="26 Semanas">Plan Rápido</button>
-                                 <button type="button" class="segment-btn active" data-val="52 Semanas">Plan Cómodo</button>
-                             </div>
+                            <label
+                                style="margin-top: 8px; display: block; font-weight: 600; font-size: 12.5px; color: var(--text-main); margin-bottom: 4px;">Frecuencia
+                                de Pago:</label>
+                            <select id="cliFrecuencia" onchange="actualizarPlazosYPrecioPDP()" style="display: none;">
+                                <option value="SEMANAL">Semanal (Cada Semana)</option>
+                                <option value="QUINCENAL">Quincenal (Cada 15 días)</option>
+                                <option value="CONTADO">De Contado (Pago Único)</option>
+                            </select>
+                            <div class="segment-control frequency-control" id="pdp-frequency-selector">
+                                <button type="button" class="segment-btn active" data-val="SEMANAL">Semanal</button>
+                                <button type="button" class="segment-btn" data-val="QUINCENAL">Quincenal</button>
+                                <button type="button" class="segment-btn" data-val="CONTADO">De Contado</button>
+                            </div>
+
+                            <label id="lbl-cliPlazo"
+                                style="margin-top: 10px; display: block; font-weight: 600; font-size: 12.5px; color: var(--text-main); margin-bottom: 4px;">Plazo
+                                de Pago:</label>
+                            <select id="cliPlazo"
+                                onchange="document.getElementById('cliEnganchePersonalizado').value=''; actualizarPrecioCalculadoPDP()"
+                                style="display: none;">
+                                <option value="26 Semanas">Plan Rápido (26 Pagos Semanales)</option>
+                                <option value="52 Semanas" selected>Plan Cómodo (52 Pagos Semanales)</option>
+                            </select>
+                            <div class="segment-control plazo-control" id="pdp-plazo-selector">
+                                <button type="button" class="segment-btn" data-val="26 Semanas">Plan Rápido</button>
+                                <button type="button" class="segment-btn active" data-val="52 Semanas">Plan
+                                    Cómodo</button>
+                            </div>
 
 
 
                             <!-- Resumen de pago seleccionado -->
-                            <div id="pdp-form-resumen-pago" style="display:none; margin-top:18px; background: linear-gradient(135deg, rgba(var(--accent-rgb),0.08) 0%, rgba(22,163,74,0.08) 100%); border: 2px solid rgba(var(--accent-rgb),0.3); border-radius: 14px; padding: 18px 20px;">
-                                <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); margin-bottom: 14px;">📋 Tu plan de pago</div>
-                                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+                            <div id="pdp-form-resumen-pago"
+                                style="display:none; margin-top:18px; background: linear-gradient(135deg, rgba(var(--accent-rgb),0.08) 0%, rgba(22,163,74,0.08) 100%); border: 2px solid rgba(var(--accent-rgb),0.3); border-radius: 14px; padding: 18px 20px;">
+                                <div
+                                    style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); margin-bottom: 14px;">
+                                    📋 Tu plan de pago</div>
+                                <div
+                                    style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
                                     <div>
-                                        <div id="pdp-resumen-enganche" class="pdp-summary-enganche-val" style="font-size:26px; font-weight:900; line-height:1;">$0 MXN</div>
-                                        <div class="pdp-summary-enganche-lbl" style="font-size:16px; font-weight:700; margin-top:5px;">pago inicial (enganche)</div>
+                                        <div id="pdp-resumen-enganche" class="pdp-summary-enganche-val"
+                                            style="font-size:26px; font-weight:900; line-height:1;">$0 MXN</div>
+                                        <div class="pdp-summary-enganche-lbl"
+                                            style="font-size:16px; font-weight:700; margin-top:5px;">pago inicial
+                                            (enganche)</div>
                                     </div>
-                                    <div style="font-size:16px; color:var(--text-muted); font-weight:600; text-transform:lowercase;">y después</div>
+                                    <div
+                                        style="font-size:16px; color:var(--text-muted); font-weight:600; text-transform:lowercase;">
+                                        y después</div>
                                     <div style="text-align:right;">
-                                        <div id="pdp-resumen-cuota" class="pdp-summary-cuota-val" style="font-size:26px; font-weight:900; line-height:1;">$0 MXN</div>
-                                        <div id="pdp-resumen-termino" class="pdp-summary-cuota-lbl" style="font-size:16px; font-weight:700; margin-top:5px;">a la semana</div>
+                                        <div id="pdp-resumen-cuota" class="pdp-summary-cuota-val"
+                                            style="font-size:26px; font-weight:900; line-height:1;">$0 MXN</div>
+                                        <div id="pdp-resumen-termino" class="pdp-summary-cuota-lbl"
+                                            style="font-size:16px; font-weight:700; margin-top:5px;">a la semana</div>
                                     </div>
                                 </div>
                             </div>
@@ -3022,39 +3188,51 @@
                             style="margin: 0; font-size: 15px; color: var(--primary); font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">
                             Cargando...</h4>
                         <div style="display: flex; gap: 8px; margin-top: 8px; align-items: baseline;">
-                            <span id="pe-preview-enganche-label" style="font-size: 12px; color: var(--text-muted);">Pago Inicial (Enganche):</span>
-                            <span id="pe-preview-enganche"
-                                style="font-size: 18px; font-weight: bold;">$0</span>
+                            <span id="pe-preview-enganche-label" style="font-size: 12px; color: var(--text-muted);">Pago
+                                Inicial (Enganche):</span>
+                            <span id="pe-preview-enganche" style="font-size: 18px; font-weight: bold;">$0</span>
                         </div>
                         <div style="display: flex; gap: 8px; margin-top: 2px; align-items: baseline;">
-                            <span id="pe-preview-semanal-label" style="font-size: 12px; color: var(--text-muted);">Abono Semanal:</span>
-                            <span id="pe-preview-semanal"
-                                style="font-size: 16px; font-weight: bold;">$0</span>
+                            <span id="pe-preview-semanal-label" style="font-size: 12px; color: var(--text-muted);">Abono
+                                Semanal:</span>
+                            <span id="pe-preview-semanal" style="font-size: 16px; font-weight: bold;">$0</span>
                         </div>
-                        <div id="pe-tasa-interes-badge" style="font-size: 11px; font-weight: bold; color: #16a34a; margin-top: 4px; display: none;"></div>
+                        <div id="pe-tasa-interes-badge"
+                            style="font-size: 11px; font-weight: bold; color: #16a34a; margin-top: 4px; display: none;">
+                        </div>
                     </div>
                 </div>
 
                 <details class="enganche-personalizado-pdp" id="pe-enganche-personalizado-container"
                     style="margin-top: 10px; margin-bottom: 10px; text-align: left; background: var(--bg-card); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color);">
-                    <summary style="cursor: pointer; font-size: 13px; font-weight: 600; color: var(--primary); outline: none; list-style: none; display: flex; align-items: center; justify-content: space-between;">
-                        <span>🏁 Personalizar Enganche <span style="font-size: 11px; font-weight: 400; color: var(--text-muted);">(Opcional)</span></span>
+                    <summary
+                        style="cursor: pointer; font-size: 13px; font-weight: 600; color: var(--primary); outline: none; list-style: none; display: flex; align-items: center; justify-content: space-between;">
+                        <span>🏁 Personalizar Enganche <span
+                                style="font-size: 11px; font-weight: 400; color: var(--text-muted);">(Opcional)</span></span>
                         <span style="font-size: 12px; color: var(--text-muted);">▼</span>
                     </summary>
                     <div style="margin-top: 8px;">
-                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
-                            <span>Mínimo: <strong id="pe-enganche-minimo-label" style="color: #16a34a !important;">$0</strong></span>
-                            <span>Máximo: <strong id="pe-enganche-maximo-label" style="color: #16a34a !important;">$0</strong></span>
+                        <div
+                            style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
+                            <span>Mínimo: <strong id="pe-enganche-minimo-label"
+                                    style="color: #16a34a !important;">$0</strong></span>
+                            <span>Máximo: <strong id="pe-enganche-maximo-label"
+                                    style="color: #16a34a !important;">$0</strong></span>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 6px;">
-                            <input type="range" id="pe-cliEnganchePersonalizadoSlider" 
+                            <input type="range" id="pe-cliEnganchePersonalizadoSlider"
                                 style="width: 100%; height: 5px; border-radius: 2.5px; accent-color: #16a34a; cursor: pointer;"
                                 oninput="syncPESliderToInput(this.value)">
-                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px;">
-                                <span style="font-size: 10px; color: var(--text-muted); font-weight: 500;">Monto seleccionado:</span>
-                                <span id="pe-enganche-seleccionado-val-parent" style="font-size: 13px; font-weight: bold; color: #16a34a !important;"><span id="pe-enganche-seleccionado-val">$0</span> MXN</span>
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px;">
+                                <span style="font-size: 10px; color: var(--text-muted); font-weight: 500;">Monto
+                                    seleccionado:</span>
+                                <span id="pe-enganche-seleccionado-val-parent"
+                                    style="font-size: 13px; font-weight: bold; color: #16a34a !important;"><span
+                                        id="pe-enganche-seleccionado-val">$0</span> MXN</span>
                             </div>
-                            <input type="hidden" id="pe-cliEnganchePersonalizado" oninput="actualizarPreciosPedidoEspecial()">
+                            <input type="hidden" id="pe-cliEnganchePersonalizado"
+                                oninput="actualizarPreciosPedidoEspecial()">
                         </div>
                     </div>
                 </details>
@@ -3088,7 +3266,8 @@
 
                         <div id="seccionPreguntasPedidoEspecial">
                             <label id="pe-lbl-cliSueldo"
-                                style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">¿Cuánto ganas libres a la semana? (Ingresos):</label>
+                                style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">¿Cuánto
+                                ganas libres a la semana? (Ingresos):</label>
                             <select id="pe-cliSueldo"
                                 style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
                                 <option value="Menos de $1,500">Menos de $1,500</option>
@@ -3098,7 +3277,8 @@
                             </select>
 
                             <label id="pe-lbl-cliPrestamos"
-                                style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">¿Cuánto pagas de abonos actualmente a la semana? (Deudas activas):</label>
+                                style="margin-top: 12px; font-weight: 600; font-size: 13px; color: var(--text-main);">¿Cuánto
+                                pagas de abonos actualmente a la semana? (Deudas activas):</label>
                             <select id="pe-cliPrestamos"
                                 style="width: 100%; padding: 10px; margin-top: 4px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none;">
                                 <option value="Nada, no tengo deudas">Nada, no tengo deudas</option>
@@ -3109,7 +3289,8 @@
                         </div>
 
                         <label
-                            style="margin-top: 8px; font-weight: 600; font-size: 12.5px; color: var(--text-main); display: block; margin-bottom: 4px;">Frecuencia de Pago:</label>
+                            style="margin-top: 8px; font-weight: 600; font-size: 12.5px; color: var(--text-main); display: block; margin-bottom: 4px;">Frecuencia
+                            de Pago:</label>
                         <select id="pe-cliFrecuencia" onchange="actualizarPlazosYPreciosPedidoEspecial()"
                             style="display: none;">
                             <option value="SEMANAL">Semanal (Cada Semana)</option>
@@ -3123,8 +3304,10 @@
                         </div>
 
                         <label id="pe-lbl-cliPlazo"
-                            style="margin-top: 8px; font-weight: 600; font-size: 12.5px; color: var(--text-main); display: block; margin-bottom: 4px;">Plazo Deseado:</label>
-                        <select id="pe-cliPlazo" onchange="document.getElementById('pe-cliEnganchePersonalizado').value=''; actualizarPreciosPedidoEspecial()"
+                            style="margin-top: 8px; font-weight: 600; font-size: 12.5px; color: var(--text-main); display: block; margin-bottom: 4px;">Plazo
+                            Deseado:</label>
+                        <select id="pe-cliPlazo"
+                            onchange="document.getElementById('pe-cliEnganchePersonalizado').value=''; actualizarPreciosPedidoEspecial()"
                             style="display: none;">
                             <option value="26 Semanas">Plan Rápido (26 Pagos Semanales)</option>
                             <option value="52 Semanas" selected>Plan Cómodo (52 Pagos Semanales)</option>
@@ -3298,7 +3481,13 @@
                         diagnosticado y validado por nuestro equipo técnico y que no pueda ser reparado o sustituido.
                     </p>
 
-                    <p><strong>SEXTA: Exclusión de Responsabilidad por Errores de Terceros (MercadoLibre)</strong><br>El Cliente acepta y reconoce que el catálogo de productos y precios se sincroniza con sistemas de terceros, incluyendo MercadoLibre. CelYa! no se hace responsable por errores de precios, inconsistencias en especificaciones de almacenamiento/RAM, o fallas técnicas en dicha sincronización. En caso de detectarse un error manifiesto en el precio cotizado o mostrado, CelYa! se reserva el derecho de cancelar la cotización o suspender el trámite de financiamiento sin ninguna responsabilidad para la empresa.</p>
+                    <p><strong>SEXTA: Exclusión de Responsabilidad por Errores de Terceros (MercadoLibre)</strong><br>El
+                        Cliente acepta y reconoce que el catálogo de productos y precios se sincroniza con sistemas de
+                        terceros, incluyendo MercadoLibre. CelYa! no se hace responsable por errores de precios,
+                        inconsistencias en especificaciones de almacenamiento/RAM, o fallas técnicas en dicha
+                        sincronización. En caso de detectarse un error manifiesto en el precio cotizado o mostrado,
+                        CelYa! se reserva el derecho de cancelar la cotización o suspender el trámite de financiamiento
+                        sin ninguna responsabilidad para la empresa.</p>
                 </div>
             </div>
         </div>
@@ -3308,11 +3497,17 @@
     <div id="modalMapa" class="modal-solicitud">
         <div class="modal-content" style="max-width: 800px; width: 90%;">
             <button type="button" class="pdp-close-btn" onclick="cerrarModalMapa()">×</button>
-            <h3 style="color: var(--primary); font-size: 1.5rem; margin-bottom: 10px; text-align: center; font-weight: 700;">🗺️ Área de Cobertura CelYa!</h3>
-            <p style="text-align: center; color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem; line-height: 1.4;">
-                Entregas personales e inmediatas exclusivamente dentro de la zona marcada en rojo (CDMX y Zona Metropolitana).
+            <h3
+                style="color: var(--primary); font-size: 1.5rem; margin-bottom: 10px; text-align: center; font-weight: 700;">
+                🗺️ Área de Cobertura CelYa!</h3>
+            <p
+                style="text-align: center; color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem; line-height: 1.4;">
+                Entregas personales e inmediatas exclusivamente dentro de la zona marcada en rojo (CDMX y Zona
+                Metropolitana).
             </p>
-            <div id="mapa-cobertura" style="width: 100%; height: clamp(300px, 50vh, 450px); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); z-index: 1;"></div>
+            <div id="mapa-cobertura"
+                style="width: 100%; height: clamp(300px, 50vh, 450px); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); z-index: 1;">
+            </div>
         </div>
     </div>
 
@@ -3632,11 +3827,11 @@
 
             // 1. Filtrar
             let filtrados = [...window.equiposCargados];
-            
+
             const queryText = document.getElementById('inputBusqueda') ? document.getElementById('inputBusqueda').value.toLowerCase().trim() : "";
             if (queryText) {
-                filtrados = filtrados.filter(item => 
-                    (item.modelo || '').toLowerCase().includes(queryText) || 
+                filtrados = filtrados.filter(item =>
+                    (item.modelo || '').toLowerCase().includes(queryText) ||
                     obtenerMarca(item.modelo).toLowerCase().includes(queryText)
                 );
             }
@@ -4137,7 +4332,7 @@
                     document.getElementById('modal-producto-foto').src = this.src;
                 };
                 thumbsContainer.appendChild(imgThumb);
-                
+
                 if (window.updatePdpGalleryArrows) window.updatePdpGalleryArrows();
             }
 
@@ -4208,7 +4403,7 @@
                 pdpWaFloat.style.display = 'flex';
                 pdpWaFloat.style.opacity = '1';
                 pdpWaFloat.style.pointerEvents = 'auto';
-                
+
                 const modelName = modelo || "";
                 const encodedMsg = encodeURIComponent(`Hola, tengo dudas o aclaraciones sobre el crédito para el celular ${modelName}`);
                 pdpWaFloat.href = `https://wa.me/525621227408?text=${encodedMsg}`;
@@ -4249,7 +4444,7 @@
 
             const currentVal = select.value;
             const buttons = container.querySelectorAll('.segment-btn');
-            
+
             buttons.forEach(btn => {
                 const val = btn.getAttribute('data-val');
                 const opt = select.querySelector(`option[value="${val}"]`);
@@ -4260,7 +4455,7 @@
                     } else {
                         btn.classList.remove('active');
                     }
-                    
+
                     // Sincronizar visibilidad y estados habilitados
                     if (opt.disabled || opt.style.display === 'none') {
                         btn.style.display = 'none';
@@ -4298,7 +4493,7 @@
             const select = document.getElementById(selectId);
             const container = document.querySelector(buttonGroupSelector);
             if (!select || !container) return;
-            
+
             const buttons = container.querySelectorAll('.segment-btn');
             buttons.forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -4314,7 +4509,7 @@
                     }
                 });
             });
-            
+
             // Sincronización inicial
             syncSelectButtons(selectId, buttonGroupSelector);
         }
@@ -4495,11 +4690,11 @@
 
                 const minLabel = document.getElementById('pdp-enganche-minimo-label');
                 if (minLabel) minLabel.innerText = `$${engancheCalculado.toLocaleString('es-MX')} MXN`;
-                
+
                 const maxEnganche = Math.max(engancheCalculado, Math.round(precioContado * 0.5));
                 const maxLabel = document.getElementById('pdp-enganche-maximo-label');
                 if (maxLabel) maxLabel.innerText = `$${maxEnganche.toLocaleString('es-MX')} MXN`;
-                
+
                 const slider = document.getElementById('cliEnganchePersonalizadoSlider');
                 const valLabel = document.getElementById('pdp-enganche-seleccionado-val');
                 if (slider) {
@@ -4547,7 +4742,7 @@
                 const factorInteres = Math.max(0, factorInteresBase - descuentoInteres);
 
                 console.log(`%c[PDP] === actualizarPrecioCalculadoPDP === freq=${freq}, plazo=${plazo}, precio=${precioContado}, fEng=${factorEnganche}, fInt=${factorInteres}, numPagos=${numPagos}, engCalc=${engancheCalculado}, engFinal=${engancheFinal}`, 'color: #00bcd4; font-weight: bold');
-                
+
                 const totalFinanciadoCalc = (precioContado * (1 + factorInteres)) - engancheFinal;
                 const cuotaFinal = Math.max(0, Math.round(totalFinanciadoCalc / numPagos));
 
@@ -4581,19 +4776,19 @@
             document.getElementById('hiddenCuota52').value = calcularCuotaSemanal52(precioContado);
 
             // — Resumen de pago en el formulario —
-            const resumenBox     = document.getElementById('pdp-form-resumen-pago');
-            const resumenEng     = document.getElementById('pdp-resumen-enganche');
-            const resumenCuota   = document.getElementById('pdp-resumen-cuota');
+            const resumenBox = document.getElementById('pdp-form-resumen-pago');
+            const resumenEng = document.getElementById('pdp-resumen-enganche');
+            const resumenCuota = document.getElementById('pdp-resumen-cuota');
             const resumenTermino = document.getElementById('pdp-resumen-termino');
             if (resumenBox && resumenEng && resumenCuota && resumenTermino) {
                 if (freq === 'CONTADO') {
                     resumenBox.style.display = 'none';
                 } else {
-                    const engVal   = parseFloat(document.getElementById('pdp-enganche-grande').innerText.replace(/[^0-9.]/g,'')) || 0;
-                    const cuotaVal = parseFloat(document.getElementById('pdp-weekly-amount').innerText.replace(/[^0-9.]/g,'')) || 0;
+                    const engVal = parseFloat(document.getElementById('pdp-enganche-grande').innerText.replace(/[^0-9.]/g, '')) || 0;
+                    const cuotaVal = parseFloat(document.getElementById('pdp-weekly-amount').innerText.replace(/[^0-9.]/g, '')) || 0;
                     const freqLabel = (freq === 'QUINCENAL') ? 'a la quincena' : 'a la semana';
-                    resumenEng.innerText     = `$${Math.round(engVal).toLocaleString('es-MX')} MXN`;
-                    resumenCuota.innerText   = `$${Math.round(cuotaVal).toLocaleString('es-MX')} MXN`;
+                    resumenEng.innerText = `$${Math.round(engVal).toLocaleString('es-MX')} MXN`;
+                    resumenCuota.innerText = `$${Math.round(cuotaVal).toLocaleString('es-MX')} MXN`;
                     resumenTermino.innerText = freqLabel;
                     resumenBox.style.display = 'block';
                 }
@@ -4695,7 +4890,7 @@
         function abrirModalMapa() {
             document.getElementById('modalMapa').style.display = 'flex';
             cerrarMenuLateral();
-            
+
             // Inicializar mapa si es la primera vez que se abre
             if (!mapaInicializado) {
                 setTimeout(() => {
@@ -4750,11 +4945,11 @@
                                     [-99.3495036, 19.3023754],
                                     [-99.2518104, 19.3205721]
                                 ]
-                             ]
-                         }
-                     }
-                 ]
-             };
+                            ]
+                        }
+                    }
+                ]
+            };
 
             L.geoJSON(zonaCelYa, {
                 style: function (feature) {
@@ -4966,7 +5161,7 @@
             }
             const freq = document.getElementById('pe-cliFrecuencia').value;
             const selectPlazo = document.getElementById('pe-cliPlazo');
-            
+
             // Sincronizar plazo: elegir dinámicamente el plan con enganche menor
             if (freq === "QUINCENAL") {
                 const fQR = CONFIG_TASAS.engancheQuin26 !== undefined ? CONFIG_TASAS.engancheQuin26 : 0.25;
@@ -5108,7 +5303,7 @@
                         ? (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11)
                         : (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165);
                 }
-                
+
                 let numPagos = (plazo === "26 Semanas") ? 26 : 52;
                 if (freq === "QUINCENAL") {
                     numPagos = numPagos / 2;
@@ -6108,10 +6303,10 @@
 
                 const isRam = idUpper.includes("RAM") || nameUpper.includes("RAM");
                 const isStorage = idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") ||
-                                  idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" ||
-                                  idUpper === "CAPACITY" || idUpper === "CAPACIDAD" ||
-                                  idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO" ||
-                                  nameUpper.includes("ALMACENAMIENTO") || nameUpper.includes("CAPACIDAD");
+                    idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" ||
+                    idUpper === "CAPACITY" || idUpper === "CAPACIDAD" ||
+                    idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO" ||
+                    nameUpper.includes("ALMACENAMIENTO") || nameUpper.includes("CAPACIDAD");
 
                 let numericValue = 0;
                 const match = valueStr.match(/(\d+(?:\.\d+)?)/);
@@ -6477,7 +6672,7 @@
             let cache = ML_CACHE_VARIANTES[cleanId];
             if (!cache) {
                 // Buscar en el caché si hay alguna otra variante de la misma familia cargada
-                const familyCache = Object.values(ML_CACHE_VARIANTES).find(c => 
+                const familyCache = Object.values(ML_CACHE_VARIANTES).find(c =>
                     c && c.isFresh && c.pickers && c.pickers.some(picker =>
                         picker.products && picker.products.some(p => p.product_id === cleanId)
                     )
@@ -7803,7 +7998,7 @@
                         const dailyLabel = document.getElementById('pdp-daily-equivalent-label');
                         if (dailyLabel) dailyLabel.style.display = 'none';
                     }
-                    
+
                     // === ACTUALIZAR FOTO PARA PRODUCTOS DE CATÁLOGO ===
                     try {
                         const newPhotoUrl = obtenerFotoDeProductoCatalogo(cleanId, data);
@@ -7983,10 +8178,10 @@
                                 divColor.style.backgroundColor = obtenerCodigoColor(colorInfo.name);
 
                                 // Hover to show name in header label
-                                divColor.onmouseenter = function() {
+                                divColor.onmouseenter = function () {
                                     document.getElementById('color-seleccionado-txt').innerText = colorInfo.name;
                                 };
-                                divColor.onmouseleave = function() {
+                                divColor.onmouseleave = function () {
                                     document.getElementById('color-seleccionado-txt').innerText = colorSeleccionado || "";
                                 };
 
@@ -8609,10 +8804,10 @@
                 divColor.style.backgroundColor = obtenerCodigoColor(defaultColor);
 
                 // Hover to show name in header label
-                divColor.onmouseenter = function() {
+                divColor.onmouseenter = function () {
                     document.getElementById('color-seleccionado-txt').innerText = defaultColor;
                 };
-                divColor.onmouseleave = function() {
+                divColor.onmouseleave = function () {
                     document.getElementById('color-seleccionado-txt').innerText = colorSeleccionado || "";
                 };
 
@@ -8742,18 +8937,22 @@
     </div>
 
     <!-- Botón Flotante de WhatsApp -->
-    <a href="https://wa.me/525621227408" class="whatsapp-float whatsapp-pulse" target="_blank" rel="noopener noreferrer" title="Contáctanos por WhatsApp">
+    <a href="https://wa.me/525621227408" class="whatsapp-float whatsapp-pulse" target="_blank" rel="noopener noreferrer"
+        title="Contáctanos por WhatsApp">
         <svg viewBox="0 0 24 24">
-            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436.002 9.858-4.42 9.86-9.86.001-2.636-1.024-5.113-2.884-6.978C16.484 1.903 14.004.877 11.4.877c-5.446 0-9.871 4.423-9.873 9.862-.001 1.77.472 3.498 1.372 5.031L1.879 21.5l5.882-1.543zm11.75-4.227c-.31-.154-1.836-.906-2.119-1.01-.283-.102-.49-.153-.696.154-.205.308-.797.997-.976 1.199-.178.203-.357.226-.667.071-3.132-1.558-4.47-3.002-5.3-4.426-.205-.353-.021-.544.152-.715.156-.155.31-.353.465-.53.155-.177.206-.298.31-.497.102-.199.05-.375-.026-.53-.077-.154-.696-1.67-.954-2.285-.25-.604-.503-.522-.696-.532-.179-.009-.384-.01-.59-.01-.205 0-.54.077-.822.385-.283.308-1.079 1.056-1.079 2.574 0 1.519 1.103 2.986 1.258 3.193.154.205 2.17 3.31 5.257 4.637.734.317 1.309.507 1.758.649.738.236 1.412.203 1.944.123.593-.088 1.836-.751 2.094-1.444.258-.693.258-1.288.181-1.413-.076-.124-.282-.199-.592-.353z"/>
+            <path
+                d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436.002 9.858-4.42 9.86-9.86.001-2.636-1.024-5.113-2.884-6.978C16.484 1.903 14.004.877 11.4.877c-5.446 0-9.871 4.423-9.873 9.862-.001 1.77.472 3.498 1.372 5.031L1.879 21.5l5.882-1.543zm11.75-4.227c-.31-.154-1.836-.906-2.119-1.01-.283-.102-.49-.153-.696.154-.205.308-.797.997-.976 1.199-.178.203-.357.226-.667.071-3.132-1.558-4.47-3.002-5.3-4.426-.205-.353-.021-.544.152-.715.156-.155.31-.353.465-.53.155-.177.206-.298.31-.497.102-.199.05-.375-.026-.53-.077-.154-.696-1.67-.954-2.285-.25-.604-.503-.522-.696-.532-.179-.009-.384-.01-.59-.01-.205 0-.54.077-.822.385-.283.308-1.079 1.056-1.079 2.574 0 1.519 1.103 2.986 1.258 3.193.154.205 2.17 3.31 5.257 4.637.734.317 1.309.507 1.758.649.738.236 1.412.203 1.944.123.593-.088 1.836-.751 2.094-1.444.258-.693.258-1.288.181-1.413-.076-.124-.282-.199-.592-.353z" />
         </svg>
     </a>
 
     <!-- Botón Volver Arriba (Back to Top) -->
-    <button type="button" id="backToTopBtn" class="back-to-top-btn" onclick="scrollToTop()" aria-label="Volver arriba">↑</button>
+    <button type="button" id="backToTopBtn" class="back-to-top-btn" onclick="scrollToTop()"
+        aria-label="Volver arriba">↑</button>
 
     <!-- Botón Central de Llenar Solicitud -->
     <div id="floatingSolicitudContainer" class="floating-solicitud-container">
-        <button type="button" id="floatingSolicitudBtn" class="floating-solicitud-btn" onclick="toggleSolicitudDropdown(event)">
+        <button type="button" id="floatingSolicitudBtn" class="floating-solicitud-btn"
+            onclick="toggleSolicitudDropdown(event)">
             <span class="btn-icon">📋</span> <span class="btn-text">Llenar Solicitud</span>
         </button>
         <div id="floatingSolicitudDropdown" class="floating-solicitud-dropdown">
@@ -8765,18 +8964,22 @@
     </div>
 
     <!-- Botón Flotante Llenar Solicitud en PDP (se muestra al abrir modal) -->
-    <button type="button" id="pdpFloatingSolicitudBtn" class="pdp-floating-solicitud-btn" onclick="handlePdpFloatingClick(event)">
+    <button type="button" id="pdpFloatingSolicitudBtn" class="pdp-floating-solicitud-btn"
+        onclick="handlePdpFloatingClick(event)">
         <span class="btn-icon">📋</span>
-        <span class="btn-text" style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; line-height: 1.2;">
+        <span class="btn-text"
+            style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; line-height: 1.2;">
             <span>Llenar solicitud</span>
-            <span style="font-size: 9.5px; font-weight: 500; text-transform: lowercase; opacity: 0.85;">(pedir crédito)</span>
+            <span style="font-size: 9.5px; font-weight: 500; text-transform: lowercase; opacity: 0.85;">(pedir
+                crédito)</span>
         </span>
     </button>
 
     <!-- Botón WhatsApp PDP (azul transparente con tooltip rebotante) -->
     <a href="#" id="pdpWhatsappFloat" class="pdp-whatsapp-float" target="_blank" rel="noopener noreferrer">
         <svg viewBox="0 0 24 24">
-            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436.002 9.858-4.42 9.86-9.86.001-2.636-1.024-5.113-2.884-6.978C16.484 1.903 14.004.877 11.4.877c-5.446 0-9.871 4.423-9.873 9.862-.001 1.77.472 3.498 1.372 5.031L1.879 21.5l5.882-1.543zm11.75-4.227c-.31-.154-1.836-.906-2.119-1.01-.283-.102-.49-.153-.696.154-.205.308-.797.997-.976 1.199-.178.203-.357.226-.667.071-3.132-1.558-4.47-3.002-5.3-4.426-.205-.353-.021-.544.152-.715.156-.155.31-.353.465-.53.155-.177.206-.298.31-.497.102-.199.05-.375-.026-.53-.077-.154-.696-1.67-.954-2.285-.25-.604-.503-.522-.696-.532-.179-.009-.384-.01-.59-.01-.205 0-.54.077-.822.385-.283.308-1.079 1.056-1.079 2.574 0 1.519 1.103 2.986 1.258 3.193.154.205 2.17 3.31 5.257 4.637.734.317 1.309.507 1.758.649.738.236 1.412.203 1.944.123.593-.088 1.836-.751 2.094-1.444.258-.693.258-1.288.181-1.413-.076-.124-.282-.199-.592-.353z"/>
+            <path
+                d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436.002 9.858-4.42 9.86-9.86.001-2.636-1.024-5.113-2.884-6.978C16.484 1.903 14.004.877 11.4.877c-5.446 0-9.871 4.423-9.873 9.862-.001 1.77.472 3.498 1.372 5.031L1.879 21.5l5.882-1.543zm11.75-4.227c-.31-.154-1.836-.906-2.119-1.01-.283-.102-.49-.153-.696.154-.205.308-.797.997-.976 1.199-.178.203-.357.226-.667.071-3.132-1.558-4.47-3.002-5.3-4.426-.205-.353-.021-.544.152-.715.156-.155.31-.353.465-.53.155-.177.206-.298.31-.497.102-.199.05-.375-.026-.53-.077-.154-.696-1.67-.954-2.285-.25-.604-.503-.522-.696-.532-.179-.009-.384-.01-.59-.01-.205 0-.54.077-.822.385-.283.308-1.079 1.056-1.079 2.574 0 1.519 1.103 2.986 1.258 3.193.154.205 2.17 3.31 5.257 4.637.734.317 1.309.507 1.758.649.738.236 1.412.203 1.944.123.593-.088 1.836-.751 2.094-1.444.258-.693.258-1.288.181-1.413-.076-.124-.282-.199-.592-.353z" />
         </svg>
         <span class="pdp-whatsapp-tooltip">Dudas</span>
     </a>
@@ -9064,9 +9267,9 @@
     })();
 
     // Lógica del botón Volver Arriba y Scroll Hiding de Botones Flotantes en la Página Principal
-    (function() {
+    (function () {
         let lastScrollTop = 0;
-        window.addEventListener('scroll', function() {
+        window.addEventListener('scroll', function () {
             const btnBackToTop = document.getElementById('backToTopBtn');
             const btnSolicitud = document.getElementById('floatingSolicitudContainer');
             const btnWhatsapp = document.querySelector('.whatsapp-float');
@@ -9132,7 +9335,7 @@
         });
     })();
 
-    window.scrollToTop = function() {
+    window.scrollToTop = function () {
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
@@ -9140,11 +9343,11 @@
     };
 
     // Funciones del Dropdown Desplegable de Llenar Solicitud
-    window.toggleSolicitudDropdown = function(event) {
+    window.toggleSolicitudDropdown = function (event) {
         if (event) event.stopPropagation();
         const dropdown = document.getElementById('floatingSolicitudDropdown');
         if (!dropdown) return;
-        
+
         const isVisible = dropdown.style.display === 'flex';
         if (isVisible) {
             dropdown.style.display = 'none';
@@ -9154,24 +9357,24 @@
         }
     };
 
-    window.closeSolicitudDropdown = function() {
+    window.closeSolicitudDropdown = function () {
         const dropdown = document.getElementById('floatingSolicitudDropdown');
         if (dropdown) dropdown.style.display = 'none';
     };
 
     // Cerrar dropdown al hacer click fuera del contenedor
-    window.addEventListener('click', function(event) {
+    window.addEventListener('click', function (event) {
         const container = document.getElementById('floatingSolicitudContainer');
         if (container && !container.contains(event.target)) {
             window.closeSolicitudDropdown();
         }
     });
 
-    window.populateSolicitudDropdown = function() {
+    window.populateSolicitudDropdown = function () {
         const container = document.getElementById('floatingSolicitudOptions');
         if (!container) return;
         container.innerHTML = "";
-        
+
         if (!window.equiposCargados || window.equiposCargados.length === 0) {
             container.innerHTML = `<div style="padding: 14px 16px; color: var(--text-muted); font-size: 13.5px; text-align: left;">Cargando catálogo...</div>`;
             return;
@@ -9192,18 +9395,18 @@
             const optionEl = document.createElement('div');
             optionEl.className = 'dropdown-option';
             optionEl.innerText = item.modelo;
-            optionEl.onclick = function() {
+            optionEl.onclick = function () {
                 window.closeSolicitudDropdown();
-                
+
                 // Calcular cuotas o usar fórmulas
                 const cuotaSem26 = window.calcularCuotaSemanal26 ? window.calcularCuotaSemanal26(item.precioContado) : 0;
                 const cuotaSem52 = window.calcularCuotaSemanal52 ? window.calcularCuotaSemanal52(item.precioContado) : 0;
                 const engancheComodoCalculado = window.calcularEngancheComodo ? window.calcularEngancheComodo(item.precioContado) : 0;
                 const isFijo = item.esFijo === 'true' || item.esFijo === true;
-                
+
                 // Primer tap abre, el segundo (este clic en la opción) abre modal y lleva al formulario
                 window.shouldScrollToFormOnLoad = true;
-                
+
                 abrirModalCredito(
                     item.id,
                     item.modelo,
@@ -9218,14 +9421,14 @@
                     item.memoria || "",
                     null
                 );
-                
+
                 window.scrollToPDPForm();
             };
             container.appendChild(optionEl);
         });
     };
 
-    window.scrollToPDPForm = function(immediate = false) {
+    window.scrollToPDPForm = function (immediate = false) {
         const delay = immediate ? 0 : 600;
         setTimeout(() => {
             const formCard = document.getElementById('pdp-credit-form-card');
@@ -9237,11 +9440,11 @@
     };
 
     // Lógica del botón flotante de Llenar Solicitud dentro de la modal (PDP)
-    window.handlePdpFloatingClick = function(event) {
+    window.handlePdpFloatingClick = function (event) {
         if (event) event.stopPropagation();
         const btn = document.getElementById('pdpFloatingSolicitudBtn');
         if (!btn) return;
-        
+
         const isExpanded = btn.classList.contains('expanded');
         if (!isExpanded) {
             btn.classList.add('expanded');
@@ -9254,7 +9457,7 @@
     };
 
     // Cerrar el botón expandido al hacer clic fuera
-    window.addEventListener('click', function(event) {
+    window.addEventListener('click', function (event) {
         const btn = document.getElementById('pdpFloatingSolicitudBtn');
         if (btn && btn.classList.contains('expanded') && !btn.contains(event.target)) {
             btn.classList.remove('expanded');
@@ -9262,13 +9465,13 @@
     });
 
     // Ocultar/Colapsar elementos de PDP al hacer scroll
-    (function() {
+    (function () {
         const pdpContent = document.querySelector('#modalCredito .modal-content');
         if (pdpContent) {
             let lastPdpScrollTop = 0;
-            pdpContent.addEventListener('scroll', function() {
+            pdpContent.addEventListener('scroll', function () {
                 const currentScroll = pdpContent.scrollTop;
-                
+
                 // Colapsar botón de llenar solicitud a su forma pequeña al hacer scroll o esconder al llegar al formulario
                 const pdpFloatBtn = document.getElementById('pdpFloatingSolicitudBtn');
                 if (pdpFloatBtn) {
@@ -9299,7 +9502,7 @@
                 if (window.innerWidth > 900) return;
                 const closeBtn = document.querySelector('#modalCredito .pdp-close-btn');
                 const infoBtn = document.getElementById('pdp-info-btn');
-                
+
                 if (currentScroll > lastPdpScrollTop && currentScroll > 40) {
                     // Scroll abajo: esconder
                     if (closeBtn) {
@@ -9331,29 +9534,29 @@
     })();
 
     // Navegación de imágenes en la galería PDP
-    window.navigatePdpImages = function(direction) {
+    window.navigatePdpImages = function (direction) {
         const thumbs = Array.from(document.querySelectorAll('#pdp-thumbs-container .pdp-thumb'));
         if (thumbs.length === 0) return;
-        
+
         let activeIdx = thumbs.findIndex(t => t.classList.contains('active'));
         if (activeIdx === -1) {
             activeIdx = 0;
         }
-        
+
         let nextIdx = activeIdx + direction;
         if (nextIdx < 0) {
             nextIdx = thumbs.length - 1;
         } else if (nextIdx >= thumbs.length) {
             nextIdx = 0;
         }
-        
+
         thumbs[nextIdx].click();
-        
+
         // Centrar el thumbnail en el scroll
         thumbs[nextIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     };
 
-    window.updatePdpGalleryArrows = function() {
+    window.updatePdpGalleryArrows = function () {
         const thumbs = document.querySelectorAll('#pdp-thumbs-container .pdp-thumb');
         const arrows = document.querySelectorAll('.pdp-gallery-arrow');
         if (thumbs.length <= 1) {
@@ -9364,17 +9567,17 @@
     };
 
     // Soporte para gestos de deslizamiento (Swipe) en móvil sobre la foto principal del PDP
-    (function() {
+    (function () {
         let touchStartX = 0;
         let touchEndX = 0;
-        
+
         window.addEventListener('load', () => {
             const mainImgWrapper = document.querySelector('.pdp-main-img-wrapper');
             if (mainImgWrapper) {
                 mainImgWrapper.addEventListener('touchstart', e => {
                     touchStartX = e.changedTouches[0].screenX;
                 }, { passive: true });
-                
+
                 mainImgWrapper.addEventListener('touchend', e => {
                     touchEndX = e.changedTouches[0].screenX;
                     const diffX = touchEndX - touchStartX;
