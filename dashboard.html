@@ -1698,9 +1698,8 @@
                         sessionStorage.removeItem('celya_authenticated');
                         sessionStorage.removeItem('celya_api_token');
                         CONFIG.API_TOKEN = "";
-                        setTimeout(() => {
-                            location.reload();
-                        }, 1500);
+                        // Mostrar pantalla de bloqueo inmediatamente
+                        document.getElementById('lockscreen-celya').style.display = 'block';
                     }
                     return;
                 }
@@ -4225,6 +4224,14 @@
                         const data = await response.json();
 
                         if (data.result === 'success') {
+                            if (!data.token || data.token === 'null' || data.token === 'undefined' || data.token === '') {
+                                errorTxt.innerText = "🚨 Error crítico: El Apps Script no tiene configurado un API_TOKEN en sus Script Properties (propiedades de script).";
+                                errorTxt.style.display = 'block';
+                                btn.disabled = false;
+                                btn.innerText = "Entrar al Sistema";
+                                return;
+                            }
+
                             // Guardar token temporal de sesión
                             sessionStorage.setItem('celya_authenticated', 'true');
                             sessionStorage.setItem('celya_api_token', data.token);
