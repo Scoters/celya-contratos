@@ -12,7 +12,7 @@
         content="estrena celya, celulares a credito, pagos semanales, celulares cdmx, celulares estado de mexico, financiamiento celulares">
     <link rel="shortcut icon" href="logo-modified.webp?v=3" type="image/webp">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
     <script type="text/javascript">
         (function (c, l, a, r, i, t, y) {
             c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
@@ -4159,6 +4159,34 @@
             return "brand-otro";
         }
 
+        // 🖼️ OPTIMIZADOR DINÁMICO DE URLS DE IMÁGENES DE GOOGLE DRIVE (LCP OPTIMIZATION)
+        function optimizarUrlImagen(url, width = 300) {
+            if (!url) return "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop";
+            const urlStr = String(url).trim();
+            
+            // Si es de lh3.googleusercontent.com (Google Drive directo)
+            if (urlStr.includes("lh3.googleusercontent.com/d/")) {
+                const cleanUrl = urlStr.split("=")[0];
+                return `${cleanUrl}=w${width}`;
+            }
+            
+            // Si es de docs.google.com/uc?id=ID
+            if (urlStr.includes("docs.google.com/uc")) {
+                const match = urlStr.match(/id=([^&]+)/);
+                if (match) {
+                    return `https://lh3.googleusercontent.com/d/${match[1]}=w${width}`;
+                }
+            }
+            
+            // Si es de lh3.googleusercontent.com/drive-viewer
+            if (urlStr.includes("lh3.googleusercontent.com/drive-viewer/")) {
+                const cleanUrl = urlStr.split("=")[0];
+                return `${cleanUrl}=w${width}`;
+            }
+            
+            return urlStr;
+        }
+
         // 📋 MANEJO DE VISTAS: CATÁLOGO (GRID) VS LISTA (LIST)
         function setModoVista(modo) {
             try {
@@ -4562,13 +4590,13 @@
                         <div class="card-celular" data-item-id="${item.id}">
                             <div>
                                 <div class="card-badges">
-                                    <span class="brand-badge ${claseMarca}">${marca}</span>
-                                    ${item.estado === "MAS VENDIDO" ? `<span class="status-badge status-featured">⭐ Destacado</span>` : (item.entregaInmediata || item.estado === "DISPONIBLE") ? `<span class="status-badge status-available">⚡ Disponible</span>` : `<span class="status-badge status-order">⏳ Bajo Pedido</span>`}
-                                    ${(item.esImportacion === true || item.esImportacion === 'true') ? `<span class="status-badge status-import">✈️ Importación</span>` : ''}
-                                    ${(item.esUsado === true || item.esUsado === 'true') ? `<span class="status-badge status-used" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">🔧 Usado</span>` : ''}
+                                     <span class="brand-badge ${claseMarca}">${marca}</span>
+                                     ${item.estado === "MAS VENDIDO" ? `<span class="status-badge status-featured">⭐ Destacado</span>` : (item.entregaInmediata || item.estado === "DISPONIBLE") ? `<span class="status-badge status-available">⚡ Disponible</span>` : `<span class="status-badge status-order">⏳ Bajo Pedido</span>`}
+                                     ${(item.esImportacion === true || item.esImportacion === 'true') ? `<span class="status-badge status-import">✈️ Importación</span>` : ''}
+                                     ${(item.esUsado === true || item.esUsado === 'true') ? `<span class="status-badge status-used" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">🔧 Usado</span>` : ''}
                                 </div>
                                 <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheComodoCalculado}, '${item.color || ""}', '${item.memoria || ""}', this)">
-                                    <img src="${item.foto}" alt="${modeloLimpio}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop'">
+                                     <img src="${optimizarUrlImagen(item.foto, 300)}" alt="${modeloLimpio}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop'">
                                 </div>
                                 <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheComodoCalculado}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpio}</h4>
                                 <div class="specs-container">
@@ -4984,7 +5012,7 @@
 
             const imgElement = document.getElementById('modal-producto-foto');
             if (imgElement) {
-                imgElement.src = foto || "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop";
+                imgElement.src = optimizarUrlImagen(foto, 600);
             }
 
             // Determinar frecuencia activa de la tarjeta
