@@ -1587,6 +1587,12 @@
                 </div>
 
                 <div class="form-group-config">
+                    <label for="cfg-codigo-descuento">🎟️ Código de Descuento Enganche (13%)</label>
+                    <input type="text" id="cfg-codigo-descuento" name="codigoDescuento"
+                        placeholder="Ej. PROMO13">
+                </div>
+
+                <div class="form-group-config">
                     <label for="cfg-telegram-token">🤖 Telegram Bot Token</label>
                     <input type="text" id="cfg-telegram-token" name="telegramBotToken"
                         placeholder="Ej. 123456789:ABCdef...">
@@ -2177,15 +2183,21 @@
 
                         // Generar el mensaje
                         let mensaje = `¡Hola, ${clienteSeleccionadoActual.cliente}! 👋\n` +
-                            `Te confirmamos que hemos registrado tu abono para tu equipo *${clienteSeleccionadoActual.modelo || 'Celular'}* exitosamente.\n\n` +
-                            `💵 *Monto recibido:* $${Math.round(abonoMonto).toLocaleString('es-MX')} MXN\n`;
+                            `Te confirmamos que hemos registrado tu abono para tu equipo ${clienteSeleccionadoActual.modelo || 'Celular'} exitosamente.\n\n` +
+                            `💵 Monto recibido: $${Math.round(abonoMonto).toLocaleString('es-MX')} MXN\n`;
 
                         if (folioVal) {
-                            mensaje += `🔢 *Folio/Referencia:* #${folioVal}\n`;
+                            mensaje += `🔢 Folio/Referencia: #${folioVal}\n`;
                         }
 
-                        mensaje += `📉 *Nuevo saldo pendiente:* $${nuevoSaldo.toLocaleString('es-MX')} MXN\n\n` +
-                            `🔗 *Consulta tu estado de cuenta:* https://portal.estrenacelya.com/?imei=${clienteSeleccionadoActual.imei}\n\n` +
+                        mensaje += `📉 Nuevo saldo pendiente: $${nuevoSaldo.toLocaleString('es-MX')} MXN\n`;
+
+                        if (nuevoSaldo > 0) {
+                            const descPct = parseFloat(configGlobal.descuentoLiquidacion) || 15;
+                            mensaje += `🚀 Obtén un ${descPct}% de descuento si liquidas hoy.\n`;
+                        }
+
+                        mensaje += `\n🔗 Consulta tu estado de cuenta: https://portal.estrenacelya.com/?imei=${clienteSeleccionadoActual.imei}\n\n` +
                             `¡Muchas gracias por tu pago y por mantener tu cuenta al corriente! 😊\n` +
                             `CelYa te desea un excelente día. ✨`;
 
@@ -2606,6 +2618,7 @@
                     document.getElementById('cfg-enganche-quin-comodo').value = data.config.engancheMinimoQuincenalComodo || 35;
 
                     document.getElementById('cfg-descuento-liquidacion').value = data.config.descuentoLiquidacion || 15;
+                    document.getElementById('cfg-codigo-descuento').value = data.config.codigoDescuento || '';
                     document.getElementById('cfg-telegram-token').value = data.config.telegramBotToken || '';
                     document.getElementById('cfg-telegram-chatid').value = data.config.telegramChatId || '';
                 }
@@ -2637,6 +2650,7 @@
             params.append('engancheMinimoQuincenalComodo', document.getElementById('cfg-enganche-quin-comodo').value);
 
             params.append('descuentoLiquidacion', document.getElementById('cfg-descuento-liquidacion').value);
+            params.append('codigoDescuento', document.getElementById('cfg-codigo-descuento').value);
             params.append('telegramBotToken', document.getElementById('cfg-telegram-token').value);
             params.append('telegramChatId', document.getElementById('cfg-telegram-chatid').value);
 
@@ -2666,6 +2680,7 @@
                     configGlobal.engancheMinimoQuincenalComodo = document.getElementById('cfg-enganche-quin-comodo').value;
 
                     configGlobal.descuentoLiquidacion = document.getElementById('cfg-descuento-liquidacion').value;
+                    configGlobal.codigoDescuento = document.getElementById('cfg-codigo-descuento').value;
 
                     cerrarModalConfig();
                 } else {

@@ -410,6 +410,7 @@
 
             <label for="monto">🏁 Pago Inicial / Enganche Recibido ($):</label>
             <input type="number" id="monto" name="monto" style="color: #c0392b; font-weight: bold;" placeholder="Ej. 1200" min="0">
+            <div id="cfg-enganche-feedback" style="font-size: 13.5px; font-weight: 600; color: #16a34a; margin-top: 4px; margin-bottom: 8px; display: none;"></div>
             <div id="cfg-interes-feedback" style="font-size: 13.5px; font-weight: 600; color: #16a34a; margin-top: 4px; margin-bottom: 8px; display: none;"></div>
 
             <label for="cuota">Monto del Abono Regular ($):</label>
@@ -713,6 +714,11 @@
 
                 // --- LECTOR DE DATOS DE TEXTO PRE-LLENADO DESDE EL CATÁLOGO ---
                 const urlParams = new URLSearchParams(window.location.search);
+                const preDescEnganche = urlParams.get('pre_desc_enganche');
+                if (preDescEnganche === "1" || preDescEnganche === "true") {
+                    window.formPromoDiscountActive = true;
+                    console.log("🎟️ Promoción de enganche de 13% activa vía URL");
+                }
                 const preModelo = urlParams.get('pre_modelo');
                 if (preModelo) {
                     const options = select.options;
@@ -1155,13 +1161,18 @@
                     const feedbackEl = document.getElementById('cfg-interes-feedback');
                     if (feedbackEl) feedbackEl.style.display = 'none';
                 } else {
-                    const factorEngancheMinimo = (frecuencia === "QUINCENAL")
-                        ? ((planElegido === "52")
-                            ? (CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.15)
-                            : (CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.13))
-                        : ((planElegido === "52")
-                            ? (CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.15)
-                            : (CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.13));
+                    let factorEngancheMinimo;
+                    if (window.formPromoDiscountActive) {
+                        factorEngancheMinimo = 0.13;
+                    } else {
+                        factorEngancheMinimo = (frecuencia === "QUINCENAL")
+                            ? ((planElegido === "52")
+                                ? (CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.15)
+                                : (CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.13))
+                            : ((planElegido === "52")
+                                ? (CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.15)
+                                : (CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.13));
+                    }
                     const engancheMinimoObligatorio = Math.ceil((precioContado * factorEngancheMinimo) / 10) * 10;
 
                     const inputMonto = document.getElementById('monto');
@@ -1223,6 +1234,17 @@
                     const totalFinanciadoCalculado = cuotaFinal * numPagos;
                     totalFinanciadoActual = totalFinanciadoCalculado;
                     document.getElementById('totalFinanciado').value = "$" + totalFinanciadoCalculado.toLocaleString('es-MX');
+
+                    // --- FEEDBACK DE ENGANCHE CON DESCUENTO ---
+                    const feedbackEng = document.getElementById('cfg-enganche-feedback');
+                    if (feedbackEng) {
+                        if (window.formPromoDiscountActive) {
+                            feedbackEng.style.display = 'block';
+                            feedbackEng.innerHTML = `🎟️ Promoción de enganche activa: <strong>13% obligatorio</strong>`;
+                        } else {
+                            feedbackEng.style.display = 'none';
+                        }
+                    }
 
                     // --- RETROALIMENTACIÓN VISUAL EN FORMULARIO ---
                     const feedbackEl = document.getElementById('cfg-interes-feedback');
@@ -1398,13 +1420,18 @@
                 const selector = selectorCobro || "";
                 const partes = selector ? selector.split('|') : [];
                 const frecuencia = partes[0] || "SEMANAL";
-                const factorEngancheMinimo = (frecuencia === "QUINCENAL")
-                    ? ((planElegido === "52")
-                        ? (CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.15)
-                        : (CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.13))
-                    : ((planElegido === "52")
-                        ? (CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.15)
-                        : (CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.13));
+                let factorEngancheMinimo;
+                if (window.formPromoDiscountActive) {
+                    factorEngancheMinimo = 0.13;
+                } else {
+                    factorEngancheMinimo = (frecuencia === "QUINCENAL")
+                        ? ((planElegido === "52")
+                            ? (CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.15)
+                            : (CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.13))
+                        : ((planElegido === "52")
+                            ? (CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.15)
+                            : (CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.13));
+                }
                 const engancheMinimoObligatorio = Math.ceil((precioContado * factorEngancheMinimo) / 10) * 10;
                 const engancheIngresado = parseFloat(document.getElementById('monto').value.replace(/[\$,]/g, "")) || 0;
 

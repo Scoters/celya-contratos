@@ -3609,6 +3609,18 @@
                         </div>
                     </div>
 
+                    <!-- Código de Descuento para Enganche -->
+                    <div id="pdp-codigo-descuento-container" style="margin-top: 10px; margin-bottom: 10px; text-align: left; background: var(--bg-card); padding: 14px 18px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <label style="font-weight: 600; font-size: 13.5px; color: var(--text-main); display: block; margin-bottom: 8px;">
+                            🎟️ ¿Tienes un código de descuento para el enganche?
+                        </label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="cliCodigoDescuento" placeholder="Ingresa tu código" style="flex: 1; box-sizing: border-box; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 12px; color: #fff; font-size: 13px; outline: none;">
+                            <button type="button" onclick="aplicarCodigoDescuentoPDP()" style="background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.2s;">Aplicar</button>
+                        </div>
+                        <div id="pdp-codigo-descuento-mensaje" style="display: none; margin-top: 8px; font-size: 12px; font-weight: 600;"></div>
+                    </div>
+
                     <details class="enganche-personalizado-pdp" id="pdp-enganche-personalizado-container"
                         style="margin-top: 10px; margin-bottom: 10px; text-align: left; background: var(--bg-card); padding: 14px 18px; border-radius: 8px; border: 1px solid var(--border-color);">
                         <summary
@@ -3845,6 +3857,18 @@
                             style="font-size: 11px; font-weight: bold; color: #16a34a; margin-top: 4px; display: none;">
                         </div>
                     </div>
+                </div>
+
+                <!-- Código de Descuento para Enganche Pedido Especial -->
+                <div id="pe-codigo-descuento-container" style="margin-top: 10px; margin-bottom: 10px; text-align: left; background: var(--bg-card); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                    <label style="font-weight: 600; font-size: 13px; color: var(--text-main); display: block; margin-bottom: 6px;">
+                        🎟️ ¿Tienes un código de descuento para el enganche?
+                    </label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="pe-cliCodigoDescuento" placeholder="Ingresa tu código" style="flex: 1; box-sizing: border-box; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 10px; color: #fff; font-size: 12px; outline: none;">
+                        <button type="button" onclick="aplicarCodigoDescuentoPE()" style="background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s;">Aplicar</button>
+                    </div>
+                    <div id="pe-codigo-descuento-mensaje" style="display: none; margin-top: 6px; font-size: 11px; font-weight: 600;"></div>
                 </div>
 
                 <details class="enganche-personalizado-pdp" id="pe-enganche-personalizado-container"
@@ -4180,7 +4204,8 @@
             interesQuin26: 0.25, 
             interesQuin52: 0.45, 
             engancheQuin26: 0.13, 
-            engancheQuin52: 0.15 
+            engancheQuin52: 0.15,
+            codigoDescuento: ""
         };
         let CONFIG_TASAS = (() => {
             try {
@@ -5208,6 +5233,13 @@
             document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(precioContado || 0).toLocaleString('es-MX')} MXN</strong>`;
 
             currentMLItemLink = link || "";
+            // Resetear código de descuento
+            window._pdpDiscountApplied = false;
+            const inputCodigo = document.getElementById('cliCodigoDescuento');
+            if (inputCodigo) inputCodigo.value = "";
+            const msgCodigo = document.getElementById('pdp-codigo-descuento-mensaje');
+            if (msgCodigo) msgCodigo.style.display = 'none';
+
             let finalColor = color;
             if (!finalColor || finalColor.trim() === "" || finalColor.trim() === "-") {
                 if (window.equiposCargados) {
@@ -5379,6 +5411,66 @@
                 const encodedMsg = encodeURIComponent(`Hola, tengo dudas o aclaraciones sobre el crédito para el celular ${modelName}`);
                 pdpWaFloat.href = `https://wa.me/525621227408?text=${encodedMsg}`;
             }
+        }
+
+        function aplicarCodigoDescuentoPDP() {
+            const input = document.getElementById('cliCodigoDescuento');
+            const mensajeEl = document.getElementById('pdp-codigo-descuento-mensaje');
+            if (!input || !mensajeEl) return;
+
+            const codeEntered = input.value.trim().toLowerCase();
+            const configCode = (CONFIG_TASAS.codigoDescuento || "").trim().toLowerCase();
+
+            if (!codeEntered) {
+                window._pdpDiscountApplied = false;
+                mensajeEl.style.display = 'none';
+                actualizarPrecioCalculadoPDP();
+                return;
+            }
+
+            if (configCode && codeEntered === configCode) {
+                window._pdpDiscountApplied = true;
+                mensajeEl.style.color = '#22c55e'; // Green
+                mensajeEl.innerHTML = `🎉 ¡Código aplicado! Enganche reducido a 13% en plan rápido y cómodo.`;
+                mensajeEl.style.display = 'block';
+            } else {
+                window._pdpDiscountApplied = false;
+                mensajeEl.style.color = '#ef4444'; // Red
+                mensajeEl.innerHTML = `❌ Código de descuento incorrecto o inválido.`;
+                mensajeEl.style.display = 'block';
+            }
+
+            actualizarPrecioCalculadoPDP();
+        }
+
+        function aplicarCodigoDescuentoPE() {
+            const input = document.getElementById('pe-cliCodigoDescuento');
+            const mensajeEl = document.getElementById('pe-codigo-descuento-mensaje');
+            if (!input || !mensajeEl) return;
+
+            const codeEntered = input.value.trim().toLowerCase();
+            const configCode = (CONFIG_TASAS.codigoDescuento || "").trim().toLowerCase();
+
+            if (!codeEntered) {
+                window._pdpDiscountApplied = false;
+                mensajeEl.style.display = 'none';
+                actualizarPreciosPedidoEspecial();
+                return;
+            }
+
+            if (configCode && codeEntered === configCode) {
+                window._pdpDiscountApplied = true;
+                mensajeEl.style.color = '#22c55e'; // Green
+                mensajeEl.innerHTML = `🎉 ¡Código aplicado! Enganche reducido a 13% en plan rápido y cómodo.`;
+                mensajeEl.style.display = 'block';
+            } else {
+                window._pdpDiscountApplied = false;
+                mensajeEl.style.color = '#ef4444'; // Red
+                mensajeEl.innerHTML = `❌ Código de descuento incorrecto o inválido.`;
+                mensajeEl.style.display = 'block';
+            }
+
+            actualizarPreciosPedidoEspecial();
         }
 
         let pdpInfoLocked = false;
@@ -5644,7 +5736,9 @@
                 if (containerEng) containerEng.style.display = "block";
 
                 let factorEnganche;
-                if (freq === "QUINCENAL") {
+                if (window._pdpDiscountApplied) {
+                    factorEnganche = 0.13;
+                } else if (freq === "QUINCENAL") {
                     if (plazo === "52 Semanas") {
                         factorEnganche = CONFIG_TASAS.engancheQuin52 !== undefined ? CONFIG_TASAS.engancheQuin52 : 0.35;
                     } else {
@@ -6029,6 +6123,12 @@
             document.getElementById('pe-link-input').value = "";
             document.getElementById('pe-error-msg').style.display = 'none';
             document.getElementById('formPedidoEspecial').reset();
+            window._pdpDiscountApplied = false;
+            const inputCodigo = document.getElementById('pe-cliCodigoDescuento');
+            if (inputCodigo) inputCodigo.value = "";
+            const msgCodigo = document.getElementById('pe-codigo-descuento-mensaje');
+            if (msgCodigo) msgCodigo.style.display = 'none';
+
             pe_data_actual = null;
             pe_link_actual = "";
         }
@@ -6295,7 +6395,9 @@
 
                 // Matemática
                 let factorEnganche;
-                if (freq === "QUINCENAL") {
+                if (window._pdpDiscountApplied) {
+                    factorEnganche = 0.13;
+                } else if (freq === "QUINCENAL") {
                     if (plazo === "52 Semanas") {
                         factorEnganche = CONFIG_TASAS.engancheQuin52 !== undefined ? CONFIG_TASAS.engancheQuin52 : 0.35;
                     } else {
@@ -6502,7 +6604,7 @@
                 pathname = pathname.replace(/(index|catalogo)\.html$/, 'formulario.html');
             }
             const baseUrl = window.location.origin + pathname;
-            const prefilledUrl = `${baseUrl}?pre_modelo=${encodeURIComponent(pe_data_actual.title)}&pre_frecuencia=${encodeURIComponent(freq)}&pre_plazo=${encodeURIComponent(plazo === "26 Semanas" ? "26" : "52")}&pre_nombre=${encodeURIComponent(nombre)}&pre_telefono=${encodeURIComponent(telefono)}&pre_color=&pre_capacidad=&pre_enganche=${engancheFinal}`;
+            const prefilledUrl = `${baseUrl}?pre_modelo=${encodeURIComponent(pe_data_actual.title)}&pre_frecuencia=${encodeURIComponent(freq)}&pre_plazo=${encodeURIComponent(plazo === "26 Semanas" ? "26" : "52")}&pre_nombre=${encodeURIComponent(nombre)}&pre_telefono=${encodeURIComponent(telefono)}&pre_color=&pre_capacidad=&pre_enganche=${engancheFinal}&pre_desc_enganche=${window._pdpDiscountApplied ? '1' : '0'}`;
 
             const planElegidoVal = (freq === "CONTADO") ? "Contado" : (plazo === "26 Semanas" ? "Plan Rápido" : "Plan Cómodo");
             const frecuenciaVal = (freq === "SEMANAL") ? "Semanal" : ((freq === "QUINCENAL") ? "Quincenal" : "Contado");
@@ -6700,7 +6802,7 @@
                     pathname = pathname.replace(/(index|catalogo)\.html$/, 'formulario.html');
                 }
                 const baseUrl = window.location.origin + pathname;
-                const prefilledUrl = `${baseUrl}?pre_modelo=${encodeURIComponent(modelo)}&pre_frecuencia=${encodeURIComponent(freq)}&pre_plazo=${encodeURIComponent(plazo === "26 Semanas" ? "26" : "52")}&pre_nombre=${encodeURIComponent(nombre)}&pre_telefono=${encodeURIComponent(telefono)}&pre_color=${encodeURIComponent(colorSeleccionado || "")}&pre_capacidad=${encodeURIComponent(almacenamientoSeleccionado || "")}&pre_enganche=${finalEnganche}`;
+                const prefilledUrl = `${baseUrl}?pre_modelo=${encodeURIComponent(modelo)}&pre_frecuencia=${encodeURIComponent(freq)}&pre_plazo=${encodeURIComponent(plazo === "26 Semanas" ? "26" : "52")}&pre_nombre=${encodeURIComponent(nombre)}&pre_telefono=${encodeURIComponent(telefono)}&pre_color=${encodeURIComponent(colorSeleccionado || "")}&pre_capacidad=${encodeURIComponent(almacenamientoSeleccionado || "")}&pre_enganche=${finalEnganche}&pre_desc_enganche=${window._pdpDiscountApplied ? '1' : '0'}`;
                 params.append('linkPrellenado', prefilledUrl);
                 // Precio para el desglose en Telegram
                 const _precioContadoTg = parseFloat(document.getElementById('hiddenPrecioContado').value) || 0;
