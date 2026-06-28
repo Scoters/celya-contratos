@@ -5269,7 +5269,7 @@
                         if (typeof parsed === 'string') {
                             parsed = JSON.parse(parsed);
                         }
-                        if (parsed && !parsed.error) {
+                        if (parsed && !parsed.error && ((parsed.pickers && parsed.pickers.length > 0) || (parsed.variations && parsed.variations.length > 0))) {
                             parsed.isFresh = true;
                             let cleanId = "";
                             if (link) {
