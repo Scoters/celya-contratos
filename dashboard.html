@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CelYa! - Panel de Control Administrativo</title>
+    <title>CelYa - Panel de Control Administrativo</title>
     <link rel="shortcut icon" href="logo-modified.webp" type="image/webp">
     <script src="config.js?v=2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1032,7 +1032,7 @@
                 <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo"
                      style="max-height: 80px; width: auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));">
             </div>
-            <h2 style="color:white; margin-bottom:5px; display: none;">CelYa!</h2>
+            <h2 style="color:white; margin-bottom:5px; display: none;">CelYa</h2>
             <p style="color:#94a3b8; font-size:14px; margin-top:0; margin-bottom:24px;">Acceso restringido al sistema
             </p>
             <input type="password" id="pass-input-celya" placeholder="Introduce la contraseña"
@@ -1062,7 +1062,7 @@
                 <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo"
                     style="cursor: pointer;" onclick="window.location.reload();">
                 <div class="header-text">
-                    <h2>💜 CelYa! Ecosistema</h2>
+                    <h2>💜 CelYa Ecosistema</h2>
                     <p class="subtitulo">Módulo de Cobranza y Administración Global</p>
                 </div>
             </div>
@@ -1510,7 +1510,7 @@
             <span class="close-config-btn" onclick="cerrarModalConfig()">&times;</span>
 
             <h2>📊 Parámetros Globales del Negocio</h2>
-            <p class="modal-subtitle">Configuración del ecosistema financiero CelYa!</p>
+            <p class="modal-subtitle">Configuración del ecosistema financiero CelYa</p>
 
             <form id="form-config-global">
                 <div class="form-group-config">
@@ -2187,7 +2187,7 @@
                         mensaje += `📉 *Nuevo saldo pendiente:* $${nuevoSaldo.toLocaleString('es-MX')} MXN\n\n` +
                             `🔗 *Consulta tu estado de cuenta:* https://portal.estrenacelya.com/?imei=${clienteSeleccionadoActual.imei}\n\n` +
                             `¡Muchas gracias por tu pago y por mantener tu cuenta al corriente! 😊\n` +
-                            `CelYa! te desea un excelente día. ✨`;
+                            `CelYa te desea un excelente día. ✨`;
 
                         document.getElementById('txt-recibo-mensaje').value = mensaje;
                         document.getElementById('modal-recibo-pago').style.display = 'block';
@@ -4005,7 +4005,7 @@
                 doc.setTextColor(255, 255, 255);
                 doc.setFont("Helvetica", "bold");
                 doc.setFontSize(22);
-                doc.text("💜 CelYa! Ecosistema", 15, 18);
+                doc.text("💜 CelYa Ecosistema", 15, 18);
 
                 doc.setFont("Helvetica", "normal");
                 doc.setFontSize(11);

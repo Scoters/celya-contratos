@@ -310,7 +310,7 @@
                 <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo"
                     style="max-height: 80px; width: auto;">
             </div>
-            <h2 style="color:#2c3e50; margin-bottom:5px; display: none;">CelYa!</h2>
+            <h2 style="color:#2c3e50; margin-bottom:5px; display: none;">CelYa</h2>
             <p style="color:#7f8c8d; font-size:14px; margin-top:0; margin-bottom:20px;">Acceso restringido al sistema
             </p>
             <input type="password" id="pass-input-celya" placeholder="Introduce la contraseña"
@@ -523,7 +523,7 @@
                 const data = await response.json();
                 if (data.result === 'success') {
                     CONFIG_TASAS_SHEETS = data;
-                    console.log("🎯 Tasas CelYa! Sincronizadas:", CONFIG_TASAS_SHEETS);
+                    console.log("🎯 Tasas CelYa Sincronizadas:", CONFIG_TASAS_SHEETS);
                 }
             } catch (err) {
                 console.error("⚠️ Error de red al sincronizar tasas, usando respaldo local:", err);
@@ -1387,7 +1387,7 @@
                 const engancheIngresado = parseFloat(document.getElementById('monto').value.replace(/[\$,]/g, "")) || 0;
 
                 if (engancheIngresado < engancheMinimoObligatorio) {
-                    toast(`Enganche m\u00ednimo para <strong>${frecuencia}</strong>: <strong>$${engancheMinimoObligatorio.toLocaleString('es-MX')}</strong><br>Ingresado: $${engancheIngresado.toLocaleString('es-MX')}`, 'error', '\u26d4 Candado de Enganche CelYa!');
+                    toast(`Enganche m\u00ednimo para <strong>${frecuencia}</strong>: <strong>$${engancheMinimoObligatorio.toLocaleString('es-MX')}</strong><br>Ingresado: $${engancheIngresado.toLocaleString('es-MX')}`, 'error', '\u26d4 Candado de Enganche CelYa');
                     return;
                 }
             } else if (!esContado) {
