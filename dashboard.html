@@ -405,6 +405,20 @@
         }
 
         .modal-revolvente-content {
+            background-color: #1e293b;
+            color: var(--text-primary);
+            margin: 10% auto;
+            padding: 25px 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 5px solid #0d9488;
+            position: relative;
+        }
+
+        .modal-fondo-revolvente-fullscreen {
             background-color: #0b0f19;
             color: var(--text-primary);
             margin: 0;
@@ -1699,7 +1713,7 @@
                         sessionStorage.removeItem('celya_api_token');
                         CONFIG.API_TOKEN = "";
                         // Mostrar pantalla de bloqueo inmediatamente
-                        document.getElementById('lockscreen-celya').style.display = 'block';
+                        document.getElementById('lockscreen-celya').style.display = 'flex';
                     }
                     return;
                 }
@@ -4259,7 +4273,7 @@
     </script>
     <!-- ═══════════════════════ MODAL FONDO REVOLVENTE ═══════════════════════ -->
     <div id="modal-fondo-revolvente" class="modal-celya-config" style="display: none;">
-        <div class="modal-revolvente-content">
+        <div class="modal-fondo-revolvente-fullscreen">
             <!-- Header Fijo Superior -->
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 25px;">
                 <div>
