@@ -7547,6 +7547,21 @@
                 itemVariationsData = [];
                 variantesVivasGlobal = [];
 
+                // Registro persistente de variantes confirmadas con stock
+                // Evita que la API de una variante marque erróneamente a otra como agotada
+                window._confirmedStockIds = new Set();
+                // Pre-poblar desde catálogo local (todas las filas del mismo modelo base)
+                if (window.equiposCargados && window.currentBaseModelName) {
+                    window.equiposCargados.forEach(eq => {
+                        if (eq.modelo && baseModelsMatch(eq.modelo, window.currentBaseModelName)) {
+                            if (eq.link) {
+                                const lm = eq.link.match(/(MLM\-?\d+)/i);
+                                if (lm) window._confirmedStockIds.add(lm[0].replace("-", "").toUpperCase());
+                            }
+                        }
+                    });
+                }
+
                 // Cargar variantes locales por defecto
                 mostrarVariantesFallback();
             }
@@ -7853,6 +7868,12 @@
                             if (freshData) {
                                 freshData.isFresh = true;
 
+                                // Registrar esta variante como confirmada con stock real
+                                if (window._confirmedStockIds) {
+                                    window._confirmedStockIds.add(originalCleanId);
+                                    if (freshData.id) window._confirmedStockIds.add(freshData.id);
+                                }
+
                                 // Preserve GRADING picker and other custom pickers from old cache if missing in freshData
                                 const oldCache = ML_CACHE_VARIANTES[originalCleanId] || ML_CACHE_VARIANTES[cleanId];
                                 if (oldCache && oldCache.pickers) {
@@ -7999,7 +8020,12 @@
                         if (picker.products) {
                             picker.products.forEach(p => {
                                 if (!p.product_id) return;
-                                const isOutOfStock = p.tags && isProductTagOutOfStock(p.tags);
+                                let isOutOfStock = p.tags && isProductTagOutOfStock(p.tags);
+                                // Si esta variante fue confirmada con stock (por su propia API o por catálogo local),
+                                // ignorar el reporte desfasado de la API de otra variante
+                                if (isOutOfStock && window._confirmedStockIds && window._confirmedStockIds.has(p.product_id)) {
+                                    isOutOfStock = false;
+                                }
                                 if (!productMapGlobal[p.product_id]) {
                                     const parsed = parseSpecsFromProductName(p.product_name || p.product_title || "");
                                     productMapGlobal[p.product_id] = {
@@ -8026,7 +8052,11 @@
                                                 existing.tags.push(t);
                                             }
                                         });
-                                        const outOfStockFlag = existing.tags && isProductTagOutOfStock(existing.tags);
+                                        let outOfStockFlag = existing.tags && isProductTagOutOfStock(existing.tags);
+                                        // Respetar stock confirmado previamente
+                                        if (outOfStockFlag && window._confirmedStockIds && window._confirmedStockIds.has(p.product_id)) {
+                                            outOfStockFlag = false;
+                                        }
                                         existing.isOutOfStock = outOfStockFlag;
                                     }
                                 }
