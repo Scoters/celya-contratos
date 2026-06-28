@@ -8738,6 +8738,13 @@
                         colorSeleccionadoGlobal = colorSeleccionadoGlobal || colorSeleccionado || defaultColor || listaColoresFijos[0] || "";
                         memoriaSeleccionadaGlobal = memoriaSeleccionadaGlobal || almacenamientoSeleccionado || defaultMemoria || listaMemoriasFijas[0] || "";
 
+                        if (colorSeleccionadoGlobal && colorSeleccionadoGlobal.includes(",")) {
+                            colorSeleccionadoGlobal = colorSeleccionadoGlobal.split(",")[0].trim();
+                        }
+                        if (memoriaSeleccionadaGlobal && memoriaSeleccionadaGlobal.includes(",")) {
+                            memoriaSeleccionadaGlobal = memoriaSeleccionadaGlobal.split(",")[0].trim();
+                        }
+
                         const wrapperColores = document.getElementById('ml-colors-wrapper') || document.querySelector('.color-picker-wrapper');
                         if (wrapperColores) {
                             wrapperColores.innerHTML = '';
@@ -9696,25 +9703,28 @@
                 contenedor.style.display = "block";
                 wrapperColores.innerHTML = "";
 
-                const divColor = document.createElement('div');
-                divColor.className = "color-circle selected";
-                divColor.title = defaultColor;
-                divColor.setAttribute('data-color', defaultColor);
-                divColor.setAttribute('data-tooltip', defaultColor);
-
-                divColor.style.backgroundColor = obtenerCodigoColor(defaultColor);
-
-                // Hover to show name in header label
-                divColor.onmouseenter = function () {
-                    document.getElementById('color-seleccionado-txt').innerText = defaultColor;
-                };
-                divColor.onmouseleave = function () {
-                    document.getElementById('color-seleccionado-txt').innerText = colorSeleccionado || "";
-                };
-
-                colorSeleccionado = defaultColor;
-                document.getElementById('color-seleccionado-txt').innerText = defaultColor;
-                wrapperColores.appendChild(divColor);
+                const colores = defaultColor.split(",").map(c => c.trim());
+                colores.forEach((col, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'color-pill' + (idx === 0 ? ' selected' : '');
+                    btn.type = 'button';
+                    btn.innerText = col;
+                    btn.onclick = function () {
+                        wrapperColores.querySelectorAll('.color-pill').forEach(b => b.classList.remove('selected'));
+                        this.classList.add('selected');
+                        colorSeleccionado = col;
+                        colorSeleccionadoGlobal = col;
+                        document.getElementById('color-seleccionado-txt').innerText = col;
+                        actualizarPreciosYFotoPorVarianteActual();
+                        if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
+                    };
+                    if (idx === 0) {
+                        colorSeleccionado = col;
+                        colorSeleccionadoGlobal = col;
+                        document.getElementById('color-seleccionado-txt').innerText = col;
+                    }
+                    wrapperColores.appendChild(btn);
+                });
                 hasColor = true;
             }
 
@@ -9723,14 +9733,28 @@
                 seccionStorage.style.display = "block";
                 wrapperStorage.innerHTML = "";
 
-                const divStorage = document.createElement('div');
-                divStorage.className = "storage-pill selected";
-                divStorage.innerText = defaultMemoria;
-                divStorage.setAttribute('data-storage', defaultMemoria);
-
-                almacenamientoSeleccionado = defaultMemoria;
-                document.getElementById('memoria-seleccionada-txt').innerText = defaultMemoria;
-                wrapperStorage.appendChild(divStorage);
+                const memorias = defaultMemoria.split(",").map(m => m.trim());
+                memorias.forEach((mem, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'storage-pill' + (idx === 0 ? ' selected' : '');
+                    btn.type = 'button';
+                    btn.innerText = mem;
+                    btn.onclick = function () {
+                        wrapperStorage.querySelectorAll('.storage-pill').forEach(b => b.classList.remove('selected'));
+                        this.classList.add('selected');
+                        almacenamientoSeleccionado = mem;
+                        memoriaSeleccionadaGlobal = mem;
+                        document.getElementById('memoria-seleccionada-txt').innerText = mem;
+                        actualizarPreciosYFotoPorVarianteActual();
+                        if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
+                    };
+                    if (idx === 0) {
+                        almacenamientoSeleccionado = mem;
+                        memoriaSeleccionadaGlobal = mem;
+                        document.getElementById('memoria-seleccionada-txt').innerText = mem;
+                    }
+                    wrapperStorage.appendChild(btn);
+                });
                 hasStorage = true;
             }
         }
