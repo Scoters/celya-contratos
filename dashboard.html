@@ -2442,12 +2442,16 @@
             
             const labelsMes = [];
             const dataEfectivoMes = [];
+            const dataCarteraMes = [];
+            const dataRetirosMes = [];
             const dataActivosMes = [];
             
             for (let idx = 3; idx < dataSemanas.length; idx += 4) {
                 const mesNum = Math.ceil(dataSemanas[idx] / 4);
                 labelsMes.push(`Mes ${mesNum}`);
                 dataEfectivoMes.push(dataEfectivo[idx]);
+                dataCarteraMes.push(dataCartera[idx]);
+                dataRetirosMes.push(dataRetiros[idx]);
                 dataActivosMes.push(dataActivos[idx]);
             }
             
@@ -2460,21 +2464,27 @@
                             label: 'Caja Disponible ($)',
                             data: dataEfectivoMes,
                             borderColor: '#0d9488',
-                            backgroundColor: 'rgba(13, 148, 136, 0.08)',
+                            backgroundColor: 'rgba(13, 148, 136, 0.05)',
                             borderWidth: 2.5,
                             tension: 0.3,
-                            fill: true,
-                            yAxisID: 'y'
+                            fill: true
                         },
                         {
-                            label: 'Celulares Activos (Clientes)',
-                            data: dataActivosMes,
+                            label: 'Cartera en la Calle ($)',
+                            data: dataCarteraMes,
                             borderColor: '#38bdf8',
-                            backgroundColor: 'rgba(56, 189, 248, 0.03)',
+                            backgroundColor: 'rgba(56, 189, 248, 0.02)',
                             borderWidth: 2.5,
                             tension: 0.3,
-                            fill: false,
-                            yAxisID: 'y1'
+                            fill: true
+                        },
+                        {
+                            label: 'Retiros Familia ($)',
+                            data: dataRetirosMes,
+                            borderColor: '#a855f7',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: false
                         }
                     ]
                 },
@@ -2487,6 +2497,25 @@
                                 color: '#e2e8f0',
                                 font: { family: 'Outfit', size: 11.5, weight: '500' }
                             }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += '$' + context.parsed.y.toLocaleString();
+                                    }
+                                    // Si es la serie de Cartera en la Calle (índice 1)
+                                    if (context.datasetIndex === 1) {
+                                        const activos = dataActivosMes[context.dataIndex];
+                                        label += ` (${activos} celulares activos)`;
+                                    }
+                                    return label;
+                                }
+                            }
                         }
                     },
                     scales: {
@@ -2496,20 +2525,11 @@
                         },
                         y: {
                             grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                            position: 'left',
                             ticks: { 
                                 color: '#94a3b8', 
                                 font: { family: 'Outfit', size: 10.5 },
                                 callback: function(value) { return '$' + value.toLocaleString(); }
                             }
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            grid: { drawOnChartArea: false },
-                            ticks: { color: '#38bdf8', font: { family: 'Outfit', size: 10.5 } },
-                            min: 0
                         }
                     }
                 }
@@ -4301,7 +4321,7 @@
                     </div>
                     <div class="form-group-config">
                         <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px; font-weight: 500;">Retiro de Apoyo Familiar (Mensual)</label>
-                        <input type="number" id="fr-retiro-familiar" value="4000" step="500" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 14.5px; outline: none; font-weight: 600;">
+                        <input type="number" id="fr-retiro-familiar" value="500" step="500" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 14.5px; outline: none; font-weight: 600;">
                     </div>
                 </div>
                 
