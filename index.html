@@ -3885,7 +3885,7 @@
                             personal. Tu privacidad está completamente protegida.
                         </p>
                     </div>
-                    <div class="faq-item">
+                    <div class="faq-item" id="faq-devoluciones">
                         <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin: 0 0 8px 0;">2.
                             ¿Cuál es la política de devoluciones de CelYa!?</h3>
                         <p style="font-size: 14px; color: var(--text-muted); margin: 0; line-height: 1.6;">
@@ -4658,6 +4658,7 @@
             if (!window.seoUrlChecked && window.equiposCargados && window.equiposCargados.length > 0) {
                 window.seoUrlChecked = true;
                 verificarModeloPorUrl();
+                verificarInfoLegalPorUrl();
             }
 
             // Inyectar datos estructurados JSON-LD dinámicamente para SEO
@@ -4755,6 +4756,25 @@
                 }
             } catch (eCheckUrl) {
                 console.error("Error al verificar modelo de la URL para SEO:", eCheckUrl);
+            }
+        }
+
+        // ⚖️ VERIFICAR SI LA URL SOLICITA ABRIR DIRECTAMENTE ALGUNA SECCIÓN DE INFO LEGAL (SEO / MERCHANT)
+        function verificarInfoLegalPorUrl() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const infoParam = params.get('info');
+                const hashParam = window.location.hash;
+
+                if (infoParam === 'devoluciones' || hashParam === '#devoluciones') {
+                    abrirModalInfoLegal('devoluciones');
+                } else if (infoParam === 'faq' || hashParam === '#faq') {
+                    abrirModalInfoLegal('faq');
+                } else if (infoParam === 'terminos' || hashParam === '#terminos') {
+                    abrirModalInfoLegal('terminos');
+                }
+            } catch (eInfoUrl) {
+                console.error("Error al verificar info legal desde la URL:", eInfoUrl);
             }
         }
 
@@ -5677,7 +5697,23 @@
             document.getElementById('modalInfoLegal').style.display = 'flex';
             cerrarMenuLateral(); // Cerrar el menú lateral por si estaba abierto
             if (tabName) {
-                switchInfoTab(tabName);
+                if (tabName === 'devoluciones') {
+                    switchInfoTab('faq');
+                    // Hacer scroll suave al item de devoluciones y resaltarlo temporalmente
+                    setTimeout(() => {
+                        const elem = document.getElementById('faq-devoluciones');
+                        if (elem) {
+                            elem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            elem.style.transition = 'background-color 0.5s ease';
+                            elem.style.backgroundColor = 'rgba(99, 102, 241, 0.15)';
+                            setTimeout(() => {
+                                elem.style.backgroundColor = 'transparent';
+                            }, 2500);
+                        }
+                    }, 300);
+                } else {
+                    switchInfoTab(tabName);
+                }
             }
         }
 
