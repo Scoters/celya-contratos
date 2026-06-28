@@ -4262,6 +4262,7 @@
 
         // Función unificada de cálculo de cuotas — recibe los factores correctos según frecuencia y plazo
         function calcularCuotaUnificada(precioContado, factorEng, factorInt, numPagos, _caller) {
+            if (precioContado <= 0) return 0;
             const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
             
             // --- APLICAR EL MISMO DESCUENTO DE TASA SEGÚN EL ENGANCHE QUE EL PDP ---
@@ -5691,7 +5692,7 @@
                 let engancheFinal = customEnganche;
 
                 // --- CALCULAR DESCUENTO DE TASA SEGÚN EL ENGANCHE SELECCIONADO ---
-                const pctEnganche = (engancheFinal / precioContado) * 100;
+                const pctEnganche = precioContado > 0 ? (engancheFinal / precioContado) * 100 : 0;
                 let descuentoInteres = 0;
                 let mensajeDescuento = "";
                 if (pctEnganche >= 45) {
@@ -6344,7 +6345,7 @@
                 let engancheFinal = customEnganche;
 
                 // --- CALCULAR DESCUENTO DE TASA SEGÚN EL ENGANCHE SELECCIONADO ---
-                const pctEnganche = (engancheFinal / precioContado) * 100;
+                const pctEnganche = precioContado > 0 ? (engancheFinal / precioContado) * 100 : 0;
                 let descuentoInteres = 0;
                 let mensajeDescuento = "";
                 if (pctEnganche >= 45) {

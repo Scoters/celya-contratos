@@ -1189,7 +1189,7 @@
                     }
 
                     // --- CALCULAR DESCUENTO DE TASA SEGÚN EL ENGANCHE EFECTIVO ---
-                    const pctEnganche = (engancheEfectivo / precioContado) * 100;
+                    const pctEnganche = precioContado > 0 ? (engancheEfectivo / precioContado) * 100 : 0;
                     let descuentoInteres = 0;
                     let mensajeDescuento = "";
                     if (pctEnganche >= 45) {
