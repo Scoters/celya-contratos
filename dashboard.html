@@ -2273,14 +2273,24 @@
             let dataActivos = [];
             let dataRetiros = [];
             let dataCartera = [];
+            let dataVentasSemanales = [];
+            let dataCobroCuotas = [];
+            let dataRetiroSemanalReal = [];
             
             let semanaAutosuficiente = -1;
             let stockInsuficienteDetectado = false;
             let retirosIncompletosDetectados = false;
             
+            let acumuladorVentas = 0;
+            
             for (let sem = 1; sem <= 52; sem++) {
                 totalRetirosProyectados += retiroSemanal;
                 totalVentasProyectadas += metaSemanal;
+                
+                // Acumulador de ventas para soportar metas fraccionarias (ej: 1 al mes = 0.25 a la semana)
+                acumuladorVentas += metaSemanal;
+                let metaEstaSemana = Math.floor(acumuladorVentas);
+                acumuladorVentas -= metaEstaSemana;
                 
                 // A. Cobro de cuotas semanales de los clientes activos
                 let activos = 0;
@@ -2305,18 +2315,19 @@
                 // Cada equipo requiere 'costoEquipo' de egreso, pero ingresa inmediatamente 'enganche'
                 // Costo de compra real de caja por equipo = costoEquipo - enganche
                 let colocadosEstaSemana = 0;
-                const costoParaColocarMeta = metaSemanal * inversionNetaPorEquipo;
+                const costoParaColocarMeta = metaEstaSemana * inversionNetaPorEquipo;
                 
                 if (efectivo >= costoParaColocarMeta) {
-                    colocadosEstaSemana = metaSemanal;
+                    colocadosEstaSemana = metaEstaSemana;
                     efectivo -= colocadosEstaSemana * inversionNetaPorEquipo;
                 } else {
-                    // Solo compramos los que alcancen con la caja líquida
-                    colocadosEstaSemana = Math.floor(efectivo / inversionNetaPorEquipo);
+                    // Solo compramos los que alcancen con la caja líquida, limitado por la meta
+                    const maxComprables = Math.floor(efectivo / inversionNetaPorEquipo);
+                    colocadosEstaSemana = Math.min(metaEstaSemana, maxComprables);
                     if (colocadosEstaSemana > 0) {
                         efectivo -= colocadosEstaSemana * inversionNetaPorEquipo;
                     }
-                    if (metaSemanal > 0 && colocadosEstaSemana < metaSemanal) {
+                    if (metaEstaSemana > 0 && colocadosEstaSemana < metaEstaSemana) {
                         stockInsuficienteDetectado = true;
                     }
                 }
@@ -2343,7 +2354,7 @@
                 }
                 
                 // Determinar si es autosuficiente
-                if (semanaAutosuficiente === -1 && colocadosEstaSemana >= metaSemanal && efectivo >= 0 && activos > 0 && !stockInsuficienteDetectado) {
+                if (semanaAutosuficiente === -1 && colocadosEstaSemana >= metaEstaSemana && efectivo >= 0 && activos > 0 && !stockInsuficienteDetectado) {
                     semanaAutosuficiente = sem;
                 }
                 
@@ -2353,6 +2364,9 @@
                 dataActivos.push(activos);
                 dataRetiros.push(Math.round(totalRetiradoFamilia));
                 dataCartera.push(Math.round(valorCarteraTotal));
+                dataVentasSemanales.push(colocadosEstaSemana);
+                dataCobroCuotas.push(cobroCuotas);
+                dataRetiroSemanalReal.push(retiroDeSemana);
             }
             
             // 4. Actualizar KPIs
@@ -2392,69 +2406,30 @@
                 diagBadge.style.background = "#ef4444";
             }
             
-            // 6. Actualizar Tabla (semanas 1 a 24)
+            // 6. Actualizar Tabla (semanas 1 a 52 completa a todo el ancho)
             const tbody = document.getElementById('fr-projection-tbody');
             tbody.innerHTML = '';
             
-            let tempEfectivo = capitalInicial;
-            let tempRetirado = 0;
-            let tempCarteraClientes = [];
-            
-            for (let sem = 1; sem <= 24; sem++) {
-                let activos = 0;
-                let cobroCuotas = 0;
-                let valorCarteraTotal = 0;
-                
-                tempCarteraClientes.forEach(cliente => {
-                    if (cliente.semanasPagadas < plazoSemanas) {
-                        activos++;
-                        cobroCuotas += cuotaSemanal;
-                        cliente.semanasPagadas++;
-                        
-                        const saldoRestante = totalFinanciadoPorEquipo - (cliente.semanasPagadas * cuotaSemanal);
-                        valorCarteraTotal += Math.max(0, saldoRestante);
-                    }
-                });
-                
-                tempEfectivo += cobroCuotas;
-                
-                let colocadosEstaSemana = 0;
-                const costoParaColocarMeta = metaSemanal * inversionNetaPorEquipo;
-                
-                if (tempEfectivo >= costoParaColocarMeta) {
-                    colocadosEstaSemana = metaSemanal;
-                    tempEfectivo -= colocadosEstaSemana * inversionNetaPorEquipo;
-                } else {
-                    colocadosEstaSemana = Math.floor(tempEfectivo / inversionNetaPorEquipo);
-                    if (colocadosEstaSemana > 0) {
-                        tempEfectivo -= colocadosEstaSemana * inversionNetaPorEquipo;
-                    }
-                }
-                
-                for (let i = 0; i < colocadosEstaSemana; i++) {
-                    tempCarteraClientes.push({
-                        semanaColocacion: sem,
-                        semanasPagadas: 0
-                    });
-                }
-                
-                let retiroDeSemana = 0;
-                if (tempEfectivo > 0) {
-                    retiroDeSemana = Math.min(retiroSemanal, tempEfectivo);
-                    tempEfectivo -= retiroDeSemana;
-                    tempRetirado += retiroDeSemana;
-                }
+            for (let idx = 0; idx < 52; idx++) {
+                const sem = dataSemanas[idx];
+                const activos = dataActivos[idx];
+                const colocados = dataVentasSemanales[idx];
+                const cobroCuotas = dataCobroCuotas[idx];
+                const cobroEnganche = colocados * enganche;
+                const retiro = dataRetiroSemanalReal[idx];
+                const cartera = dataCartera[idx];
+                const cajaFinal = dataEfectivo[idx];
                 
                 const tr = document.createElement('tr');
-                tr.style.background = tempEfectivo <= 500 ? 'rgba(239, 68, 68, 0.03)' : '';
+                tr.style.background = cajaFinal <= 500 ? 'rgba(239, 68, 68, 0.03)' : '';
                 tr.innerHTML = `
-                    <td style="padding: 8px; border-bottom: 1px solid var(--border-color); font-weight: 700; text-align: center; color: #fff;">Sem ${sem}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid var(--border-color); text-align: center;">${activos}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid var(--border-color); text-align: center; font-weight: 600; color: ${colocadosEstaSemana < metaSemanal ? '#f59e0b' : '#fff'};">${colocadosEstaSemana}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid var(--border-color); text-align: right; color: #34d399;">+$$${Math.round(cobroCuotas).toLocaleString('es-MX')}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid var(--border-color); text-align: right; color: ${retiroDeSemana < retiroSemanal ? '#ef4444' : '#c084fc'};">-$$${Math.round(retiroDeSemana).toLocaleString('es-MX')}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid var(--border-color); text-align: right; color: #38bdf8;">$$${Math.round(valorCarteraTotal).toLocaleString('es-MX')}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid var(--border-color); text-align: right; font-weight: 700; color: ${tempEfectivo <= 500 ? '#f87171' : '#fff'};">$$${Math.round(tempEfectivo).toLocaleString('es-MX')}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid var(--border-color); font-weight: 700; text-align: center; color: #fff;">Semana ${sem}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: center;">${activos}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: center; font-weight: 600; color: ${colocados > 0 ? '#38bdf8' : '#64748b'};">${colocados}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: right; color: #34d399;">+$${Math.round(cobroCuotas + cobroEnganche).toLocaleString('es-MX')}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: right; color: ${retiro < (retiroMensual/4) ? '#ef4444' : '#c084fc'};">-$${Math.round(retiro).toLocaleString('es-MX')}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: right; color: #38bdf8;">$${Math.round(cartera).toLocaleString('es-MX')}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid var(--border-color); text-align: right; font-weight: 700; color: ${cajaFinal <= 500 ? '#f87171' : '#34d399'};">$${Math.round(cajaFinal).toLocaleString('es-MX')}</td>
                 `;
                 tbody.appendChild(tr);
             }
@@ -4364,43 +4339,40 @@
                         <span id="fr-status-badge" style="background: #3b82f6; color: #fff; font-weight: 700; font-size: 11.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px;">Diagnóstico</span>
                     </div>
                     
-                    <!-- Fila de Gráfico y Tabla Proyección (Distribución 50/50 o en Grid de Dos Columnas) -->
-                    <div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; min-height: 380px;">
-                        <!-- Gráfico de Crecimiento de Flujo -->
-                        <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-color); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+                    <!-- Fila de Gráfico (Ancho Completo) -->
+                    <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-color); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; min-height: 250px;">
+                        <h4 style="font-size: 14.5px; margin: 0; color: var(--text-primary); font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                            📊 Evolución Mensual del Fondo Revolvente
+                        </h4>
+                        <div style="flex: 1; height: 220px; position: relative;">
+                            <canvas id="chartFondoRevolvente" style="width: 100%; height: 100%;"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Tabla Detallada (Ancho Completo, Semanas 1 a 52) -->
+                    <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-color); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
                             <h4 style="font-size: 14.5px; margin: 0; color: var(--text-primary); font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                                📊 Evolución Mensual del Fondo Revolvente
+                                📅 Flujo Semanal Completo (Semanas 1 a 52)
                             </h4>
-                            <div style="flex: 1; min-height: 320px; position: relative;">
-                                <canvas id="chartFondoRevolvente" style="width: 100%; height: 100%;"></canvas>
-                            </div>
+                            <span style="font-size: 10.5px; color: var(--text-muted); font-weight: 500;">*Valores redondeados a enteros</span>
                         </div>
                         
-                        <!-- Tabla Detallada -->
-                        <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-color); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <h4 style="font-size: 14.5px; margin: 0; color: var(--text-primary); font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                                    📅 Flujo Semanal (Semanas 1 a 24)
-                                </h4>
-                                <span style="font-size: 10.5px; color: var(--text-muted); font-weight: 500;">*Valores redondeados a enteros</span>
-                            </div>
-                            
-                            <div style="flex: 1; overflow-y: auto; max-height: 330px; border: 1px solid var(--border-color); border-radius: 10px; background: rgba(0,0,0,0.3);">
-                                <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
-                                    <thead style="background: rgba(15, 23, 42, 0.9); position: sticky; top: 0; color: var(--text-primary); border-bottom: 1px solid var(--border-color); z-index: 2;">
-                                        <tr>
-                                            <th style="padding: 10px 8px; text-align: center;">Sem</th>
-                                            <th style="padding: 10px 8px; text-align: center;">Clientes</th>
-                                            <th style="padding: 10px 8px; text-align: center;">Ventas</th>
-                                            <th style="padding: 10px 8px; text-align: right; color: #34d399;">Cuotas</th>
-                                            <th style="padding: 10px 8px; text-align: right; color: #a855f7;">Retiro</th>
-                                            <th style="padding: 10px 8px; text-align: right; color: #38bdf8;">Cartera</th>
-                                            <th style="padding: 10px 8px; text-align: right; color: #fff; font-weight: 700;">Caja Final</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="fr-projection-tbody"></tbody>
-                                </table>
-                            </div>
+                        <div style="overflow-y: auto; max-height: 400px; border: 1px solid var(--border-color); border-radius: 10px; background: rgba(0,0,0,0.3);">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                                <thead style="background: rgba(15, 23, 42, 0.95); position: sticky; top: 0; color: var(--text-primary); border-bottom: 1px solid var(--border-color); z-index: 2;">
+                                    <tr>
+                                        <th style="padding: 12px 10px; text-align: center;">Semana</th>
+                                        <th style="padding: 12px 10px; text-align: center;">Clientes Activos</th>
+                                        <th style="padding: 12px 10px; text-align: center;">Ventas Reales</th>
+                                        <th style="padding: 12px 10px; text-align: right; color: #34d399;">Cobro Cuotas</th>
+                                        <th style="padding: 12px 10px; text-align: right; color: #a855f7;">Retiro Familia</th>
+                                        <th style="padding: 12px 10px; text-align: right; color: #38bdf8;">Cartera Activa</th>
+                                        <th style="padding: 12px 10px; text-align: right; color: #fff; font-weight: 700;">Caja Final</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fr-projection-tbody"></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
