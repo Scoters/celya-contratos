@@ -11,3 +11,6 @@ Contrato_y_Pagare_CelYa.html
 Contrato_y_Pagare_CelYa/
 patch_compose.py
 .env
+
+generar_feed_merchant.py
+configurar_nginx_perf.py
