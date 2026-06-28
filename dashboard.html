@@ -2280,6 +2280,7 @@
             let semanaAutosuficiente = -1;
             let stockInsuficienteDetectado = false;
             let retirosIncompletosDetectados = false;
+            let semanaPrimerFalloStock = -1;
             
             let acumuladorVentas = 0;
             
@@ -2329,6 +2330,9 @@
                     }
                     if (metaEstaSemana > 0 && colocadosEstaSemana < metaEstaSemana) {
                         stockInsuficienteDetectado = true;
+                        if (semanaPrimerFalloStock === -1) {
+                            semanaPrimerFalloStock = sem;
+                        }
                     }
                 }
                 
@@ -2387,21 +2391,21 @@
                 diagBox.style.borderLeftColor = "#10b981";
                 diagBox.style.background = "rgba(16, 185, 129, 0.06)";
                 diagIcon.innerText = "🟢";
-                diagText.innerHTML = `<strong>Simulación Sostenible:</strong> Se cumplió la meta de colocar <strong>${metaMensual} celulares/mes</strong> y se retiraron los <strong>$${retiroMensual.toLocaleString('es-MX')} MXN/mes</strong> completos para la familia. El negocio se autofinancia.`;
+                diagText.innerHTML = `<strong>Simulación Sostenible:</strong> Se cumplió la meta de colocar <strong>${metaMensual} celulares/mes</strong> (total de <strong>${Math.round(totalVentasProyectadas)} en el año</strong>) y se retiraron los <strong>$${retiroMensual.toLocaleString('es-MX')} MXN/mes</strong> completos para la familia. El negocio se autofinancia.`;
                 diagBadge.innerText = "Excelente";
                 diagBadge.style.background = "#10b981";
             } else if (stockInsuficienteDetectado && !retirosIncompletosDetectados) {
                 diagBox.style.borderLeftColor = "#f59e0b";
                 diagBox.style.background = "rgba(245, 158, 11, 0.06)";
                 diagIcon.innerText = "⚠️";
-                diagText.innerHTML = `<strong>Cuello de Botella de Caja:</strong> No tienes suficiente capital para comprar todos los teléfonos de la meta mensual. Solo se lograron comprar <strong>${Math.round(totalVentasReales)} de ${Math.round(totalVentasProyectadas)} celulares</strong>. Considera inyectar más capital semilla o subir el enganche.`;
+                diagText.innerHTML = `<strong>Cuello de Botella de Caja:</strong> No tienes suficiente capital para comprar todos los teléfonos de la meta anual de <strong>${Math.round(totalVentasProyectadas)} celulares</strong> (meta de ${metaMensual} al mes). Solo se lograron comprar <strong>${Math.round(totalVentasReales)} celulares</strong>. El primer faltante ocurrió en la <strong>Semana ${semanaPrimerFalloStock}</strong>. Considera inyectar más capital semilla o subir el enganche.`;
                 diagBadge.innerText = "Caja Limitada";
                 diagBadge.style.background = "#f59e0b";
             } else {
                 diagBox.style.borderLeftColor = "#ef4444";
                 diagBox.style.background = "rgba(239, 68, 68, 0.06)";
                 diagIcon.innerText = "🚨";
-                diagText.innerHTML = `<strong>Insolvencia (Retiros en Riesgo):</strong> El flujo de caja no dio abasto. Solo lograste retirar <strong>$${Math.round(totalRetiradoFamilia).toLocaleString('es-MX')}</strong> de los $${Math.round(totalRetirosProyectados).toLocaleString('es-MX')} proyectados para la familia.`;
+                diagText.innerHTML = `<strong>Insolvencia (Retiros en Riesgo):</strong> El flujo de caja del negocio no dio abasto para cubrir tus compras y los retiros familiares anuales. Solo lograste retirar <strong>$${Math.round(totalRetiradoFamilia).toLocaleString('es-MX')}</strong> de los $${Math.round(totalRetirosProyectados).toLocaleString('es-MX')} proyectados para la familia.`;
                 diagBadge.innerText = "Insolvente";
                 diagBadge.style.background = "#ef4444";
             }
