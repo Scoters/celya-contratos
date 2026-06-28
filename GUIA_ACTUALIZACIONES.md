@@ -50,6 +50,20 @@ Siempre que modifiques un workflow de n8n o requieras actualizar plantillas:
    docker restart n8n_n8n_1
    ```
 3. **Publicación desde n8n Editor:** Si creas un nuevo webhook o trigger de tiempo directo en la web de n8n, recuerda hacer clic en el botón **`Publish`** en la esquina superior derecha para habilitarlo en producción.
+4. **Zona Horaria del Servidor n8n (Importante para Triggers y Resúmenes):**
+   * El archivo de configuración de Docker Compose de n8n está en `/root/n8n/docker-compose.yaml` en el VPS.
+   * Para asegurar que los triggers programados (ej. 8:00 AM) se ejecuten en la hora de México, el contenedor de n8n debe tener las variables de entorno de zona horaria en su sección `environment`:
+     ```yaml
+     - GENERIC_TIMEZONE=America/Mexico_City
+     - TZ=America/Mexico_City
+     ```
+   * Si necesitas reiniciar n8n para aplicar cambios del Compose, usa `docker-compose` (con guion medio):
+     ```bash
+     cd /root/n8n
+     docker-compose down
+     docker-compose up -d
+     ```
+   * Para verificar la hora interna en n8n: `docker exec n8n_n8n_1 date`.
 
 ---
 
