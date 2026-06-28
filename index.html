@@ -5061,6 +5061,7 @@
             window.pdpInitialColor = color || "";
             window.pdpInitialMemoria = memoria || "";
             window.pdpUserHasChangedVariant = false;
+            window.ultimoItemIdMLSeleccionado = "";
 
             document.getElementById('hiddenId').value = id;
             document.getElementById('hiddenModelo').value = modelo;
@@ -6563,7 +6564,10 @@
                 }
                 params.append('cuota', Math.round(cuotaBase));
 
-                const referenciaProducto = currentMLItemLink || ((esFijo === "true" || esFijo === true) ? `Stock Fijo: ${modelo}` : `https://articulo.mercadolibre.com.mx/MLM-${id.replace("MLM", "")}`);
+                let referenciaProducto = currentMLItemLink || ((esFijo === "true" || esFijo === true) ? `Stock Fijo: ${modelo}` : `https://articulo.mercadolibre.com.mx/MLM-${id.replace("MLM", "")}`);
+                if (window.ultimoItemIdMLSeleccionado && window.ultimoItemIdMLSeleccionado.startsWith("MLM") && esFijo !== "true" && esFijo !== true) {
+                    referenciaProducto = `https://articulo.mercadolibre.com.mx/MLM-${window.ultimoItemIdMLSeleccionado.replace("MLM", "")}`;
+                }
                 params.append('link', referenciaProducto);
 
                 // Formatear el plazo incluyendo las variantes seleccionadas
@@ -9612,6 +9616,16 @@
                 }
                 return;
             }
+
+            // Extraer el ID real de la publicación del ítem de Mercado Libre
+            let itemRealId = "";
+            if (varianteSeleccionada) {
+                itemRealId = varianteSeleccionada.item_id || 
+                             (varianteSeleccionada.buy_box_winner ? (varianteSeleccionada.buy_box_winner.item_id || varianteSeleccionada.buy_box_winner.id) : "") || 
+                             varianteSeleccionada.id || 
+                             "";
+            }
+            window.ultimoItemIdMLSeleccionado = itemRealId;
 
             if (varianteSeleccionada.id) {
                 actualizarFotoModalPorVariante(varianteSeleccionada.id);
