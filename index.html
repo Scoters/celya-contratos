@@ -4181,6 +4181,10 @@
                 if (data && data.interes26) {
                     CONFIG_TASAS = data;
                     console.log("Tasas sincronizadas:", CONFIG_TASAS);
+                    // Re-render cards to show the correct live rates matching the PDP
+                    if (typeof aplicarFiltrosYOrden === 'function') {
+                        aplicarFiltrosYOrden();
+                    }
                 }
             } catch (e) {
                 console.warn("No se pudieron obtener las tasas desde la configuración:", e);
