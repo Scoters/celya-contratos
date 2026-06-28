@@ -980,11 +980,10 @@
             margin-top: auto;
         }
 
-        /* 📋 BOTONES TOGGLE VISTA */
         .view-toggle-btn.active {
-            background: var(--primary) !important;
-            color: white !important;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            background: var(--accent) !important;
+            color: #fff !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
         }
 
         .view-toggle-btn:hover:not(.active) {
@@ -7355,7 +7354,112 @@
                 return true;
             }
 
-            console.log("=== FIN DETECTAR ANOMALIA (SIN ANOMALIA - RELAJADO PARA EVITAR FALSOS POSITIVOS) ===");
+            // Si no tenemos cleanId o datos del producto actual, no podemos verificar anomalías cruzadas
+            if (typeof cleanId === "undefined" || !cleanId) {
+                console.log("Sin cleanId. Omitiendo validación cruzada.");
+                return false;
+            }
+
+            const currentData = ML_CACHE_VARIANTES[cleanId];
+            if (!currentData) {
+                console.log("Sin datos de variante activa en caché. Omitiendo validación cruzada.");
+                return false;
+            }
+
+            const currentPrice = currentData.price || 0;
+            const currentOriginalPrice = currentData.original_price || 0;
+
+            const helperExtraerGb = (str) => {
+                if (!str) return 0;
+                const clean = str.toLowerCase().replace(/\s+/g, "");
+                const match = clean.match(/(\d+)(gb|tb)/);
+                if (!match) return 0;
+                let val = parseInt(match[1], 10);
+                if (match[2] === "tb") val *= 1024;
+                return val;
+            };
+
+            const helperExtraerRamGb = (str) => {
+                if (!str) return 0;
+                const clean = str.toLowerCase().replace(/\s+/g, "");
+                const match = clean.match(/(\d+)(gb|mb)/);
+                if (!match) return 0;
+                let val = parseInt(match[1], 10);
+                if (match[2] === "mb") val /= 1024;
+                return val;
+            };
+
+            const curMemGb = helperExtraerGb(memoriaSeleccionadaGlobal);
+            const curRamGb = helperExtraerRamGb(ramSeleccionadaGlobal);
+
+            console.log(`Variante activa: costo=${currentPrice}, original_price=${currentOriginalPrice}, memoriaGb=${curMemGb}, ramGb=${curRamGb}`);
+
+            // Validar anomalías cruzadas con otras variantes de la misma familia en productMapGlobal
+            let hasAnomaly = false;
+            let anomalyMsg = "";
+
+            Object.values(productMapGlobal).forEach(prod => {
+                if (hasAnomaly) return;
+                if (!prod.id || prod.id === cleanId || prod.isOutOfStock) return;
+
+                // Obtener datos de la otra variante en caché
+                const prodData = ML_CACHE_VARIANTES[prod.id];
+                if (!prodData || !prodData.price) return;
+
+                const otherPrice = prodData.price || 0;
+                const otherOriginalPrice = prodData.original_price || 0;
+                const otherMemGb = helperExtraerGb(prod.memory);
+                const otherRamGb = helperExtraerRamGb(prod.ram);
+
+                // Comparamos únicamente variantes con el mismo color y grading para que la comparación sea justa
+                if (colorSeleccionadoGlobal && prod.color && !colorsMatch(colorSeleccionadoGlobal, prod.color)) return;
+                if (gradingSeleccionadoGlobal && prod.grading) {
+                    const cleanG1 = gradingSeleccionadoGlobal.toLowerCase().replace(/\s+/g, "");
+                    const cleanG2 = prod.grading.toLowerCase().replace(/\s+/g, "");
+                    if (cleanG1 !== cleanG2) return;
+                }
+
+                console.log(`Comparando con variante ${prod.id}: costo=${otherPrice}, original_price=${otherOriginalPrice}, memoriaGb=${otherMemGb}, ramGb=${otherRamGb}`);
+
+                // Caso 1: Mayor almacenamiento seleccionado, pero cuesta igual o menos que otra de menor almacenamiento
+                if (curMemGb > 0 && otherMemGb > 0 && curMemGb > otherMemGb) {
+                    if (currentPrice <= otherPrice) {
+                        // Verificar si es una promoción real (el precio original del seleccionado es mayor que el de la otra)
+                        const esPromocionReal = (currentOriginalPrice > 0 && currentOriginalPrice > otherPrice);
+                        if (!esPromocionReal) {
+                            hasAnomaly = true;
+                            anomalyMsg = `<strong>⚠️ Inconsistencia de precio (ML):</strong> La versión de mayor capacidad (${memoriaSeleccionadaGlobal}) se está ofertando a menor o igual precio que la de menor capacidad (${prod.memory}).`;
+                            console.log(`Anomalía de precio (Caso 1) detectada entre ${cleanId} y ${prod.id}.`);
+                        } else {
+                            console.log(`Se detectó costo menor para mayor capacidad, pero se omite por ser oferta legítima (original_price: ${currentOriginalPrice} > precio_otro: ${otherPrice}).`);
+                        }
+                    }
+                }
+
+                // Caso 2: Menor almacenamiento seleccionado, pero cuesta igual o más que otra de mayor almacenamiento
+                if (curMemGb > 0 && otherMemGb > 0 && curMemGb < otherMemGb) {
+                    if (currentPrice >= otherPrice) {
+                        // Verificar si es una promoción real (la otra variante tiene descuento y su precio original era mayor)
+                        const esPromocionReal = (otherOriginalPrice > 0 && otherOriginalPrice > currentPrice);
+                        if (!esPromocionReal) {
+                            hasAnomaly = true;
+                            anomalyMsg = `<strong>⚠️ Inconsistencia de precio (ML):</strong> La versión de menor capacidad (${memoriaSeleccionadaGlobal}) cuesta igual o más que la de mayor capacidad (${prod.memory}).`;
+                            console.log(`Anomalía de precio (Caso 2) detectada entre ${cleanId} y ${prod.id}.`);
+                        } else {
+                            console.log(`Se detectó costo mayor para menor capacidad, pero se omite por ser oferta legítima en la otra variante (original_price_otra: ${otherOriginalPrice} > precio_actual: ${currentPrice}).`);
+                        }
+                    }
+                }
+            });
+
+            if (hasAnomaly) {
+                if (warningEl) {
+                    warningEl.innerHTML = anomalyMsg;
+                }
+                return true;
+            }
+
+            console.log("=== FIN DETECTAR ANOMALIA (SIN ANOMALIA) ===");
             return false;
         }
 
@@ -8902,8 +9006,14 @@
                                 const normColor = obtenerGrupoColor(p.picker_label);
                                 const isSel = p.tags && p.tags.includes("selected");
 
-                                // Only skip if the color has absolutely no stock in the family
-                                if (!isOptionInFamily("color", p.picker_label) && !isSel) return;
+                                // Only skip if the color has absolutely no stock in the family AND it is not an official color in Google Sheets
+                                const esColorOficial = window.equiposCargados && window.equiposCargados.some(eq => {
+                                    if (!eq.modelo || !baseModelsMatch(eq.modelo, window.currentBaseModelName)) return false;
+                                    const cols = (eq.coloresDisponibles || eq.color || "").split(",").map(c => c.trim());
+                                    return cols.some(c => colorsMatch(c, p.picker_label));
+                                });
+
+                                if (!esColorOficial && !isOptionInFamily("color", p.picker_label) && !isSel) return;
 
                                 const specItem = productMapGlobal[p.product_id];
                                 const isOutOfStock = specItem ? specItem.isOutOfStock : false;
@@ -9144,8 +9254,19 @@
                                         }
                                     }
 
-                                    // Only skip if the option has absolutely no stock in the family
-                                    if (optionType && !isOptionInFamily(optionType, prod.picker_label) && !isSel) return;
+                                    // Only skip if the option has absolutely no stock in the family AND it is not an official configuration in Sheets
+                                    const esOpcionOficial = window.equiposCargados && window.equiposCargados.some(eq => {
+                                        if (!eq.modelo || !baseModelsMatch(eq.modelo, window.currentBaseModelName)) return false;
+                                        if (optionType === "memory") {
+                                            return memoriesMatch(eq.memoria || "", prod.picker_label);
+                                        }
+                                        if (optionType === "ram") {
+                                            return ramsMatch(eq.ram || "", prod.picker_label);
+                                        }
+                                        return false;
+                                    });
+
+                                    if (optionType && !esOpcionOficial && !isOptionInFamily(optionType, prod.picker_label) && !isSel) return;
 
                                     if (!itemsVistos.has(normLabel) || isSel) {
                                         itemsVistos.set(normLabel, {
