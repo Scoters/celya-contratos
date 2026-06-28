@@ -32,7 +32,7 @@
         body {
             font-family: 'Outfit', sans-serif;
             background-color: #0b0f19;
-            background-image: 
+            background-image:
                 radial-gradient(at 0% 0%, rgba(155, 89, 182, 0.12) 0px, transparent 50%),
                 radial-gradient(at 100% 100%, rgba(230, 126, 34, 0.08) 0px, transparent 50%);
             color: var(--text-primary);
@@ -74,7 +74,7 @@
         .header-logo-title img {
             max-height: 70px;
             width: auto;
-            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
             transition: transform 0.3s ease;
         }
 
@@ -105,16 +105,38 @@
             gap: 24px;
         }
 
-        .column-left, .column-right {
+        .column-left,
+        .column-right {
             display: contents;
         }
 
-        #card-cobranza { order: 1; }
-        #card-cierre { order: 2; }
-        #card-agregar { order: 3; margin-top: 0 !important; }
-        #card-vip { order: 4; margin-top: 0 !important; }
-        #card-inventario { order: 5; margin-top: 0 !important; }
-        #card-morosos { order: 6; margin-top: 0 !important; }
+        #card-cobranza {
+            order: 1;
+        }
+
+        #card-cierre {
+            order: 2;
+        }
+
+        #card-agregar {
+            order: 3;
+            margin-top: 0 !important;
+        }
+
+        #card-vip {
+            order: 4;
+            margin-top: 0 !important;
+        }
+
+        #card-inventario {
+            order: 5;
+            margin-top: 0 !important;
+        }
+
+        #card-morosos {
+            order: 6;
+            margin-top: 0 !important;
+        }
 
         .container {
             background: rgba(30, 41, 59, 0.5);
@@ -303,7 +325,8 @@
             margin-top: 15px;
         }
 
-        th, td {
+        th,
+        td {
             padding: 12px;
             border: none;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -353,14 +376,14 @@
 
         /* Modal Estilo Pop-up */
         .modal-celya-config {
-            display: none; 
-            position: fixed; 
-            z-index: 10000; 
+            display: none;
+            position: fixed;
+            z-index: 10000;
             left: 0;
             top: 0;
-            width: 100%; 
-            height: 100%; 
-            overflow: auto; 
+            width: 100%;
+            height: 100%;
+            overflow: auto;
             background-color: rgba(15, 23, 42, 0.75);
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
@@ -369,7 +392,7 @@
         .modal-config-content {
             background-color: #1e293b;
             color: var(--text-primary);
-            margin: 8% auto; 
+            margin: 8% auto;
             padding: 25px 30px;
             border-radius: 16px;
             width: 90%;
@@ -407,6 +430,7 @@
         .form-group-config {
             margin-bottom: 16px;
         }
+
         .form-group-config label {
             display: block;
             font-weight: 600;
@@ -414,6 +438,7 @@
             font-size: 13px;
             color: var(--text-primary);
         }
+
         .form-group-config input {
             width: 100%;
             padding: 10px;
@@ -424,6 +449,7 @@
             background: rgba(15, 23, 42, 0.5);
             color: var(--text-primary);
         }
+
         .form-group-config input:focus {
             border-color: var(--accent-orange);
             outline: none;
@@ -448,6 +474,7 @@
             justify-content: center;
             align-items: center;
         }
+
         .btn-save-config:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 18px rgba(230, 126, 34, 0.4);
@@ -472,7 +499,7 @@
         }
 
         /* Early settlement container */
-        #cardDetalleCobro > div:last-child {
+        #cardDetalleCobro>div:last-child {
             background: rgba(16, 185, 129, 0.1) !important;
             border: 1px dashed rgba(16, 185, 129, 0.3) !important;
             border-radius: 8px !important;
@@ -509,7 +536,7 @@
         }
 
         /* Placeholders modal lists styling */
-        #placeholders-list > div {
+        #placeholders-list>div {
             background: rgba(15, 23, 42, 0.4) !important;
             border: 1px solid rgba(255, 255, 255, 0.08) !important;
             border-radius: 12px !important;
@@ -520,13 +547,13 @@
             text-align: left;
         }
 
-        #placeholders-list > div img {
+        #placeholders-list>div img {
             border-radius: 8px;
             background-color: #fff !important;
             padding: 4px;
         }
 
-        #placeholders-list > div button {
+        #placeholders-list>div button {
             margin-top: 8px !important;
         }
 
@@ -535,40 +562,52 @@
             .dashboard-grid {
                 grid-template-columns: 1fr;
             }
-            .column-left, .column-right {
+
+            .column-left,
+            .column-right {
                 display: contents;
             }
+
             .container {
                 margin-top: 0 !important;
             }
+
             #card-cobranza {
                 order: 1;
             }
+
             #card-cierre {
                 order: 2;
             }
+
             #card-agregar {
                 order: 3;
             }
+
             #card-inventario {
                 order: 4;
             }
+
             #card-vip {
                 order: 5;
             }
+
             #card-morosos {
                 order: 6;
             }
+
             .dashboard-header {
                 flex-direction: column;
                 text-align: center;
                 gap: 15px;
                 padding: 20px;
             }
+
             .header-logo-title {
                 flex-direction: column;
                 gap: 10px;
             }
+
             body {
                 padding: 10px;
             }
@@ -581,30 +620,35 @@
                 width: 92% !important;
                 box-sizing: border-box !important;
             }
+
             .modal-config-content h2 {
                 font-size: 20px !important;
                 white-space: normal !important;
                 word-wrap: break-word !important;
             }
+
             .form-group-config label {
                 font-size: 12px !important;
                 white-space: normal !important;
             }
+
             .form-group-config input {
                 font-size: 13px !important;
                 padding: 8px 10px !important;
             }
-            #placeholders-list > div {
+
+            #placeholders-list>div {
                 flex-direction: column !important;
                 align-items: flex-start !important;
                 gap: 12px !important;
                 padding: 12px !important;
             }
-            #placeholders-list > div img {
+
+            #placeholders-list>div img {
                 margin: 0 auto;
             }
         }
-        
+
         /* Estilos específicos para nuevos módulos */
         .badge-rojo {
             background-color: rgba(239, 68, 68, 0.2);
@@ -616,6 +660,7 @@
             font-weight: 600;
             display: inline-block;
         }
+
         .badge-naranja {
             background-color: rgba(249, 115, 22, 0.2);
             color: #f97316;
@@ -626,6 +671,7 @@
             font-weight: 600;
             display: inline-block;
         }
+
         .badge-verde {
             background-color: rgba(16, 185, 129, 0.2);
             color: #10b981;
@@ -636,6 +682,7 @@
             font-weight: 600;
             display: inline-block;
         }
+
         .badge-azul {
             background-color: rgba(59, 130, 246, 0.2);
             color: #3b82f6;
@@ -646,51 +693,77 @@
             font-weight: 600;
             display: inline-block;
         }
+
         .btn-cierre {
             background: linear-gradient(135deg, #10b981, #059669);
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
+
         .btn-cierre:hover {
             background: linear-gradient(135deg, #059669, #047857) !important;
             box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4) !important;
         }
+
         .btn-pdf {
             background: linear-gradient(135deg, #ef4444, #b91c1c);
             box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
+
         .btn-pdf:hover {
             background: linear-gradient(135deg, #dc2626, #991b1b) !important;
             box-shadow: 0 6px 18px rgba(239, 68, 68, 0.4) !important;
         }
+
         .btn-stock-alert {
             transition: all 0.3s ease;
         }
+
         .btn-stock-alert.active {
             background: linear-gradient(135deg, #ef4444, #dc2626) !important;
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4) !important;
             color: white !important;
             animation: pulse-red-alert 2s infinite;
         }
+
         @keyframes pulse-red-alert {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
-            70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
+            }
+
+            70% {
+                box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
         }
+
         @keyframes stockDropIn {
-            from { opacity: 0; transform: translateY(-8px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
         #stock-alerts-dropdown::-webkit-scrollbar,
         #stock-alerts-list::-webkit-scrollbar {
             width: 5px;
         }
+
         #stock-alerts-dropdown::-webkit-scrollbar-track,
         #stock-alerts-list::-webkit-scrollbar-track {
             background: transparent;
         }
+
         #stock-alerts-dropdown::-webkit-scrollbar-thumb,
         #stock-alerts-list::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 3px;
         }
 
@@ -709,19 +782,21 @@
             max-width: 520px;
             max-height: 80vh;
         }
-        
+
         .stock-alerts-title {
             font-size: 17px;
             font-weight: 700;
             color: var(--text-primary);
         }
+
         .stock-alerts-subtitle {
             font-size: 12px;
             color: var(--text-secondary);
             margin-top: 2px;
         }
+
         .stock-alerts-close-btn {
-            background: rgba(255,255,255,0.06);
+            background: rgba(255, 255, 255, 0.06);
             border: none;
             color: var(--text-secondary);
             font-size: 18px;
@@ -735,8 +810,9 @@
             transition: all 0.15s;
             outline: none;
         }
+
         .stock-alerts-close-btn:hover {
-            background: rgba(255,255,255,0.12);
+            background: rgba(255, 255, 255, 0.12);
             color: var(--text-primary);
         }
 
@@ -750,18 +826,20 @@
             transition: background 0.15s;
             border-left: 3px solid transparent;
         }
+
         .stock-alert-item-img {
             width: 44px;
             height: 44px;
             border-radius: 10px;
-            background: rgba(15,23,42,0.6);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
         }
+
         .stock-alert-item-title {
             font-size: 13px;
             font-weight: 600;
@@ -771,33 +849,39 @@
             text-overflow: ellipsis;
             max-width: 200px;
         }
+
         .stock-alert-item-badge {
-            background: rgba(239,68,68,0.12);
+            background: rgba(239, 68, 68, 0.12);
             color: #ef4444;
             font-size: 10px;
             padding: 1px 5px;
             border-radius: 3px;
             font-weight: 600;
         }
+
         .stock-alert-item-fila {
             color: var(--text-secondary);
             font-size: 10px;
         }
+
         .stock-alert-item-message {
             font-size: 11px;
             color: #f87171;
             margin-top: 2px;
         }
+
         .stock-alert-item-tag {
             font-size: 10px;
             padding: 1px 6px;
             border-radius: 3px;
         }
+
         .stock-alert-item-actions {
             display: flex;
             gap: 6px;
             margin-top: 6px;
         }
+
         .stock-alert-item-btn {
             font-size: 10px;
             border-radius: 4px;
@@ -807,9 +891,15 @@
         }
 
         @keyframes stockAlertsSpin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
+
         .stock-alerts-refresh-spinning {
             animation: stockAlertsSpin 1s linear infinite;
         }
@@ -829,7 +919,8 @@
                 border-radius: 16px !important;
                 box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8) !important;
             }
-            .stock-alerts-panel > div[style*="transform: rotate(45deg)"] {
+
+            .stock-alerts-panel>div[style*="transform: rotate(45deg)"] {
                 display: none !important;
             }
         }
@@ -840,46 +931,58 @@
                 width: 600px;
                 max-width: 600px;
             }
+
             .stock-alerts-title {
                 font-size: 20px;
             }
+
             .stock-alerts-subtitle {
                 font-size: 14px;
             }
+
             .stock-alerts-close-btn {
                 width: 37px;
                 height: 37px;
                 font-size: 21px;
             }
+
             .stock-alert-item {
                 padding: 12px 18px;
                 gap: 14px;
             }
+
             .stock-alert-item-img {
                 width: 51px;
                 height: 51px;
             }
+
             .stock-alert-item-title {
                 font-size: 15px;
                 max-width: 260px;
             }
+
             .stock-alert-item-badge {
                 font-size: 11.5px;
                 padding: 2px 6px;
             }
+
             .stock-alert-item-fila {
                 font-size: 11.5px;
             }
+
             .stock-alert-item-message {
                 font-size: 12.5px;
             }
+
             .stock-alert-item-tag {
                 font-size: 11.5px;
             }
+
             .stock-alert-item-btn {
                 font-size: 11.5px;
                 padding: 3px 10px;
             }
+
             .stock-alert-item-actions {
                 gap: 8px;
             }
@@ -897,11 +1000,13 @@
                     style="max-height: 80px; width: auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));">
             </div>
             <h2 style="color:white; margin-bottom:5px; display: none;">CelYa!</h2>
-            <p style="color:#94a3b8; font-size:14px; margin-top:0; margin-bottom:24px;">Acceso restringido al sistema</p>
+            <p style="color:#94a3b8; font-size:14px; margin-top:0; margin-bottom:24px;">Acceso restringido al sistema
+            </p>
             <input type="password" id="pass-input-celya" placeholder="Introduce la contraseña"
                 style="width:100%; padding:14px; margin-bottom:15px; border:1px solid rgba(255, 255, 255, 0.12); border-radius:8px; box-sizing:border-box; font-size:16px; text-align:center; background:rgba(15, 23, 42, 0.6); color:white; outline:none; font-family:inherit;">
             <button id="btn-login-celya" class="btn-pago"
-                style="width:100%; padding:14px; font-weight:bold; font-size:16px; cursor:pointer; margin-top:10px;">Entrar al Sistema</button>
+                style="width:100%; padding:14px; font-weight:bold; font-size:16px; cursor:pointer; margin-top:10px;">Entrar
+                al Sistema</button>
             <p id="error-login-celya"
                 style="color:#f87171; font-size:14px; margin-top:15px; display:none; font-weight:bold;"></p>
         </div>
@@ -910,18 +1015,22 @@
     <div class="dashboard-wrapper">
         <header class="dashboard-header">
             <div class="header-logo-title">
-                <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo" style="cursor: pointer;" onclick="window.location.reload();">
+                <img src="https://lh3.googleusercontent.com/d/13bnQONkSe9Sd1zsC0Iw8LoPmx1ljvOtQ" alt="CelYa Logo"
+                    style="cursor: pointer;" onclick="window.location.reload();">
                 <div class="header-text">
                     <h2>💜 CelYa! Ecosistema</h2>
                     <p class="subtitulo">Módulo de Cobranza y Administración Global</p>
                 </div>
             </div>
             <div class="header-actions" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-                <button id="btnOpenStockAlerts" class="btn-config-trigger btn-stock-alert" style="background: linear-gradient(135deg, #475569, #334155); border: none; display: flex; align-items: center; gap: 6px; position: relative;">
+                <button id="btnOpenStockAlerts" class="btn-config-trigger btn-stock-alert"
+                    style="background: linear-gradient(135deg, #475569, #334155); border: none; display: flex; align-items: center; gap: 6px; position: relative;">
                     ⚠️ Alertas de Stock
-                    <span id="badgeStockAlerts" style="background: #ffffff; color: #ef4444; border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: bold; min-width: 15px; text-align: center; display: none;">0</span>
+                    <span id="badgeStockAlerts"
+                        style="background: #ffffff; color: #ef4444; border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: bold; min-width: 15px; text-align: center; display: none;">0</span>
                 </button>
-                <button id="btnOpenPlaceholders" class="btn-config-trigger" style="background: linear-gradient(135deg, #f97316, #ea580c); border: none;">
+                <button id="btnOpenPlaceholders" class="btn-config-trigger"
+                    style="background: linear-gradient(135deg, #f97316, #ea580c); border: none;">
                     🗂️ Placeholders
                 </button>
                 <button id="btn-config-global" class="btn-config-trigger" onclick="abrirModalConfig()">
@@ -936,36 +1045,58 @@
                     <h3>💵 Módulo de Cobranza Dinámica</h3>
                     <label for="buscarClienteAbonoInput">Buscar Cliente (Nombre, ID o IMEI):</label>
                     <div style="position: relative; width: 100%;">
-                        <input type="text" id="buscarClienteAbonoInput" placeholder="🔍 Escribe para buscar cliente..." style="width: 100%; box-sizing: border-box; padding: 12px; font-size: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(15, 23, 42, 0.5); color: #fff; outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='var(--primary-color)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
-                        <div id="resultadosClienteAbono" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.5); margin-top: 5px;"></div>
+                        <input type="text" id="buscarClienteAbonoInput" placeholder="🔍 Escribe para buscar cliente..."
+                            style="width: 100%; box-sizing: border-box; padding: 12px; font-size: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(15, 23, 42, 0.5); color: #fff; outline: none; transition: border 0.2s;"
+                            onfocus="this.style.borderColor='var(--primary-color)'"
+                            onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+                        <div id="resultadosClienteAbono"
+                            style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.5); margin-top: 5px;">
+                        </div>
                     </div>
                     <input type="hidden" id="buscarClienteAbonoVal" value="">
 
                     <div id="cardDetalleCobro" style="display:none; margin-top: 20px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-weight: bold; color: var(--text-primary); font-size: 16px;">Estado del Cliente:</span>
+                            <span style="font-weight: bold; color: var(--text-primary); font-size: 16px;">Estado del
+                                Cliente:</span>
                             <span id="badgeAtraso">0 días de atraso</span>
                         </div>
 
                         <!-- Semáforo de salud financiera -->
-                        <div id="semaforoSaludContainer" style="margin-top: 8px; font-size: 12px; display: flex; align-items: center; gap: 6px; color: #a0aec0; background: rgba(255, 255, 255, 0.02); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.04);">
-                            <span id="semaforoSaludIndicator" style="width: 10px; height: 10px; border-radius: 50%; display: inline-block;"></span>
+                        <div id="semaforoSaludContainer"
+                            style="margin-top: 8px; font-size: 12px; display: flex; align-items: center; gap: 6px; color: #a0aec0; background: rgba(255, 255, 255, 0.02); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.04);">
+                            <span id="semaforoSaludIndicator"
+                                style="width: 10px; height: 10px; border-radius: 50%; display: inline-block;"></span>
                             <span id="semaforoSaludText" style="font-weight: 600;">Estado de salud</span>
                         </div>
 
                         <!-- Contador de semanas para rescisión -->
-                        <div id="rescisionContainer" style="margin-top: 8px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.04);">
-                            <span style="color: #a0aec0;">Semanas de atraso: <strong id="semanasAtrasoTexto" style="color: #fff;">0 / 0</strong></span>
-                            <span id="badgeRescision" style="display: none; background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px;">⚠️ APTO PARA RESCISIÓN</span>
+                        <div id="rescisionContainer"
+                            style="margin-top: 8px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.04);">
+                            <span style="color: #a0aec0;">Semanas de atraso: <strong id="semanasAtrasoTexto"
+                                    style="color: #fff;">0 / 0</strong></span>
+                            <span id="badgeRescision"
+                                style="display: none; background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px;">⚠️
+                                APTO PARA RESCISIÓN</span>
                         </div>
 
                         <!-- Promesa de pago activa (si existe) -->
-                        <div id="promesaActivaContainer" style="display: none; margin-top: 15px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 10px;">
-                            <span style="font-weight: bold; color: #60a5fa; font-size: 13px; display: block; margin-bottom: 2px;">📅 Promesa de Pago Activa:</span>
-                            <span id="promesaActivaDetalle" style="font-size: 13px; color: #fff; display: block; margin-bottom: 8px;"></span>
+                        <div id="promesaActivaContainer"
+                            style="display: none; margin-top: 15px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 10px;">
+                            <span
+                                style="font-weight: bold; color: #60a5fa; font-size: 13px; display: block; margin-bottom: 2px;">📅
+                                Promesa de Pago Activa:</span>
+                            <span id="promesaActivaDetalle"
+                                style="font-size: 13px; color: #fff; display: block; margin-bottom: 8px;"></span>
                             <div style="display: flex; gap: 8px;">
-                                <button type="button" onclick="resolverPromesaPago('CUMPLIDA')" style="background: #10b981; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">✅ Cumplida</button>
-                                <button type="button" onclick="resolverPromesaPago('INCUMPLIDA')" style="background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">❌ Incumplida</button>
+                                <button type="button" onclick="resolverPromesaPago('CUMPLIDA')"
+                                    style="background: #10b981; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; transition: background 0.2s;"
+                                    onmouseover="this.style.background='#059669'"
+                                    onmouseout="this.style.background='#10b981'">✅ Cumplida</button>
+                                <button type="button" onclick="resolverPromesaPago('INCUMPLIDA')"
+                                    style="background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; transition: background 0.2s;"
+                                    onmouseover="this.style.background='#dc2626'"
+                                    onmouseout="this.style.background='#ef4444'">❌ Incumplida</button>
                             </div>
                         </div>
 
@@ -976,60 +1107,91 @@
                             </div>
                             <div>
                                 <label style="margin:0; color:#f87171;">Saldo Pendiente Total:</label>
-                                <input type="text" id="infoSaldoPendiente" readonly style="color:#f87171; font-weight: bold;">
+                                <input type="text" id="infoSaldoPendiente" readonly
+                                    style="color:#f87171; font-weight: bold;">
                             </div>
                         </div>
 
                         <!-- Monto a recibir prominente y visible inmediatamente -->
-                        <div id="formMontoCobro" style="display: none; margin-top: 20px; border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 15px;">
-                            <label for="montoAbono" style="font-size: 15px; font-weight: bold; color: #34d399; margin-bottom: 8px; display: block;">💵 Monto a Recibir ($):</label>
-                            <input type="number" id="montoAbono" placeholder="Mete la cantidad que te va a pagar" style="font-size: 18px; padding: 12px; font-weight: bold; color: #fff; background: rgba(15, 23, 42, 0.6); border: 2px solid #34d399; border-radius: 8px; box-sizing: border-box; width: 100%; margin-bottom: 12px;">
-                            
-                            <label for="metodoAbono" style="font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 8px; display: block;">💳 Método de Pago:</label>
-                            <select id="metodoAbono" style="font-size: 15px; padding: 10px; font-weight: 600; color: #fff; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; box-sizing: border-box; width: 100%; margin-bottom: 12px; font-family: inherit; outline: none;">
+                        <div id="formMontoCobro"
+                            style="display: none; margin-top: 20px; border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 15px;">
+                            <label for="montoAbono"
+                                style="font-size: 15px; font-weight: bold; color: #34d399; margin-bottom: 8px; display: block;">💵
+                                Monto a Recibir ($):</label>
+                            <input type="number" id="montoAbono" placeholder="Mete la cantidad que te va a pagar"
+                                style="font-size: 18px; padding: 12px; font-weight: bold; color: #fff; background: rgba(15, 23, 42, 0.6); border: 2px solid #34d399; border-radius: 8px; box-sizing: border-box; width: 100%; margin-bottom: 12px;">
+
+                            <label for="metodoAbono"
+                                style="font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 8px; display: block;">💳
+                                Método de Pago:</label>
+                            <select id="metodoAbono"
+                                style="font-size: 15px; padding: 10px; font-weight: 600; color: #fff; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; box-sizing: border-box; width: 100%; margin-bottom: 12px; font-family: inherit; outline: none;">
                                 <option value="Transferencia" selected>🏦 Transferencia Bancaria / Depósito</option>
                                 <option value="Efectivo">💵 Efectivo</option>
                                 <option value="Spin OXXO">🏪 Spin by OXXO Efectivo</option>
                                 <option value="Tarjeta">💳 Tarjeta (Clip/Débito/Crédito)</option>
                             </select>
 
-                            <label for="folioAbono" style="font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 8px; display: block;">🔢 Folio / Referencia (Opcional):</label>
-                            <input type="text" id="folioAbono" placeholder="Ej. 123456 o número de autorización" style="font-size: 15px; padding: 10px; color: #fff; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; box-sizing: border-box; width: 100%; margin-bottom: 12px; outline: none; font-family: inherit; transition: border 0.2s;" onfocus="this.style.borderColor='var(--primary-color)'" onblur="this.style.borderColor='rgba(255,255,255,0.15)'">
+                            <label for="folioAbono"
+                                style="font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 8px; display: block;">🔢
+                                Folio / Referencia (Opcional):</label>
+                            <input type="text" id="folioAbono" placeholder="Ej. 123456 o número de autorización"
+                                style="font-size: 15px; padding: 10px; color: #fff; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; box-sizing: border-box; width: 100%; margin-bottom: 12px; outline: none; font-family: inherit; transition: border 0.2s;"
+                                onfocus="this.style.borderColor='var(--primary-color)'"
+                                onblur="this.style.borderColor='rgba(255,255,255,0.15)'">
 
-                            <button type="button" id="btnRegistrarCobro" style="margin-top: 4px; background: linear-gradient(135deg, #10b981, #059669); font-size: 15px; font-weight: bold; padding: 12px; width: 100%;">
+                            <button type="button" id="btnRegistrarCobro"
+                                style="margin-top: 4px; background: linear-gradient(135deg, #10b981, #059669); font-size: 15px; font-weight: bold; padding: 12px; width: 100%;">
                                 📲 Registrar Abono en la Hoja
                             </button>
                         </div>
 
                         <!-- Opciones de liquidación colapsables y discretas -->
-                        <details id="detallesLiquidacion" style="margin-top: 20px; font-size: 13px; color: var(--text-secondary); cursor: pointer;">
-                            <summary style="color: #64748b; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06); outline: none;">
+                        <details id="detallesLiquidacion"
+                            style="margin-top: 20px; font-size: 13px; color: var(--text-secondary); cursor: pointer;">
+                            <summary
+                                style="color: #64748b; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06); outline: none;">
                                 ⚙️ Opciones avanzadas de liquidación
-                             </summary>
-                             <div style="margin-top: 12px; padding: 12px; background: rgba(15, 23, 42, 0.4); border-radius: 8px; border: 1px dashed rgba(255, 255, 255, 0.1); cursor: default;" onclick="event.stopPropagation()">
-                                 <p id="descLiquidacionTexto" style="margin: 0 0 10px 0; font-size: 12px; color: #a0aec0;">¿El cliente quiere liquidar todo el celular hoy? Aplica un 15% de descuento en el saldo restante:</p>
-                                 <button type="button" id="btnLiquidacionAnticipada" onclick="aplicarDescuentoLiquidacion()" style="margin-top: 0; padding: 10px 14px; font-size: 13px; font-weight: bold; width:100%;">
-                                     🚀 Calcular Liquidación con Descuento
-                                 </button>
-                             </div>
+                            </summary>
+                            <div style="margin-top: 12px; padding: 12px; background: rgba(15, 23, 42, 0.4); border-radius: 8px; border: 1px dashed rgba(255, 255, 255, 0.1); cursor: default;"
+                                onclick="event.stopPropagation()">
+                                <p id="descLiquidacionTexto"
+                                    style="margin: 0 0 10px 0; font-size: 12px; color: #a0aec0;">¿El cliente quiere
+                                    liquidar todo el celular hoy? Aplica un 15% de descuento en el saldo restante:</p>
+                                <button type="button" id="btnLiquidacionAnticipada"
+                                    onclick="aplicarDescuentoLiquidacion()"
+                                    style="margin-top: 0; padding: 10px 14px; font-size: 13px; font-weight: bold; width:100%;">
+                                    🚀 Calcular Liquidación con Descuento
+                                </button>
+                            </div>
                         </details>
 
                         <!-- Opciones de promesa de pago colapsables -->
-                        <details id="detallesPromesa" style="margin-top: 12px; font-size: 13px; color: var(--text-secondary); cursor: pointer;">
-                            <summary style="color: #64748b; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06); outline: none;">
+                        <details id="detallesPromesa"
+                            style="margin-top: 12px; font-size: 13px; color: var(--text-secondary); cursor: pointer;">
+                            <summary
+                                style="color: #64748b; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06); outline: none;">
                                 📅 Crear Promesa de Pago
                             </summary>
-                            <div style="margin-top: 12px; padding: 12px; background: rgba(15, 23, 42, 0.4); border-radius: 8px; border: 1px dashed rgba(255, 255, 255, 0.1); cursor: default;" onclick="event.stopPropagation()">
-                                <label style="margin:0 0 4px 0; display:block; font-weight: 600;">Fecha de Pago Prometida:</label>
-                                <input type="date" id="promesaFecha" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(15, 23, 42, 0.6); color:white; box-sizing:border-box; margin-bottom:10px; outline:none; font-family:inherit;">
+                            <div style="margin-top: 12px; padding: 12px; background: rgba(15, 23, 42, 0.4); border-radius: 8px; border: 1px dashed rgba(255, 255, 255, 0.1); cursor: default;"
+                                onclick="event.stopPropagation()">
+                                <label style="margin:0 0 4px 0; display:block; font-weight: 600;">Fecha de Pago
+                                    Prometida:</label>
+                                <input type="date" id="promesaFecha"
+                                    style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(15, 23, 42, 0.6); color:white; box-sizing:border-box; margin-bottom:10px; outline:none; font-family:inherit;">
 
-                                <label style="margin:0 0 4px 0; display:block; font-weight: 600;">Monto Prometido ($):</label>
-                                <input type="number" id="promesaMonto" placeholder="Ej. 500" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(15, 23, 42, 0.6); color:white; box-sizing:border-box; margin-bottom:10px; outline:none;">
+                                <label style="margin:0 0 4px 0; display:block; font-weight: 600;">Monto Prometido
+                                    ($):</label>
+                                <input type="number" id="promesaMonto" placeholder="Ej. 500"
+                                    style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(15, 23, 42, 0.6); color:white; box-sizing:border-box; margin-bottom:10px; outline:none;">
 
-                                <label style="margin:0 0 4px 0; display:block; font-weight: 600;">Notas / Comentarios:</label>
-                                <textarea id="promesaNotas" placeholder="Ej. Pagará en OXXO por la tarde" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(15, 23, 42, 0.6); color:white; box-sizing:border-box; min-height:60px; margin-bottom:12px; outline:none; font-family:inherit; resize:vertical;"></textarea>
+                                <label style="margin:0 0 4px 0; display:block; font-weight: 600;">Notas /
+                                    Comentarios:</label>
+                                <textarea id="promesaNotas" placeholder="Ej. Pagará en OXXO por la tarde"
+                                    style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:rgba(15, 23, 42, 0.6); color:white; box-sizing:border-box; min-height:60px; margin-bottom:12px; outline:none; font-family:inherit; resize:vertical;"></textarea>
 
-                                <button type="button" id="btnGuardarPromesa" onclick="registrarPromesaPago()" style="margin-top: 0; padding: 10px 14px; font-size: 13px; font-weight: bold; width:100%; background:linear-gradient(135deg, #3b82f6, #1d4ed8); border:none; color:white; border-radius:6px; cursor:pointer;">
+                                <button type="button" id="btnGuardarPromesa" onclick="registrarPromesaPago()"
+                                    style="margin-top: 0; padding: 10px 14px; font-size: 13px; font-weight: bold; width:100%; background:linear-gradient(135deg, #3b82f6, #1d4ed8); border:none; color:white; border-radius:6px; cursor:pointer;">
                                     💾 Guardar Promesa de Pago
                                 </button>
                             </div>
@@ -1055,12 +1217,14 @@
                 <div class="container" id="card-agregar" style="margin-top: 24px;">
                     <h3>📱 Agregar Celular al Catálogo</h3>
                     <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
-                        Pega el enlace de Mercado Libre. Traeremos nombre, foto, precio y especificaciones automáticamente.
+                        Pega el enlace de Mercado Libre. Traeremos nombre, foto, precio y especificaciones
+                        automáticamente.
                     </p>
 
                     <form id="formAgregarCelular">
                         <label for="nuevoLink">Enlace de Mercado Libre (Se recomienda link de catálogo /p/):</label>
-                        <input type="text" id="nuevoLink" placeholder="https://www.mercadolibre.com.mx/p/MLM..." required>
+                        <input type="text" id="nuevoLink" placeholder="https://www.mercadolibre.com.mx/p/MLM..."
+                            required>
 
                         <label for="nuevoImei">IMEI o ID del Celular (Dejar vacío para autogenerar temporal):</label>
                         <input type="text" id="nuevoImei" placeholder="Ej. 999999000000005">
@@ -1078,17 +1242,26 @@
                             <option value="used">🔧 REACONDICIONADO / USADO (Buscar mejor precio en usados)</option>
                         </select>
 
-                        <div style="margin-top: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" id="nuevo-es-importacion" style="width: auto; margin: 0; cursor: pointer;" />
-                            <label for="nuevo-es-importacion" style="margin: 0; font-weight: normal; cursor: pointer; color: var(--text-main);">✈️ ¿Es de Importación?</label>
+                        <div
+                            style="margin-top: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="nuevo-es-importacion"
+                                style="width: auto; margin: 0; cursor: pointer;" />
+                            <label for="nuevo-es-importacion"
+                                style="margin: 0; font-weight: normal; cursor: pointer; color: var(--text-main);">✈️ ¿Es
+                                de Importación?</label>
                         </div>
 
-                        <div id="nuevo-importacion-container" style="display: none; margin-bottom: 15px; background: rgba(230, 126, 34, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed rgba(230, 126, 34, 0.3);">
-                            <label style="margin-top: 0; display: block; font-weight: 600; margin-bottom: 4px; color: var(--text-main);">Costo de Importación Estimado (Mercado Libre):</label>
-                            <input id="nuevo-costo-importacion" type="number" placeholder="Ej. 1022" style="width: 100%; padding: 10px; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; box-sizing: border-box; background: rgba(15, 23, 42, 0.5); color: white;" />
+                        <div id="nuevo-importacion-container"
+                            style="display: none; margin-bottom: 15px; background: rgba(230, 126, 34, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed rgba(230, 126, 34, 0.3);">
+                            <label
+                                style="margin-top: 0; display: block; font-weight: 600; margin-bottom: 4px; color: var(--text-main);">Costo
+                                de Importación Estimado (Mercado Libre):</label>
+                            <input id="nuevo-costo-importacion" type="number" placeholder="Ej. 1022"
+                                style="width: 100%; padding: 10px; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; box-sizing: border-box; background: rgba(15, 23, 42, 0.5); color: white;" />
                         </div>
 
-                        <button type="button" class="btn-pago" id="btnAgregarCelular">➕ Importar y Agregar al Excel</button>
+                        <button type="button" class="btn-pago" id="btnAgregarCelular">➕ Importar y Agregar al
+                            Excel</button>
                     </form>
                 </div>
 
@@ -1098,15 +1271,21 @@
                     <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
                         Busca un equipo y actualiza su estado (por ejemplo, marcar como Robado, Perdido o Devuelto).
                     </p>
-                    
+
                     <label for="buscarInventarioInput">Buscar Celular (Modelo, Color o IMEI):</label>
                     <div style="position: relative; width: 100%;">
-                        <input type="text" id="buscarInventarioInput" placeholder="🔍 Escribe para buscar celular..." style="width: 100%; box-sizing: border-box; padding: 12px; font-size: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(15, 23, 42, 0.5); color: #fff; outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='var(--primary-color)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
-                        <div id="resultadosInventario" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.5); margin-top: 5px;"></div>
+                        <input type="text" id="buscarInventarioInput" placeholder="🔍 Escribe para buscar celular..."
+                            style="width: 100%; box-sizing: border-box; padding: 12px; font-size: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(15, 23, 42, 0.5); color: #fff; outline: none; transition: border 0.2s;"
+                            onfocus="this.style.borderColor='var(--primary-color)'"
+                            onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+                        <div id="resultadosInventario"
+                            style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.5); margin-top: 5px;">
+                        </div>
                     </div>
                     <input type="hidden" id="buscarInventarioVal" value="">
 
-                    <div id="cardDetalleInventario" style="display: none; margin-top: 20px; border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 15px;">
+                    <div id="cardDetalleInventario"
+                        style="display: none; margin-top: 20px; border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 15px;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div>
                                 <label style="margin:0;">Modelo:</label>
@@ -1140,7 +1319,8 @@
                             <option value="RESERVADO">🔒 RESERVADO</option>
                         </select>
 
-                        <button type="button" id="btnActualizarEstadoInventario" onclick="guardarEstadoInventario()" style="margin-top: 15px; background: linear-gradient(135deg, #a855f7, #7e22ce); font-size: 15px; font-weight: bold; padding: 12px; width: 100%;">
+                        <button type="button" id="btnActualizarEstadoInventario" onclick="guardarEstadoInventario()"
+                            style="margin-top: 15px; background: linear-gradient(135deg, #a855f7, #7e22ce); font-size: 15px; font-weight: bold; padding: 12px; width: 100%;">
                             💾 Guardar Estado del Equipo
                         </button>
                     </div>
@@ -1155,44 +1335,57 @@
                 <div class="container" id="card-cierre">
                     <h3>💰 Cierre de Caja Diario</h3>
                     <p style="color: var(--text-secondary); font-size: 13px; margin-top: -10px; margin-bottom: 15px;">
-                        Selecciona un día para calcular el dinero cobrado por método de pago e ingresa el efectivo real para cerrar caja.
+                        Selecciona un día para calcular el dinero cobrado por método de pago e ingresa el efectivo real
+                        para cerrar caja.
                     </p>
 
                     <label for="fechaCierreCaja">Fecha a Consultar / Cerrar:</label>
-                    <input type="date" id="fechaCierreCaja" style="margin-bottom: 15px;" onchange="calcularResumenCajaDiario()">
+                    <input type="date" id="fechaCierreCaja" style="margin-bottom: 15px;"
+                        onchange="calcularResumenCajaDiario()">
 
-                    <div style="background: rgba(15, 23, 42, 0.4); padding: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 15px;">
-                        <h4 style="margin: 0 0 10px 0; color: #fff; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 5px;">📊 Resumen de Cobros del Día</h4>
-                        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+                    <div
+                        style="background: rgba(15, 23, 42, 0.4); padding: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 15px;">
+                        <h4
+                            style="margin: 0 0 10px 0; color: #fff; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 5px;">
+                            📊 Resumen de Cobros del Día</h4>
+                        <div
+                            style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
                             <span>💵 Efectivo Esperado:</span>
                             <span id="cierreEfectivoEsperado" style="font-weight: bold; color: #10b981;">$0 MXN</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+                        <div
+                            style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
                             <span>🏦 Transferencia:</span>
                             <span id="cierreTransferencia" style="font-weight: bold; color: #3b82f6;">$0 MXN</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+                        <div
+                            style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
                             <span>💳 Tarjeta:</span>
                             <span id="cierreTarjeta" style="font-weight: bold; color: #f59e0b;">$0 MXN</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; color: #fff; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 8px; margin-top: 8px;">
+                        <div
+                            style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; color: #fff; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 8px; margin-top: 8px;">
                             <span>💰 Total Recaudado:</span>
                             <span id="cierreTotalEsperado">$0 MXN</span>
                         </div>
                     </div>
 
                     <label for="cierreEfectivoReal">💵 Efectivo Real en Caja ($):</label>
-                    <input type="number" id="cierreEfectivoReal" placeholder="Introduce el dinero físico real..." oninput="calcularDiferenciaCaja()">
+                    <input type="number" id="cierreEfectivoReal" placeholder="Introduce el dinero físico real..."
+                        oninput="calcularDiferenciaCaja()">
 
-                    <div style="display: flex; justify-content: space-between; font-size: 13px; margin-top: 12px; padding: 8px 12px; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
+                    <div
+                        style="display: flex; justify-content: space-between; font-size: 13px; margin-top: 12px; padding: 8px 12px; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
                         <span>Diferencia en Caja (Faltante/Sobrante):</span>
                         <span id="cierreDiferencia" style="font-weight: bold; color: #fff;">$0 MXN</span>
                     </div>
 
                     <label for="cierreNotas">Notas / Comentarios de Caja:</label>
-                    <textarea id="cierreNotas" placeholder="Ej. Hubo un faltante por cambio entregado..." style="min-height: 60px;"></textarea>
+                    <textarea id="cierreNotas" placeholder="Ej. Hubo un faltante por cambio entregado..."
+                        style="min-height: 60px;"></textarea>
 
-                    <button type="button" class="btn-cierre" id="btnRegistrarCierre" onclick="guardarCierreCaja()" style="margin-top: 15px; font-size: 15px; font-weight: bold; padding: 12px; width: 100%;">
+                    <button type="button" class="btn-cierre" id="btnRegistrarCierre" onclick="guardarCierreCaja()"
+                        style="margin-top: 15px; font-size: 15px; font-weight: bold; padding: 12px; width: 100%;">
                         📝 Registrar Cierre de Caja en Excel
                     </button>
                 </div>
@@ -1205,28 +1398,40 @@
 
                     <label for="buscarVip">Buscar Cliente (Nombre o IMEI):</label>
                     <div style="position: relative; width: 100%;">
-                        <input type="text" id="buscarVip" placeholder="🔍 Escribe para buscar cliente..." style="width: 100%; box-sizing: border-box; padding: 12px; font-size: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(15, 23, 42, 0.5); color: #fff; outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='var(--primary-color)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
-                        <div id="resultadosVip" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.5); margin-top: 5px;"></div>
+                        <input type="text" id="buscarVip" placeholder="🔍 Escribe para buscar cliente..."
+                            style="width: 100%; box-sizing: border-box; padding: 12px; font-size: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(15, 23, 42, 0.5); color: #fff; outline: none; transition: border 0.2s;"
+                            onfocus="this.style.borderColor='var(--primary-color)'"
+                            onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+                        <div id="resultadosVip"
+                            style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.5); margin-top: 5px;">
+                        </div>
                     </div>
                 </div>
 
                 <!-- 🚨 Reporte de Morosos -->
                 <div class="container" id="card-morosos" style="margin-top: 24px;">
                     <details style="outline: none;">
-                        <summary style="font-size: 18px; font-weight: 600; color: var(--text-primary); cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--primary-color); padding-bottom: 8px; margin-bottom: 0; outline: none;">
+                        <summary
+                            style="font-size: 18px; font-weight: 600; color: var(--text-primary); cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--primary-color); padding-bottom: 8px; margin-bottom: 0; outline: none;">
                             <span style="display: flex; align-items: center; gap: 8px;">🚨 Reporte de Morosos</span>
-                            <span style="font-size: 12px; color: var(--text-secondary); font-weight: normal;">🔽 Clic para expandir</span>
+                            <span style="font-size: 12px; color: var(--text-secondary); font-weight: normal;">🔽 Clic
+                                para expandir</span>
                         </summary>
                         <div style="margin-top: 20px; cursor: default;">
-                            <p style="color: var(--text-secondary); font-size: 13px; margin-top: 0; margin-bottom: 15px;">
-                                Visualiza los clientes activos que tienen atrasos de pago y exporta la lista completa a PDF.
+                            <p
+                                style="color: var(--text-secondary); font-size: 13px; margin-top: 0; margin-bottom: 15px;">
+                                Visualiza los clientes activos que tienen atrasos de pago y exporta la lista completa a
+                                PDF.
                             </p>
-                            
-                            <button type="button" class="btn-pdf" id="btnExportarMorososPDF" onclick="generarReporteMorososPDF()" style="margin-top: 0; margin-bottom: 15px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: auto; font-size: 14px; padding: 10px 20px;">
+
+                            <button type="button" class="btn-pdf" id="btnExportarMorososPDF"
+                                onclick="generarReporteMorososPDF()"
+                                style="margin-top: 0; margin-bottom: 15px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: auto; font-size: 14px; padding: 10px 20px;">
                                 📄 Exportar Morosos a PDF
                             </button>
-                            
-                            <div style="overflow-x: auto; max-height: 350px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px;">
+
+                            <div
+                                style="overflow-x: auto; max-height: 350px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px;">
                                 <table style="margin-top: 0; min-width: 500px;">
                                     <thead>
                                         <tr>
@@ -1238,7 +1443,9 @@
                                     </thead>
                                     <tbody id="tablaMorososCuerpo">
                                         <tr>
-                                            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px;">Cargando lista de morosos...</td>
+                                            <td colspan="4"
+                                                style="text-align: center; color: var(--text-muted); padding: 20px;">
+                                                Cargando lista de morosos...</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -1253,10 +1460,10 @@
     <div id="modal-config-negocio" class="modal-celya-config">
         <div class="modal-config-content">
             <span class="close-config-btn" onclick="cerrarModalConfig()">&times;</span>
-            
+
             <h2>📊 Parámetros Globales del Negocio</h2>
             <p class="modal-subtitle">Configuración del ecosistema financiero CelYa!</p>
-            
+
             <form id="form-config-global">
                 <div class="form-group-config">
                     <label for="cfg-interes-moratorio">⚠️ Interés Moratorio Semanal (%)</label>
@@ -1285,12 +1492,14 @@
 
                 <div class="form-group-config">
                     <label for="cfg-tasa-quin-rapido">⚡ Interés Quincenal Rápido (13 Quincenas %)</label>
-                    <input type="number" id="cfg-tasa-quin-rapido" name="tasaInteresQuincenalRapido" min="0" placeholder="Ej. 45">
+                    <input type="number" id="cfg-tasa-quin-rapido" name="tasaInteresQuincenalRapido" min="0"
+                        placeholder="Ej. 45">
                 </div>
 
                 <div class="form-group-config">
                     <label for="cfg-tasa-quin-comodo">🛋️ Interés Quincenal Cómodo (26 Quincenas %)</label>
-                    <input type="number" id="cfg-tasa-quin-comodo" name="tasaInteresQuincenalComodo" min="0" placeholder="Ej. 65">
+                    <input type="number" id="cfg-tasa-quin-comodo" name="tasaInteresQuincenalComodo" min="0"
+                        placeholder="Ej. 65">
                 </div>
 
                 <div class="form-group-config">
@@ -1300,33 +1509,39 @@
 
                 <div class="form-group-config">
                     <label for="cfg-enganche-semanal">💸 % Enganche Semanal Rápido (26 Semanas)</label>
-                    <input type="number" step="0.1" id="cfg-enganche-semanal" name="engancheSemanal" min="0" placeholder="Ej. 20">
+                    <input type="number" step="0.1" id="cfg-enganche-semanal" name="engancheSemanal" min="0"
+                        placeholder="Ej. 20">
                 </div>
 
                 <div class="form-group-config">
                     <label for="cfg-enganche-comodo">🛋️ % Enganche Semanal Cómodo (52 Semanas)</label>
-                    <input type="number" step="0.1" id="cfg-enganche-comodo" name="engancheComodo" min="0" placeholder="Ej. 30">
+                    <input type="number" step="0.1" id="cfg-enganche-comodo" name="engancheComodo" min="0"
+                        placeholder="Ej. 30">
                 </div>
 
                 <div class="form-group-config">
                     <label for="cfg-enganche-quin-rapido">💸 % Enganche Quincenal Rápido (13 Quincenas)</label>
-                    <input type="number" step="0.1" id="cfg-enganche-quin-rapido" name="engancheMinimoQuincenalRapido" min="0" placeholder="Ej. 25">
+                    <input type="number" step="0.1" id="cfg-enganche-quin-rapido" name="engancheMinimoQuincenalRapido"
+                        min="0" placeholder="Ej. 25">
                 </div>
 
                 <div class="form-group-config">
                     <label for="cfg-enganche-quin-comodo">🛋️ % Enganche Quincenal Cómodo (26 Quincenas)</label>
-                    <input type="number" step="0.1" id="cfg-enganche-quin-comodo" name="engancheMinimoQuincenalComodo" min="0" placeholder="Ej. 35">
+                    <input type="number" step="0.1" id="cfg-enganche-quin-comodo" name="engancheMinimoQuincenalComodo"
+                        min="0" placeholder="Ej. 35">
                 </div>
 
 
                 <div class="form-group-config">
                     <label for="cfg-descuento-liquidacion">🚀 % Descuento Liquidación Anticipada</label>
-                    <input type="number" step="0.1" id="cfg-descuento-liquidacion" name="descuentoLiquidacion" min="0" placeholder="Ej. 15">
+                    <input type="number" step="0.1" id="cfg-descuento-liquidacion" name="descuentoLiquidacion" min="0"
+                        placeholder="Ej. 15">
                 </div>
 
                 <div class="form-group-config">
                     <label for="cfg-telegram-token">🤖 Telegram Bot Token</label>
-                    <input type="text" id="cfg-telegram-token" name="telegramBotToken" placeholder="Ej. 123456789:ABCdef...">
+                    <input type="text" id="cfg-telegram-token" name="telegramBotToken"
+                        placeholder="Ej. 123456789:ABCdef...">
                 </div>
 
                 <div class="form-group-config">
@@ -1338,11 +1553,13 @@
                     💾 Guardar Parámetros
                 </button>
 
-                <button type="button" class="btn-test-telegram" onclick="probarNotificacionTelegram()" style="margin-top: 12px; padding: 10px 14px; font-size: 13px; font-weight: bold; width:100%; background: linear-gradient(135deg, #10b981, #059669); border:none; color:white; border-radius:6px; cursor:pointer;">
+                <button type="button" class="btn-test-telegram" onclick="probarNotificacionTelegram()"
+                    style="margin-top: 12px; padding: 10px 14px; font-size: 13px; font-weight: bold; width:100%; background: linear-gradient(135deg, #10b981, #059669); border:none; color:white; border-radius:6px; cursor:pointer;">
                     🔔 Enviar Resumen de Prueba a Telegram
                 </button>
 
-                <button type="button" class="btn-webhook-telegram" onclick="activarWebhookTelegram()" style="margin-top: 10px; padding: 10px 14px; font-size: 13px; font-weight: bold; width:100%; background: linear-gradient(135deg, #3b82f6, #1d4ed8); border:none; color:white; border-radius:6px; cursor:pointer;">
+                <button type="button" class="btn-webhook-telegram" onclick="activarWebhookTelegram()"
+                    style="margin-top: 10px; padding: 10px 14px; font-size: 13px; font-weight: bold; width:100%; background: linear-gradient(135deg, #3b82f6, #1d4ed8); border:none; color:white; border-radius:6px; cursor:pointer;">
                     🔗 Activar Webhook de Comandos Telegram
                 </button>
             </form>
@@ -1355,15 +1572,20 @@
             <span class="close-config-btn" onclick="cerrarModalRecibo()">&times;</span>
             <h2>🎉 ¡Abono Registrado!</h2>
             <p class="modal-subtitle">Copia el mensaje de confirmación para enviarlo al cliente por WhatsApp:</p>
-            
-            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 15px; margin: 15px 0; text-align: left;">
-                <textarea id="txt-recibo-mensaje" style="width: 100%; min-height: 140px; background: transparent; border: none; color: white; outline: none; font-family: inherit; font-size: 14px; resize: none; line-height: 1.5;" readonly></textarea>
+
+            <div
+                style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 15px; margin: 15px 0; text-align: left;">
+                <textarea id="txt-recibo-mensaje"
+                    style="width: 100%; min-height: 140px; background: transparent; border: none; color: white; outline: none; font-family: inherit; font-size: 14px; resize: none; line-height: 1.5;"
+                    readonly></textarea>
             </div>
-            
-            <button type="button" class="btn-save-config" onclick="copiarMensajeRecibo()" style="background: linear-gradient(135deg, #10b981, #059669); margin-bottom: 10px; width: 100%;">
+
+            <button type="button" class="btn-save-config" onclick="copiarMensajeRecibo()"
+                style="background: linear-gradient(135deg, #10b981, #059669); margin-bottom: 10px; width: 100%;">
                 📋 Copiar Mensaje
             </button>
-            <button type="button" onclick="cerrarModalReciboYRecargar()" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 10px 14px; width: 100%; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; border-color: rgba(255,255,255,0.2);">
+            <button type="button" onclick="cerrarModalReciboYRecargar()"
+                style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 10px 14px; width: 100%; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; border-color: rgba(255,255,255,0.2);">
                 Cerrar y Actualizar Pantalla
             </button>
         </div>
@@ -1488,12 +1710,12 @@
         };
 
         // 🔍 Autocomplete Event Listeners for Client Collection
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const input = document.getElementById('buscarClienteAbonoInput');
             const resultados = document.getElementById('resultadosClienteAbono');
 
             if (input && resultados) {
-                input.addEventListener('input', function(e) {
+                input.addEventListener('input', function (e) {
                     const query = e.target.value.toLowerCase().trim();
                     if (!query) {
                         resultados.style.display = 'none';
@@ -1501,9 +1723,9 @@
                         return;
                     }
 
-                    const matches = listaClientesGlobal.filter(c => 
-                        (c.cliente && c.cliente.toLowerCase().includes(query)) || 
-                        (c.id && c.id.toLowerCase().includes(query)) || 
+                    const matches = listaClientesGlobal.filter(c =>
+                        (c.cliente && c.cliente.toLowerCase().includes(query)) ||
+                        (c.id && c.id.toLowerCase().includes(query)) ||
                         (c.imei && c.imei.toLowerCase().includes(query)) ||
                         (c.modelo && c.modelo.toLowerCase().includes(query))
                     );
@@ -1525,7 +1747,7 @@
                                 <div style="font-weight: 600; color: #fff; font-size: 14px;">${c.cliente}</div>
                                 <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">ID: ${c.id || 'S/ID'} | ${c.modelo || 'Genérico'} (IMEI: ${c.imei})</div>
                             `;
-                            item.addEventListener('click', function() {
+                            item.addEventListener('click', function () {
                                 seleccionarClienteAbono(c.imei, c.cliente, c.id);
                             });
                             resultados.appendChild(item);
@@ -1534,7 +1756,7 @@
                     resultados.style.display = 'block';
                 });
 
-                input.addEventListener('focus', function(e) {
+                input.addEventListener('focus', function (e) {
                     const query = e.target.value.toLowerCase().trim();
                     if (query) {
                         const event = new Event('input');
@@ -1555,7 +1777,7 @@
                                 <div style="font-weight: 600; color: #fff; font-size: 14px;">${c.cliente}</div>
                                 <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">ID: ${c.id || 'S/ID'} | ${c.modelo || 'Genérico'} (IMEI: ${c.imei})</div>
                             `;
-                            item.addEventListener('click', function() {
+                            item.addEventListener('click', function () {
                                 seleccionarClienteAbono(c.imei, c.cliente, c.id);
                             });
                             resultados.appendChild(item);
@@ -1565,7 +1787,7 @@
                 });
             }
 
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 if (input && resultados && e.target !== input && e.target !== resultados && !resultados.contains(e.target)) {
                     resultados.style.display = 'none';
                 }
@@ -1800,7 +2022,7 @@
 
                 if (data.result === 'success') {
                     toast('Promesa de pago registrada exitosamente.', 'success');
-                    
+
                     let parts = fecha.split('-');
                     let fFormatted = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : fecha;
 
@@ -1892,33 +2114,33 @@
 
                     if (data.result === 'success') {
                         toast('Abono registrado exitosamente.', 'success', 'Abono guardado');
-                        
+
                         // Calcular nuevo saldo pendiente
                         const abonoMonto = parseFloat(monto) || 0;
                         const saldoActual = parseFloat(clienteSeleccionadoActual.saldoPendiente) || 0;
                         const nuevoSaldo = Math.max(0, Math.round(saldoActual - abonoMonto));
-                        
+
                         // Generar el mensaje
                         let mensaje = `¡Hola, ${clienteSeleccionadoActual.cliente}! 👋\n` +
-                                        `Te confirmamos que hemos registrado tu abono para tu equipo *${clienteSeleccionadoActual.modelo || 'Celular'}* exitosamente.\n\n` +
-                                        `💵 *Monto recibido:* $${Math.round(abonoMonto).toLocaleString('es-MX')} MXN\n`;
-                                        
+                            `Te confirmamos que hemos registrado tu abono para tu equipo *${clienteSeleccionadoActual.modelo || 'Celular'}* exitosamente.\n\n` +
+                            `💵 *Monto recibido:* $${Math.round(abonoMonto).toLocaleString('es-MX')} MXN\n`;
+
                         if (folioVal) {
                             mensaje += `🔢 *Folio/Referencia:* #${folioVal}\n`;
                         }
-                        
+
                         mensaje += `📉 *Nuevo saldo pendiente:* $${nuevoSaldo.toLocaleString('es-MX')} MXN\n\n` +
-                                        `🔗 *Consulta tu estado de cuenta:* https://portal.estrenacelya.com/?imei=${clienteSeleccionadoActual.imei}\n\n` +
-                                        `¡Muchas gracias por tu pago y por mantener tu cuenta al corriente! 😊\n` +
-                                        `CelYa! te desea un excelente día. ✨`;
-                                        
+                            `🔗 *Consulta tu estado de cuenta:* https://portal.estrenacelya.com/?imei=${clienteSeleccionadoActual.imei}\n\n` +
+                            `¡Muchas gracias por tu pago y por mantener tu cuenta al corriente! 😊\n` +
+                            `CelYa! te desea un excelente día. ✨`;
+
                         document.getElementById('txt-recibo-mensaje').value = mensaje;
                         document.getElementById('modal-recibo-pago').style.display = 'block';
-                        
+
                         // Limpiar campos
                         document.getElementById('folioAbono').value = '';
                         document.getElementById('montoAbono').value = '';
-                        
+
                         btn.innerText = originalText;
                         btn.disabled = false;
                     } else {
@@ -1941,7 +2163,7 @@
                 localStorage.removeItem("celya_catalogo_timestamp_" + urlHash);
                 localStorage.removeItem("celya_catalogo_cache");
                 localStorage.removeItem("celya_catalogo_timestamp");
-            } catch(e) {
+            } catch (e) {
                 console.warn("Error al limpiar caché local:", e);
             }
         }
@@ -1961,7 +2183,7 @@
             try {
                 const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}&action=obtenerConfiguracionActual`);
                 const data = await response.json();
-                
+
                 if (data.result === 'success') {
                     document.getElementById('cfg-interes-moratorio').value = data.config.interes || 5;
                     document.getElementById('cfg-horas-tolerancia').value = data.config.horasTolerancia || 48;
@@ -2021,7 +2243,7 @@
 
                 if (data.result === 'success') {
                     toast('Parámetros globales actualizados con éxito.', 'success', 'Configuración guardada');
-                    
+
                     // Update local config cache
                     configGlobal.interes = document.getElementById('cfg-interes-moratorio').value;
                     configGlobal.horastol = document.getElementById('cfg-horas-tolerancia').value;
@@ -2149,111 +2371,111 @@
                 }
             }
         }
-                // --- Alertas de Stock ---
-                function inicializarAlertasStock() {
-                    const btn = document.getElementById('btnOpenStockAlerts');
-                    if (btn) {
-                        btn.addEventListener('click', function() {
-                            abrirModalStockAlerts();
-                        });
-                    }
-                    evaluarAlertasStock();
-                }
+        // --- Alertas de Stock ---
+        function inicializarAlertasStock() {
+            const btn = document.getElementById('btnOpenStockAlerts');
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    abrirModalStockAlerts();
+                });
+            }
+            evaluarAlertasStock();
+        }
 
-                function isProductTagOutOfStock(tags) {
-                    if (!tags) return false;
-                    return tags.includes("out-of-stock") ||
-                        tags.includes("disabled") ||
-                        tags.includes("no-bids") ||
-                        tags.includes("no-winner");
-                }
+        function isProductTagOutOfStock(tags) {
+            if (!tags) return false;
+            return tags.includes("out-of-stock") ||
+                tags.includes("disabled") ||
+                tags.includes("no-bids") ||
+                tags.includes("no-winner");
+        }
 
-                async function evaluarAlertasStock() {
-                    const btn = document.getElementById('btnOpenStockAlerts');
-                    const originalBtnHtml = btn ? btn.innerHTML : '';
-                    if (btn) {
-                        btn.innerHTML = '🔍 Verificando Stock... <span id="badgeStockAlerts" style="background: #ffffff; color: #ef4444; border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: bold; min-width: 15px; text-align: center; display: none;">0</span>';
-                    }
-                    
-                    try {
-                        const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=verificarStockGlobal&token=${CONFIG.API_TOKEN}`);
-                        const resultados = await response.json();
-                        
-                        alertasStockGlobal = [];
-                        
-                        if (Array.isArray(resultados)) {
-                            resultados.forEach(res => {
-                                if (!res.tieneStock) {
-                                    const itemConAlerta = {
-                                        filaNum: res.filaNum,
-                                        modelo: res.modelo,
-                                        link: res.link,
-                                        id: res.id,
-                                        estado: res.estado,
-                                        foto: res.foto,
-                                        variantesJson: res.liveData,
-                                        _stockDetalle: {
-                                            razon: res.razon,
-                                            mensaje: res.mensaje,
-                                            coloresAgotados: [],
-                                            memoriasAgotadas: [],
-                                            ramsAgotadas: []
-                                        }
-                                    };
-                                    alertasStockGlobal.push(itemConAlerta);
+        async function evaluarAlertasStock() {
+            const btn = document.getElementById('btnOpenStockAlerts');
+            const originalBtnHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.innerHTML = '🔍 Verificando Stock... <span id="badgeStockAlerts" style="background: #ffffff; color: #ef4444; border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: bold; min-width: 15px; text-align: center; display: none;">0</span>';
+            }
+
+            try {
+                const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=verificarStockGlobal&token=${CONFIG.API_TOKEN}`);
+                const resultados = await response.json();
+
+                alertasStockGlobal = [];
+
+                if (Array.isArray(resultados)) {
+                    resultados.forEach(res => {
+                        if (!res.tieneStock) {
+                            const itemConAlerta = {
+                                filaNum: res.filaNum,
+                                modelo: res.modelo,
+                                link: res.link,
+                                id: res.id,
+                                estado: res.estado,
+                                foto: res.foto,
+                                variantesJson: res.liveData,
+                                _stockDetalle: {
+                                    razon: res.razon,
+                                    mensaje: res.mensaje,
+                                    coloresAgotados: [],
+                                    memoriasAgotadas: [],
+                                    ramsAgotadas: []
                                 }
-                            });
+                            };
+                            alertasStockGlobal.push(itemConAlerta);
                         }
-                        
-                        actualizarBotonAlertasStock();
-                        const dropdownPanel = document.getElementById('stock-alerts-dropdown');
-                        if (dropdownPanel && dropdownPanel.style.display === 'block') {
-                            renderizarStockAlerts();
-                        }
-                        
-                    } catch (err) {
-                        console.error("Error al evaluar alertas de stock:", err);
-                    } finally {
-                        if (btn) {
-                            btn.innerHTML = '⚠️ Alertas de Stock <span id="badgeStockAlerts" style="background: #ffffff; color: #ef4444; border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: bold; min-width: 15px; text-align: center; display: none;">0</span>';
-                        }
-                        actualizarBotonAlertasStock();
-                    }
+                    });
                 }
 
-                function actualizarBotonAlertasStock() {
-                    const btn = document.getElementById('btnOpenStockAlerts');
-                    const badge = document.getElementById('badgeStockAlerts');
-                    if (!btn || !badge) return;
-                    
-                    const count = alertasStockGlobal.length;
-                    badge.textContent = count;
-                    if (count > 0) {
-                        badge.style.display = 'inline-block';
-                        btn.classList.add('active');
-                    } else {
-                        badge.style.display = 'none';
-                        btn.classList.remove('active');
-                    }
+                actualizarBotonAlertasStock();
+                const dropdownPanel = document.getElementById('stock-alerts-dropdown');
+                if (dropdownPanel && dropdownPanel.style.display === 'block') {
+                    renderizarStockAlerts();
                 }
 
-                function abrirModalStockAlerts() {
-                    let panel = document.getElementById('stock-alerts-dropdown');
-                    if (panel) {
-                        // Toggle: si ya está abierto, cerrarlo
-                        if (panel.style.display === 'block') {
-                            panel.style.display = 'none';
-                            return;
-                        }
-                        panel.style.display = 'block';
-                        renderizarStockAlerts();
-                        return;
-                    }
-                    
-                    // Crear el panel dropdown estilo Facebook
-                    const btn = document.getElementById('btnOpenStockAlerts');
-                    const rect = btn.getBoundingClientRect();
-                    const panelHtml = `
+            } catch (err) {
+                console.error("Error al evaluar alertas de stock:", err);
+            } finally {
+                if (btn) {
+                    btn.innerHTML = '⚠️ Alertas de Stock <span id="badgeStockAlerts" style="background: #ffffff; color: #ef4444; border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: bold; min-width: 15px; text-align: center; display: none;">0</span>';
+                }
+                actualizarBotonAlertasStock();
+            }
+        }
+
+        function actualizarBotonAlertasStock() {
+            const btn = document.getElementById('btnOpenStockAlerts');
+            const badge = document.getElementById('badgeStockAlerts');
+            if (!btn || !badge) return;
+
+            const count = alertasStockGlobal.length;
+            badge.textContent = count;
+            if (count > 0) {
+                badge.style.display = 'inline-block';
+                btn.classList.add('active');
+            } else {
+                badge.style.display = 'none';
+                btn.classList.remove('active');
+            }
+        }
+
+        function abrirModalStockAlerts() {
+            let panel = document.getElementById('stock-alerts-dropdown');
+            if (panel) {
+                // Toggle: si ya está abierto, cerrarlo
+                if (panel.style.display === 'block') {
+                    panel.style.display = 'none';
+                    return;
+                }
+                panel.style.display = 'block';
+                renderizarStockAlerts();
+                return;
+            }
+
+            // Crear el panel dropdown estilo Facebook
+            const btn = document.getElementById('btnOpenStockAlerts');
+            const rect = btn.getBoundingClientRect();
+            const panelHtml = `
                     <div id="stock-alerts-dropdown" class="stock-alerts-panel" style="
                         top: ${rect.bottom + 10}px;
                         right: ${window.innerWidth - rect.right}px;
@@ -2277,108 +2499,108 @@
                         <!-- Lista de notificaciones -->
                         <div id="stock-alerts-list" style="max-height: 520px; overflow-y: auto; overflow-x: hidden; padding: 6px 0;"></div>
                     </div>`;
-                    
-                    // Insertar en el body para que flote sobre todo
-                    document.body.insertAdjacentHTML('beforeend', panelHtml);
-                    
-                    renderizarStockAlerts();
-                    
-                    // Cerrar al hacer click fuera
-                    setTimeout(() => {
-                        document.addEventListener('click', function cerrarFuera(e) {
-                            const panel = document.getElementById('stock-alerts-dropdown');
-                            const btnAlerts = document.getElementById('btnOpenStockAlerts');
-                            if (panel && !panel.contains(e.target) && !btnAlerts.contains(e.target)) {
-                                panel.style.display = 'none';
-                                document.removeEventListener('click', cerrarFuera);
-                            }
-                        });
-                    }, 50);
-                }
- 
-                window.refrescarAlertasStock = async function(btn) {
-                    if (btn.disabled) return;
-                    btn.disabled = true;
-                    btn.classList.add('stock-alerts-refresh-spinning');
-                    try {
-                        await evaluarAlertasStock();
-                    } catch(e) {
-                        console.error(e);
-                    } finally {
-                        btn.disabled = false;
-                        btn.classList.remove('stock-alerts-refresh-spinning');
-                    }
-                };
- 
-                function cerrarModalStockAlerts() {
-                    const p = document.getElementById('stock-alerts-dropdown');
-                    if (p) p.style.display = 'none';
-                }
 
-                function renderizarStockAlerts() {
-                    const cont = document.getElementById('stock-alerts-list');
-                    const subtitle = document.getElementById('stock-alerts-subtitle');
-                    if (!cont) return;
-                    
-                    if (alertasStockGlobal.length === 0) {
-                        cont.innerHTML = `<div style="padding: 40px 20px; text-align: center;">
+            // Insertar en el body para que flote sobre todo
+            document.body.insertAdjacentHTML('beforeend', panelHtml);
+
+            renderizarStockAlerts();
+
+            // Cerrar al hacer click fuera
+            setTimeout(() => {
+                document.addEventListener('click', function cerrarFuera(e) {
+                    const panel = document.getElementById('stock-alerts-dropdown');
+                    const btnAlerts = document.getElementById('btnOpenStockAlerts');
+                    if (panel && !panel.contains(e.target) && !btnAlerts.contains(e.target)) {
+                        panel.style.display = 'none';
+                        document.removeEventListener('click', cerrarFuera);
+                    }
+                });
+            }, 50);
+        }
+
+        window.refrescarAlertasStock = async function (btn) {
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.classList.add('stock-alerts-refresh-spinning');
+            try {
+                await evaluarAlertasStock();
+            } catch (e) {
+                console.error(e);
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('stock-alerts-refresh-spinning');
+            }
+        };
+
+        function cerrarModalStockAlerts() {
+            const p = document.getElementById('stock-alerts-dropdown');
+            if (p) p.style.display = 'none';
+        }
+
+        function renderizarStockAlerts() {
+            const cont = document.getElementById('stock-alerts-list');
+            const subtitle = document.getElementById('stock-alerts-subtitle');
+            if (!cont) return;
+
+            if (alertasStockGlobal.length === 0) {
+                cont.innerHTML = `<div style="padding: 40px 20px; text-align: center;">
                             <div style="font-size: 36px; margin-bottom: 8px;">🎉</div>
                             <div style="color: var(--text-primary); font-size: 14px; font-weight: 600;">¡Todo en orden!</div>
                             <div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">No hay equipos con problemas de stock</div>
                         </div>`;
-                        if (subtitle) subtitle.textContent = 'Sin problemas detectados';
-                        return;
-                    }
-                    
-                    if (subtitle) subtitle.textContent = `${alertasStockGlobal.length} equipo${alertasStockGlobal.length > 1 ? 's' : ''} con problemas`;
-                    
-                    cont.innerHTML = '';
-                    alertasStockGlobal.forEach(item => {
-                        const nombreLimpio = typeof limpiarNombreModelo === 'function' ? limpiarNombreModelo(item.modelo) : item.modelo;
-                        
-                        let itemMlId = "";
-                        if (item.link) {
-                            const regex = /(MLM\-?\d+)/i;
-                            const match = item.link.match(regex);
-                            if (match) itemMlId = match[0].replace("-", "").toUpperCase();
-                        }
-                        
-                        const det = item._stockDetalle || {};
-                        
-                        // Texto de detalle
-                        let detTexto = '';
-                        if (det.totalVariantes > 0) {
-                            detTexto = `${det.activasVariantes}/${det.totalVariantes} variantes activas`;
-                        }
-                        if (det.mensaje) {
-                            detTexto = det.mensaje;
-                        }
-                        
-                        // Tags de combinaciones agotadas
-                        let tagsHtml = '';
-                        if (det.coloresAgotados && det.coloresAgotados.length > 0) {
-                            det.coloresAgotados.forEach(c => {
-                                tagsHtml += `<span class="stock-alert-item-tag" style="background: rgba(239,68,68,0.1); color: #fca5a5; border: 1px solid rgba(239,68,68,0.15);">🎨 ${c}</span>`;
-                            });
-                        }
-                        if (det.memoriasAgotadas && det.memoriasAgotadas.length > 0) {
-                            det.memoriasAgotadas.forEach(m => {
-                                tagsHtml += `<span class="stock-alert-item-tag" style="background: rgba(251,146,60,0.1); color: #fdba74; border: 1px solid rgba(251,146,60,0.15);">💾 ${m}</span>`;
-                            });
-                        }
-                        if (det.ramsAgotadas && det.ramsAgotadas.length > 0) {
-                            det.ramsAgotadas.forEach(r => {
-                                tagsHtml += `<span class="stock-alert-item-tag" style="background: rgba(168,85,247,0.1); color: #c4b5fd; border: 1px solid rgba(168,85,247,0.15);">🔧 ${r}</span>`;
-                            });
-                        }
-                        
-                        const notifDiv = document.createElement('div');
-                        notifDiv.className = 'stock-alert-item';
-                        
-                        const escapedNombre = nombreLimpio.replace(/'/g, "\\'");
-                        const escapedLink = item.link ? item.link.replace(/'/g, "\\'") : "";
-                        
-                        notifDiv.innerHTML = `
+                if (subtitle) subtitle.textContent = 'Sin problemas detectados';
+                return;
+            }
+
+            if (subtitle) subtitle.textContent = `${alertasStockGlobal.length} equipo${alertasStockGlobal.length > 1 ? 's' : ''} con problemas`;
+
+            cont.innerHTML = '';
+            alertasStockGlobal.forEach(item => {
+                const nombreLimpio = typeof limpiarNombreModelo === 'function' ? limpiarNombreModelo(item.modelo) : item.modelo;
+
+                let itemMlId = "";
+                if (item.link) {
+                    const regex = /(MLM\-?\d+)/i;
+                    const match = item.link.match(regex);
+                    if (match) itemMlId = match[0].replace("-", "").toUpperCase();
+                }
+
+                const det = item._stockDetalle || {};
+
+                // Texto de detalle
+                let detTexto = '';
+                if (det.totalVariantes > 0) {
+                    detTexto = `${det.activasVariantes}/${det.totalVariantes} variantes activas`;
+                }
+                if (det.mensaje) {
+                    detTexto = det.mensaje;
+                }
+
+                // Tags de combinaciones agotadas
+                let tagsHtml = '';
+                if (det.coloresAgotados && det.coloresAgotados.length > 0) {
+                    det.coloresAgotados.forEach(c => {
+                        tagsHtml += `<span class="stock-alert-item-tag" style="background: rgba(239,68,68,0.1); color: #fca5a5; border: 1px solid rgba(239,68,68,0.15);">🎨 ${c}</span>`;
+                    });
+                }
+                if (det.memoriasAgotadas && det.memoriasAgotadas.length > 0) {
+                    det.memoriasAgotadas.forEach(m => {
+                        tagsHtml += `<span class="stock-alert-item-tag" style="background: rgba(251,146,60,0.1); color: #fdba74; border: 1px solid rgba(251,146,60,0.15);">💾 ${m}</span>`;
+                    });
+                }
+                if (det.ramsAgotadas && det.ramsAgotadas.length > 0) {
+                    det.ramsAgotadas.forEach(r => {
+                        tagsHtml += `<span class="stock-alert-item-tag" style="background: rgba(168,85,247,0.1); color: #c4b5fd; border: 1px solid rgba(168,85,247,0.15);">🔧 ${r}</span>`;
+                    });
+                }
+
+                const notifDiv = document.createElement('div');
+                notifDiv.className = 'stock-alert-item';
+
+                const escapedNombre = nombreLimpio.replace(/'/g, "\\'");
+                const escapedLink = item.link ? item.link.replace(/'/g, "\\'") : "";
+
+                notifDiv.innerHTML = `
                             <div class="stock-alert-item-img">
                                 <img src="${item.foto || ''}" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.src='https://placehold.co/44x44/1e293b/475569?text=📱';" />
                             </div>
@@ -2399,398 +2621,398 @@
                             </div>
                             <div style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444; flex-shrink: 0; margin-top: 6px; box-shadow: 0 0 6px rgba(239,68,68,0.5);"></div>
                         `;
-                        cont.appendChild(notifDiv);
-                    });
+                cont.appendChild(notifDiv);
+            });
+        }
+
+        window.sincronizarStockItem = async function (id, row, btnElement) {
+            if (!id || !row) {
+                toast("Faltan parámetros para sincronizar", "error");
+                return;
+            }
+            const originalText = btnElement.innerHTML;
+            btnElement.disabled = true;
+            btnElement.innerHTML = "⏳ Sincronizando...";
+
+            try {
+                const isProduct = id.startsWith("MLM") && id.length <= 11;
+                const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${id}&isProduct=${isProduct}`;
+                const resML = await fetch(proxyUrl);
+                const freshData = await resML.json();
+
+                if (freshData.error || freshData.status === 404) {
+                    toast("No se pudo obtener la información desde Mercado Libre", "error");
+                    btnElement.disabled = false;
+                    btnElement.innerHTML = originalText;
+                    return;
                 }
 
-                window.sincronizarStockItem = async function(id, row, btnElement) {
-                    if (!id || !row) {
-                        toast("Faltan parámetros para sincronizar", "error");
-                        return;
-                    }
-                    const originalText = btnElement.innerHTML;
-                    btnElement.disabled = true;
-                    btnElement.innerHTML = "⏳ Sincronizando...";
-                    
-                    try {
-                        const isProduct = id.startsWith("MLM") && id.length <= 11;
-                        const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${id}&isProduct=${isProduct}`;
-                        const resML = await fetch(proxyUrl);
-                        const freshData = await resML.json();
-                        
-                        if (freshData.error || freshData.status === 404) {
-                            toast("No se pudo obtener la información desde Mercado Libre", "error");
-                            btnElement.disabled = false;
-                            btnElement.innerHTML = originalText;
-                            return;
-                        }
-                        
-                        const formData = new URLSearchParams();
-                        formData.append('token', CONFIG.API_TOKEN);
-                        formData.append('action', 'actualizarVariantesJson');
-                        formData.append('row', row);
-                        formData.append('variantes', JSON.stringify(freshData));
-                        
-                        const resUpdate = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                            method: 'POST',
-                            body: formData.toString(),
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                        });
-                        const updateResult = await resUpdate.json();
-                        
-                        if (updateResult.result !== 'success') {
-                            toast("Error al guardar variantes en el Google Sheet", "error");
-                            btnElement.disabled = false;
-                            btnElement.innerHTML = originalText;
-                            return;
-                        }
-                        
-                        toast("Sincronización exitosa", "success");
-                        await evaluarAlertasStock();
-                        renderizarStockAlerts();
-                    } catch (err) {
-                        console.error("Error al sincronizar stock:", err);
-                        toast("Error inesperado al sincronizar", "error");
-                        btnElement.disabled = false;
-                        btnElement.innerHTML = originalText;
-                    }
-                };
+                const formData = new URLSearchParams();
+                formData.append('token', CONFIG.API_TOKEN);
+                formData.append('action', 'actualizarVariantesJson');
+                formData.append('row', row);
+                formData.append('variantes', JSON.stringify(freshData));
 
-                window.marcarAgotadoItem = async function(row, nombre, btnElement) {
-                    if (!row) {
-                        toast("Falta el número de fila", "error");
-                        return;
-                    }
-                    if (!confirm(`¿Estás seguro de que quieres marcar "${nombre}" como AGOTADO en el catálogo?`)) {
-                        return;
-                    }
-                    
-                    const originalText = btnElement.innerHTML;
-                    btnElement.disabled = true;
-                    btnElement.innerHTML = "⏳ Actualizando...";
-                    
-                    try {
-                        const formData = new URLSearchParams();
-                        formData.append('token', CONFIG.API_TOKEN);
-                        formData.append('action', 'cambiarEstadoCatalogo');
-                        formData.append('row', row);
-                        formData.append('estado', 'AGOTADO');
+                const resUpdate = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData.toString(),
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                const updateResult = await resUpdate.json();
 
-                        const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                            method: 'POST',
-                            body: formData.toString(),
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                        });
-                        const data = await res.json();
-                        
-                        if (data.result === 'success') {
-                            toast(`"${nombre}" marcado como AGOTADO exitosamente`, "success");
-                            alertasStockGlobal = alertasStockGlobal.filter(item => item.filaNum !== row);
-                            actualizarBotonAlertasStock();
-                            renderizarStockAlerts();
-                        } else {
-                            toast("Error al actualizar estado en el catálogo: " + (data.message || "desconocido"), "error");
-                            btnElement.disabled = false;
-                            btnElement.innerHTML = originalText;
-                        }
-                    } catch (err) {
-                        console.error("Error al cambiar estado en catálogo:", err);
-                        toast("Error de red o de servidor al cambiar estado", "error");
-                        btnElement.disabled = false;
-                        btnElement.innerHTML = originalText;
-                    }
-                };
+                if (updateResult.result !== 'success') {
+                    toast("Error al guardar variantes en el Google Sheet", "error");
+                    btnElement.disabled = false;
+                    btnElement.innerHTML = originalText;
+                    return;
+                }
 
-                async function evaluarStockUnicoItem(item) {
+                toast("Sincronización exitosa", "success");
+                await evaluarAlertasStock();
+                renderizarStockAlerts();
+            } catch (err) {
+                console.error("Error al sincronizar stock:", err);
+                toast("Error inesperado al sincronizar", "error");
+                btnElement.disabled = false;
+                btnElement.innerHTML = originalText;
+            }
+        };
+
+        window.marcarAgotadoItem = async function (row, nombre, btnElement) {
+            if (!row) {
+                toast("Falta el número de fila", "error");
+                return;
+            }
+            if (!confirm(`¿Estás seguro de que quieres marcar "${nombre}" como AGOTADO en el catálogo?`)) {
+                return;
+            }
+
+            const originalText = btnElement.innerHTML;
+            btnElement.disabled = true;
+            btnElement.innerHTML = "⏳ Actualizando...";
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('token', CONFIG.API_TOKEN);
+                formData.append('action', 'cambiarEstadoCatalogo');
+                formData.append('row', row);
+                formData.append('estado', 'AGOTADO');
+
+                const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData.toString(),
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                const data = await res.json();
+
+                if (data.result === 'success') {
+                    toast(`"${nombre}" marcado como AGOTADO exitosamente`, "success");
+                    alertasStockGlobal = alertasStockGlobal.filter(item => item.filaNum !== row);
+                    actualizarBotonAlertasStock();
+                    renderizarStockAlerts();
+                } else {
+                    toast("Error al actualizar estado en el catálogo: " + (data.message || "desconocido"), "error");
+                    btnElement.disabled = false;
+                    btnElement.innerHTML = originalText;
+                }
+            } catch (err) {
+                console.error("Error al cambiar estado en catálogo:", err);
+                toast("Error de red o de servidor al cambiar estado", "error");
+                btnElement.disabled = false;
+                btnElement.innerHTML = originalText;
+            }
+        };
+
+        async function evaluarStockUnicoItem(item) {
+            try {
+                let itemMlId = "";
+                if (item.link) {
+                    const regex = /(MLM\-?\d+)/i;
+                    const match = item.link.match(regex);
+                    if (match) itemMlId = match[0].replace("-", "").toUpperCase();
+                }
+
+                const idBusqueda = itemMlId || item.id;
+                if (!idBusqueda) return false;
+
+                let isProduct = idBusqueda.startsWith("MLM") && idBusqueda.length <= 11;
+                const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${idBusqueda}&isProduct=${isProduct}`;
+
+                const resLive = await fetch(proxyUrl);
+                const contentType = resLive.headers.get('content-type') || '';
+                if (!resLive.ok || !contentType.includes('application/json')) {
+                    return false;
+                }
+                let liveData = await resLive.json();
+                if (!liveData || typeof liveData !== 'object' || liveData.error || Object.keys(liveData).length === 0) {
+                    return false;
+                }
+
+                if (!isProduct && liveData.catalog_product_id && (!liveData.pickers || liveData.pickers.length === 0) && (!liveData.variations || liveData.variations.length === 0)) {
                     try {
-                        let itemMlId = "";
-                        if (item.link) {
-                            const regex = /(MLM\-?\d+)/i;
-                            const match = item.link.match(regex);
-                            if (match) itemMlId = match[0].replace("-", "").toUpperCase();
+                        const prodUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${liveData.catalog_product_id}&isProduct=true`;
+                        const resProd = await fetch(prodUrl);
+                        const prodData = await resProd.json();
+                        if (prodData && !prodData.error && prodData.pickers) {
+                            liveData = prodData;
+                            isProduct = true;
                         }
-                        
-                        const idBusqueda = itemMlId || item.id;
-                        if (!idBusqueda) return false;
-                        
-                        let isProduct = idBusqueda.startsWith("MLM") && idBusqueda.length <= 11;
-                        const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${idBusqueda}&isProduct=${isProduct}`;
-                        
-                        const resLive = await fetch(proxyUrl);
-                        const contentType = resLive.headers.get('content-type') || '';
-                        if (!resLive.ok || !contentType.includes('application/json')) {
-                            return false;
-                        }
-                        let liveData = await resLive.json();
-                        if (!liveData || typeof liveData !== 'object' || liveData.error || Object.keys(liveData).length === 0) {
-                            return false;
-                        }
-                        
-                        if (!isProduct && liveData.catalog_product_id && (!liveData.pickers || liveData.pickers.length === 0) && (!liveData.variations || liveData.variations.length === 0)) {
+                    } catch (e) { }
+                }
+
+                if (!isProduct && item.link && item.link.includes("/p/") && (!liveData.pickers || liveData.pickers.length === 0)) {
+                    const pMatch = item.link.match(/\/p\/(MLM\-?\d+)/i);
+                    if (pMatch) {
+                        const parentProductId = pMatch[1].replace("-", "").toUpperCase();
+                        if (parentProductId !== idBusqueda) {
                             try {
-                                const prodUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${liveData.catalog_product_id}&isProduct=true`;
-                                const resProd = await fetch(prodUrl);
-                                const prodData = await resProd.json();
-                                if (prodData && !prodData.error && prodData.pickers) {
-                                    liveData = prodData;
+                                const prodUrl2 = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${parentProductId}&isProduct=true`;
+                                const resProd2 = await fetch(prodUrl2);
+                                const prodData2 = await resProd2.json();
+                                if (prodData2 && !prodData2.error && prodData2.pickers) {
+                                    liveData = prodData2;
                                     isProduct = true;
                                 }
-                            } catch(e) {}
+                            } catch (e) { }
                         }
-                        
-                        if (!isProduct && item.link && item.link.includes("/p/") && (!liveData.pickers || liveData.pickers.length === 0)) {
-                            const pMatch = item.link.match(/\/p\/(MLM\-?\d+)/i);
-                            if (pMatch) {
-                                const parentProductId = pMatch[1].replace("-", "").toUpperCase();
-                                if (parentProductId !== idBusqueda) {
-                                    try {
-                                        const prodUrl2 = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${parentProductId}&isProduct=true`;
-                                        const resProd2 = await fetch(prodUrl2);
-                                        const prodData2 = await resProd2.json();
-                                        if (prodData2 && !prodData2.error && prodData2.pickers) {
-                                            liveData = prodData2;
-                                            isProduct = true;
-                                        }
-                                    } catch(e) {}
-                                }
-                            }
-                        }
-                        
-                        const isCatalog = isProduct || liveData.type === "catalog_product" || !!liveData.catalog_product_id;
-                        let tieneStock = false;
-                        let detalle = { razon: '', coloresAgotados: [], memoriasAgotadas: [], ramsAgotadas: [], totalVariantes: 0, activasVariantes: 0 };
-                        
-                        if (liveData.pickers && liveData.pickers.length > 0) {
-                            const productMap = {};
-                            liveData.pickers.forEach(picker => {
-                                if (!picker.products) return;
-                                const pIdUpper = picker.picker_id ? picker.picker_id.toUpperCase() : "";
-                                
-                                let attributeType = "";
-                                if (pIdUpper.includes("COLOR") || pIdUpper === "FINISH" || pIdUpper === "ACABADO") {
-                                    attributeType = "color";
-                                } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY") || pIdUpper.includes("CAPACIDAD")) {
-                                    attributeType = "memory";
-                                } else if (pIdUpper.includes("RAM")) {
-                                    attributeType = "ram";
-                                } else if (pIdUpper === "GRADING") {
-                                    attributeType = "grading";
-                                }
-                                
-                                picker.products.forEach(p => {
-                                    if (!p.product_id) return;
-                                    const tags = p.tags || [];
-                                    const outOfStock = isProductTagOutOfStock(tags);
-                                    
-                                    if (!productMap[p.product_id]) {
-                                        productMap[p.product_id] = {
-                                            isOutOfStock: outOfStock,
-                                            color: "", memory: "", ram: "", grading: "",
-                                            tags: tags
-                                        };
-                                    } else {
-                                        if (outOfStock) productMap[p.product_id].isOutOfStock = true;
-                                        tags.forEach(t => {
-                                            if (!productMap[p.product_id].tags.includes(t)) {
-                                                productMap[p.product_id].tags.push(t);
-                                            }
-                                        });
-                                        productMap[p.product_id].isOutOfStock = isProductTagOutOfStock(productMap[p.product_id].tags);
-                                    }
-                                    
-                                    if (attributeType && p.picker_label) {
-                                        productMap[p.product_id][attributeType] = p.picker_label.trim();
-                                    }
-                                });
-                            });
-                            
-                            const allProductIds = Object.keys(productMap);
-                            const activeProducts = allProductIds.filter(pid => !productMap[pid].isOutOfStock);
-                            const outOfStockProducts = allProductIds.filter(pid => productMap[pid].isOutOfStock);
-                            
-                            detalle.totalVariantes = allProductIds.length;
-                            detalle.activasVariantes = activeProducts.length;
-                            
-                            if (activeProducts.length > 0) {
-                                tieneStock = true;
-                            }
-                            
-                            const coloresVivos = new Set();
-                            const coloresAgotados = new Set();
-                            const memoriasVivas = new Set();
-                            const memoriasAgotadas = new Set();
-                            const ramsVivas = new Set();
-                            const ramsAgotadas = new Set();
-                            
-                            allProductIds.forEach(pid => {
-                                const p = productMap[pid];
-                                if (p.color) {
-                                    if (p.isOutOfStock) coloresAgotados.add(p.color);
-                                    else coloresVivos.add(p.color);
-                                }
-                                if (p.memory) {
-                                    if (p.isOutOfStock) memoriasAgotadas.add(p.memory);
-                                    else memoriasVivas.add(p.memory);
-                                }
-                                if (p.ram) {
-                                    if (p.isOutOfStock) ramsAgotadas.add(p.ram);
-                                    else ramsVivas.add(p.ram);
-                                }
-                            });
-                            
-                            detalle.coloresAgotados = [...coloresAgotados].filter(c => !coloresVivos.has(c));
-                            detalle.memoriasAgotadas = [...memoriasAgotadas].filter(m => !memoriasVivas.has(m));
-                            detalle.ramsAgotadas = [...ramsAgotadas].filter(r => !ramsVivas.has(r));
-                            
-                            if (!tieneStock) {
-                                detalle.razon = 'all_pickers_out';
-                                detalle.mensaje = `${allProductIds.length} variantes, todas agotadas`;
-                            } else if (isCatalog && !liveData.buy_box_winner && !liveData.price) {
-                                tieneStock = false;
-                                detalle.razon = 'no_buy_box';
-                                detalle.mensaje = `Pickers activos pero sin vendedor disponible (sin buy_box_winner)`;
-                            } else if (outOfStockProducts.length > 0) {
-                                detalle.razon = 'partial_stock';
-                            }
-                        }
-                        else if (isCatalog && liveData.buy_box_winner) {
-                            tieneStock = true;
-                        }
-                        else if (liveData.variations && liveData.variations.length > 0) {
-                            const totalVars = liveData.variations.length;
-                            const activeVariations = liveData.variations.filter(v => parseInt(v.available_quantity, 10) > 0);
-                            detalle.totalVariantes = totalVars;
-                            detalle.activasVariantes = activeVariations.length;
-                            
-                            if (activeVariations.length > 0) {
-                                tieneStock = true;
-                            } else {
-                                detalle.razon = 'all_variations_out';
-                                detalle.mensaje = `${totalVars} variaciones, todas sin stock`;
-                            }
-                        }
-                        else {
-                            const status = (liveData.status || "").toLowerCase();
-                            const qty = parseInt(liveData.available_quantity, 10);
-                            
-                            if (status && status !== "active") {
-                                tieneStock = false;
-                                detalle.razon = 'inactive';
-                                detalle.mensaje = `Estado: ${liveData.status || 'inactivo'}`;
-                            } else if (!isNaN(qty) && qty > 0) {
-                                tieneStock = true;
-                            } else if (isCatalog && !liveData.buy_box_winner && (!liveData.pickers || liveData.pickers.length === 0)) {
-                                tieneStock = false;
-                                detalle.razon = 'no_buy_box';
-                                detalle.mensaje = 'Sin buy_box_winner ni pickers';
-                            } else if (status === "" && isNaN(qty)) {
-                                tieneStock = true;
-                            }
-                        }
-                        
-                        item._stockDetalle = detalle;
-                        
-                        const cacheStr = JSON.stringify(liveData);
-                        const cacheActualStr = JSON.stringify(item.variantesJson);
-                        if (cacheStr !== cacheActualStr) {
-                            item.variantesJson = liveData;
-                            const formData = new URLSearchParams();
-                            formData.append('token', CONFIG.API_TOKEN);
-                            formData.append('action', 'actualizarVariantesJson');
-                            formData.append('row', item.filaNum);
-                            formData.append('variantes', cacheStr);
-                            
-                            fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                                method: 'POST',
-                                body: formData.toString(),
-                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                            }).catch(e => console.warn("Error background caching variants:", e));
-                        }
-                        
-                        return tieneStock;
-                    } catch (err) {
-                        console.error("Error en evaluarStockUnicoItem:", err);
-                        return false;
                     }
                 }
 
-                window.editarLinkItem = async function(row, nombre, linkActual, btnElement) {
-                    const nuevoLink = prompt(`Actualizar link de Mercado Libre para:\n${nombre}\n\nIntroduce el nuevo enlace:`, linkActual);
-                    if (nuevoLink === null) return; // cancelado
-                    
-                    const urlLimpia = nuevoLink.trim();
-                    if (!urlLimpia) {
-                        toast("El enlace no puede estar vacío.", "warning");
-                        return;
-                    }
-                    
-                    if (!urlLimpia.includes("mercadolibre")) {
-                        toast("El enlace debe ser un link válido de Mercado Libre.", "warning");
-                        return;
-                    }
-                    
-                    const originalText = btnElement.innerHTML;
-                    btnElement.disabled = true;
-                    btnElement.innerHTML = "⏳ Guardando...";
-                    
-                    try {
-                        const formData = new URLSearchParams();
-                        formData.append('token', CONFIG.API_TOKEN);
-                        formData.append('action', 'actualizarLinkCatalogo');
-                        formData.append('row', row);
-                        formData.append('link', urlLimpia);
-                        
-                        const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                            method: 'POST',
-                            body: formData.toString(),
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                        });
-                        const data = await res.json();
-                        
-                        if (data.result === 'success') {
-                            toast(data.message || "Link actualizado con éxito.", "success");
-                            
-                            const item = alertasStockGlobal.find(p => p.filaNum === row);
-                            if (item) {
-                                item.link = urlLimpia;
-                                btnElement.disabled = true;
-                                btnElement.innerHTML = "⏳ Validando...";
-                                
-                                const tieneStock = await evaluarStockUnicoItem(item);
-                                if (tieneStock) {
-                                    alertasStockGlobal = alertasStockGlobal.filter(p => p.filaNum !== row);
-                                    toast(`"${nombre}" ahora tiene stock y se eliminó de las alertas.`, "success");
-                                } else {
-                                    toast(`"${nombre}" sigue sin stock en el nuevo enlace.`, "warning");
-                                    btnElement.disabled = false;
-                                    btnElement.innerHTML = "✏️ Link";
-                                }
-                            }
-                            
-                            actualizarBotonAlertasStock();
-                            renderizarStockAlerts();
-                        } else {
-                            toast("Error al actualizar link: " + (data.message || "Error desconocido"), "error");
-                            btnElement.disabled = false;
-                            btnElement.innerHTML = originalText;
+                const isCatalog = isProduct || liveData.type === "catalog_product" || !!liveData.catalog_product_id;
+                let tieneStock = false;
+                let detalle = { razon: '', coloresAgotados: [], memoriasAgotadas: [], ramsAgotadas: [], totalVariantes: 0, activasVariantes: 0 };
+
+                if (liveData.pickers && liveData.pickers.length > 0) {
+                    const productMap = {};
+                    liveData.pickers.forEach(picker => {
+                        if (!picker.products) return;
+                        const pIdUpper = picker.picker_id ? picker.picker_id.toUpperCase() : "";
+
+                        let attributeType = "";
+                        if (pIdUpper.includes("COLOR") || pIdUpper === "FINISH" || pIdUpper === "ACABADO") {
+                            attributeType = "color";
+                        } else if (pIdUpper.includes("MEMORY") || pIdUpper.includes("STORAGE") || pIdUpper.includes("CAPACITY") || pIdUpper.includes("CAPACIDAD")) {
+                            attributeType = "memory";
+                        } else if (pIdUpper.includes("RAM")) {
+                            attributeType = "ram";
+                        } else if (pIdUpper === "GRADING") {
+                            attributeType = "grading";
                         }
-                    } catch (err) {
-                        console.error("Error al actualizar link:", err);
-                        toast("Error de red al actualizar el link.", "error");
-                        btnElement.disabled = false;
-                        btnElement.innerHTML = originalText;
+
+                        picker.products.forEach(p => {
+                            if (!p.product_id) return;
+                            const tags = p.tags || [];
+                            const outOfStock = isProductTagOutOfStock(tags);
+
+                            if (!productMap[p.product_id]) {
+                                productMap[p.product_id] = {
+                                    isOutOfStock: outOfStock,
+                                    color: "", memory: "", ram: "", grading: "",
+                                    tags: tags
+                                };
+                            } else {
+                                if (outOfStock) productMap[p.product_id].isOutOfStock = true;
+                                tags.forEach(t => {
+                                    if (!productMap[p.product_id].tags.includes(t)) {
+                                        productMap[p.product_id].tags.push(t);
+                                    }
+                                });
+                                productMap[p.product_id].isOutOfStock = isProductTagOutOfStock(productMap[p.product_id].tags);
+                            }
+
+                            if (attributeType && p.picker_label) {
+                                productMap[p.product_id][attributeType] = p.picker_label.trim();
+                            }
+                        });
+                    });
+
+                    const allProductIds = Object.keys(productMap);
+                    const activeProducts = allProductIds.filter(pid => !productMap[pid].isOutOfStock);
+                    const outOfStockProducts = allProductIds.filter(pid => productMap[pid].isOutOfStock);
+
+                    detalle.totalVariantes = allProductIds.length;
+                    detalle.activasVariantes = activeProducts.length;
+
+                    if (activeProducts.length > 0) {
+                        tieneStock = true;
                     }
-                };
 
-                // --- Placeholders / Conversión a Inventario ---
-                document.getElementById('btnOpenPlaceholders').addEventListener('click', function () {
-                        abrirModalPlaceholders();
+                    const coloresVivos = new Set();
+                    const coloresAgotados = new Set();
+                    const memoriasVivas = new Set();
+                    const memoriasAgotadas = new Set();
+                    const ramsVivas = new Set();
+                    const ramsAgotadas = new Set();
+
+                    allProductIds.forEach(pid => {
+                        const p = productMap[pid];
+                        if (p.color) {
+                            if (p.isOutOfStock) coloresAgotados.add(p.color);
+                            else coloresVivos.add(p.color);
+                        }
+                        if (p.memory) {
+                            if (p.isOutOfStock) memoriasAgotadas.add(p.memory);
+                            else memoriasVivas.add(p.memory);
+                        }
+                        if (p.ram) {
+                            if (p.isOutOfStock) ramsAgotadas.add(p.ram);
+                            else ramsVivas.add(p.ram);
+                        }
+                    });
+
+                    detalle.coloresAgotados = [...coloresAgotados].filter(c => !coloresVivos.has(c));
+                    detalle.memoriasAgotadas = [...memoriasAgotadas].filter(m => !memoriasVivas.has(m));
+                    detalle.ramsAgotadas = [...ramsAgotadas].filter(r => !ramsVivas.has(r));
+
+                    if (!tieneStock) {
+                        detalle.razon = 'all_pickers_out';
+                        detalle.mensaje = `${allProductIds.length} variantes, todas agotadas`;
+                    } else if (isCatalog && !liveData.buy_box_winner && !liveData.price) {
+                        tieneStock = false;
+                        detalle.razon = 'no_buy_box';
+                        detalle.mensaje = `Pickers activos pero sin vendedor disponible (sin buy_box_winner)`;
+                    } else if (outOfStockProducts.length > 0) {
+                        detalle.razon = 'partial_stock';
+                    }
+                }
+                else if (isCatalog && liveData.buy_box_winner) {
+                    tieneStock = true;
+                }
+                else if (liveData.variations && liveData.variations.length > 0) {
+                    const totalVars = liveData.variations.length;
+                    const activeVariations = liveData.variations.filter(v => parseInt(v.available_quantity, 10) > 0);
+                    detalle.totalVariantes = totalVars;
+                    detalle.activasVariantes = activeVariations.length;
+
+                    if (activeVariations.length > 0) {
+                        tieneStock = true;
+                    } else {
+                        detalle.razon = 'all_variations_out';
+                        detalle.mensaje = `${totalVars} variaciones, todas sin stock`;
+                    }
+                }
+                else {
+                    const status = (liveData.status || "").toLowerCase();
+                    const qty = parseInt(liveData.available_quantity, 10);
+
+                    if (status && status !== "active") {
+                        tieneStock = false;
+                        detalle.razon = 'inactive';
+                        detalle.mensaje = `Estado: ${liveData.status || 'inactivo'}`;
+                    } else if (!isNaN(qty) && qty > 0) {
+                        tieneStock = true;
+                    } else if (isCatalog && !liveData.buy_box_winner && (!liveData.pickers || liveData.pickers.length === 0)) {
+                        tieneStock = false;
+                        detalle.razon = 'no_buy_box';
+                        detalle.mensaje = 'Sin buy_box_winner ni pickers';
+                    } else if (status === "" && isNaN(qty)) {
+                        tieneStock = true;
+                    }
+                }
+
+                item._stockDetalle = detalle;
+
+                const cacheStr = JSON.stringify(liveData);
+                const cacheActualStr = JSON.stringify(item.variantesJson);
+                if (cacheStr !== cacheActualStr) {
+                    item.variantesJson = liveData;
+                    const formData = new URLSearchParams();
+                    formData.append('token', CONFIG.API_TOKEN);
+                    formData.append('action', 'actualizarVariantesJson');
+                    formData.append('row', item.filaNum);
+                    formData.append('variantes', cacheStr);
+
+                    fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        body: formData.toString(),
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    }).catch(e => console.warn("Error background caching variants:", e));
+                }
+
+                return tieneStock;
+            } catch (err) {
+                console.error("Error en evaluarStockUnicoItem:", err);
+                return false;
+            }
+        }
+
+        window.editarLinkItem = async function (row, nombre, linkActual, btnElement) {
+            const nuevoLink = prompt(`Actualizar link de Mercado Libre para:\n${nombre}\n\nIntroduce el nuevo enlace:`, linkActual);
+            if (nuevoLink === null) return; // cancelado
+
+            const urlLimpia = nuevoLink.trim();
+            if (!urlLimpia) {
+                toast("El enlace no puede estar vacío.", "warning");
+                return;
+            }
+
+            if (!urlLimpia.includes("mercadolibre")) {
+                toast("El enlace debe ser un link válido de Mercado Libre.", "warning");
+                return;
+            }
+
+            const originalText = btnElement.innerHTML;
+            btnElement.disabled = true;
+            btnElement.innerHTML = "⏳ Guardando...";
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('token', CONFIG.API_TOKEN);
+                formData.append('action', 'actualizarLinkCatalogo');
+                formData.append('row', row);
+                formData.append('link', urlLimpia);
+
+                const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData.toString(),
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
                 });
+                const data = await res.json();
 
-                function abrirModalPlaceholders() {
-                        // Crear modal si no existe
-                        if (!document.getElementById('modal-placeholders')) {
-                                const modalHtml = `
+                if (data.result === 'success') {
+                    toast(data.message || "Link actualizado con éxito.", "success");
+
+                    const item = alertasStockGlobal.find(p => p.filaNum === row);
+                    if (item) {
+                        item.link = urlLimpia;
+                        btnElement.disabled = true;
+                        btnElement.innerHTML = "⏳ Validando...";
+
+                        const tieneStock = await evaluarStockUnicoItem(item);
+                        if (tieneStock) {
+                            alertasStockGlobal = alertasStockGlobal.filter(p => p.filaNum !== row);
+                            toast(`"${nombre}" ahora tiene stock y se eliminó de las alertas.`, "success");
+                        } else {
+                            toast(`"${nombre}" sigue sin stock en el nuevo enlace.`, "warning");
+                            btnElement.disabled = false;
+                            btnElement.innerHTML = "✏️ Link";
+                        }
+                    }
+
+                    actualizarBotonAlertasStock();
+                    renderizarStockAlerts();
+                } else {
+                    toast("Error al actualizar link: " + (data.message || "Error desconocido"), "error");
+                    btnElement.disabled = false;
+                    btnElement.innerHTML = originalText;
+                }
+            } catch (err) {
+                console.error("Error al actualizar link:", err);
+                toast("Error de red al actualizar el link.", "error");
+                btnElement.disabled = false;
+                btnElement.innerHTML = originalText;
+            }
+        };
+
+        // --- Placeholders / Conversión a Inventario ---
+        document.getElementById('btnOpenPlaceholders').addEventListener('click', function () {
+            abrirModalPlaceholders();
+        });
+
+        function abrirModalPlaceholders() {
+            // Crear modal si no existe
+            if (!document.getElementById('modal-placeholders')) {
+                const modalHtml = `
                                 <div id="modal-placeholders" class="modal-celya-config">
                                     <div class="modal-config-content" style="max-width:720px;">
                                         <span class="close-config-btn" onclick="cerrarModalPlaceholders()">&times;</span>
@@ -2799,42 +3021,42 @@
                                         <div id="placeholders-list" style="max-height:420px; overflow:auto;"></div>
                                     </div>
                                 </div>`;
-                                document.body.insertAdjacentHTML('beforeend', modalHtml);
-                        }
-                        document.getElementById('modal-placeholders').style.display = 'block';
-                        cargarPlaceholders();
-                }
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+            }
+            document.getElementById('modal-placeholders').style.display = 'block';
+            cargarPlaceholders();
+        }
 
-                function cerrarModalPlaceholders() {
-                        const m = document.getElementById('modal-placeholders');
-                        if (m) m.style.display = 'none';
-                }
+        function cerrarModalPlaceholders() {
+            const m = document.getElementById('modal-placeholders');
+            if (m) m.style.display = 'none';
+        }
 
-                async function cargarPlaceholders() {
-                        const cont = document.getElementById('placeholders-list');
-                        cont.innerHTML = '<div style="padding:14px; text-align:center; color:var(--text-secondary);">Cargando cotizaciones...</div>';
-                        try {
-                                const res = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}&action=obtenerCatalogoPublico`);
-                                const data = await res.json();
-                                if (!data.result || data.result !== 'success') {
-                                        cont.innerHTML = '<div style="padding:14px; color:#f87171;">Error al cargar</div>';
-                                        return;
-                                }
-                                const items = data.resultados || [];
-                                if (items.length === 0) {
-                                        cont.innerHTML = '<div style="padding:14px; color:var(--text-secondary);">No hay cotizaciones pendientes en la pestaña Cotizaciones.</div>';
-                                        return;
-                                }
-                                cont.innerHTML = '';
-                                items.forEach(it => {
-                                        const card = document.createElement('div');
-                                        card.style.border = '1px solid rgba(255, 255, 255, 0.08)';
-                                        card.style.padding = '16px';
-                                        card.style.margin = '8px 0';
-                                        card.style.display = 'flex';
-                                        card.style.gap = '16px';
-                                        card.style.alignItems = 'center';
-                                        card.innerHTML = `
+        async function cargarPlaceholders() {
+            const cont = document.getElementById('placeholders-list');
+            cont.innerHTML = '<div style="padding:14px; text-align:center; color:var(--text-secondary);">Cargando cotizaciones...</div>';
+            try {
+                const res = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}&action=obtenerCatalogoPublico`);
+                const data = await res.json();
+                if (!data.result || data.result !== 'success') {
+                    cont.innerHTML = '<div style="padding:14px; color:#f87171;">Error al cargar</div>';
+                    return;
+                }
+                const items = data.resultados || [];
+                if (items.length === 0) {
+                    cont.innerHTML = '<div style="padding:14px; color:var(--text-secondary);">No hay cotizaciones pendientes en la pestaña Cotizaciones.</div>';
+                    return;
+                }
+                cont.innerHTML = '';
+                items.forEach(it => {
+                    const card = document.createElement('div');
+                    card.style.border = '1px solid rgba(255, 255, 255, 0.08)';
+                    card.style.padding = '16px';
+                    card.style.margin = '8px 0';
+                    card.style.display = 'flex';
+                    card.style.gap = '16px';
+                    card.style.alignItems = 'center';
+                    card.innerHTML = `
                                             <div style="width:72px; height:72px; background:rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); border-radius:6px; overflow:hidden; display:flex; align-items:center; justify-content:center;">
                                                 <img src="${it.foto || ''}" style="max-width:100%; max-height:100%; object-fit:contain;" onerror="this.src='https://placehold.co/72x72?text=CelYa';" />
                                             </div>
@@ -2849,65 +3071,65 @@
                                                 </div>
                                             </div>
                                         `;
-                                        const btn = card.querySelector('.btn-convertir-trigger');
-                                        btn.addEventListener('click', function () {
-                                                abrirConvertForm(it.fila, it.modelo, it.color, it.memoria, it.precioPlaceholder, it.precioContado, it.planElegido, it.link);
-                                        });
-                                        cont.appendChild(card);
-                                });
-                        } catch (err) {
-                                cont.innerHTML = '<div style="padding:14px; color:#f87171;">Error de red al cargar placeholders</div>';
-                        }
-                }
+                    const btn = card.querySelector('.btn-convertir-trigger');
+                    btn.addEventListener('click', function () {
+                        abrirConvertForm(it.fila, it.modelo, it.color, it.memoria, it.precioPlaceholder, it.precioContado, it.planElegido, it.link);
+                    });
+                    cont.appendChild(card);
+                });
+            } catch (err) {
+                cont.innerHTML = '<div style="padding:14px; color:#f87171;">Error de red al cargar placeholders</div>';
+            }
+        }
 
-                function abrirConvertForm(fila, modelo = "", color = "", memoria = "", precioPlaceholder = 0, precioContado = 0, planElegido = "", link = "") {
-                        const rate26Input = document.getElementById('cfg-plan-rapido');
-                        const rate52Input = document.getElementById('cfg-plan-comodo');
-                        const rate26 = rate26Input ? (parseFloat(rate26Input.value) || 66) : 66;
-                        const rate52 = rate52Input ? (parseFloat(rate52Input.value) || 90) : 90;
-                        const factor = (String(planElegido).includes("52") || planElegido == 52) ? (1 + rate52/100) : (1 + rate26/100);
+        function abrirConvertForm(fila, modelo = "", color = "", memoria = "", precioPlaceholder = 0, precioContado = 0, planElegido = "", link = "") {
+            const rate26Input = document.getElementById('cfg-plan-rapido');
+            const rate52Input = document.getElementById('cfg-plan-comodo');
+            const rate26 = rate26Input ? (parseFloat(rate26Input.value) || 66) : 66;
+            const rate52 = rate52Input ? (parseFloat(rate52Input.value) || 90) : 90;
+            const factor = (String(planElegido).includes("52") || planElegido == 52) ? (1 + rate52 / 100) : (1 + rate26 / 100);
 
-                        if (!precioContado && precioPlaceholder) {
-                            precioContado = Math.round(precioPlaceholder / factor);
-                        }
+            if (!precioContado && precioPlaceholder) {
+                precioContado = Math.round(precioPlaceholder / factor);
+            }
 
-                        let mlmId = "";
-                        if ((!precioContado || precioContado === 0) && link) {
-                            const match = link.match(/(MLM\-?\d+)/i);
-                            if (match) mlmId = match[0].replace("-", "").toUpperCase();
-                        }
-                        if (mlmId) {
-                            setTimeout(async () => {
-                                try {
-                                    const previewEl = document.getElementById('conv-precio-financiado-preview');
-                                    if (previewEl) previewEl.innerText = "🔍 Consultando precio original en Mercado Libre...";
-                                    
-                                    const mlUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}&action=obtenerVariantesML&id=${mlmId}`;
-                                    const resp = await fetch(mlUrl);
-                                    const mlData = await resp.json();
-                                    if (mlData && mlData.price) {
-                                        const precioCosto = parseFloat(mlData.price) || 0;
-                                        const ganVal = parseFloat(document.getElementById('cfg-ganancia-contado').value) || 15;
-                                        const factorContado = 1 + (ganVal / 100);
-                                        const precioContadoCalculado = Math.round(precioCosto * factorContado);
-                                        
-                                        const inputPrecio = document.getElementById('conv-precio');
-                                        if (inputPrecio && !inputPrecio.value) {
-                                            inputPrecio.value = precioContadoCalculado;
-                                            inputPrecio.dispatchEvent(new Event('input'));
-                                        }
-                                    } else {
-                                        if (previewEl) previewEl.innerText = "⚠️ No se pudo obtener precio automático de Mercado Libre.";
-                                    }
-                                } catch (e) {
-                                    console.error("Error al obtener precio de ML:", e);
-                                }
-                            }, 50);
-                        }
+            let mlmId = "";
+            if ((!precioContado || precioContado === 0) && link) {
+                const match = link.match(/(MLM\-?\d+)/i);
+                if (match) mlmId = match[0].replace("-", "").toUpperCase();
+            }
+            if (mlmId) {
+                setTimeout(async () => {
+                    try {
+                        const previewEl = document.getElementById('conv-precio-financiado-preview');
+                        if (previewEl) previewEl.innerText = "🔍 Consultando precio original en Mercado Libre...";
 
-                        const cont = document.getElementById('placeholders-list');
-                        // Reemplazamos por formulario simple
-                        cont.innerHTML = `
+                        const mlUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?token=${encodeURIComponent(CONFIG.API_TOKEN)}&action=obtenerVariantesML&id=${mlmId}`;
+                        const resp = await fetch(mlUrl);
+                        const mlData = await resp.json();
+                        if (mlData && mlData.price) {
+                            const precioCosto = parseFloat(mlData.price) || 0;
+                            const ganVal = parseFloat(document.getElementById('cfg-ganancia-contado').value) || 15;
+                            const factorContado = 1 + (ganVal / 100);
+                            const precioContadoCalculado = Math.round(precioCosto * factorContado);
+
+                            const inputPrecio = document.getElementById('conv-precio');
+                            if (inputPrecio && !inputPrecio.value) {
+                                inputPrecio.value = precioContadoCalculado;
+                                inputPrecio.dispatchEvent(new Event('input'));
+                            }
+                        } else {
+                            if (previewEl) previewEl.innerText = "⚠️ No se pudo obtener precio automático de Mercado Libre.";
+                        }
+                    } catch (e) {
+                        console.error("Error al obtener precio de ML:", e);
+                    }
+                }, 50);
+            }
+
+            const cont = document.getElementById('placeholders-list');
+            // Reemplazamos por formulario simple
+            cont.innerHTML = `
                             <div style="padding:6px; text-align:left;">
                                 <h3 style="margin-top:0;">Convertir Cotización a Inventario (fila ${fila})</h3>
                                 
@@ -2960,94 +3182,94 @@
                             </div>
                         `;
 
-                        // Escuchador dinámico de precio
-                        document.getElementById('conv-precio').addEventListener('input', function() {
-                            const val = parseFloat(this.value.replace(/[\$,]/g, "")) || 0;
-                            const preview = Math.round(val * factor);
-                            document.getElementById('conv-precio-financiado-preview').innerText = 
-                                `Precio Financiado Estimado: $${preview.toLocaleString('es-MX')} (Plan ${planElegido || '—'} sem)`;
-                        });
+            // Escuchador dinámico de precio
+            document.getElementById('conv-precio').addEventListener('input', function () {
+                const val = parseFloat(this.value.replace(/[\$,]/g, "")) || 0;
+                const preview = Math.round(val * factor);
+                document.getElementById('conv-precio-financiado-preview').innerText =
+                    `Precio Financiado Estimado: $${preview.toLocaleString('es-MX')} (Plan ${planElegido || '—'} sem)`;
+            });
 
-                        // Lógica de Importación Dinámica
-                        const chkImport = document.getElementById('conv-es-importacion');
-                        const containerImport = document.getElementById('conv-importacion-container');
-                        const inputImport = document.getElementById('conv-costo-importacion');
-                        const inputPrecio = document.getElementById('conv-precio');
-                        
-                        let precioBase = parseFloat(inputPrecio.value.replace(/[\$,]/g, "")) || 0;
+            // Lógica de Importación Dinámica
+            const chkImport = document.getElementById('conv-es-importacion');
+            const containerImport = document.getElementById('conv-importacion-container');
+            const inputImport = document.getElementById('conv-costo-importacion');
+            const inputPrecio = document.getElementById('conv-precio');
 
-                        chkImport.addEventListener('change', function() {
-                            if (this.checked) {
-                                containerImport.style.display = 'block';
-                                precioBase = parseFloat(inputPrecio.value.replace(/[\$,]/g, "")) || 0;
-                                inputImport.focus();
-                            } else {
-                                containerImport.style.display = 'none';
-                                inputImport.value = '';
-                                inputPrecio.value = precioBase;
-                                inputPrecio.dispatchEvent(new Event('input'));
-                            }
-                        });
+            let precioBase = parseFloat(inputPrecio.value.replace(/[\$,]/g, "")) || 0;
 
-                        inputImport.addEventListener('input', function() {
-                            const costo = parseFloat(this.value) || 0;
-                            inputPrecio.value = Math.round(precioBase + costo);
-                            inputPrecio.dispatchEvent(new Event('input'));
-                        });
-
-                        document.getElementById('conv-cancel').addEventListener('click', cargarPlaceholders);
-                        document.getElementById('conv-confirm').addEventListener('click', async function () {
-                                const imei = document.getElementById('conv-imei').value.trim();
-                                const modeloVal = document.getElementById('conv-modelo').value.trim();
-                                const color = document.getElementById('conv-color').value.trim();
-                                const memoria = document.getElementById('conv-memoria').value.trim();
-                                const precioFinal = document.getElementById('conv-precio').value.replace(/[\$,]/g, "").trim();
-                                const estado = document.getElementById('conv-estado').value.trim();
-                                const notas = document.getElementById('conv-notas').value.trim();
-
-                                if (!imei) { toast('IMEI es requerido.', 'warning'); return; }
-                                if (!modeloVal) { toast('Modelo es requerido.', 'warning'); return; }
-
-                                const params = new URLSearchParams();
-                                params.append('action', 'convertirPlaceholderAInventario');
-                                params.append('token', CONFIG.API_TOKEN);
-                                params.append('fila', String(fila));
-                                params.append('imei', imei);
-                                params.append('modelo', modeloVal);
-                                params.append('color', color);
-                                params.append('memoria', memoria);
-                                params.append('precioFinal', precioFinal);
-                                params.append('estado', estado);
-                                params.append('notas', notas);
-
-                                try {
-                                        const resp = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                                                method: 'POST',
-                                                body: params.toString(),
-                                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                                        });
-                                        const d = await resp.json();
-                                        if (d.result === 'success') {
-                                                toast('Cotización convertida correctamente a Inventario.', 'success', 'Conversión exitosa');
-                                                limpiarCacheLocalCatalogo();
-                                                cargarPlaceholders();
-                                        } else {
-                                                toast('Error: ' + (d.message || 'No se pudo convertir'), 'error');
-                                        }
-                                } catch (err) {
-                                        toast('Error de red al convertir placeholder.', 'error');
-                                }
-                        });
+            chkImport.addEventListener('change', function () {
+                if (this.checked) {
+                    containerImport.style.display = 'block';
+                    precioBase = parseFloat(inputPrecio.value.replace(/[\$,]/g, "")) || 0;
+                    inputImport.focus();
+                } else {
+                    containerImport.style.display = 'none';
+                    inputImport.value = '';
+                    inputPrecio.value = precioBase;
+                    inputPrecio.dispatchEvent(new Event('input'));
                 }
+            });
 
-                // Cerrar modal si clic fuera
-                window.addEventListener('click', function (e) {
-                        const modal = document.getElementById('modal-placeholders');
-                        if (modal && e.target === modal) modal.style.display = 'none';
-                });
+            inputImport.addEventListener('input', function () {
+                const costo = parseFloat(this.value) || 0;
+                inputPrecio.value = Math.round(precioBase + costo);
+                inputPrecio.dispatchEvent(new Event('input'));
+            });
+
+            document.getElementById('conv-cancel').addEventListener('click', cargarPlaceholders);
+            document.getElementById('conv-confirm').addEventListener('click', async function () {
+                const imei = document.getElementById('conv-imei').value.trim();
+                const modeloVal = document.getElementById('conv-modelo').value.trim();
+                const color = document.getElementById('conv-color').value.trim();
+                const memoria = document.getElementById('conv-memoria').value.trim();
+                const precioFinal = document.getElementById('conv-precio').value.replace(/[\$,]/g, "").trim();
+                const estado = document.getElementById('conv-estado').value.trim();
+                const notas = document.getElementById('conv-notas').value.trim();
+
+                if (!imei) { toast('IMEI es requerido.', 'warning'); return; }
+                if (!modeloVal) { toast('Modelo es requerido.', 'warning'); return; }
+
+                const params = new URLSearchParams();
+                params.append('action', 'convertirPlaceholderAInventario');
+                params.append('token', CONFIG.API_TOKEN);
+                params.append('fila', String(fila));
+                params.append('imei', imei);
+                params.append('modelo', modeloVal);
+                params.append('color', color);
+                params.append('memoria', memoria);
+                params.append('precioFinal', precioFinal);
+                params.append('estado', estado);
+                params.append('notas', notas);
+
+                try {
+                    const resp = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        body: params.toString(),
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    });
+                    const d = await resp.json();
+                    if (d.result === 'success') {
+                        toast('Cotización convertida correctamente a Inventario.', 'success', 'Conversión exitosa');
+                        limpiarCacheLocalCatalogo();
+                        cargarPlaceholders();
+                    } else {
+                        toast('Error: ' + (d.message || 'No se pudo convertir'), 'error');
+                    }
+                } catch (err) {
+                    toast('Error de red al convertir placeholder.', 'error');
+                }
+            });
+        }
+
+        // Cerrar modal si clic fuera
+        window.addEventListener('click', function (e) {
+            const modal = document.getElementById('modal-placeholders');
+            if (modal && e.target === modal) modal.style.display = 'none';
+        });
 
         // Cerrar si hacen clic fuera del cuadro blanco
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             const modal = document.getElementById('modal-config-negocio');
             if (event.target == modal) {
                 cerrarModalConfig();
@@ -3069,7 +3291,7 @@
                 }
 
                 // Filtra por nombre, IMEI o ID
-                const filtrados = dbClientesActivos.filter(c => 
+                const filtrados = dbClientesActivos.filter(c =>
                     (c.cliente && String(c.cliente).toUpperCase().includes(query)) ||
                     (c.imei && String(c.imei).includes(query)) ||
                     (c.id && String(c.id).toUpperCase().includes(query))
@@ -3088,7 +3310,7 @@
                     div.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
                     div.style.fontSize = "13px";
                     div.style.transition = "background 0.2s";
-                    
+
                     div.innerHTML = `
                         <div style="font-weight:600; color:#fff; text-align:left;">${c.cliente}</div>
                         <div style="color:#94a3b8; font-size:11px; margin-top:2px; text-align:left;">ID: ${c.id || 'S/ID'} | IMEI: ${c.imei}</div>
@@ -3112,7 +3334,7 @@
             });
 
             // Cerrar al hacer clic afuera
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 if (e.target !== inputBuscar && e.target !== listaResultados && !listaResultados.contains(e.target)) {
                     listaResultados.style.display = 'none';
                 }
@@ -3124,7 +3346,7 @@
             const inputNuevoImport = document.getElementById('nuevo-costo-importacion');
 
             if (chkNuevoImport && containerNuevoImport) {
-                chkNuevoImport.addEventListener('change', function() {
+                chkNuevoImport.addEventListener('change', function () {
                     if (this.checked) {
                         containerNuevoImport.style.display = 'block';
                         if (inputNuevoImport) inputNuevoImport.focus();
@@ -3135,36 +3357,36 @@
                 });
             }
 
-             if (btnAgregar) {
-                 btnAgregar.addEventListener('click', async function () {
-                     const link = document.getElementById('nuevoLink').value.trim();
-                     const imei = document.getElementById('nuevoImei').value.trim();
-                     const estado = document.getElementById('nuevoEstado').value;
-                     const condicion = document.getElementById('nuevoCondicion').value;
-                     const esImport = chkNuevoImport ? chkNuevoImport.checked : false;
-                     const costoImport = (esImport && inputNuevoImport) ? inputNuevoImport.value.trim() : "";
- 
-                     if (!link) {
-                         toast('Por favor introduce el enlace de Mercado Libre.', 'warning');
-                         return;
-                     }
- 
-                     const originalText = btnAgregar.innerText;
-                     btnAgregar.innerText = "⏳ Consultando e inyectando...";
-                     btnAgregar.disabled = true;
- 
-                     try {
-                         const formData = new URLSearchParams();
-                         formData.append('action', 'agregarCelularCatalogo');
-                         formData.append('token', CONFIG.API_TOKEN);
-                         formData.append('link', link);
-                         formData.append('imei', imei);
-                         formData.append('estado', estado);
-                         formData.append('condicion', condicion);
-                         formData.append('esImportacion', esImport ? 'true' : 'false');
-                         if (costoImport) {
-                             formData.append('costoImportacion', costoImport);
-                         }
+            if (btnAgregar) {
+                btnAgregar.addEventListener('click', async function () {
+                    const link = document.getElementById('nuevoLink').value.trim();
+                    const imei = document.getElementById('nuevoImei').value.trim();
+                    const estado = document.getElementById('nuevoEstado').value;
+                    const condicion = document.getElementById('nuevoCondicion').value;
+                    const esImport = chkNuevoImport ? chkNuevoImport.checked : false;
+                    const costoImport = (esImport && inputNuevoImport) ? inputNuevoImport.value.trim() : "";
+
+                    if (!link) {
+                        toast('Por favor introduce el enlace de Mercado Libre.', 'warning');
+                        return;
+                    }
+
+                    const originalText = btnAgregar.innerText;
+                    btnAgregar.innerText = "⏳ Consultando e inyectando...";
+                    btnAgregar.disabled = true;
+
+                    try {
+                        const formData = new URLSearchParams();
+                        formData.append('action', 'agregarCelularCatalogo');
+                        formData.append('token', CONFIG.API_TOKEN);
+                        formData.append('link', link);
+                        formData.append('imei', imei);
+                        formData.append('estado', estado);
+                        formData.append('condicion', condicion);
+                        formData.append('esImportacion', esImport ? 'true' : 'false');
+                        if (costoImport) {
+                            formData.append('costoImportacion', costoImport);
+                        }
 
                         const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
                             method: 'POST',
@@ -3203,7 +3425,7 @@
 
             if (!input || !resultados) return;
 
-            input.addEventListener('input', function(e) {
+            input.addEventListener('input', function (e) {
                 const query = e.target.value.toLowerCase().trim();
                 resultados.innerHTML = '';
                 if (!query) {
@@ -3211,7 +3433,7 @@
                     return;
                 }
 
-                const matches = dbInventarioEquipos.filter(eq => 
+                const matches = dbInventarioEquipos.filter(eq =>
                     (eq.modelo && String(eq.modelo).toLowerCase().includes(query)) ||
                     (eq.imei && String(eq.imei).toLowerCase().includes(query)) ||
                     (eq.color && String(eq.color).toLowerCase().includes(query))
@@ -3234,7 +3456,7 @@
                             <div style="font-weight: 600; color: #fff; font-size: 14px;">${eq.modelo} <span class="${badgeClass}">${eq.estado}</span></div>
                             <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">IMEI: ${eq.imei} | Color: ${eq.color} | Memoria: ${eq.memoria || 'N/A'}</div>
                         `;
-                        item.addEventListener('click', function() {
+                        item.addEventListener('click', function () {
                             seleccionarEquipoInventario(eq.imei);
                         });
                         resultados.appendChild(item);
@@ -3244,7 +3466,7 @@
             });
 
             // Cerrar al hacer clic afuera
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 if (e.target !== input && e.target !== resultados && !resultados.contains(e.target)) {
                     resultados.style.display = 'none';
                 }
@@ -3268,7 +3490,7 @@
             document.getElementById('cardDetalleInventario').style.display = 'block';
         }
 
-        window.guardarEstadoInventario = async function() {
+        window.guardarEstadoInventario = async function () {
             const imei = document.getElementById('buscarInventarioVal').value;
             const nuevoEstado = document.getElementById('invEstado').value;
             const btn = document.getElementById('btnActualizarEstadoInventario');
@@ -3298,13 +3520,13 @@
 
                 if (data.result === 'success') {
                     toast('El estado del equipo se ha actualizado en el Excel.', 'success', 'Inventario Actualizado');
-                    
+
                     // Actualizar en memoria
                     const eqIndex = dbInventarioEquipos.findIndex(item => item.imei === imei);
                     if (eqIndex !== -1) {
                         dbInventarioEquipos[eqIndex].estado = nuevoEstado;
                     }
-                    
+
                     // Actualizar formulario y caché local
                     limpiarCacheLocalCatalogo();
                 } else {
@@ -3365,7 +3587,7 @@
             });
         }
 
-        window.generarReporteMorososPDF = function() {
+        window.generarReporteMorososPDF = function () {
             try {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
@@ -3455,7 +3677,7 @@
         // ==========================================
         let resumenCajaActual = { efectivo: 0, transferencia: 0, tarjeta: 0, total: 0 };
 
-        window.calcularResumenCajaDiario = function() {
+        window.calcularResumenCajaDiario = function () {
             const fechaInput = document.getElementById('fechaCierreCaja').value;
             if (!fechaInput) return;
 
@@ -3507,7 +3729,7 @@
             document.getElementById('cierreNotas').value = '';
         }
 
-        window.calcularDiferenciaCaja = function() {
+        window.calcularDiferenciaCaja = function () {
             const efectivoRealVal = parseFloat(document.getElementById('cierreEfectivoReal').value) || 0;
             const diferencia = efectivoRealVal - resumenCajaActual.efectivo;
             const difEl = document.getElementById('cierreDiferencia');
@@ -3524,7 +3746,7 @@
             }
         }
 
-        window.guardarCierreCaja = async function() {
+        window.guardarCierreCaja = async function () {
             const fechaInput = document.getElementById('fechaCierreCaja').value;
             const efectivoRealVal = document.getElementById('cierreEfectivoReal').value;
             const notas = document.getElementById('cierreNotas').value.trim();
@@ -3584,7 +3806,7 @@
         // ==========================================
         // 🔄 INICIALIZADOR GENERAL DE NUEVOS MÓDULOS
         // ==========================================
-        window.inicializarNuevosModulos = function() {
+        window.inicializarNuevosModulos = function () {
             // 1. Cargar lista de morosos
             cargarListaMorosos();
 
@@ -3601,73 +3823,73 @@
         }
     </script>
     <script>
-        (function () {
-            // Verificar si ya cuenta con sesión activa en esta pestaña
-            if (sessionStorage.getItem('celya_authenticated') === 'true') {
-                document.getElementById('lockscreen-celya').style.display = 'none';
-                return;
-            }
-
-            // Eventos del botón y teclado
-            document.getElementById('btn-login-celya').addEventListener('click', ejecutarLoginCelya);
-            document.getElementById('pass-input-celya').addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') ejecutarLoginCelya();
-            });
-
-            async function ejecutarLoginCelya() {
-                const btn = document.getElementById('btn-login-celya');
-                const errorTxt = document.getElementById('error-login-celya');
-                const passValue = document.getElementById('pass-input-celya').value;
-
-                if (!passValue) {
-                    errorTxt.innerText = "⚠️ Escribe la contraseña";
-                    errorTxt.style.display = 'block';
+            (function () {
+                // Verificar si ya cuenta con sesión activa en esta pestaña
+                if (sessionStorage.getItem('celya_authenticated') === 'true') {
+                    document.getElementById('lockscreen-celya').style.display = 'none';
                     return;
                 }
 
-                btn.disabled = true;
-                btn.innerText = "Verificando...";
-                errorTxt.style.display = 'none';
+                // Eventos del botón y teclado
+                document.getElementById('btn-login-celya').addEventListener('click', ejecutarLoginCelya);
+                document.getElementById('pass-input-celya').addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') ejecutarLoginCelya();
+                });
 
-                try {
-                    const formData = new URLSearchParams();
-                    formData.append('action', 'login');
-                    formData.append('password', passValue);
+                async function ejecutarLoginCelya() {
+                    const btn = document.getElementById('btn-login-celya');
+                    const errorTxt = document.getElementById('error-login-celya');
+                    const passValue = document.getElementById('pass-input-celya').value;
 
-                    // CONFIG.GOOGLE_SCRIPT_URL se jala de tu archivo config.js ya enlazado
-                    const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
-                        method: 'POST',
-                        body: formData.toString(),
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                    });
+                    if (!passValue) {
+                        errorTxt.innerText = "⚠️ Escribe la contraseña";
+                        errorTxt.style.display = 'block';
+                        return;
+                    }
 
-                    const data = await response.json();
+                    btn.disabled = true;
+                    btn.innerText = "Verificando...";
+                    errorTxt.style.display = 'none';
 
-                    if (data.result === 'success') {
-                        // Guardar token temporal de sesión
-                        sessionStorage.setItem('celya_authenticated', 'true');
-                        sessionStorage.setItem('celya_api_token', data.token);
-                        CONFIG.API_TOKEN = data.token;
-                        
-                        // Desvanecer pantalla de bloqueo
-                        document.getElementById('lockscreen-celya').style.display = 'none';
-                        
-                        // Cargar datos del dashboard de inmediato con el nuevo token
-                        cargarDatosDashboard();
-                    } else {
-                        errorTxt.innerText = "❌ Contraseña incorrecta";
+                    try {
+                        const formData = new URLSearchParams();
+                        formData.append('action', 'login');
+                        formData.append('password', passValue);
+
+                        // CONFIG.GOOGLE_SCRIPT_URL se jala de tu archivo config.js ya enlazado
+                        const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                            method: 'POST',
+                            body: formData.toString(),
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                        });
+
+                        const data = await response.json();
+
+                        if (data.result === 'success') {
+                            // Guardar token temporal de sesión
+                            sessionStorage.setItem('celya_authenticated', 'true');
+                            sessionStorage.setItem('celya_api_token', data.token);
+                            CONFIG.API_TOKEN = data.token;
+
+                            // Desvanecer pantalla de bloqueo
+                            document.getElementById('lockscreen-celya').style.display = 'none';
+
+                            // Cargar datos del dashboard de inmediato con el nuevo token
+                            cargarDatosDashboard();
+                        } else {
+                            errorTxt.innerText = "❌ Contraseña incorrecta";
+                            errorTxt.style.display = 'block';
+                            btn.disabled = false;
+                            btn.innerText = "Entrar al Sistema";
+                        }
+                    } catch (err) {
+                        errorTxt.innerText = "🌐 Error de red, revisa tu conexión";
                         errorTxt.style.display = 'block';
                         btn.disabled = false;
                         btn.innerText = "Entrar al Sistema";
                     }
-                } catch (err) {
-                    errorTxt.innerText = "🌐 Error de red, revisa tu conexión";
-                    errorTxt.style.display = 'block';
-                    btn.disabled = false;
-                    btn.innerText = "Entrar al Sistema";
                 }
-            }
-        })();
+            })();
     </script>
     <!-- ═══════════════════════ TOAST SYSTEM ═══════════════════════ -->
     <div id="toast-container" style="
@@ -3675,51 +3897,116 @@
         display: flex; flex-direction: column; gap: 12px; pointer-events: none;
     "></div>
     <style>
-        @keyframes toastIn  { from { opacity:0; transform:translateX(110%); } to { opacity:1; transform:translateX(0); } }
-        @keyframes toastOut { from { opacity:1; transform:translateX(0);    } to { opacity:0; transform:translateX(110%); } }
-        @keyframes toastBar { from { width:100%; } to { width:0%; } }
-        .celya-toast {
-            min-width: 300px; max-width: 420px; border-radius: 14px;
-            padding: 16px 20px 20px; box-shadow: 0 8px 32px rgba(0,0,0,.22);
-            font-family: 'Inter', sans-serif; font-size: 14px; color: #fff;
-            pointer-events: all; position: relative; overflow: hidden;
-            animation: toastIn .35s cubic-bezier(.22,1,.36,1) forwards;
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(110%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
-        .celya-toast.hide { animation: toastOut .3s ease forwards; }
+
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(110%);
+            }
+        }
+
+        @keyframes toastBar {
+            from {
+                width: 100%;
+            }
+
+            to {
+                width: 0%;
+            }
+        }
+
+        .celya-toast {
+            min-width: 300px;
+            max-width: 420px;
+            border-radius: 14px;
+            padding: 16px 20px 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, .22);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: #fff;
+            pointer-events: all;
+            position: relative;
+            overflow: hidden;
+            animation: toastIn .35s cubic-bezier(.22, 1, .36, 1) forwards;
+        }
+
+        .celya-toast.hide {
+            animation: toastOut .3s ease forwards;
+        }
+
         .celya-toast-bar {
-            position: absolute; bottom: 0; left: 0; height: 3px;
-            background: rgba(255,255,255,.45);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, .45);
             animation: toastBar var(--dur) linear forwards;
         }
-        .celya-toast-icon { font-size: 22px; flex-shrink: 0; }
-        .celya-toast-body { display: flex; align-items: flex-start; gap: 12px; }
-        .celya-toast-title { font-weight: 700; font-size: 15px; margin-bottom: 3px; }
-        .celya-toast-msg   { opacity: .88; line-height: 1.4; }
+
+        .celya-toast-icon {
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .celya-toast-body {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .celya-toast-title {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 3px;
+        }
+
+        .celya-toast-msg {
+            opacity: .88;
+            line-height: 1.4;
+        }
     </style>
     <script>
-    function toast(msg, type, title) {
-        type  = type  || 'info';
-        title = title || { success:'Listo', error:'Error', warning:'Atenci\u00f3n', info:'Info' }[type];
-        const bg = { success:'linear-gradient(135deg,#16a34a,#15803d)',
-                     error:  'linear-gradient(135deg,#dc2626,#b91c1c)',
-                     warning:'linear-gradient(135deg,#d97706,#b45309)',
-                     info:   'linear-gradient(135deg,#2563eb,#1d4ed8)' }[type];
-        const icon = { success:'\u2705', error:'\u26d4', warning:'\u26a0\ufe0f', info:'\u2139\ufe0f' }[type];
-        const dur = 4200;
-        const el = document.createElement('div');
-        el.className = 'celya-toast';
-        el.style.cssText += 'background:' + bg;
-        el.style.setProperty('--dur', dur + 'ms');
-        el.innerHTML = '<div class="celya-toast-body">'
-            + '<span class="celya-toast-icon">' + icon + '</span>'
-            + '<div><div class="celya-toast-title">' + title + '</div>'
-            + '<div class="celya-toast-msg">' + msg + '</div></div></div>'
-            + '<div class="celya-toast-bar"></div>';
-        document.getElementById('toast-container').appendChild(el);
-        const remove = () => { el.classList.add('hide'); setTimeout(() => el.remove(), 320); };
-        const tid = setTimeout(remove, dur);
-        el.addEventListener('click', () => { clearTimeout(tid); remove(); });
-    }
+        function toast(msg, type, title) {
+            type = type || 'info';
+            title = title || { success: 'Listo', error: 'Error', warning: 'Atenci\u00f3n', info: 'Info' }[type];
+            const bg = {
+                success: 'linear-gradient(135deg,#16a34a,#15803d)',
+                error: 'linear-gradient(135deg,#dc2626,#b91c1c)',
+                warning: 'linear-gradient(135deg,#d97706,#b45309)',
+                info: 'linear-gradient(135deg,#2563eb,#1d4ed8)'
+            }[type];
+            const icon = { success: '\u2705', error: '\u26d4', warning: '\u26a0\ufe0f', info: '\u2139\ufe0f' }[type];
+            const dur = 4200;
+            const el = document.createElement('div');
+            el.className = 'celya-toast';
+            el.style.cssText += 'background:' + bg;
+            el.style.setProperty('--dur', dur + 'ms');
+            el.innerHTML = '<div class="celya-toast-body">'
+                + '<span class="celya-toast-icon">' + icon + '</span>'
+                + '<div><div class="celya-toast-title">' + title + '</div>'
+                + '<div class="celya-toast-msg">' + msg + '</div></div></div>'
+                + '<div class="celya-toast-bar"></div>';
+            document.getElementById('toast-container').appendChild(el);
+            const remove = () => { el.classList.add('hide'); setTimeout(() => el.remove(), 320); };
+            const tid = setTimeout(remove, dur);
+            el.addEventListener('click', () => { clearTimeout(tid); remove(); });
+        }
     </script>
 </body>
 

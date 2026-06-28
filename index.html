@@ -1267,6 +1267,53 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        /* Estilos para pastillas de color (PDP pickers dinámicos) */
+        .color-pill {
+            padding: 10px 18px !important;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px !important;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #334155;
+            flex-shrink: 0 !important;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .color-pill:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            transform: translateY(-1px);
+        }
+
+        .color-pill.selected {
+            border-color: var(--accent);
+            background-color: rgba(var(--accent-rgb), 0.08);
+            color: var(--accent);
+            font-weight: 700;
+            box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.2);
+        }
+
+        body.dark-theme .color-pill {
+            background: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
+        body.dark-theme .color-pill:hover {
+            background: #283548;
+            border-color: #475569;
+        }
+
+        body.dark-theme .color-pill.selected {
+            background: rgba(var(--accent-rgb), 0.15);
+            border-color: var(--accent);
+            color: #38bdf8;
+        }
+
         /* Estilos para las pastillas de memoria */
         .storage-pill {
             padding: 10px 18px !important;
@@ -1731,8 +1778,9 @@
         .pdp-price-container {
             display: flex;
             flex-direction: column;
+            gap: 10px;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 16px;
+            padding-bottom: 18px;
             text-align: left;
         }
 
@@ -1760,14 +1808,35 @@
             font-size: 15px;
             color: #2563eb;
             font-weight: 600;
-            margin-top: 4px;
+            margin-top: 0;
             display: flex;
-            align-items: center;
-            gap: 4px;
+            align-items: baseline;
+            gap: 6px;
+            flex-wrap: wrap;
+            line-height: 1.5;
         }
 
         body.dark-theme .pdp-weekly-payments {
             color: #38bdf8;
+        }
+
+        /* Badge de descuento por enganche - color ámbar/dorado llamativo */
+        .pdp-tasa-hint-badge {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #b45309;
+            margin-top: 2px;
+            padding: 8px 14px;
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border: 1px solid #fcd34d;
+            border-radius: 8px;
+            display: none;
+        }
+
+        body.dark-theme .pdp-tasa-hint-badge {
+            color: #fbbf24;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(245, 158, 11, 0.08));
+            border-color: rgba(251, 191, 36, 0.3);
         }
 
         /* Resumen del plan de pago en el formulario */
@@ -3274,18 +3343,15 @@
             style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
             <h2 id="tituloSeccion" style="margin: 0; font-size: clamp(16px, 4vw, 22px);">✨ Modelos Destacados y
                 Favoritos CelYa!</h2>
-            <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-                <span id="cacheBadge"
-                    style="display: none; background:#fff7ed; color:#c2410c; border: 1px solid #ffedd5; padding:3px 8px; border-radius:10px; font-weight:700; font-size:10px; white-space: nowrap;">⏳
-                    Caché</span>
+            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                <span id="cacheBadge" style="display: none;"></span>
                 <span class="count-badge" id="countBadge"
-                    style="cursor: pointer; user-select: none; font-size: 12px; padding: 3px 10px;"
-                    title="Haz clic para alternar vista" onclick="alternarModoVista()">0 equipos</span>
+                    style="cursor: default; user-select: none; font-size: 14px; padding: 5px 14px; font-weight: 600;">0 equipos</span>
                 <div
-                    style="display: flex; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 8px; padding: 2px; gap: 1px;">
+                    style="display: flex; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 10px; padding: 3px; gap: 2px;">
                     <button type="button" id="btnViewGrid" class="view-toggle-btn active" onclick="setModoVista('grid')"
-                        style="border: none; background: transparent; padding: 4px 6px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: all 0.2s;">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        style="border: none; background: transparent; padding: 8px 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: all 0.2s;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="7" height="7"></rect>
                             <rect x="14" y="3" width="7" height="7"></rect>
@@ -3294,8 +3360,8 @@
                         </svg>
                     </button>
                     <button type="button" id="btnViewList" class="view-toggle-btn" onclick="setModoVista('list')"
-                        style="border: none; background: transparent; padding: 4px 6px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: all 0.2s;">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        style="border: none; background: transparent; padding: 8px 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: all 0.2s;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="8" y1="6" x2="21" y2="6"></line>
                             <line x1="8" y1="12" x2="21" y2="12"></line>
@@ -3470,24 +3536,22 @@
                     </div>
 
                     <div class="pdp-price-container">
-                        <div style="display: flex; align-items: baseline; gap: 8px;">
+                        <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;">
                             <span class="pdp-price-amount" id="pdp-enganche-grande">$0</span>
-                            <span style="font-size: 14px; color: var(--text-muted);" id="pdp-enganche-label">Pago
-                                Inicial (Enganche)</span>
+                            <span style="font-size: 14px; color: var(--text-muted); font-weight: 500; padding: 4px 10px; background: rgba(22, 163, 74, 0.08); border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.15);" id="pdp-enganche-label">Pago Inicial (Enganche)</span>
                         </div>
 
                         <div class="pdp-weekly-payments">
-                            <span style="font-size: 24px;" id="pdp-weekly-amount">$0</span>
+                            <span style="font-size: 24px; font-weight: 700;" id="pdp-weekly-amount">$0</span>
                             <span id="pdp-daily-equivalent-label"
-                                style="font-size: 14.5px; font-weight: 700; margin-left: 6px; display: none;"></span>
+                                style="font-size: 14px; font-weight: 700; display: none; color: #059669; background: rgba(5, 150, 105, 0.08); padding: 3px 8px; border-radius: 5px;"></span>
                             <span id="pdp-weekly-term"
-                                style="font-size: 14px; font-weight: normal; color: var(--text-muted);">en
+                                style="font-size: 14px; font-weight: 500; color: var(--text-muted);">en
                                 -- pagos semanales</span>
                         </div>
-                        <div id="pdp-tasa-interes-badge"
-                            style="font-size: 13.5px; font-weight: 600; color: #16a34a; margin-top: 5px; display: none;">
+                        <div id="pdp-tasa-interes-badge" class="pdp-tasa-hint-badge">
                         </div>
-                        <div style="font-size: 13px; color: var(--text-muted); margin-top: 6px;"
+                        <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;"
                             id="pdp-contado-chico-texto">
                             Precio de Contado: <strong>$0</strong>
                         </div>
@@ -4307,12 +4371,20 @@
                 }
             }
 
-            const urlConsulta = `${CONFIG.GOOGLE_SCRIPT_URL}?action=buscarModelosCatalogo&q=${encodeURIComponent(busqueda)}`;
+            const urlLocal = "https://portal.estrenacelya.com/catalogo.json";
+            const urlGoogle = `${CONFIG.GOOGLE_SCRIPT_URL}?action=buscarModelosCatalogo&q=${encodeURIComponent(busqueda)}`;
 
             // --- ESCENARIO 1: ACTUALIZACIÓN SILENCIOSA EN SEGUNDO PLANO (Si ya hay caché en pantalla) ---
             if (cachePintada && busqueda === "") {
-                fetch(urlConsulta)
-                    .then(res => res.json())
+                fetch(urlLocal)
+                    .then(res => {
+                        if (!res.ok) throw new Error("Status HTTP no exitoso en catalogo.json local");
+                        return res.json();
+                    })
+                    .catch(err => {
+                        console.warn("Fallo catalogo.json local en background. Iniciando fallback de Google Apps Script...");
+                        return fetch(urlGoogle).then(r => r.json());
+                    })
                     .then(data => {
                         if (data.result === 'success' && data.resultados) {
                             const nuevoJson = JSON.stringify(data.resultados);
@@ -4345,10 +4417,22 @@
 
             // --- ESCENARIO 2: CARGA SÍNCRONA CON LOADER (Primera carga sin caché o búsqueda manual) ---
             try {
-                const res = await fetch(urlConsulta);
-                const data = await res.json();
+                let data = null;
+                try {
+                    const res = await fetch(busqueda === "" ? urlLocal : urlGoogle);
+                    if (!res.ok) throw new Error("Fallo de red en catalogo.json local");
+                    data = await res.json();
+                } catch (errLocal) {
+                    if (busqueda === "") {
+                        console.warn("Fallo al descargar catalogo.json local. Ejecutando fallback de Google Apps Script en caliente...");
+                        const res = await fetch(urlGoogle);
+                        data = await res.json();
+                    } else {
+                        throw errLocal;
+                    }
+                }
 
-                if (data.result === 'success' && data.resultados) {
+                if (data && data.result === 'success' && data.resultados) {
                     window.equiposCargados = data.resultados;
                     window.catalogCacheActive = false;
 
@@ -5534,11 +5618,15 @@
                 if (rateBadge) {
                     rateBadge.style.display = 'block';
                     if (descuentoInteres > 0) {
+                        rateBadge.style.background = 'linear-gradient(135deg, #ecfdf5, #d1fae5)';
+                        rateBadge.style.borderColor = '#6ee7b7';
                         rateBadge.style.color = '#059669';
                         rateBadge.innerHTML = `🔥 ¡Se aplicó un descuento del <strong>${Math.round(descuentoInteres * 100)}%</strong> en tu financiamiento!`;
                     } else {
-                        rateBadge.style.color = '#7f8c8d';
-                        rateBadge.innerHTML = `💡 ¡Da 25% o más de enganche y obtén un descuento en tu tasa!`;
+                        rateBadge.style.background = '';
+                        rateBadge.style.borderColor = '';
+                        rateBadge.style.color = '';
+                        rateBadge.innerHTML = `💰 ¡Da 25% o más de enganche y <strong>obtén un descuento</strong> en tu tasa de interés!`;
                     }
                 }
             }
@@ -6177,8 +6265,8 @@
                         rateBadge.style.color = '#059669';
                         rateBadge.innerHTML = `🔥 ¡Se aplicó un descuento del <strong>${Math.round(descuentoInteres * 100)}%</strong> en tu financiamiento!`;
                     } else {
-                        rateBadge.style.color = '#7f8c8d';
-                        rateBadge.innerHTML = `💡 ¡Da 25% o más de enganche y obtén un descuento en tu tasa!`;
+                        rateBadge.style.color = '#b45309';
+                        rateBadge.innerHTML = `💰 ¡Da 25% o más de enganche y <strong>obtén un descuento</strong> en tu tasa de interés!`;
                     }
                 }
             }
