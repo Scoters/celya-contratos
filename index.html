@@ -5264,10 +5264,21 @@
                 cliFrecuencia.value = freqInicial;
             }
 
-            // Establecer plazo por defecto: Plan Cómodo (52 Semanas / 26 Quincenas)
+            // Establecer plazo por defecto dinámicamente según el plan con el menor enganche
+            // para que coincida exactamente con el "Enganche desde" de la tarjeta
             const cliPlazo = document.getElementById('cliPlazo');
             if (cliPlazo) {
-                cliPlazo.value = "52 Semanas";
+                if (freqInicial === "QUINCENAL") {
+                    const fQR = CONFIG_TASAS.engancheQuin26 !== undefined ? CONFIG_TASAS.engancheQuin26 : 0.25;
+                    const fQC = CONFIG_TASAS.engancheQuin52 !== undefined ? CONFIG_TASAS.engancheQuin52 : 0.35;
+                    cliPlazo.value = (fQR <= fQC) ? "26 Semanas" : "52 Semanas";
+                } else if (freqInicial === "SEMANAL") {
+                    const fSR = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
+                    const fSC = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
+                    cliPlazo.value = (fSC <= fSR) ? "52 Semanas" : "26 Semanas";
+                } else {
+                    cliPlazo.value = "52 Semanas";
+                }
             }
 
             const inputEng = document.getElementById('cliEnganchePersonalizado');
@@ -5276,7 +5287,7 @@
             }
 
             // Initialize Dynamic Price Calculator
-            // Flag: no sobreescribir el plazo "52 Semanas" que acabamos de fijar en la primera llamada
+            // Flag: no sobreescribir el plazo inicial que acabamos de fijar en la primera llamada
             window._pdpPlazoOverrideAllowed = false;
             actualizarPlazosYPrecioPDP();
             const thumbsContainer = document.getElementById('pdp-thumbs-container');
