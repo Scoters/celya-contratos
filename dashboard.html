@@ -4234,7 +4234,7 @@
                             document.getElementById('lockscreen-celya').style.display = 'none';
 
                             // Cargar datos del dashboard de inmediato con el nuevo token
-                            cargarDatosDashboard();
+                            location.reload();
                         } else {
                             errorTxt.innerText = "❌ Contraseña incorrecta";
                             errorTxt.style.display = 'block';
