@@ -514,21 +514,43 @@
         let ineTraseraB64 = "";
         let fotoEvidenciaB64 = "";
 
-        let CONFIG_TASAS_SHEETS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, engancheSemanal: 0.165, engancheComodo: 0.11, interesQuin26: 0.45, interesQuin52: 0.65, engancheQuin26: 0.25, engancheQuin52: 0.35 }; // Aquí caen en vivo el 66% y 90% del Sheets
+        const DEFAULT_TASAS_SHEETS = { 
+            interes26: 0.45, 
+            interes52: 0.65, 
+            enganche26: 0.225, 
+            enganche52: 0.325, 
+            engancheSemanal: 0.13, 
+            engancheComodo: 0.15, 
+            interesQuin26: 0.25, 
+            interesQuin52: 0.45, 
+            engancheQuin26: 0.13, 
+            engancheQuin52: 0.15 
+        };
+        let CONFIG_TASAS_SHEETS = (() => {
+            try {
+                const cached = localStorage.getItem('celya_config_tasas');
+                return cached ? JSON.parse(cached) : DEFAULT_TASAS_SHEETS;
+            } catch (e) {
+                return DEFAULT_TASAS_SHEETS;
+            }
+        })();
 
         // Conexión directa al backend para traer los intereses de D2 y E2
         async function sincronizarTasasDesdeSheets() {
             try {
                 const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerTasasConfig`);
                 const data = await response.json();
-                if (data.result === 'success') {
+                if (data.result === 'success' || data.interes26) {
                     CONFIG_TASAS_SHEETS = data;
+                    localStorage.setItem('celya_config_tasas', JSON.stringify(data));
                     console.log("🎯 Tasas CelYa Sincronizadas:", CONFIG_TASAS_SHEETS);
+                    // Actualizar el cálculo de precios del formulario con las tasas actualizadas
+                    if (typeof actualizarFormularioPrecios === 'function') {
+                        actualizarFormularioPrecios();
+                    }
                 }
             } catch (err) {
                 console.error("⚠️ Error de red al sincronizar tasas, usando respaldo local:", err);
-                // Respaldo de seguridad por si falla la conexión un segundo
-                CONFIG_TASAS_SHEETS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, engancheSemanal: 0.165, engancheComodo: 0.11, interesQuin26: 0.45, interesQuin52: 0.65, engancheQuin26: 0.25, engancheQuin52: 0.35 };
             }
         }
 
@@ -1135,11 +1157,11 @@
                 } else {
                     const factorEngancheMinimo = (frecuencia === "QUINCENAL")
                         ? ((planElegido === "52")
-                            ? (CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.35)
-                            : (CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.25))
+                            ? (CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.15)
+                            : (CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.13))
                         : ((planElegido === "52")
-                            ? (CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.11)
-                            : (CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.165));
+                            ? (CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.15)
+                            : (CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.13));
                     const engancheMinimoObligatorio = Math.ceil((precioContado * factorEngancheMinimo) / 10) * 10;
 
                     const inputMonto = document.getElementById('monto');
@@ -1183,11 +1205,11 @@
 
                     const factorInteresBase = (frecuencia === "QUINCENAL")
                         ? ((planElegido === "26")
-                            ? (CONFIG_TASAS_SHEETS.interesQuin26 !== undefined ? CONFIG_TASAS_SHEETS.interesQuin26 : 0.45)
-                            : (CONFIG_TASAS_SHEETS.interesQuin52 !== undefined ? CONFIG_TASAS_SHEETS.interesQuin52 : 0.65))
+                            ? (CONFIG_TASAS_SHEETS.interesQuin26 !== undefined ? CONFIG_TASAS_SHEETS.interesQuin26 : 0.25)
+                            : (CONFIG_TASAS_SHEETS.interesQuin52 !== undefined ? CONFIG_TASAS_SHEETS.interesQuin52 : 0.45))
                         : ((planElegido === "26")
-                            ? (CONFIG_TASAS_SHEETS.interes26 !== undefined ? CONFIG_TASAS_SHEETS.interes26 : 0.66)
-                            : (CONFIG_TASAS_SHEETS.interes52 !== undefined ? CONFIG_TASAS_SHEETS.interes52 : 0.90));
+                            ? (CONFIG_TASAS_SHEETS.interes26 !== undefined ? CONFIG_TASAS_SHEETS.interes26 : 0.45)
+                            : (CONFIG_TASAS_SHEETS.interes52 !== undefined ? CONFIG_TASAS_SHEETS.interes52 : 0.65));
                     const factorInteres = Math.max(0, factorInteresBase - descuentoInteres);
                     
                     const numPagosBase = (planElegido === "26") ? 26 : 52;
@@ -1319,12 +1341,12 @@
             // Sincronizar plazo: elegir dinámicamente el plan con enganche menor
             const selectPlazo = document.getElementById('plazoSemanas');
             if (frecuencia === "QUINCENAL") {
-                const fQR = CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.25;
-                const fQC = CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.35;
+                const fQR = CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.13;
+                const fQC = CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.15;
                 selectPlazo.value = (fQR <= fQC) ? "26" : "52";
             } else if (frecuencia === "SEMANAL") {
-                const fSR = CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.165;
-                const fSC = CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.11;
+                const fSR = CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.13;
+                const fSC = CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.15;
                 selectPlazo.value = (fSC <= fSR) ? "52" : "26";
             }
 
@@ -1378,11 +1400,11 @@
                 const frecuencia = partes[0] || "SEMANAL";
                 const factorEngancheMinimo = (frecuencia === "QUINCENAL")
                     ? ((planElegido === "52")
-                        ? (CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.35)
-                        : (CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.25))
+                        ? (CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.15)
+                        : (CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.13))
                     : ((planElegido === "52")
-                        ? (CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.11)
-                        : (CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.165));
+                        ? (CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.15)
+                        : (CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.13));
                 const engancheMinimoObligatorio = Math.ceil((precioContado * factorEngancheMinimo) / 10) * 10;
                 const engancheIngresado = parseFloat(document.getElementById('monto').value.replace(/[\$,]/g, "")) || 0;
 
