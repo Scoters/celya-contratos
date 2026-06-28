@@ -3387,7 +3387,7 @@
             style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
             <h2 id="tituloSeccion" style="margin: 0; font-size: clamp(16px, 4vw, 22px);">✨ Modelos Destacados y
                 Favoritos CelYa</h2>
-            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: auto;">
                 <span id="cacheBadge" style="display: none;"></span>
                 <span class="count-badge" id="countBadge"
                     style="cursor: default; user-select: none; font-size: 14px; padding: 5px 14px; font-weight: 600;">0
@@ -4237,10 +4237,24 @@
         // Función unificada de cálculo de cuotas — recibe los factores correctos según frecuencia y plazo
         function calcularCuotaUnificada(precioContado, factorEng, factorInt, numPagos, _caller) {
             const eng = Math.ceil((precioContado * factorEng) / 10) * 10;
-            const totalFinanciado = (precioContado * (1 + factorInt)) - eng;
+            
+            // --- APLICAR EL MISMO DESCUENTO DE TASA SEGÚN EL ENGANCHE QUE EL PDP ---
+            const pctEnganche = (eng / precioContado) * 100;
+            let descuentoInteres = 0;
+            if (pctEnganche >= 45) {
+                descuentoInteres = 0.15;
+            } else if (pctEnganche >= 35) {
+                descuentoInteres = 0.10;
+            } else if (pctEnganche >= 25) {
+                descuentoInteres = 0.05;
+            }
+            const factorIntFinal = Math.max(0, factorInt - descuentoInteres);
+
+            const totalFinanciado = (precioContado * (1 + factorIntFinal)) - eng;
             const cuotaSinRedondear = totalFinanciado / numPagos;
-            const cuotaRedondeada = Math.round(cuotaSinRedondear);
-            console.log(`[CUOTA-DEBUG ${_caller || '?'}] precio=${precioContado}, fEng=${factorEng}, fInt=${factorInt}, eng=${eng}, totalFin=${totalFinanciado}, pagos=${numPagos}, cuotaRaw=${cuotaSinRedondear}, cuotaFinal=${cuotaRedondeada}`);
+            const cuotaRedondeada = Math.max(0, Math.round(cuotaSinRedondear));
+            
+            console.log(`[CUOTA-DEBUG ${_caller || '?'}] precio=${precioContado}, fEng=${factorEng}, fInt=${factorInt}, fIntFinal=${factorIntFinal}, eng=${eng}, totalFin=${totalFinanciado}, pagos=${numPagos}, cuotaFinal=${cuotaRedondeada}`);
             return cuotaRedondeada;
         }
 
@@ -4771,10 +4785,10 @@
                                      ${(item.esImportacion === true || item.esImportacion === 'true') ? `<span class="status-badge status-import">✈️ Importación</span>` : ''}
                                      ${(item.esUsado === true || item.esUsado === 'true') ? `<span class="status-badge status-used" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">🔧 Usado</span>` : ''}
                                 </div>
-                                <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheComodoCalculado}, '${item.color || ""}', '${item.memoria || ""}', this)">
+                                <div class="img-container" style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheComodoCalculado}, '${item.coloresDisponibles || item.color || ""}', '${item.memoria || ""}', this)">
                                      <img src="${optimizarUrlImagen(item.foto, 300)}" alt="${modeloLimpio}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=150&auto=format&fit=crop'">
                                 </div>
-                                <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheComodoCalculado}, '${item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpio}</h4>
+                                <h4 style="cursor: pointer;" onclick="abrirModalCredito('${item.id}', '${modeloOriginalEscapado}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheComodoCalculado}, '${item.coloresDisponibles || item.color || ""}', '${item.memoria || ""}', this)">${modeloLimpio}</h4>
                                 <div class="specs-container">
                                     ${ramText ? `<span class="spec-tag">⚡ ${ramText}</span>` : ''}
                                     ${memoriaText ? `<span class="spec-tag">💾 ${memoriaText}</span>` : ''}
@@ -4835,7 +4849,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/\'/g, "").replace(/\"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheComodoCalculado}, '${item.color || ""}', '${item.memoria || ""}', this)">${textSolicitar}</button>
+                                <button class="btn-solicitar" onclick="abrirModalCredito('${item.id}', '${modeloLimpio.replace(/\'/g, "").replace(/\"/g, "")}', ${item.esFijo === 'true' || item.esFijo === true}, '${item.foto}', ${cuotaSem26}, ${cuotaSem52}, '${item.link || ""}', ${item.precioContado || 0}, ${engancheComodoCalculado}, '${item.coloresDisponibles || item.color || ""}', '${item.memoria || ""}', this)">${textSolicitar}</button>
                             </div>
                         </div>
                     `;
@@ -4946,7 +4960,7 @@
                         equipoEncontrado.link || "",
                         equipoEncontrado.precioContado || 0,
                         engancheComodoCalculado,
-                        equipoEncontrado.color || "",
+                        equipoEncontrado.coloresDisponibles || equipoEncontrado.color || "",
                         equipoEncontrado.memoria || "",
                         null
                     );
@@ -5198,11 +5212,13 @@
                 if (card) {
                     const activeBtn = card.querySelector('.freq-btn.active');
                     if (activeBtn) {
-                        const clickAttr = activeBtn.getAttribute('onclick') || '';
-                        if (clickAttr.includes('quincenal')) {
+                        const btnText = activeBtn.innerText.trim().toUpperCase();
+                        if (btnText === "QUINCENAL") {
                             freqInicial = "QUINCENAL";
-                        } else if (clickAttr.includes('contado')) {
+                        } else if (btnText === "CONTADO" || btnText.includes("CONTADO")) {
                             freqInicial = "CONTADO";
+                        } else {
+                            freqInicial = "SEMANAL";
                         }
                     }
                 }
@@ -5213,19 +5229,10 @@
                 cliFrecuencia.value = freqInicial;
             }
 
-            // Establecer plazo por defecto: elegir dinámicamente el plan con enganche menor
-            // para que coincida exactamente con el "Enganche desde" de la tarjeta (Math.min)
+            // Establecer plazo por defecto: Plan Cómodo (52 Semanas / 26 Quincenas)
             const cliPlazo = document.getElementById('cliPlazo');
             if (cliPlazo) {
-                if (freqInicial === "QUINCENAL") {
-                    const fQR = CONFIG_TASAS.engancheQuin26 !== undefined ? CONFIG_TASAS.engancheQuin26 : 0.25;
-                    const fQC = CONFIG_TASAS.engancheQuin52 !== undefined ? CONFIG_TASAS.engancheQuin52 : 0.35;
-                    cliPlazo.value = (fQR <= fQC) ? "26 Semanas" : "52 Semanas";
-                } else {
-                    const fSR = CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165;
-                    const fSC = CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11;
-                    cliPlazo.value = (fSC <= fSR) ? "52 Semanas" : "26 Semanas";
-                }
+                cliPlazo.value = "52 Semanas";
             }
 
             const inputEng = document.getElementById('cliEnganchePersonalizado');
@@ -7329,174 +7336,17 @@
             console.log("Grading seleccionado global:", gradingSeleccionadoGlobal);
 
             const warningEl = document.getElementById('pdp-price-anomaly-warning');
+            const precioContado = parseFloat(document.getElementById('hiddenPrecioContado').value) || 0;
 
-            let listToUse = [];
-            if (variantesVivasGlobal && variantesVivasGlobal.length > 0) {
-                listToUse = variantesVivasGlobal;
-            } else if (productMapGlobal && Object.keys(productMapGlobal).length > 0) {
-                listToUse = Object.values(productMapGlobal).map(p => {
-                    return {
-                        id: p.id,
-                        attribute_combinations: [
-                            { id: "COLOR", value_name: p.color },
-                            { id: "INTERNAL_MEMORY", value_name: p.memory },
-                            { id: "RAM_MEMORY", value_name: p.ram },
-                            { id: "GRADING", value_name: p.grading }
-                        ],
-                        attributes: []
-                    };
-                });
-            }
-
-            console.log("Cantidad de variantes vivas totales:", listToUse.length);
-
-            if (listToUse.length === 0) {
-                console.log("Fin anomalía: No hay variantes vivas cargadas.");
-                return false;
-            }
-
-            const varianteSeleccionada = listToUse.find(v => {
-                const allAttrs = (v.attribute_combinations || []).concat(v.attributes || []);
-                const colorMatch = colorSeleccionadoGlobal ? allAttrs.some(a => {
-                    const idUpper = a.id.toUpperCase();
-                    return (idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO") && a.value_name && colorsMatch(a.value_name, colorSeleccionadoGlobal);
-                }) : true;
-                const memoriaMatch = memoriaSeleccionadaGlobal ? allAttrs.some(a => {
-                    const idUpper = a.id.toUpperCase();
-                    return (idUpper.includes("MEMORY") || idUpper.includes("MEMORIA") || idUpper === "INTERNAL_MEMORY" || idUpper === "MEMORY_CAPACITY" || idUpper === "CAPACITY" || idUpper === "CAPACIDAD" || idUpper === "STORAGE" || idUpper === "ALMACENAMIENTO" || idUpper === "RAM_MEMORY") && a.value_name && a.value_name.toLowerCase().replace(/\s+/g, "") === memoriaSeleccionadaGlobal.toLowerCase().replace(/\s+/g, "");
-                }) : true;
-                const gradingMatch = gradingSeleccionadoGlobal ? allAttrs.some(a => {
-                    const idUpper = (a.id || '').toString().toUpperCase();
-                    return (idUpper === "GRADING" || a.name === "Estado del reacondicionado") && a.value_name && a.value_name.toLowerCase().trim() === gradingSeleccionadoGlobal.toLowerCase().trim();
-                }) : true;
-                return colorMatch && memoriaMatch && gradingMatch;
-            });
-
-            if (!varianteSeleccionada) {
-                console.log("Fin anomalía: No se encontró variante seleccionada coincidente.");
-                return false;
-            }
-
-            const specsSelected = obtenerSpecsDeVariacion(varianteSeleccionada);
-            const priceSelected = resolverPrecioContadoDeVariacion(varianteSeleccionada, true);
-
-            console.log("Variante seleccionada:", {
-                id: varianteSeleccionada.id,
-                specs: specsSelected,
-                price: priceSelected
-            });
-
-            if (priceSelected <= 0) {
-                console.log("Fin anomalía: El precio de la variante seleccionada es <= 0.");
-                return false;
-            }
-
-            // Tier 1 check: Compare selected variant's price with base price if specs changed
-            const currentMem = memoriaSeleccionadaGlobal || almacenamientoSeleccionado || "";
-            const currentRam = ramSeleccionadaGlobal || "";
-            const baseMem = window.pdpBaseSpecs ? window.pdpBaseSpecs.memory : defaultMemoria;
-            const baseRam = window.pdpBaseSpecs ? window.pdpBaseSpecs.ram : "";
-
-            const currMemGb = obtenerGbsNumericos(currentMem);
-            const baseMemGb = obtenerGbsNumericos(baseMem);
-            const currRamGb = obtenerGbsNumericos(currentRam);
-            const baseRamGb = obtenerGbsNumericos(baseRam);
-
-            const hasStorageChange = currMemGb > 0 && baseMemGb > 0 && currMemGb !== baseMemGb;
-            const hasRamChange = currRamGb > 0 && baseRamGb > 0 && currRamGb !== baseRamGb;
-
-            if ((hasStorageChange || hasRamChange) && priceSelected === window.pdpBasePrecioContado) {
-                console.warn("Anomalía Tier 1: El precio de contado final no cambió del precio base, pero las especificaciones de memoria/RAM son diferentes.", {
-                    currentSpecs: { memory: currentMem, ram: currentRam },
-                    baseSpecs: { memory: baseMem, ram: baseRam },
-                    price: priceSelected
-                });
+            if (precioContado <= 0) {
+                console.log("Anomalía detectada: Precio de contado es <= 0.");
                 if (warningEl) {
-                    warningEl.innerHTML = '<strong>⚠️ Error de carga en precios:</strong> El precio no se actualizó correctamente para la capacidad seleccionada. Intente seleccionar otra variante o espere un momento.';
+                    warningEl.innerHTML = '<strong>⚠️ Error de precio:</strong> El precio de este equipo no está disponible temporalmente.';
                 }
-                console.log("=== FIN DETECTAR ANOMALIA (ANOMALIA TIER 1 ENCONTRADA) ===");
                 return true;
             }
 
-            // Si el producto actual es un producto de catálogo (/p/), desactivamos la validación de anomalías Tier 2
-            // porque consolidan ofertas de múltiples vendedores independientes de Mercado Libre y es normal y común
-            // que capacidades más grandes cuesten menos.
-            const isCatalogProduct = (typeof currentMLItemLink !== "undefined" && currentMLItemLink && currentMLItemLink.includes("/p/")) || 
-                                     (varianteSeleccionada && varianteSeleccionada.id && varianteSeleccionada.id.startsWith("MLM") && varianteSeleccionada.id.length <= 11);
-            if (isCatalogProduct) {
-                console.log("Desactivando anomalías de precio Tier 2 para producto de catálogo.");
-                console.log("=== FIN DETECTAR ANOMALIA (PRODUCTO DE CATALOGO) ===");
-                return false;
-            }
-
-            // Tier 2 sibling comparison
-            for (let i = 0; i < listToUse.length; i++) {
-                const vOther = listToUse[i];
-                if (vOther.id === varianteSeleccionada.id) continue;
-
-                const otherAttrs = (vOther.attribute_combinations || []).concat(vOther.attributes || []);
-                const colorMatch = colorSeleccionadoGlobal ? otherAttrs.some(a => {
-                    const idUpper = a.id.toUpperCase();
-                    return (idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO") && a.value_name && colorsMatch(a.value_name, colorSeleccionadoGlobal);
-                }) : true;
-                const gradingMatch = gradingSeleccionadoGlobal ? otherAttrs.some(a => {
-                    const idUpper = (a.id || '').toString().toUpperCase();
-                    return (idUpper === "GRADING" || a.name === "Estado del reacondicionado") && a.value_name && a.value_name.toLowerCase().trim() === gradingSeleccionadoGlobal.toLowerCase().trim();
-                }) : true;
-
-                console.log(`Hermano #${i + 1} (${vOther.id}): colorMatch=${colorMatch}, gradingMatch=${gradingMatch}`);
-
-                if (!colorMatch || !gradingMatch) continue;
-
-                const specsOther = obtenerSpecsDeVariacion(vOther);
-                const priceOther = resolverPrecioContadoDeVariacion(vOther, false);
-
-                console.log(`Hermano #${i + 1} (${vOther.id}) detalles:`, {
-                    specs: specsOther,
-                    price: priceOther
-                });
-
-                if (priceOther <= 0) {
-                    console.log(`Hermano #${i + 1} omitido porque precio <= 0.`);
-                    continue;
-                }
-
-                const hasStorageComparison = specsSelected.storage > 0 && specsOther.storage > 0;
-                const hasRamComparison = specsSelected.ram > 0 && specsOther.ram > 0;
-
-                let isAnomaly = false;
-
-                if (hasStorageComparison) {
-                    const isHigherStorage = specsSelected.storage > specsOther.storage;
-                    const isSameOrHigherRam = hasRamComparison ? (specsSelected.ram >= specsOther.ram) : true;
-                    console.log(`Comparando storage: selectedStorage(${specsSelected.storage}) > otherStorage(${specsOther.storage}) -> ${isHigherStorage}. isSameOrHigherRam -> ${isSameOrHigherRam}`);
-                    if (isHigherStorage && isSameOrHigherRam && priceSelected <= priceOther) {
-                        isAnomaly = true;
-                    }
-                }
-                if (hasRamComparison && !isAnomaly) {
-                    const isHigherRam = specsSelected.ram > specsOther.ram;
-                    const isSameOrHigherStorage = hasStorageComparison ? (specsSelected.storage >= specsOther.storage) : true;
-                    console.log(`Comparando RAM: selectedRam(${specsSelected.ram}) > otherRam(${specsOther.ram}) -> ${isHigherRam}. isSameOrHigherStorage -> ${isSameOrHigherStorage}`);
-                    if (isHigherRam && isSameOrHigherStorage && priceSelected <= priceOther) {
-                        isAnomaly = true;
-                    }
-                }
-
-                if (isAnomaly) {
-                    console.warn("Anomalía Tier 2 detectada:", {
-                        selected: { id: varianteSeleccionada.id, specs: specsSelected, price: priceSelected },
-                        other: { id: vOther.id, specs: specsOther, price: priceOther }
-                    });
-                    if (warningEl) {
-                        warningEl.innerHTML = '<strong>⚠️ Variación no disponible:</strong> Detectamos una inconsistencia temporal en los precios de MercadoLibre para esta capacidad o RAM. Por favor selecciona otra variante.';
-                    }
-                    console.log("=== FIN DETECTAR ANOMALIA (ANOMALIA TIER 2 ENCONTRADA) ===");
-                    return true;
-                }
-            }
-
-            console.log("=== FIN DETECTAR ANOMALIA (SIN ANOMALIA) ===");
+            console.log("=== FIN DETECTAR ANOMALIA (SIN ANOMALIA - RELAJADO PARA EVITAR FALSOS POSITIVOS) ===");
             return false;
         }
 
@@ -9729,6 +9579,41 @@
                     btnSubmit.style.opacity = "0.5";
                     btnSubmit.style.cursor = "not-allowed";
                 }
+            // --- SALVAVIDAS FINAL SI NO SE PINTARON BOTONES (Bug Moto G24) ---
+            const colorPills = wrapperColores ? wrapperColores.querySelectorAll('.color-pill') : [];
+            if (colorPills.length === 0) {
+                console.log("[PDP-FALLBACK] No se detectaron botones de color reales. Aplicando variantes fallback.");
+                mostrarVariantesFallback();
+            } else {
+                // Si se pintaron colores reales pero no memorias
+                const storagePills = wrapperStorage ? wrapperStorage.querySelectorAll('.storage-pill') : [];
+                if (storagePills.length === 0 && defaultMemoria && defaultMemoria.trim() !== "" && defaultMemoria.trim() !== "-") {
+                    console.log("[PDP-FALLBACK] No se detectaron botones de almacenamiento reales. Aplicando fallback de almacenamiento.");
+                    seccionStorage.style.display = "block";
+                    wrapperStorage.innerHTML = "";
+                    const memorias = defaultMemoria.split(",").map(m => m.trim());
+                    memorias.forEach((mem, idx) => {
+                        const btn = document.createElement('button');
+                        btn.className = 'storage-pill' + (idx === 0 ? ' selected' : '');
+                        btn.type = 'button';
+                        btn.innerText = mem;
+                        btn.onclick = function () {
+                            wrapperStorage.querySelectorAll('.storage-pill').forEach(b => b.classList.remove('selected'));
+                            this.classList.add('selected');
+                            almacenamientoSeleccionado = mem;
+                            memoriaSeleccionadaGlobal = mem;
+                            document.getElementById('memoria-seleccionada-txt').innerText = mem;
+                            actualizarPreciosYFotoPorVarianteActual();
+                            if (typeof actualizarPrecioCalculadoPDP === 'function') actualizarPrecioCalculadoPDP();
+                        };
+                        if (idx === 0) {
+                            almacenamientoSeleccionado = mem;
+                            memoriaSeleccionadaGlobal = mem;
+                            document.getElementById('memoria-seleccionada-txt').innerText = mem;
+                        }
+                        wrapperStorage.appendChild(btn);
+                    });
+                }
             }
         }
 
@@ -10384,7 +10269,7 @@
                     item.link || "",
                     item.precioContado || 0,
                     engancheComodoCalculado,
-                    item.color || "",
+                    item.coloresDisponibles || item.color || "",
                     item.memoria || "",
                     null
                 );
