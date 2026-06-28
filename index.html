@@ -24,6 +24,35 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="config.js?v=2"></script>
+    <!-- 📊 DATOS ESTRUCTURADOS JSON-LD PARA GOOGLE SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "CelYa!",
+      "url": "https://estrenacelya.com",
+      "logo": "https://estrenacelya.com/logo-modified.webp",
+      "sameAs": [],
+      "description": "Financiamiento de smartphones y celulares con enganches cómodos y pagos semanales en CDMX y Estado de México."
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "CelYa! Lázaro Cárdenas",
+      "image": "https://estrenacelya.com/logo-modified.webp",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Lázaro Cárdenas",
+        "addressLocality": "Estado de México",
+        "addressCountry": "MX"
+      },
+      "url": "https://estrenacelya.com",
+      "priceRange": "$$",
+      "telephone": ""
+    }
+    </script>
     <style>
         :root {
             --primary: #0f172a;
@@ -489,56 +518,115 @@
             transition: all 0.3s ease;
         }
 
-        /* 📋 ESTILOS DE VISTA LISTA PREMIUM */
+        /* 📋 ESTILOS DE VISTA LISTA PREMIUM (Móvil y Escritorio) */
+        .grid-equipos.view-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .grid-equipos.view-list .card-celular {
+            flex-direction: row;
+            align-items: center;
+            padding: 12px 16px;
+            gap: 16px;
+            min-height: auto;
+        }
+        .grid-equipos.view-list .card-celular .img-container {
+            width: 80px !important;
+            height: 80px !important;
+            flex-shrink: 0;
+            margin: 0 !important;
+        }
+        .grid-equipos.view-list .card-celular h4 {
+            font-size: 16px !important;
+            margin: 4px 0 !important;
+            text-align: left !important;
+        }
+        .grid-equipos.view-list .card-celular .card-badges {
+            display: none !important;
+        }
+        .grid-equipos.view-list .card-celular > div:first-child {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1.5;
+            text-align: left;
+        }
+        .grid-equipos.view-list .card-celular > div:last-child {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            flex: 1;
+            min-width: auto;
+        }
+        .grid-equipos.view-list .card-celular .specs-container {
+            display: none !important;
+        }
+        .grid-equipos.view-list .card-celular .price-row {
+            font-size: 13px !important;
+            margin-bottom: 2px !important;
+        }
+        .grid-equipos.view-list .card-celular .enganche {
+            font-size: 11px !important;
+            margin: 0 !important;
+            padding: 2px 6px !important;
+        }
+        .grid-equipos.view-list .card-celular .cuotas {
+            margin: 4px 0 !important;
+            font-size: 13px !important;
+            text-align: right !important;
+        }
+        .grid-equipos.view-list .card-celular .frecuencia-toggle-container {
+            display: none !important;
+        }
+        .grid-equipos.view-list .card-celular .btn-solicitar {
+            padding: 6px 12px !important;
+            font-size: 12px !important;
+            margin: 0 !important;
+            border-radius: 8px !important;
+            width: auto !important;
+        }
+
         @media (min-width: 768px) {
             .grid-equipos.view-list {
-                display: flex;
-                flex-direction: column;
                 gap: 18px;
             }
             .grid-equipos.view-list .card-celular {
-                flex-direction: row;
-                align-items: stretch;
                 padding: 20px 24px;
                 gap: 28px;
-                min-height: auto;
-            }
-            .grid-equipos.view-list .card-celular > div:first-child {
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                gap: 24px;
-                flex: 2.2;
-                border-right: 1px solid var(--border-color);
-                padding-right: 28px;
-                text-align: left;
-            }
-            .grid-equipos.view-list .card-celular > div:last-child {
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                flex: 1;
-                min-width: 260px;
-                padding-left: 4px;
-            }
-            .grid-equipos.view-list .card-celular .img-container {
-                width: 120px !important;
-                height: 120px !important;
-                flex-shrink: 0;
-                margin: 0 !important;
-            }
-            .grid-equipos.view-list .card-celular h4 {
-                font-size: 19px !important;
-                margin: 6px 0 !important;
-                text-align: left !important;
             }
             .grid-equipos.view-list .card-celular .card-badges {
+                display: flex !important;
                 position: absolute;
                 top: 14px;
                 left: 168px;
                 margin-bottom: 0;
             }
+            .grid-equipos.view-list .card-celular > div:first-child {
+                flex-direction: row;
+                gap: 24px;
+                flex: 2.2;
+                border-right: 1px solid var(--border-color);
+                padding-right: 28px;
+            }
+            .grid-equipos.view-list .card-celular > div:last-child {
+                flex-direction: column;
+                justify-content: space-between;
+                flex: 1;
+                min-width: 260px;
+                padding-left: 4px;
+                align-items: stretch;
+            }
+            .grid-equipos.view-list .card-celular .img-container {
+                width: 120px !important;
+                height: 120px !important;
+            }
+            .grid-equipos.view-list .card-celular h4 {
+                font-size: 19px !important;
+            }
             .grid-equipos.view-list .card-celular .specs-container {
+                display: flex !important;
                 justify-content: flex-start !important;
                 margin-bottom: 12px !important;
             }
@@ -547,10 +635,18 @@
                 text-align: left !important;
             }
             .grid-equipos.view-list .card-celular .frecuencia-toggle-container {
+                display: flex !important;
                 margin-bottom: 12px !important;
             }
             .grid-equipos.view-list .card-celular .btn-solicitar {
                 margin-top: 12px !important;
+                width: 100% !important;
+                font-size: 14px !important;
+                padding: 12px !important;
+                border-radius: 12px !important;
+            }
+            .grid-equipos.view-list .card-celular .cuotas {
+                text-align: left !important;
             }
         }
 
@@ -2936,10 +3032,12 @@
 
 
 
-        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
-            <h2 id="tituloSeccion" style="margin: 0;">✨ Modelos Destacados y Favoritos CelYa!</h2>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span id="cacheBadge" style="display: none; background:#fff7ed; color:#c2410c; border: 1px solid #ffedd5; padding:6px 12px; border-radius:12px; font-weight:700; font-size:12px;" class="badge-cache-anim">Datos en caché • Actualizando</span>
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: nowrap; margin-bottom: 20px; width: 100%;">
+            <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start; min-width: 0;">
+                <h2 id="tituloSeccion" style="margin: 0; font-size: clamp(18px, 4vw, 24px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">✨ Modelos Destacados y Favoritos CelYa!</h2>
+                <span id="cacheBadge" style="display: none; background:#fff7ed; color:#c2410c; border: 1px solid #ffedd5; padding:4px 10px; border-radius:12px; font-weight:700; font-size:11px; white-space: nowrap;" class="badge-cache-anim">Datos en caché • Actualizando</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
                 <span class="count-badge" id="countBadge" style="cursor: pointer; user-select: none;" title="Haz clic para alternar vista Catálogo/Lista" onclick="alternarModoVista()">0 equipos</span>
                 <div class="view-toggle-buttons" style="display: flex; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 10px; padding: 3px; gap: 2px;">
                     <button type="button" id="btnViewGrid" class="view-toggle-btn active" onclick="setModoVista('grid')" style="border: none; background: transparent; padding: 6px 8px; border-radius: 7px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: all 0.2s;">
@@ -4314,6 +4412,54 @@
             if (!window.seoUrlChecked && window.equiposCargados && window.equiposCargados.length > 0) {
                 window.seoUrlChecked = true;
                 verificarModeloPorUrl();
+            }
+
+            // Inyectar datos estructurados JSON-LD dinámicamente para SEO
+            actualizarJsonLdProductos(filtrados);
+        }
+
+        // 📊 ACTUALIZAR DATOS ESTRUCTURADOS JSON-LD DINÁMICAMENTE (PRODUCTOS)
+        function actualizarJsonLdProductos(productos) {
+            try {
+                let scriptTag = document.getElementById('jsonld-catalogo');
+                if (!scriptTag) {
+                    scriptTag = document.createElement('script');
+                    scriptTag.id = 'jsonld-catalogo';
+                    scriptTag.type = 'application/ld+json';
+                    document.head.appendChild(scriptTag);
+                }
+
+                const items = (productos || []).slice(0, 15).map(item => {
+                    const priceContadoNum = item.precioContado || 0;
+                    const engancheComodoCalculado = Math.min(
+                        Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheSemanal !== undefined ? CONFIG_TASAS.engancheSemanal : 0.165)) / 10) * 10,
+                        Math.ceil((priceContadoNum * (CONFIG_TASAS.engancheComodo !== undefined ? CONFIG_TASAS.engancheComodo : 0.11)) / 10) * 10
+                    );
+
+                    return {
+                        "@type": "Product",
+                        "name": item.modelo || "Celular",
+                        "image": item.foto || "https://estrenacelya.com/logo-modified.webp",
+                        "description": `Estrena tu ${item.modelo} a crédito con enganche bajo de $${engancheComodoCalculado} y pagos semanales al instante en CelYa!`,
+                        "offers": {
+                            "@type": "Offer",
+                            "priceCurrency": "MXN",
+                            "price": Math.round(priceContadoNum),
+                            "itemCondition": item.esUsado ? "https://schema.org/UsedCondition" : "https://schema.org/NewCondition",
+                            "availability": item.estado === "DISPONIBLE" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                            "url": window.location.href
+                        }
+                    };
+                });
+
+                const dataLd = {
+                    "@context": "https://schema.org",
+                    "@graph": items
+                };
+
+                scriptTag.textContent = JSON.stringify(dataLd);
+            } catch (e) {
+                console.error("Error al actualizar JSON-LD de catálogo:", e);
             }
         }
 
