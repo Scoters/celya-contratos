@@ -5249,6 +5249,8 @@
             }
 
             // Initialize Dynamic Price Calculator
+            // Flag: no sobreescribir el plazo "52 Semanas" que acabamos de fijar en la primera llamada
+            window._pdpPlazoOverrideAllowed = false;
             actualizarPlazosYPrecioPDP();
             const thumbsContainer = document.getElementById('pdp-thumbs-container');
             if (thumbsContainer) {
@@ -5525,8 +5527,9 @@
                     }
                 }
             }
-            // Elegir dinámicamente el plan con enganche menor al cambiar frecuencia
-            if (freq !== "CONTADO") {
+            // Solo sobreescribir el plazo si el usuario cambió la frecuencia manualmente
+            // (NO al abrir el PDP por primera vez, donde abrirModalCredito ya fijó "52 Semanas")
+            if (freq !== "CONTADO" && window._pdpPlazoOverrideAllowed) {
                 if (freq === "QUINCENAL") {
                     const fQR = CONFIG_TASAS.engancheQuin26 !== undefined ? CONFIG_TASAS.engancheQuin26 : 0.25;
                     const fQC = CONFIG_TASAS.engancheQuin52 !== undefined ? CONFIG_TASAS.engancheQuin52 : 0.35;
@@ -5537,6 +5540,8 @@
                     selectPlazo.value = (fSC <= fSR) ? "52 Semanas" : "26 Semanas";
                 }
             }
+            // A partir de la próxima llamada (cambio de frecuencia manual), sí permitir override
+            window._pdpPlazoOverrideAllowed = true;
 
             actualizarPrecioCalculadoPDP();
             syncSelectButtons('cliFrecuencia', '#pdp-frequency-selector');
