@@ -4168,7 +4168,29 @@
         window.catalogCacheActive = false;
 
         // Variables globales para Pedido Especial
-        let CONFIG_TASAS = { interes26: 0.66, interes52: 0.90, enganche26: 0.33, enganche52: 0.45, gananciaContadoFactor: 1.36, engancheSemanal: 0.165, engancheComodo: 0.11, interesQuin26: 0.45, interesQuin52: 0.65, engancheQuin26: 0.25, engancheQuin52: 0.35 };
+        // Intentar cargar tasas del localStorage si existen para carga instantánea (0ms)
+        let DEFAULT_TASAS = { 
+            interes26: 0.45, 
+            interes52: 0.65, 
+            enganche26: 0.225, 
+            enganche52: 0.325, 
+            gananciaContadoFactor: 1.36, 
+            engancheSemanal: 0.13, 
+            engancheComodo: 0.15, 
+            interesQuin26: 0.25, 
+            interesQuin52: 0.45, 
+            engancheQuin26: 0.13, 
+            engancheQuin52: 0.15 
+        };
+        let CONFIG_TASAS = (() => {
+            try {
+                const cached = localStorage.getItem('celya_config_tasas');
+                return cached ? JSON.parse(cached) : DEFAULT_TASAS;
+            } catch (e) {
+                return DEFAULT_TASAS;
+            }
+        })();
+
         let ML_CACHE_VARIANTES = {};
         let isFetchingML = {};
         let pe_data_actual = null;
@@ -4180,7 +4202,8 @@
                 const data = await response.json();
                 if (data && data.interes26) {
                     CONFIG_TASAS = data;
-                    console.log("Tasas sincronizadas:", CONFIG_TASAS);
+                    localStorage.setItem('celya_config_tasas', JSON.stringify(data));
+                    console.log("Tasas sincronizadas y guardadas en caché:", CONFIG_TASAS);
                     // Re-render cards to show the correct live rates matching the PDP
                     if (typeof aplicarFiltrosYOrden === 'function') {
                         aplicarFiltrosYOrden();
