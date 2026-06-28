@@ -3543,11 +3543,11 @@
 
                         <div class="pdp-weekly-payments">
                             <span style="font-size: 24px; font-weight: 700;" id="pdp-weekly-amount">$0</span>
-                            <span id="pdp-daily-equivalent-label"
-                                style="font-size: 14px; font-weight: 700; display: none; color: #059669; background: rgba(5, 150, 105, 0.08); padding: 3px 8px; border-radius: 5px;"></span>
                             <span id="pdp-weekly-term"
                                 style="font-size: 14px; font-weight: 500; color: var(--text-muted);">en
                                 -- pagos semanales</span>
+                            <span id="pdp-daily-equivalent-label"
+                                style="font-size: 14px; font-weight: 700; display: none; color: #059669; background: rgba(5, 150, 105, 0.08); padding: 3px 8px; border-radius: 5px;"></span>
                         </div>
                         <div id="pdp-tasa-interes-badge" class="pdp-tasa-hint-badge">
                         </div>
@@ -5609,7 +5609,7 @@
                 const dailyLabel = document.getElementById('pdp-daily-equivalent-label');
                 if (dailyLabel) {
                     dailyLabel.style.display = 'inline';
-                    dailyLabel.innerText = ` (o $${cuotaDiaria.toLocaleString('es-MX')} MXN al día ¡llévatelo hoy!)`;
+                    dailyLabel.innerText = `o $${cuotaDiaria.toLocaleString('es-MX')} MXN al día ¡llévatelo hoy!`;
                 }
                 document.getElementById('pdp-weekly-term').innerText = `en ${numPagos} pagos ${labelFrecuencia}`;
 
