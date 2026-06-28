@@ -4070,7 +4070,8 @@
             const savedViewMode = localStorage.getItem('celya_view_mode') || 'grid';
             setModoVista(savedViewMode);
 
-            await sincronizarTasas();
+            // Sincronizar tasas en segundo plano sin bloquear el dibujo inicial
+            sincronizarTasas();
 
             // Inicializar botones interactivos segmentados
             setupSelectButtons('cliFrecuencia', '#pdp-frequency-selector');
@@ -4243,8 +4244,54 @@
             const searchIcon = document.getElementById('searchIcon');
             if (searchIcon) searchIcon.innerText = "⏳";
 
-            // Pintar esqueletos shimmer animados durante la carga (si no hay caché pintada)
-            if (contenedor && (!window.equiposCargados || window.equiposCargados.length === 0)) {
+            // Clave de caché única según la URL del script para evitar datos stale si cambia de URL
+            const urlHash = btoa(CONFIG.GOOGLE_SCRIPT_URL).substring(0, 15);
+            const cacheKey = "celya_catalogo_cache_" + urlHash;
+            const cacheTimeKey = "celya_catalogo_timestamp_" + urlHash;
+
+            let cachePintada = false;
+
+            // Si es la carga inicial (búsqueda vacía), intentar usar la caché local
+            if (busqueda === "") {
+                const cachedDataStr = localStorage.getItem(cacheKey);
+                const cachedTimestampStr = localStorage.getItem(cacheTimeKey);
+
+                if (cachedDataStr && cachedTimestampStr) {
+                    try {
+                        const cachedData = JSON.parse(cachedDataStr);
+                        // Pintamos inmediatamente de la caché para dar velocidad instantánea
+                        window.equiposCargados = cachedData;
+                        window.catalogCacheActive = true;
+                        rellenarDropdownMarcas(cachedData);
+                        aplicarFiltrosYOrden();
+                        cachePintada = true;
+
+                        // Restaurar controles de búsqueda al pintar desde caché
+                        if (btn) {
+                            btn.innerText = "Buscar";
+                            btn.disabled = false;
+                        }
+                        if (searchIcon) searchIcon.innerText = "🔍";
+                    } catch (e) {
+                        console.warn("Error leyendo caché local:", e);
+                    }
+                } else if (CONFIG.PRELOADED_CATALOG && CONFIG.PRELOADED_CATALOG.length > 0) {
+                    window.equiposCargados = CONFIG.PRELOADED_CATALOG;
+                    window.catalogCacheActive = true;
+                    rellenarDropdownMarcas(CONFIG.PRELOADED_CATALOG);
+                    aplicarFiltrosYOrden();
+                    cachePintada = true;
+
+                    if (btn) {
+                        btn.innerText = "Buscar";
+                        btn.disabled = false;
+                    }
+                    if (searchIcon) searchIcon.innerText = "🔍";
+                }
+            }
+
+            // Pintar esqueletos shimmer animados únicamente si no hay caché en pantalla
+            if (!cachePintada && contenedor && (!window.equiposCargados || window.equiposCargados.length === 0)) {
                 contenedor.innerHTML = "";
                 for (let i = 0; i < 6; i++) {
                     contenedor.innerHTML += `
@@ -4260,83 +4307,57 @@
                 }
             }
 
-            // Clave de caché única según la URL del script para evitar datos stale si cambia de URL
-            const urlHash = btoa(CONFIG.GOOGLE_SCRIPT_URL).substring(0, 15);
-            const cacheKey = "celya_catalogo_cache_" + urlHash;
-            const cacheTimeKey = "celya_catalogo_timestamp_" + urlHash;
-            const cacheDuration = 12 * 60 * 60 * 1000; // 12 horas de validez absoluta
+            const urlConsulta = `${CONFIG.GOOGLE_SCRIPT_URL}?action=buscarModelosCatalogo&q=${encodeURIComponent(busqueda)}`;
 
-            // Si es la carga inicial (búsqueda vacía), intentar usar la caché local
-            if (busqueda === "") {
-                const cachedDataStr = localStorage.getItem(cacheKey);
-                const cachedTimestampStr = localStorage.getItem(cacheTimeKey);
+            // --- ESCENARIO 1: ACTUALIZACIÓN SILENCIOSA EN SEGUNDO PLANO (Si ya hay caché en pantalla) ---
+            if (cachePintada && busqueda === "") {
+                fetch(urlConsulta)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.result === 'success' && data.resultados) {
+                            const nuevoJson = JSON.stringify(data.resultados);
+                            const viejoJson = localStorage.getItem(cacheKey);
 
-                if (cachedDataStr && cachedTimestampStr) {
-                    try {
-                        const cachedData = JSON.parse(cachedDataStr);
-                        const age = Date.now() - parseInt(cachedTimestampStr || "0");
-
-                        // Pintamos inmediatamente de la caché para dar velocidad instantánea
-                        window.equiposCargados = cachedData;
-                        // marcar que lo renderizado proviene de caché (para merge-safe)
-                        window.catalogCacheActive = true;
-                        rellenarDropdownMarcas(cachedData);
-                        aplicarFiltrosYOrden();
-                    } catch (e) {
-                        console.warn("Error leyendo caché local:", e);
-                    }
-                } else if (CONFIG.PRELOADED_CATALOG && CONFIG.PRELOADED_CATALOG.length > 0) {
-                    // Si es la primera visita y no hay caché, pintamos instantáneamente la lista precargada
-                    window.equiposCargados = CONFIG.PRELOADED_CATALOG;
-                    window.catalogCacheActive = true;
-                    rellenarDropdownMarcas(CONFIG.PRELOADED_CATALOG);
-                    aplicarFiltrosYOrden();
-                }
+                            // Solo actualizamos el DOM si el catálogo del servidor realmente cambió
+                            if (nuevoJson !== viejoJson) {
+                                console.log("Catálogo actualizado desde el servidor (cambios detectados).");
+                                window.equiposCargados = data.resultados;
+                                window.catalogCacheActive = false;
+                                localStorage.setItem(cacheKey, nuevoJson);
+                                localStorage.setItem(cacheTimeKey, Date.now().toString());
+                                rellenarDropdownMarcas(data.resultados);
+                                aplicarFiltrosYOrden();
+                            } else {
+                                console.log("Catálogo en caché coincide con el servidor. Sin cambios visuales necesarios.");
+                            }
+                        }
+                    })
+                    .catch(err => console.warn("Error en segundo plano al sincronizar catálogo:", err))
+                    .finally(() => {
+                        if (btn) {
+                            btn.innerText = "Buscar";
+                            btn.disabled = false;
+                        }
+                        if (searchIcon) searchIcon.innerText = "🔍";
+                    });
+                return;
             }
 
+            // --- ESCENARIO 2: CARGA SÍNCRONA CON LOADER (Primera carga sin caché o búsqueda manual) ---
             try {
-                const res = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=buscarModelosCatalogo&q=${encodeURIComponent(busqueda)}`);
+                const res = await fetch(urlConsulta);
                 const data = await res.json();
 
                 if (data.result === 'success' && data.resultados) {
                     window.equiposCargados = data.resultados;
-                    // fresh data arrived -> no longer cache-mode
                     window.catalogCacheActive = false;
 
-                    // DEBUG: Log la estructura de datos recibida desde el Google Script
-                    console.log("=== DATOS RECIBIDOS DEL CATALOGO ===");
-                    console.log("Cantidad de items:", data.resultados.length);
-                    if (data.resultados.length > 0) {
-                        const firstItem = data.resultados[0];
-                        console.log("Primer item (claves):", Object.keys(firstItem));
-                        console.log("Primer item completo:", firstItem);
-                        console.log("¿Tiene variantesJson?", !!firstItem.variantesJson);
-                        if (firstItem.variantesJson) {
-                            try {
-                                const parsed = firstItem.variantesJson; // Asumimos que ya viene parseado del backend
-                                console.log("variantesJson parseado - estructura:", {
-                                    hasPickers: !!parsed.pickers,
-                                    hasVariations: !!parsed.variations,
-                                    pickersCount: parsed.pickers ? parsed.pickers.length : 0,
-                                    variationsCount: parsed.variations ? parsed.variations.length : 0
-                                });
-                            } catch (e) {
-                                console.warn("Error procesando variantesJson:", e);
-                            }
-                        }
-                    }
-                    console.log("=== FIN DEBUG ===");
-
-                    // Guardar en caché si la búsqueda fue vacía (el catálogo completo)
                     if (busqueda === "") {
                         localStorage.setItem(cacheKey, JSON.stringify(data.resultados));
                         localStorage.setItem(cacheTimeKey, Date.now().toString());
                     }
 
-                    // Rellenar dinámicamente el listado de marcas del dropdown
                     rellenarDropdownMarcas(data.resultados);
-
-                    // Aplicar filtros y orden predeterminados
                     aplicarFiltrosYOrden();
                 } else {
                     window.equiposCargados = [];
@@ -4345,7 +4366,6 @@
                 }
             } catch (err) {
                 console.error(err);
-                // Si falla la red pero tenemos datos cargados de la caché, no pisamos la pantalla con error
                 if (!window.equiposCargados || window.equiposCargados.length === 0) {
                     contenedor.innerHTML = "<p style='grid-column:1/-1; text-align:center; color:var(--danger); padding:30px; font-weight:600;'>Error de comunicación con la base de datos.</p>";
                 }
@@ -4354,7 +4374,6 @@
                     btn.innerText = "Buscar";
                     btn.disabled = false;
                 }
-                const searchIcon = document.getElementById('searchIcon');
                 if (searchIcon) searchIcon.innerText = "🔍";
             }
         }
