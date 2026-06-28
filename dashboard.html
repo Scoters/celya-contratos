@@ -2268,20 +2268,24 @@
             // 1. Obtener valores de entrada
             const capitalInicial = parseFloat(document.getElementById('fr-capital-inicial').value) || 0;
             const costoEquipo = parseFloat(document.getElementById('fr-costo-equipo').value) || 0;
+            const costoFunda = parseFloat(document.getElementById('fr-costo-funda').value) || 0;
             const enganche = parseFloat(document.getElementById('fr-enganche-promedio').value) || 0;
             const cuotaSemanal = parseFloat(document.getElementById('fr-cuota-promedio').value) || 0;
+            const costoMdmMensual = parseFloat(document.getElementById('fr-costo-mdm-mensual').value) || 0;
             const plazoSemanas = parseInt(document.getElementById('fr-plazo-plan').value) || 52;
             const metaMensual = parseFloat(document.getElementById('fr-meta-colocacion').value) || 0;
             const retiroMensual = parseFloat(document.getElementById('fr-retiro-familiar').value) || 0;
             
             const metaSemanal = metaMensual / 4;
             const retiroSemanal = retiroMensual / 4;
+            const costoMdmSemanal = costoMdmMensual / 4;
             
             // Un cliente financia: Costo - Enganche. El saldo restante a cuota fija
             const totalFinanciadoPorEquipo = (plazoSemanas === 26) ? cuotaSemanal * 26 : cuotaSemanal * 52; 
             
             // 2. Calcular Punto de Autoregeneración (cuántos activos pagan un equipo al contado neto)
-            const inversionNetaPorEquipo = costoEquipo - enganche;
+            // Inversión neta incluye el costo del celular y de la funda, menos el enganche recibido
+            const inversionNetaPorEquipo = costoEquipo + costoFunda - enganche;
             const puntoAutoVal = Math.ceil(inversionNetaPorEquipo / cuotaSemanal);
             document.getElementById('fr-kpi-punto-auto').innerText = `${puntoAutoVal} clientes`;
             
@@ -2338,6 +2342,10 @@
                 });
                 
                 efectivo += cobroCuotas;
+                
+                // MDM Weekly Expense for Active Clients
+                const costoMdmEstaSemana = activos * costoMdmSemanal;
+                efectivo -= costoMdmEstaSemana;
                 
                 // B. Compra y colocación de stock meta (con prioridad sobre los retiros)
                 // Cada equipo requiere 'costoEquipo' de egreso, pero ingresa inmediatamente 'enganche'
@@ -4332,12 +4340,20 @@
                         <input type="number" id="fr-costo-equipo" value="3000" step="100" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 14.5px; outline: none; font-weight: 600;">
                     </div>
                     <div class="form-group-config">
+                        <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px; font-weight: 500;">Costo Adicional Funda Regalo</label>
+                        <input type="number" id="fr-costo-funda" value="150" step="10" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 14.5px; outline: none; font-weight: 600;">
+                    </div>
+                    <div class="form-group-config">
                         <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px; font-weight: 500;">Enganche Promedio Recibido</label>
                         <input type="number" id="fr-enganche-promedio" value="600" step="50" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 14.5px; outline: none; font-weight: 600;">
                     </div>
                     <div class="form-group-config">
                         <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px; font-weight: 500;">Cuota Semanal Promedio</label>
                         <input type="number" id="fr-cuota-promedio" value="220" step="10" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 14.5px; outline: none; font-weight: 600;">
+                    </div>
+                    <div class="form-group-config">
+                        <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px; font-weight: 500;">Costo MDM Mensual (Por Celular)</label>
+                        <input type="number" id="fr-costo-mdm-mensual" value="55" step="5" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 14.5px; outline: none; font-weight: 600;">
                     </div>
                     <div class="form-group-config">
                         <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px; font-weight: 500;">Plazo Promedio del Plan</label>
