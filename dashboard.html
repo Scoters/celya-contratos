@@ -405,17 +405,21 @@
         }
 
         .modal-revolvente-content {
-            background-color: #1e293b;
+            background-color: #0b0f19;
             color: var(--text-primary);
-            margin: 3% auto;
-            padding: 25px 30px;
-            border-radius: 16px;
-            width: 95%;
-            max-width: 960px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-top: 5px solid #0d9488;
-            position: relative;
+            margin: 0;
+            padding: 35px 50px;
+            width: 100%;
+            height: 100%;
+            min-height: 100vh;
+            box-sizing: border-box;
+            box-shadow: none;
+            border: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            z-index: 10000;
         }
 
         .close-config-btn {
@@ -1690,6 +1694,14 @@
 
                 if (datos.error) {
                     toast('Error al cargar el panel: ' + datos.error, 'error');
+                    if (datos.error.toLowerCase().includes("token") || datos.error.toLowerCase().includes("inválido") || datos.error.toLowerCase().includes("invalido")) {
+                        sessionStorage.removeItem('celya_authenticated');
+                        sessionStorage.removeItem('celya_api_token');
+                        CONFIG.API_TOKEN = "";
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    }
                     return;
                 }
 
@@ -2224,144 +2236,217 @@
             
             const metaSemanal = metaMensual / 4;
             const retiroSemanal = retiroMensual / 4;
-            const inversionNetaPorEquipo = costoEquipo - enganche;
             
-            // 2. Calcular Punto de Autoregeneración (cuántos activos pagan un equipo por semana)
+            // Un cliente financia: Costo - Enganche. El saldo restante a cuota fija
+            const totalFinanciadoPorEquipo = (plazoSemanas === 26) ? cuotaSemanal * 26 : cuotaSemanal * 52; 
+            
+            // 2. Calcular Punto de Autoregeneración (cuántos activos pagan un equipo al contado neto)
+            const inversionNetaPorEquipo = costoEquipo - enganche;
             const puntoAutoVal = Math.ceil(inversionNetaPorEquipo / cuotaSemanal);
             document.getElementById('fr-kpi-punto-auto').innerText = `${puntoAutoVal} clientes`;
             
             // 3. Simulación semana a semana a 52 semanas (12 meses)
             let efectivo = capitalInicial;
             let totalRetiradoFamilia = 0;
-            let equiposColocados = [];
+            let totalRetirosProyectados = 0;
+            let totalVentasProyectadas = 0;
+            let totalVentasReales = 0;
+            
+            // Guardamos un historial de los equipos colocados: cada objeto es { semanaColocacion, semanasPagadas }
+            let carteraClientes = [];
             
             let dataSemanas = [];
             let dataEfectivo = [];
             let dataActivos = [];
             let dataRetiros = [];
+            let dataCartera = [];
             
             let semanaAutosuficiente = -1;
+            let stockInsuficienteDetectado = false;
+            let retirosIncompletosDetectados = false;
             
             for (let sem = 1; sem <= 52; sem++) {
-                // Clientes activos
+                totalRetirosProyectados += retiroSemanal;
+                totalVentasProyectadas += metaSemanal;
+                
+                // A. Cobro de cuotas semanales de los clientes activos
                 let activos = 0;
-                equiposColocados.forEach(semCol => {
-                    if (sem >= semCol && sem < semCol + plazoSemanas) {
+                let cobroCuotas = 0;
+                let valorCarteraTotal = 0;
+                
+                carteraClientes.forEach(cliente => {
+                    if (cliente.semanasPagadas < plazoSemanas) {
                         activos++;
+                        cobroCuotas += cuotaSemanal;
+                        cliente.semanasPagadas++;
+                        
+                        // Valor de la cartera = lo que le falta pagar
+                        const saldoRestante = totalFinanciadoPorEquipo - (cliente.semanasPagadas * cuotaSemanal);
+                        valorCarteraTotal += Math.max(0, saldoRestante);
                     }
                 });
                 
-                // Cobros
-                let cobroCuotas = activos * cuotaSemanal;
                 efectivo += cobroCuotas;
                 
-                // Retiros
-                let retiroDeSemana = 0;
-                if (efectivo >= retiroSemanal) {
-                    retiroDeSemana = retiroSemanal;
-                    efectivo -= retiroDeSemana;
-                    totalRetiradoFamilia += retiroDeSemana;
-                }
-                
-                // Compra y colocación
+                // B. Compra y colocación de stock meta (con prioridad sobre los retiros)
+                // Cada equipo requiere 'costoEquipo' de egreso, pero ingresa inmediatamente 'enganche'
+                // Costo de compra real de caja por equipo = costoEquipo - enganche
                 let colocadosEstaSemana = 0;
-                const costoParaColocar = metaSemanal * inversionNetaPorEquipo;
-                if (efectivo >= costoParaColocar) {
+                const costoParaColocarMeta = metaSemanal * inversionNetaPorEquipo;
+                
+                if (efectivo >= costoParaColocarMeta) {
                     colocadosEstaSemana = metaSemanal;
                     efectivo -= colocadosEstaSemana * inversionNetaPorEquipo;
                 } else {
-                    const unidadesMax = Math.floor(efectivo / inversionNetaPorEquipo);
-                    colocadosEstaSemana = Math.min(metaSemanal, unidadesMax);
+                    // Solo compramos los que alcancen con la caja líquida
+                    colocadosEstaSemana = Math.floor(efectivo / inversionNetaPorEquipo);
                     if (colocadosEstaSemana > 0) {
                         efectivo -= colocadosEstaSemana * inversionNetaPorEquipo;
                     }
+                    if (metaSemanal > 0 && colocadosEstaSemana < metaSemanal) {
+                        stockInsuficienteDetectado = true;
+                    }
                 }
                 
+                totalVentasReales += colocadosEstaSemana;
+                
+                // Añadir nuevos clientes
                 for (let i = 0; i < colocadosEstaSemana; i++) {
-                    equiposColocados.push(sem);
+                    carteraClientes.push({
+                        semanaColocacion: sem,
+                        semanasPagadas: 0
+                    });
                 }
                 
-                if (semanaAutosuficiente === -1 && colocadosEstaSemana >= metaSemanal && efectivo >= 0 && activos > 0) {
+                // C. Retiro familiar de ganancia (limitado a la caja real disponible tras compra de stock)
+                let retiroDeSemana = 0;
+                if (efectivo > 0) {
+                    retiroDeSemana = Math.min(retiroSemanal, efectivo);
+                    efectivo -= retiroDeSemana;
+                    totalRetiradoFamilia += retiroDeSemana;
+                }
+                if (retiroDeSemana < retiroSemanal && retiroSemanal > 0) {
+                    retirosIncompletosDetectados = true;
+                }
+                
+                // Determinar si es autosuficiente
+                if (semanaAutosuficiente === -1 && colocadosEstaSemana >= metaSemanal && efectivo >= 0 && activos > 0 && !stockInsuficienteDetectado) {
                     semanaAutosuficiente = sem;
                 }
                 
+                // Guardar datos
                 dataSemanas.push(sem);
                 dataEfectivo.push(Math.round(efectivo));
                 dataActivos.push(activos);
                 dataRetiros.push(Math.round(totalRetiradoFamilia));
+                dataCartera.push(Math.round(valorCarteraTotal));
             }
             
-            // Actualizar KPIs
-            const kpiMesAuto = document.getElementById('fr-kpi-mes-auto');
-            if (semanaAutosuficiente !== -1) {
-                const mesAutoVal = Math.ceil(semanaAutosuficiente / 4);
-                kpiMesAuto.innerText = `Mes ${mesAutoVal} (Sem. ${semanaAutosuficiente})`;
-                kpiMesAuto.parentElement.style.background = "rgba(13, 148, 136, 0.05)";
-                kpiMesAuto.parentElement.style.borderColor = "rgba(13, 148, 136, 0.2)";
-            } else {
-                kpiMesAuto.innerText = "No autónomo";
-                kpiMesAuto.parentElement.style.background = "rgba(239, 68, 68, 0.05)";
-                kpiMesAuto.parentElement.style.borderColor = "rgba(239, 68, 68, 0.2)";
-            }
+            // 4. Actualizar KPIs
+            document.getElementById('fr-kpi-efectivo-final').innerText = `$${Math.round(efectivo).toLocaleString('es-MX')} MXN`;
             document.getElementById('fr-kpi-ganancia-anual').innerText = `$${Math.round(totalRetiradoFamilia).toLocaleString('es-MX')} MXN`;
             
-            // 4. Actualizar Tabla
+            const utilidadTotal = (efectivo + totalRetiradoFamilia) - capitalInicial;
+            const roiVal = capitalInicial > 0 ? Math.round((utilidadTotal / capitalInicial) * 100) : 0;
+            document.getElementById('fr-kpi-utilidad-roi').innerText = `$${Math.round(utilidadTotal).toLocaleString('es-MX')} MXN (${roiVal}% ROI)`;
+            
+            // 5. Diagnóstico de Salud Financiera
+            const diagBox = document.getElementById('fr-diagnostico-caja');
+            const diagIcon = document.getElementById('fr-status-icon');
+            const diagText = document.getElementById('fr-status-text');
+            const diagBadge = document.getElementById('fr-status-badge');
+            
+            if (efectivo >= 0 && !stockInsuficienteDetectado && !retirosIncompletosDetectados) {
+                diagBox.style.borderLeftColor = "#10b981";
+                diagBox.style.background = "rgba(16, 185, 129, 0.06)";
+                diagIcon.innerText = "🟢";
+                diagText.innerHTML = `<strong>Simulación Sostenible:</strong> Se cumplió la meta de colocar <strong>${metaMensual} celulares/mes</strong> y se retiraron los <strong>$${retiroMensual.toLocaleString('es-MX')} MXN/mes</strong> completos para la familia. El negocio se autofinancia.`;
+                diagBadge.innerText = "Excelente";
+                diagBadge.style.background = "#10b981";
+            } else if (stockInsuficienteDetectado && !retirosIncompletosDetectados) {
+                diagBox.style.borderLeftColor = "#f59e0b";
+                diagBox.style.background = "rgba(245, 158, 11, 0.06)";
+                diagIcon.innerText = "⚠️";
+                diagText.innerHTML = `<strong>Cuello de Botella de Caja:</strong> No tienes suficiente capital para comprar todos los teléfonos de la meta mensual. Solo se lograron comprar <strong>${Math.round(totalVentasReales)} de ${Math.round(totalVentasProyectadas)} celulares</strong>. Considera inyectar más capital semilla o subir el enganche.`;
+                diagBadge.innerText = "Caja Limitada";
+                diagBadge.style.background = "#f59e0b";
+            } else {
+                diagBox.style.borderLeftColor = "#ef4444";
+                diagBox.style.background = "rgba(239, 68, 68, 0.06)";
+                diagIcon.innerText = "🚨";
+                diagText.innerHTML = `<strong>Insolvencia (Retiros en Riesgo):</strong> El flujo de caja no dio abasto. Solo lograste retirar <strong>$${Math.round(totalRetiradoFamilia).toLocaleString('es-MX')}</strong> de los $${Math.round(totalRetirosProyectados).toLocaleString('es-MX')} proyectados para la familia.`;
+                diagBadge.innerText = "Insolvente";
+                diagBadge.style.background = "#ef4444";
+            }
+            
+            // 6. Actualizar Tabla (semanas 1 a 24)
             const tbody = document.getElementById('fr-projection-tbody');
             tbody.innerHTML = '';
             
             let tempEfectivo = capitalInicial;
             let tempRetirado = 0;
-            let tempEquiposColocados = [];
+            let tempCarteraClientes = [];
             
-            for (let sem = 1; sem <= 12; sem++) {
+            for (let sem = 1; sem <= 24; sem++) {
                 let activos = 0;
-                tempEquiposColocados.forEach(semCol => {
-                    if (sem >= semCol && sem < semCol + plazoSemanas) {
+                let cobroCuotas = 0;
+                let valorCarteraTotal = 0;
+                
+                tempCarteraClientes.forEach(cliente => {
+                    if (cliente.semanasPagadas < plazoSemanas) {
                         activos++;
+                        cobroCuotas += cuotaSemanal;
+                        cliente.semanasPagadas++;
+                        
+                        const saldoRestante = totalFinanciadoPorEquipo - (cliente.semanasPagadas * cuotaSemanal);
+                        valorCarteraTotal += Math.max(0, saldoRestante);
                     }
                 });
                 
-                let cobroCuotas = activos * cuotaSemanal;
                 tempEfectivo += cobroCuotas;
                 
-                let retiroDeSemana = 0;
-                if (tempEfectivo >= retiroSemanal) {
-                    retiroDeSemana = retiroSemanal;
-                    tempEfectivo -= retiroDeSemana;
-                    tempRetirado += retiroDeSemana;
-                }
-                
                 let colocadosEstaSemana = 0;
-                const costoParaColocar = metaSemanal * inversionNetaPorEquipo;
-                if (tempEfectivo >= costoParaColocar) {
+                const costoParaColocarMeta = metaSemanal * inversionNetaPorEquipo;
+                
+                if (tempEfectivo >= costoParaColocarMeta) {
                     colocadosEstaSemana = metaSemanal;
                     tempEfectivo -= colocadosEstaSemana * inversionNetaPorEquipo;
                 } else {
-                    const unidadesMax = Math.floor(tempEfectivo / inversionNetaPorEquipo);
-                    colocadosEstaSemana = Math.min(metaSemanal, unidadesMax);
+                    colocadosEstaSemana = Math.floor(tempEfectivo / inversionNetaPorEquipo);
                     if (colocadosEstaSemana > 0) {
                         tempEfectivo -= colocadosEstaSemana * inversionNetaPorEquipo;
                     }
                 }
                 
                 for (let i = 0; i < colocadosEstaSemana; i++) {
-                    tempEquiposColocados.push(sem);
+                    tempCarteraClientes.push({
+                        semanaColocacion: sem,
+                        semanasPagadas: 0
+                    });
+                }
+                
+                let retiroDeSemana = 0;
+                if (tempEfectivo > 0) {
+                    retiroDeSemana = Math.min(retiroSemanal, tempEfectivo);
+                    tempEfectivo -= retiroDeSemana;
+                    tempRetirado += retiroDeSemana;
                 }
                 
                 const tr = document.createElement('tr');
+                tr.style.background = tempEfectivo <= 500 ? 'rgba(239, 68, 68, 0.03)' : '';
                 tr.innerHTML = `
-                    <td style="padding: 8px 12px; border-bottom: 1px solid var(--border-color); font-weight: 700; color: #fff;">Semana ${sem}</td>
-                    <td style="padding: 8px 12px; border-bottom: 1px solid var(--border-color);">${activos}</td>
-                    <td style="padding: 8px 12px; border-bottom: 1px solid var(--border-color); text-align: right; color: #34d399;">+$${Math.round(cobroCuotas).toLocaleString('es-MX')}</td>
-                    <td style="padding: 8px 12px; border-bottom: 1px solid var(--border-color); text-align: right; color: #2dd4bf;">+$${Math.round(colocadosEstaSemana * enganche).toLocaleString('es-MX')}</td>
-                    <td style="padding: 8px 12px; border-bottom: 1px solid var(--border-color); text-align: center;">${colocadosEstaSemana}</td>
-                    <td style="padding: 8px 12px; border-bottom: 1px solid var(--border-color); text-align: right; color: #c084fc;">-$${Math.round(retiroDeSemana).toLocaleString('es-MX')}</td>
-                    <td style="padding: 8px 12px; border-bottom: 1px solid var(--border-color); text-align: right; font-weight: 600; color: ${tempEfectivo >= 0 ? '#34d399' : '#f87171'};">$${Math.round(tempEfectivo).toLocaleString('es-MX')}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid var(--border-color); font-weight: 700; text-align: center; color: #fff;">Sem ${sem}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid var(--border-color); text-align: center;">${activos}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid var(--border-color); text-align: center; font-weight: 600; color: ${colocadosEstaSemana < metaSemanal ? '#f59e0b' : '#fff'};">${colocadosEstaSemana}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid var(--border-color); text-align: right; color: #34d399;">+$$${Math.round(cobroCuotas).toLocaleString('es-MX')}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid var(--border-color); text-align: right; color: ${retiroDeSemana < retiroSemanal ? '#ef4444' : '#c084fc'};">-$$${Math.round(retiroDeSemana).toLocaleString('es-MX')}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid var(--border-color); text-align: right; color: #38bdf8;">$$${Math.round(valorCarteraTotal).toLocaleString('es-MX')}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid var(--border-color); text-align: right; font-weight: 700; color: ${tempEfectivo <= 500 ? '#f87171' : '#fff'};">$$${Math.round(tempEfectivo).toLocaleString('es-MX')}</td>
                 `;
                 tbody.appendChild(tr);
             }
             
-            // 5. Renderizar Gráfico
+            // 7. Renderizar Gráfico
             const ctx = document.getElementById('chartFondoRevolvente').getContext('2d');
             if (frChartInstance) {
                 frChartInstance.destroy();
@@ -2369,14 +2454,14 @@
             
             const labelsMes = [];
             const dataEfectivoMes = [];
-            const dataActivosMes = [];
+            const dataCarteraMes = [];
             const dataRetirosMes = [];
             
             for (let idx = 3; idx < dataSemanas.length; idx += 4) {
                 const mesNum = Math.ceil(dataSemanas[idx] / 4);
                 labelsMes.push(`Mes ${mesNum}`);
                 dataEfectivoMes.push(dataEfectivo[idx]);
-                dataActivosMes.push(dataActivos[idx]);
+                dataCarteraMes.push(dataCartera[idx]);
                 dataRetirosMes.push(dataRetiros[idx]);
             }
             
@@ -2389,27 +2474,27 @@
                             label: 'Caja Disponible ($)',
                             data: dataEfectivoMes,
                             borderColor: '#0d9488',
-                            backgroundColor: 'rgba(13, 148, 136, 0.1)',
+                            backgroundColor: 'rgba(13, 148, 136, 0.08)',
                             borderWidth: 2.5,
-                            tension: 0.35,
+                            tension: 0.3,
                             fill: true
                         },
                         {
-                            label: 'Retiros Familia ($)',
+                            label: 'Cartera en la Calle ($)',
+                            data: dataCarteraMes,
+                            borderColor: '#38bdf8',
+                            backgroundColor: 'rgba(56, 189, 248, 0.03)',
+                            borderWidth: 2.5,
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Retiros Acumulados ($)',
                             data: dataRetirosMes,
                             borderColor: '#a855f7',
-                            backgroundColor: 'rgba(168, 85, 247, 0.1)',
                             borderWidth: 2,
-                            tension: 0.35,
-                            fill: true
-                        },
-                        {
-                            label: 'Clientes Activos',
-                            data: dataActivosMes,
-                            borderColor: '#60a5fa',
-                            borderWidth: 2,
-                            tension: 0.35,
-                            yAxisID: 'y1'
+                            tension: 0.3,
+                            fill: false
                         }
                     ]
                 },
@@ -2420,30 +2505,22 @@
                         legend: {
                             labels: {
                                 color: '#e2e8f0',
-                                font: { family: 'Outfit', size: 11 }
+                                font: { family: 'Outfit', size: 11.5, weight: '500' }
                             }
                         }
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(255,255,255,0.03)' },
-                            ticks: { color: '#94a3b8', font: { family: 'Outfit' } }
+                            grid: { color: 'rgba(255, 255, 255, 0.03)' },
+                            ticks: { color: '#94a3b8', font: { family: 'Outfit', size: 10.5 } }
                         },
                         y: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
                             ticks: { 
                                 color: '#94a3b8', 
-                                font: { family: 'Outfit' },
+                                font: { family: 'Outfit', size: 10.5 },
                                 callback: function(value) { return '$' + value.toLocaleString(); }
                             }
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            grid: { drawOnChartArea: false },
-                            ticks: { color: '#60a5fa', font: { family: 'Outfit' } },
-                            min: 0
                         }
                     }
                 }
@@ -4176,98 +4253,141 @@
     <!-- ═══════════════════════ MODAL FONDO REVOLVENTE ═══════════════════════ -->
     <div id="modal-fondo-revolvente" class="modal-celya-config" style="display: none;">
         <div class="modal-revolvente-content">
-            <span class="close-config-btn" onclick="cerrarModalFondoRevolvente()">&times;</span>
-            <h2 style="text-align: center; margin-top: 0; color: #0d9488; font-size: 24px;">📈 Proyección Financiera de Fondo Revolvente</h2>
-            <p class="modal-subtitle">Calcula el crecimiento autónomo de tu stock basado en la cobranza de cuotas</p>
+            <!-- Header Fijo Superior -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 25px;">
+                <div>
+                    <h2 style="margin: 0; color: #0d9488; font-size: 26px; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                        <span>📈</span> Proyección de Flujo de Caja y Fondo Revolvente Autónomo
+                    </h2>
+                    <p style="margin: 5px 0 0 0; color: var(--text-secondary); font-size: 14px;">
+                        Planifica tus compras de stock al contado y retiros de apoyo familiar en base a tu cobranza recurrente
+                    </p>
+                </div>
+                <button onclick="cerrarModalFondoRevolvente()" class="btn-config-trigger" style="background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); font-weight: 700; padding: 10px 20px; border-radius: 8px; font-size: 13.5px; transition: all 0.2s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'">
+                    ✕ Cerrar Módulo
+                </button>
+            </div>
             
-            <div style="display: grid; grid-template-columns: 280px 1fr; gap: 24px; margin-top: 20px;">
-                <!-- Columna Izquierda: Controles -->
-                <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 15px;">
-                    <h3 style="font-size: 15px; margin: 0 0 10px 0; color: var(--text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">⚙️ Variables del Modelo</h3>
+            <div style="display: grid; grid-template-columns: 310px 1fr; gap: 30px; height: calc(100vh - 120px); min-height: 580px; align-items: stretch;">
+                <!-- Columna Izquierda: Parámetros del Negocio -->
+                <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid var(--border-color); border-radius: 16px; padding: 25px; display: flex; flex-direction: column; gap: 18px; overflow-y: auto; backdrop-filter: blur(10px);">
+                    <h3 style="font-size: 16px; margin: 0 0 5px 0; color: var(--text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                        <span>⚙️</span> Parámetros del Simulador
+                    </h3>
                     
                     <div class="form-group-config">
-                        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Capital Inicial Semilla ($)</label>
-                        <input type="number" id="fr-capital-inicial" value="15000" step="1000" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; color: #fff; font-size: 14px;">
+                        <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px; font-weight: 500;">Capital Semilla Inicial (Efectivo)</label>
+                        <input type="number" id="fr-capital-inicial" value="15000" step="1000" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 14.5px; outline: none; font-weight: 600;">
                     </div>
                     <div class="form-group-config">
-                        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Costo de Adquisición Celular ($)</label>
-                        <input type="number" id="fr-costo-equipo" value="3000" step="100" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; color: #fff; font-size: 14px;">
+                        <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px; font-weight: 500;">Costo Promedio del Celular</label>
+                        <input type="number" id="fr-costo-equipo" value="3000" step="100" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 14.5px; outline: none; font-weight: 600;">
                     </div>
                     <div class="form-group-config">
-                        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Enganche Promedio Recibido ($)</label>
-                        <input type="number" id="fr-enganche-promedio" value="550" step="50" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; color: #fff; font-size: 14px;">
+                        <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px; font-weight: 500;">Enganche Promedio Recibido</label>
+                        <input type="number" id="fr-enganche-promedio" value="600" step="50" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 14.5px; outline: none; font-weight: 600;">
                     </div>
                     <div class="form-group-config">
-                        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Cuota Semanal Promedio ($)</label>
-                        <input type="number" id="fr-cuota-promedio" value="220" step="10" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; color: #fff; font-size: 14px;">
+                        <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px; font-weight: 500;">Cuota Semanal Promedio</label>
+                        <input type="number" id="fr-cuota-promedio" value="220" step="10" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 14.5px; outline: none; font-weight: 600;">
                     </div>
                     <div class="form-group-config">
-                        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Plazo Promedio del Plan</label>
-                        <select id="fr-plazo-plan" onchange="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; color: #fff; font-size: 14px;">
+                        <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px; font-weight: 500;">Plazo Promedio del Plan</label>
+                        <select id="fr-plazo-plan" onchange="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 14.5px; outline: none; font-weight: 600;">
                             <option value="26">Plan Rápido (26 semanas)</option>
                             <option value="52" selected>Plan Cómodo (52 semanas)</option>
                         </select>
                     </div>
                     <div class="form-group-config">
-                        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Colocación Meta Mensual (Equipos)</label>
-                        <input type="number" id="fr-meta-colocacion" value="8" step="1" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; color: #fff; font-size: 14px;">
+                        <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px; font-weight: 500;">Meta de Ventas Mensuales (Equipos)</label>
+                        <input type="number" id="fr-meta-colocacion" value="8" step="1" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 14.5px; outline: none; font-weight: 600;">
                     </div>
                     <div class="form-group-config">
-                        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Retiro Mensual Apoyo Familiar ($)</label>
-                        <input type="number" id="fr-retiro-familiar" value="4000" step="500" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; color: #fff; font-size: 14px;">
+                        <label style="font-size: 12.5px; color: var(--text-secondary); display: block; margin-bottom: 6px; font-weight: 500;">Retiro de Apoyo Familiar (Mensual)</label>
+                        <input type="number" id="fr-retiro-familiar" value="4000" step="500" oninput="recalcularProyeccionFondo()" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 14.5px; outline: none; font-weight: 600;">
                     </div>
                 </div>
                 
-                <!-- Columna Derecha: Indicadores y Visualización -->
-                <div style="display: flex; flex-direction: column; gap: 20px;">
-                    <!-- KPI Cards Row -->
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
-                        <div style="background: rgba(13, 148, 136, 0.05); border: 1px solid rgba(13, 148, 136, 0.2); border-radius: 10px; padding: 12px 16px; text-align: center;">
-                            <div style="font-size: 11px; text-transform: uppercase; color: #2dd4bf; font-weight: 600; margin-bottom: 4px;">Punto Autoregeneración</div>
-                            <div id="fr-kpi-punto-auto" style="font-size: 20px; font-weight: 800; color: #fff;">0 clientes</div>
-                            <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Para comprar 1 equipo/semana con cuotas</div>
+                <!-- Columna Derecha: Reportes, Indicadores, Gráfico y Flujo Detallado -->
+                <div style="display: flex; flex-direction: column; gap: 24px; overflow-y: auto; padding-right: 5px;">
+                    <!-- KPI Cards Row - 4 KPI de alta visibilidad -->
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+                        <div style="background: rgba(13, 148, 136, 0.04); border: 1px solid rgba(13, 148, 136, 0.15); border-radius: 12px; padding: 15px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            <div style="font-size: 11px; text-transform: uppercase; color: #2dd4bf; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px;">Punto Autoregeneración</div>
+                            <div id="fr-kpi-punto-auto" style="font-size: 22px; font-weight: 800; color: #fff;">0 clientes</div>
+                            <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 4px; line-height: 1.3;">Activos necesarios al corriente para comprar 1 equipo/sem al contado.</div>
                         </div>
-                        <div style="background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 10px; padding: 12px 16px; text-align: center;">
-                            <div style="font-size: 11px; text-transform: uppercase; color: #60a5fa; font-weight: 600; margin-bottom: 4px;">Mes de Autosuficiencia</div>
-                            <div id="fr-kpi-mes-auto" style="font-size: 20px; font-weight: 800; color: #fff;">Mes 1</div>
-                            <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Sin inyectar más capital propio</div>
+                        <div style="background: rgba(59, 130, 246, 0.04); border: 1px solid rgba(59, 130, 246, 0.15); border-radius: 12px; padding: 15px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            <div style="font-size: 11px; text-transform: uppercase; color: #60a5fa; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px;">Efectivo Final (Semana 52)</div>
+                            <div id="fr-kpi-efectivo-final" style="font-size: 22px; font-weight: 800; color: #fff;">$0 MXN</div>
+                            <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 4px; line-height: 1.3;">Caja líquida acumulada en el negocio tras compras y retiros familiares.</div>
                         </div>
-                        <div style="background: rgba(168, 85, 247, 0.05); border: 1px solid rgba(168, 85, 247, 0.2); border-radius: 10px; padding: 12px 16px; text-align: center;">
-                            <div style="font-size: 11px; text-transform: uppercase; color: #c084fc; font-weight: 600; margin-bottom: 4px;">Ganancia Libre Retirada</div>
-                            <div id="fr-kpi-ganancia-anual" style="font-size: 20px; font-weight: 800; color: #fff;">$0 MXN</div>
-                            <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Acumulado a 12 meses</div>
+                        <div style="background: rgba(168, 85, 247, 0.04); border: 1px solid rgba(168, 85, 247, 0.15); border-radius: 12px; padding: 15px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            <div style="font-size: 11px; text-transform: uppercase; color: #c084fc; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px;">Envíos Familiares Totales</div>
+                            <div id="fr-kpi-ganancia-anual" style="font-size: 22px; font-weight: 800; color: #fff;">$0 MXN</div>
+                            <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 4px; line-height: 1.3;">Efectivo real que lograste retirar del negocio para tu familia en 1 año.</div>
+                        </div>
+                        <div style="background: rgba(22, 163, 74, 0.04); border: 1px solid rgba(22, 163, 74, 0.15); border-radius: 12px; padding: 15px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            <div style="font-size: 11px; text-transform: uppercase; color: #4ade80; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px;">Utilidad Neta + ROI</div>
+                            <div id="fr-kpi-utilidad-roi" style="font-size: 20px; font-weight: 800; color: #fff;">$0 MXN (0% ROI)</div>
+                            <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 4px; line-height: 1.3;">Crecimiento total de tu riqueza (Caja + Retiros - Capital Semilla).</div>
                         </div>
                     </div>
                     
-                    <!-- Chart Area -->
-                    <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; position: relative; min-height: 280px;">
-                        <canvas id="chartFondoRevolvente" style="width: 100%; height: 280px;"></canvas>
+                    <!-- Fila Intermedia: Diagnóstico de Salud de la Proyección -->
+                    <div id="fr-diagnostico-caja" style="border-radius: 10px; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; font-size: 13.5px; border-left: 5px solid #3b82f6; background: rgba(59,130,246,0.06);">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 18px;" id="fr-status-icon">ℹ️</span>
+                            <span id="fr-status-text" style="font-weight: 600;">Calculando estatus de salud del simulador...</span>
+                        </div>
+                        <span id="fr-status-badge" style="background: #3b82f6; color: #fff; font-weight: 700; font-size: 11.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px;">Diagnóstico</span>
                     </div>
                     
-                    <!-- Table Area -->
-                    <div>
-                        <h4 style="font-size: 14px; margin: 0 0 10px 0; color: var(--text-primary);">📅 Proyección Semanal Detallada (Semanas 1 a 12)</h4>
-                        <div style="max-height: 180px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; background: rgba(0,0,0,0.2);">
-                            <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; color: var(--text-secondary);">
-                                <thead style="background: rgba(255,255,255,0.04); position: sticky; top: 0; color: var(--text-primary);">
-                                    <tr>
-                                        <th style="padding: 8px 12px; border-bottom: 1px solid var(--border-color);">Semana</th>
-                                        <th style="padding: 8px 12px; border-bottom: 1px solid var(--border-color);">Clientes Activos</th>
-                                        <th style="padding: 8px 12px; border-bottom: 1px solid var(--border-color);">Cobro Cuotas ($)</th>
-                                        <th style="padding: 8px 12px; border-bottom: 1px solid var(--border-color);">Enganches ($)</th>
-                                        <th style="padding: 8px 12px; border-bottom: 1px solid var(--border-color);">Comprados (Pzs)</th>
-                                        <th style="padding: 8px 12px; border-bottom: 1px solid var(--border-color);">Retiro Familia ($)</th>
-                                        <th style="padding: 8px 12px; border-bottom: 1px solid var(--border-color);">Efectivo Final ($)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="fr-projection-tbody"></tbody>
-                            </table>
+                    <!-- Fila de Gráfico y Tabla Proyección (Distribución 50/50 o en Grid de Dos Columnas) -->
+                    <div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; min-height: 380px;">
+                        <!-- Gráfico de Crecimiento de Flujo -->
+                        <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-color); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+                            <h4 style="font-size: 14.5px; margin: 0; color: var(--text-primary); font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                                📊 Evolución Mensual del Fondo Revolvente
+                            </h4>
+                            <div style="flex: 1; min-height: 320px; position: relative;">
+                                <canvas id="chartFondoRevolvente" style="width: 100%; height: 100%;"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Tabla Detallada -->
+                        <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-color); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h4 style="font-size: 14.5px; margin: 0; color: var(--text-primary); font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                                    📅 Flujo Semanal (Semanas 1 a 24)
+                                </h4>
+                                <span style="font-size: 10.5px; color: var(--text-muted); font-weight: 500;">*Valores redondeados a enteros</span>
+                            </div>
+                            
+                            <div style="flex: 1; overflow-y: auto; max-height: 330px; border: 1px solid var(--border-color); border-radius: 10px; background: rgba(0,0,0,0.3);">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+                                    <thead style="background: rgba(15, 23, 42, 0.9); position: sticky; top: 0; color: var(--text-primary); border-bottom: 1px solid var(--border-color); z-index: 2;">
+                                        <tr>
+                                            <th style="padding: 10px 8px; text-align: center;">Sem</th>
+                                            <th style="padding: 10px 8px; text-align: center;">Clientes</th>
+                                            <th style="padding: 10px 8px; text-align: center;">Ventas</th>
+                                            <th style="padding: 10px 8px; text-align: right; color: #34d399;">Cuotas</th>
+                                            <th style="padding: 10px 8px; text-align: right; color: #a855f7;">Retiro</th>
+                                            <th style="padding: 10px 8px; text-align: right; color: #38bdf8;">Cartera</th>
+                                            <th style="padding: 10px 8px; text-align: right; color: #fff; font-weight: 700;">Caja Final</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="fr-projection-tbody"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- ═══════════════════════ TOAST SYSTEM ═══════════════════════ -->
 
     <!-- ═══════════════════════ TOAST SYSTEM ═══════════════════════ -->
     <div id="toast-container" style="
