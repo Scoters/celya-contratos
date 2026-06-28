@@ -524,37 +524,41 @@
             transition: all 0.3s ease;
         }
 
-        /* 📋 ESTILOS DE VISTA LISTA PREMIUM (Móvil y Escritorio) */
+        /* 📋 ESTILOS DE VISTA LISTA PREMIUM (Móvil) */
         .grid-equipos.view-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
         .grid-equipos.view-list .card-celular {
             flex-direction: column;
             align-items: stretch;
-            padding: 12px;
-            gap: 10px;
+            padding: 10px 12px;
+            gap: 0;
             min-height: auto;
         }
+
+        /* Fila 1: imagen + título + enganche inline */
         .grid-equipos.view-list .card-celular > div:first-child {
             display: grid;
-            grid-template-columns: 60px 1fr;
-            gap: 12px;
-            align-items: center;
+            grid-template-columns: 50px 1fr;
+            gap: 10px;
+            align-items: start;
             text-align: left;
         }
         .grid-equipos.view-list .card-celular .img-container {
-            width: 60px !important;
-            height: 60px !important;
+            width: 50px !important;
+            height: 50px !important;
             flex-shrink: 0;
             margin: 0 !important;
+            grid-row: 1 / 3;
         }
         .grid-equipos.view-list .card-celular h4 {
-            font-size: 15px !important;
-            margin: 0 0 2px 0 !important;
+            font-size: 14px !important;
+            margin: 0 !important;
             text-align: left !important;
             font-weight: 700;
+            line-height: 1.2;
         }
         .grid-equipos.view-list .card-celular .specs-container {
             display: none !important;
@@ -565,66 +569,122 @@
         .grid-equipos.view-list .card-celular .price-row {
             display: none !important;
         }
+
+        /* Enganche: chip inline horizontal pequeño */
         .grid-equipos.view-list .card-celular .enganche {
-            font-size: 11px !important;
-            margin: 0 !important;
-            padding: 2px 6px !important;
-            background: rgba(34, 197, 94, 0.1);
+            font-size: 10px !important;
+            margin: 4px 0 0 0 !important;
+            padding: 2px 8px !important;
+            background: rgba(34, 197, 94, 0.08) !important;
             color: #16a34a !important;
-            border: 1px solid rgba(34, 197, 94, 0.2);
-            border-radius: 6px;
-            display: inline-block;
-            width: fit-content;
+            border: 1px solid rgba(34, 197, 94, 0.18) !important;
+            border-radius: 20px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            width: fit-content !important;
+            white-space: nowrap !important;
+            line-height: 1.4 !important;
+            font-weight: 600 !important;
+            grid-column: 2;
+        }
+        /* Ocultar todo el contenido verboso del enganche y solo mostrar la cifra */
+        .grid-equipos.view-list .card-celular .enganche > * {
+            display: none !important;
+        }
+        .grid-equipos.view-list .card-celular .enganche::before {
+            content: "Eng. $" attr(data-enganche) !important;
+            display: inline !important;
+            font-size: 10px !important;
+            font-weight: 700 !important;
         }
         body.dark-theme .grid-equipos.view-list .card-celular .enganche {
-            background: rgba(74, 222, 128, 0.1);
+            background: rgba(74, 222, 128, 0.08) !important;
             color: #4ade80 !important;
-            border-color: rgba(74, 222, 128, 0.2);
+            border-color: rgba(74, 222, 128, 0.15) !important;
         }
+
+        /* Fila 2: toggle frecuencia + cuota + botón */
         .grid-equipos.view-list .card-celular > div:last-child {
             display: flex;
             flex-direction: row;
             justify-content: space-between;
             align-items: center;
+            gap: 8px;
             border-top: 1px solid var(--border-color);
             padding-top: 8px;
-            margin-top: 4px;
+            margin-top: 8px;
             width: 100%;
         }
+
+        /* Mostrar el toggle de frecuencia como mini-pills */
         .grid-equipos.view-list .card-celular .frecuencia-toggle-container {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 2px !important;
+            margin: 0 !important;
+            flex-shrink: 0;
+        }
+        .grid-equipos.view-list .card-celular .frecuencia-toggle-container > span {
             display: none !important;
         }
+        .grid-equipos.view-list .card-celular .frecuencia-toggle {
+            gap: 2px !important;
+            padding: 2px !important;
+            border-radius: 6px !important;
+        }
+        .grid-equipos.view-list .card-celular .freq-btn {
+            font-size: 9px !important;
+            padding: 3px 6px !important;
+            border-radius: 4px !important;
+            min-width: auto !important;
+        }
+
+        /* Cuotas: solo mostrar la cuota activa en una línea */
         .grid-equipos.view-list .card-celular .cuotas {
             margin: 0 !important;
-            font-size: 13px !important;
-            text-align: left !important;
+            font-size: 12px !important;
+            text-align: center !important;
+            flex: 1;
+            min-width: 0;
         }
         .grid-equipos.view-list .card-celular .cuota-item {
             margin: 0 !important;
-            gap: 4px !important;
-            flex-direction: row !important;
+            gap: 2px !important;
+            flex-direction: column !important;
             display: flex !important;
             align-items: center !important;
         }
+        .grid-equipos.view-list .card-celular .cuota-item > div {
+            text-align: center !important;
+        }
+        .grid-equipos.view-list .card-celular .cuota-item:nth-child(2) {
+            display: none !important;
+        }
         .grid-equipos.view-list .card-celular .cuota-item span.plan-label {
-            font-size: 11px !important;
+            font-size: 9px !important;
             color: var(--text-muted) !important;
+            display: none !important;
         }
         .grid-equipos.view-list .card-celular .cuota-item span.plan-val {
-            font-size: 13px !important;
-            font-weight: 700 !important;
+            font-size: 14px !important;
+            font-weight: 800 !important;
             color: var(--text-main) !important;
         }
         .grid-equipos.view-list .card-celular .card-enganche-minimo {
             display: none !important;
         }
+
+        /* Botón compacto */
         .grid-equipos.view-list .card-celular .btn-solicitar {
-            padding: 6px 12px !important;
-            font-size: 11.5px !important;
+            padding: 6px 10px !important;
+            font-size: 11px !important;
             margin: 0 !important;
             border-radius: 8px !important;
             width: auto !important;
             font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         @media (min-width: 768px) {
@@ -682,10 +742,50 @@
                 text-align: left !important;
                 padding: 4px 8px !important;
                 font-size: 12px !important;
+                border-radius: 8px !important;
+                grid-column: auto !important;
+            }
+            .grid-equipos.view-list .card-celular .enganche > * {
+                display: revert !important;
+            }
+            .grid-equipos.view-list .card-celular .enganche::before {
+                content: none !important;
+            }
+            .grid-equipos.view-list .card-celular .price-row {
+                display: flex !important;
             }
             .grid-equipos.view-list .card-celular .frecuencia-toggle-container {
                 display: flex !important;
                 margin-bottom: 12px !important;
+            }
+            .grid-equipos.view-list .card-celular .frecuencia-toggle-container > span {
+                display: block !important;
+            }
+            .grid-equipos.view-list .card-celular .frecuencia-toggle {
+                gap: 4px !important;
+                padding: 4px !important;
+                border-radius: 10px !important;
+            }
+            .grid-equipos.view-list .card-celular .freq-btn {
+                font-size: 12px !important;
+                padding: 6px 12px !important;
+                border-radius: 8px !important;
+            }
+            .grid-equipos.view-list .card-celular .cuota-item {
+                flex-direction: row !important;
+            }
+            .grid-equipos.view-list .card-celular .cuota-item:nth-child(2) {
+                display: flex !important;
+            }
+            .grid-equipos.view-list .card-celular .cuota-item span.plan-label {
+                display: inline !important;
+                font-size: 13px !important;
+            }
+            .grid-equipos.view-list .card-celular .cuota-item span.plan-val {
+                font-size: 14px !important;
+            }
+            .grid-equipos.view-list .card-celular .card-enganche-minimo {
+                display: inline !important;
             }
             .grid-equipos.view-list .card-celular .btn-solicitar {
                 margin-top: 12px !important;
