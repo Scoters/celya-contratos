@@ -509,6 +509,12 @@
             border-radius: 20px;
         }
 
+        .view-toggle-btn.active {
+            background: var(--accent) !important;
+            color: #fff !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+
         /* Grid del Catálogo */
         .grid-equipos {
             display: grid;
@@ -522,70 +528,103 @@
         .grid-equipos.view-list {
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
         }
         .grid-equipos.view-list .card-celular {
-            flex-direction: row;
-            align-items: center;
-            padding: 12px 16px;
-            gap: 16px;
+            flex-direction: column;
+            align-items: stretch;
+            padding: 12px;
+            gap: 10px;
             min-height: auto;
         }
+        .grid-equipos.view-list .card-celular > div:first-child {
+            display: grid;
+            grid-template-columns: 60px 1fr;
+            gap: 12px;
+            align-items: center;
+            text-align: left;
+        }
         .grid-equipos.view-list .card-celular .img-container {
-            width: 80px !important;
-            height: 80px !important;
+            width: 60px !important;
+            height: 60px !important;
             flex-shrink: 0;
             margin: 0 !important;
         }
         .grid-equipos.view-list .card-celular h4 {
-            font-size: 16px !important;
-            margin: 4px 0 !important;
+            font-size: 15px !important;
+            margin: 0 0 2px 0 !important;
             text-align: left !important;
-        }
-        .grid-equipos.view-list .card-celular .card-badges {
-            display: none !important;
-        }
-        .grid-equipos.view-list .card-celular > div:first-child {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex: 1.5;
-            text-align: left;
-        }
-        .grid-equipos.view-list .card-celular > div:last-child {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            justify-content: center;
-            flex: 1;
-            min-width: auto;
+            font-weight: 700;
         }
         .grid-equipos.view-list .card-celular .specs-container {
             display: none !important;
         }
+        .grid-equipos.view-list .card-celular .card-badges {
+            display: none !important;
+        }
         .grid-equipos.view-list .card-celular .price-row {
-            font-size: 13px !important;
-            margin-bottom: 2px !important;
+            display: none !important;
         }
         .grid-equipos.view-list .card-celular .enganche {
             font-size: 11px !important;
             margin: 0 !important;
             padding: 2px 6px !important;
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a !important;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 6px;
+            display: inline-block;
+            width: fit-content;
         }
-        .grid-equipos.view-list .card-celular .cuotas {
-            margin: 4px 0 !important;
-            font-size: 13px !important;
-            text-align: right !important;
+        body.dark-theme .grid-equipos.view-list .card-celular .enganche {
+            background: rgba(74, 222, 128, 0.1);
+            color: #4ade80 !important;
+            border-color: rgba(74, 222, 128, 0.2);
+        }
+        .grid-equipos.view-list .card-celular > div:last-child {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+            padding-top: 8px;
+            margin-top: 4px;
+            width: 100%;
         }
         .grid-equipos.view-list .card-celular .frecuencia-toggle-container {
             display: none !important;
         }
+        .grid-equipos.view-list .card-celular .cuotas {
+            margin: 0 !important;
+            font-size: 13px !important;
+            text-align: left !important;
+        }
+        .grid-equipos.view-list .card-celular .cuota-item {
+            margin: 0 !important;
+            gap: 4px !important;
+            flex-direction: row !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+        .grid-equipos.view-list .card-celular .cuota-item span.plan-label {
+            font-size: 11px !important;
+            color: var(--text-muted) !important;
+        }
+        .grid-equipos.view-list .card-celular .cuota-item span.plan-val {
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            color: var(--text-main) !important;
+        }
+        .grid-equipos.view-list .card-celular .card-enganche-minimo {
+            display: none !important;
+        }
         .grid-equipos.view-list .card-celular .btn-solicitar {
             padding: 6px 12px !important;
-            font-size: 12px !important;
+            font-size: 11.5px !important;
             margin: 0 !important;
             border-radius: 8px !important;
             width: auto !important;
+            font-weight: 700;
         }
 
         @media (min-width: 768px) {
@@ -593,30 +632,31 @@
                 gap: 18px;
             }
             .grid-equipos.view-list .card-celular {
-                padding: 20px 24px;
-                gap: 28px;
-            }
-            .grid-equipos.view-list .card-celular .card-badges {
-                display: flex !important;
-                position: absolute;
-                top: 14px;
-                left: 168px;
-                margin-bottom: 0;
+                flex-direction: row !important;
+                align-items: stretch !important;
+                padding: 20px 24px !important;
+                gap: 28px !important;
             }
             .grid-equipos.view-list .card-celular > div:first-child {
-                flex-direction: row;
-                gap: 24px;
-                flex: 2.2;
-                border-right: 1px solid var(--border-color);
-                padding-right: 28px;
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 24px !important;
+                flex: 2.2 !important;
+                border-right: 1px solid var(--border-color) !important;
+                padding-right: 28px !important;
             }
             .grid-equipos.view-list .card-celular > div:last-child {
-                flex-direction: column;
-                justify-content: space-between;
-                flex: 1;
-                min-width: 260px;
-                padding-left: 4px;
-                align-items: stretch;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+                flex: 1 !important;
+                min-width: 260px !important;
+                padding-left: 4px !important;
+                align-items: stretch !important;
+                border-top: none !important;
+                padding-top: 0 !important;
+                margin-top: 0 !important;
             }
             .grid-equipos.view-list .card-celular .img-container {
                 width: 120px !important;
@@ -624,6 +664,13 @@
             }
             .grid-equipos.view-list .card-celular h4 {
                 font-size: 19px !important;
+            }
+            .grid-equipos.view-list .card-celular .card-badges {
+                display: flex !important;
+                position: absolute;
+                top: 14px;
+                left: 168px;
+                margin-bottom: 0;
             }
             .grid-equipos.view-list .card-celular .specs-container {
                 display: flex !important;
@@ -633,6 +680,8 @@
             .grid-equipos.view-list .card-celular .enganche {
                 margin: 0 !important;
                 text-align: left !important;
+                padding: 4px 8px !important;
+                font-size: 12px !important;
             }
             .grid-equipos.view-list .card-celular .frecuencia-toggle-container {
                 display: flex !important;
@@ -3032,19 +3081,17 @@
 
 
 
-        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: nowrap; margin-bottom: 20px; width: 100%;">
-            <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start; min-width: 0;">
-                <h2 id="tituloSeccion" style="margin: 0; font-size: clamp(18px, 4vw, 24px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">✨ Modelos Destacados y Favoritos CelYa!</h2>
-                <span id="cacheBadge" style="display: none; background:#fff7ed; color:#c2410c; border: 1px solid #ffedd5; padding:4px 10px; border-radius:12px; font-weight:700; font-size:11px; white-space: nowrap;" class="badge-cache-anim">Datos en caché • Actualizando</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-                <span class="count-badge" id="countBadge" style="cursor: pointer; user-select: none;" title="Haz clic para alternar vista Catálogo/Lista" onclick="alternarModoVista()">0 equipos</span>
-                <div class="view-toggle-buttons" style="display: flex; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 10px; padding: 3px; gap: 2px;">
-                    <button type="button" id="btnViewGrid" class="view-toggle-btn active" onclick="setModoVista('grid')" style="border: none; background: transparent; padding: 6px 8px; border-radius: 7px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: all 0.2s;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <h2 id="tituloSeccion" style="margin: 0; font-size: clamp(16px, 4vw, 22px);">✨ Modelos Destacados y Favoritos CelYa!</h2>
+            <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                <span id="cacheBadge" style="display: none; background:#fff7ed; color:#c2410c; border: 1px solid #ffedd5; padding:3px 8px; border-radius:10px; font-weight:700; font-size:10px; white-space: nowrap;">⏳ Caché</span>
+                <span class="count-badge" id="countBadge" style="cursor: pointer; user-select: none; font-size: 12px; padding: 3px 10px;" title="Haz clic para alternar vista" onclick="alternarModoVista()">0 equipos</span>
+                <div style="display: flex; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 8px; padding: 2px; gap: 1px;">
+                    <button type="button" id="btnViewGrid" class="view-toggle-btn active" onclick="setModoVista('grid')" style="border: none; background: transparent; padding: 4px 6px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: all 0.2s;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                     </button>
-                    <button type="button" id="btnViewList" class="view-toggle-btn" onclick="setModoVista('list')" style="border: none; background: transparent; padding: 6px 8px; border-radius: 7px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: all 0.2s;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                    <button type="button" id="btnViewList" class="view-toggle-btn" onclick="setModoVista('list')" style="border: none; background: transparent; padding: 4px 6px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: all 0.2s;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
                     </button>
                 </div>
             </div>
