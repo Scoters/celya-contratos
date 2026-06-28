@@ -480,6 +480,132 @@
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 25px;
             margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        /* 📋 ESTILOS DE VISTA LISTA PREMIUM */
+        @media (min-width: 768px) {
+            .grid-equipos.view-list {
+                display: flex;
+                flex-direction: column;
+                gap: 18px;
+            }
+            .grid-equipos.view-list .card-celular {
+                flex-direction: row;
+                align-items: stretch;
+                padding: 20px 24px;
+                gap: 28px;
+                min-height: auto;
+            }
+            .grid-equipos.view-list .card-celular > div:first-child {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 24px;
+                flex: 2.2;
+                border-right: 1px solid var(--border-color);
+                padding-right: 28px;
+                text-align: left;
+            }
+            .grid-equipos.view-list .card-celular > div:last-child {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                flex: 1;
+                min-width: 260px;
+                padding-left: 4px;
+            }
+            .grid-equipos.view-list .card-celular .img-container {
+                width: 120px !important;
+                height: 120px !important;
+                flex-shrink: 0;
+                margin: 0 !important;
+            }
+            .grid-equipos.view-list .card-celular h4 {
+                font-size: 19px !important;
+                margin: 6px 0 !important;
+                text-align: left !important;
+            }
+            .grid-equipos.view-list .card-celular .card-badges {
+                position: absolute;
+                top: 14px;
+                left: 168px;
+                margin-bottom: 0;
+            }
+            .grid-equipos.view-list .card-celular .specs-container {
+                justify-content: flex-start !important;
+                margin-bottom: 12px !important;
+            }
+            .grid-equipos.view-list .card-celular .enganche {
+                margin: 0 !important;
+                text-align: left !important;
+            }
+            .grid-equipos.view-list .card-celular .frecuencia-toggle-container {
+                margin-bottom: 12px !important;
+            }
+            .grid-equipos.view-list .card-celular .btn-solicitar {
+                margin-top: 12px !important;
+            }
+        }
+
+        /* ⏳ SKELETON SHIMMER LOADER */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            min-height: 420px;
+        }
+        .skeleton-shimmer {
+            background: linear-gradient(90deg, 
+                var(--bg-light) 25%, 
+                var(--border-color) 37%, 
+                var(--bg-light) 63%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 1.4s ease-in-out infinite;
+            border-radius: 8px;
+        }
+        .skeleton-badge {
+            width: 90px;
+            height: 22px;
+        }
+        .skeleton-img {
+            width: 100%;
+            height: 160px;
+            border-radius: 12px;
+        }
+        .skeleton-title {
+            width: 75%;
+            height: 22px;
+        }
+        .skeleton-text {
+            width: 90%;
+            height: 16px;
+        }
+        .skeleton-button {
+            width: 100%;
+            height: 46px;
+            border-radius: 12px;
+            margin-top: auto;
+        }
+
+        /* 📋 BOTONES TOGGLE VISTA */
+        .view-toggle-btn.active {
+            background: var(--primary) !important;
+            color: white !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        .view-toggle-btn:hover:not(.active) {
+            background: rgba(0, 0, 0, 0.04) !important;
+            color: var(--text-main) !important;
         }
 
         /* Tarjeta Celular Premium */
@@ -2804,26 +2930,70 @@
 
 
 
-        <div class="section-header">
-            <h2 id="tituloSeccion">✨ Modelos Destacados y Favoritos CelYa!</h2>
-            <span class="count-badge" id="countBadge">0 equipos</span>
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <h2 id="tituloSeccion" style="margin: 0;">✨ Modelos Destacados y Favoritos CelYa!</h2>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="count-badge" id="countBadge" style="cursor: pointer; user-select: none;" title="Haz clic para alternar vista Catálogo/Lista" onclick="alternarModoVista()">0 equipos</span>
+                <div class="view-toggle-buttons" style="display: flex; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 10px; padding: 3px; gap: 2px;">
+                    <button type="button" id="btnViewGrid" class="view-toggle-btn active" onclick="setModoVista('grid')" style="border: none; background: transparent; padding: 6px 8px; border-radius: 7px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: all 0.2s;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    </button>
+                    <button type="button" id="btnViewList" class="view-toggle-btn" onclick="setModoVista('list')" style="border: none; background: transparent; padding: 6px 8px; border-radius: 7px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: all 0.2s;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div id="contenedorResultados" class="grid-equipos">
-            <div
-                style="grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(50px, 8vh, 100px) 16px; gap: 20px; text-align: center;">
-                <div class="pdp-spinner"
-                    style="width: 50px; height: 50px; border-width: 4px; border-top-color: var(--accent); border-left-color: var(--border-color); border-right-color: var(--border-color); border-bottom-color: var(--border-color); animation-duration: 0.75s;">
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 6px;">
-                    <h3
-                        style="font-size: clamp(18px, 4.5vw, 22px); font-weight: 700; color: var(--text-main); margin: 0; font-family: 'Outfit', sans-serif; letter-spacing: -0.5px;">
-                        Cargando catálogo oficial...</h3>
-                    <p
-                        style="font-size: clamp(13px, 3.5vw, 14.5px); color: var(--text-muted); margin: 0; max-width: 380px; line-height: 1.5;">
-                        Estamos conectando con la base de datos para mostrarte los equipos disponibles y cotizar tus
-                        pagos semanales al instante.</p>
-                </div>
+            <!-- ⏳ SKELETON LOADER ANIMADO INICIAL (6 TARJETAS SHIMMER) -->
+            <div class="skeleton-card">
+                <div class="skeleton-shimmer skeleton-badge"></div>
+                <div class="skeleton-shimmer skeleton-img" style="margin: 10px 0;"></div>
+                <div class="skeleton-shimmer skeleton-title"></div>
+                <div class="skeleton-shimmer skeleton-text"></div>
+                <div class="skeleton-shimmer skeleton-text" style="width: 50%;"></div>
+                <div class="skeleton-shimmer skeleton-button"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-shimmer skeleton-badge"></div>
+                <div class="skeleton-shimmer skeleton-img" style="margin: 10px 0;"></div>
+                <div class="skeleton-shimmer skeleton-title"></div>
+                <div class="skeleton-shimmer skeleton-text"></div>
+                <div class="skeleton-shimmer skeleton-text" style="width: 50%;"></div>
+                <div class="skeleton-shimmer skeleton-button"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-shimmer skeleton-badge"></div>
+                <div class="skeleton-shimmer skeleton-img" style="margin: 10px 0;"></div>
+                <div class="skeleton-shimmer skeleton-title"></div>
+                <div class="skeleton-shimmer skeleton-text"></div>
+                <div class="skeleton-shimmer skeleton-text" style="width: 50%;"></div>
+                <div class="skeleton-shimmer skeleton-button"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-shimmer skeleton-badge"></div>
+                <div class="skeleton-shimmer skeleton-img" style="margin: 10px 0;"></div>
+                <div class="skeleton-shimmer skeleton-title"></div>
+                <div class="skeleton-shimmer skeleton-text"></div>
+                <div class="skeleton-shimmer skeleton-text" style="width: 50%;"></div>
+                <div class="skeleton-shimmer skeleton-button"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-shimmer skeleton-badge"></div>
+                <div class="skeleton-shimmer skeleton-img" style="margin: 10px 0;"></div>
+                <div class="skeleton-shimmer skeleton-title"></div>
+                <div class="skeleton-shimmer skeleton-text"></div>
+                <div class="skeleton-shimmer skeleton-text" style="width: 50%;"></div>
+                <div class="skeleton-shimmer skeleton-button"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-shimmer skeleton-badge"></div>
+                <div class="skeleton-shimmer skeleton-img" style="margin: 10px 0;"></div>
+                <div class="skeleton-shimmer skeleton-title"></div>
+                <div class="skeleton-shimmer skeleton-text"></div>
+                <div class="skeleton-shimmer skeleton-text" style="width: 50%;"></div>
+                <div class="skeleton-shimmer skeleton-button"></div>
             </div>
         </div>
 
@@ -3539,6 +3709,10 @@
 
         // 🚀 Carga inicial
         async function cargarPantallaInicial() {
+            // Inicializar modo de vista guardado
+            const savedViewMode = localStorage.getItem('celya_view_mode') || 'grid';
+            setModoVista(savedViewMode);
+
             await sincronizarTasas();
 
             // Inicializar botones interactivos segmentados
@@ -3641,6 +3815,38 @@
             return "brand-otro";
         }
 
+        // 📋 MANEJO DE VISTAS: CATÁLOGO (GRID) VS LISTA (LIST)
+        function setModoVista(modo) {
+            try {
+                const contenedor = document.getElementById('contenedorResultados');
+                const btnGrid = document.getElementById('btnViewGrid');
+                const btnList = document.getElementById('btnViewList');
+                if (!contenedor) return;
+
+                localStorage.setItem('celya_view_mode', modo);
+
+                if (modo === 'list') {
+                    contenedor.classList.add('view-list');
+                    if (btnGrid) btnGrid.classList.remove('active');
+                    if (btnList) btnList.classList.add('active');
+                } else {
+                    contenedor.classList.remove('view-list');
+                    if (btnGrid) btnGrid.classList.add('active');
+                    if (btnList) btnList.classList.remove('active');
+                }
+            } catch (e) {
+                console.error("Error al configurar modo de vista:", e);
+            }
+        }
+
+        function alternarModoVista() {
+            const contenedor = document.getElementById('contenedorResultados');
+            if (contenedor) {
+                const esLista = contenedor.classList.contains('view-list');
+                setModoVista(esLista ? 'grid' : 'list');
+            }
+        }
+
         // Carga los datos por red (con soporte de caché instantáneo para F5)
         async function renderizarCatalogo(busqueda) {
             const contenedor = document.getElementById('contenedorResultados');
@@ -3651,6 +3857,23 @@
             }
             const searchIcon = document.getElementById('searchIcon');
             if (searchIcon) searchIcon.innerText = "⏳";
+
+            // Pintar esqueletos shimmer animados durante la carga (si no hay caché pintada)
+            if (contenedor && (!window.equiposCargados || window.equiposCargados.length === 0)) {
+                contenedor.innerHTML = "";
+                for (let i = 0; i < 6; i++) {
+                    contenedor.innerHTML += `
+                        <div class="skeleton-card">
+                            <div class="skeleton-shimmer skeleton-badge"></div>
+                            <div class="skeleton-shimmer skeleton-img" style="margin: 10px 0;"></div>
+                            <div class="skeleton-shimmer skeleton-title"></div>
+                            <div class="skeleton-shimmer skeleton-text"></div>
+                            <div class="skeleton-shimmer skeleton-text" style="width: 50%;"></div>
+                            <div class="skeleton-shimmer skeleton-button"></div>
+                        </div>
+                    `;
+                }
+            }
 
             // Clave de caché única según la URL del script para evitar datos stale si cambia de URL
             const urlHash = btoa(CONFIG.GOOGLE_SCRIPT_URL).substring(0, 15);
