@@ -2218,15 +2218,31 @@
         function abrirModalFondoRevolvente() {
             document.getElementById('modal-fondo-revolvente').style.display = 'block';
             
-            // Intentar rellenar enganche inicial sugerido basado en config global si existe
+            // Rellenar dinámicamente con los promedios reales de tu Google Sheets (inventario y clientes)
             try {
-                if (typeof configGlobal !== 'undefined') {
-                    const eSem = parseFloat(configGlobal.engancheSemanal) || 20;
-                    const costoBase = 3000;
-                    const factorEng = (eSem / 100);
-                    document.getElementById('fr-enganche-promedio').value = Math.ceil((costoBase * factorEng) / 10) * 10;
+                // A. Costo Promedio del Celular (precio de contado de los celulares en inventario)
+                if (typeof dbInventarioEquipos !== 'undefined' && dbInventarioEquipos.length > 0) {
+                    const totalCosto = dbInventarioEquipos.reduce((acc, eq) => acc + (parseFloat(eq.precioContado) || 3000), 0);
+                    const costoPromedio = Math.round(totalCosto / dbInventarioEquipos.length);
+                    document.getElementById('fr-costo-equipo').value = costoPromedio;
                 }
-            } catch(e) {}
+
+                // B. Enganche Promedio Recibido (de los celulares en inventario)
+                if (typeof dbInventarioEquipos !== 'undefined' && dbInventarioEquipos.length > 0) {
+                    const totalEnganche = dbInventarioEquipos.reduce((acc, eq) => acc + (parseFloat(eq.enganche) || 600), 0);
+                    const enganchePromedio = Math.round(totalEnganche / dbInventarioEquipos.length);
+                    document.getElementById('fr-enganche-promedio').value = enganchePromedio;
+                }
+
+                // C. Cuota Semanal Promedio (de los clientes activos reales)
+                if (typeof dbClientesActivos !== 'undefined' && dbClientesActivos.length > 0) {
+                    const totalCuota = dbClientesActivos.reduce((acc, cl) => acc + (parseFloat(cl.cuota) || 220), 0);
+                    const cuotaPromedio = Math.round(totalCuota / dbClientesActivos.length);
+                    document.getElementById('fr-cuota-promedio').value = cuotaPromedio;
+                }
+            } catch(e) {
+                console.warn("Error al cargar promedios reales del Spreadsheet para el simulador:", e);
+            }
             
             setTimeout(() => {
                 recalcularProyeccionFondo();
