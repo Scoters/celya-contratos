@@ -7418,6 +7418,17 @@
                 return true;
             }
 
+            // Si el producto actual es un producto de catálogo (/p/), desactivamos la validación de anomalías Tier 2
+            // porque consolidan ofertas de múltiples vendedores independientes de Mercado Libre y es normal y común
+            // que capacidades más grandes cuesten menos.
+            const isCatalogProduct = (typeof currentMLItemLink !== "undefined" && currentMLItemLink && currentMLItemLink.includes("/p/")) || 
+                                     (varianteSeleccionada && varianteSeleccionada.id && varianteSeleccionada.id.startsWith("MLM") && varianteSeleccionada.id.length <= 11);
+            if (isCatalogProduct) {
+                console.log("Desactivando anomalías de precio Tier 2 para producto de catálogo.");
+                console.log("=== FIN DETECTAR ANOMALIA (PRODUCTO DE CATALOGO) ===");
+                return false;
+            }
+
             // Tier 2 sibling comparison
             for (let i = 0; i < listToUse.length; i++) {
                 const vOther = listToUse[i];
