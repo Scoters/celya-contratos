@@ -1482,9 +1482,9 @@ function doGet(e) {
     const sheetConfig = ss.getSheetByName('Configuración') || ss.getSheetByName('Configuracion');
 
     // Cargar parámetros de configuración
-    let configActual = { interes: "6", horastol: "24", semanastol: "3", interesPlanComodo: "75", interesPlanRapido: "50", gananciaContado: "15", engancheSemanal: "20", engancheComodo: "30", descuentoLiquidacion: "15", telegramBotToken: "", telegramChatId: "", tasaInteresQuincenalRapido: "45", tasaInteresQuincenalComodo: "65", engancheMinimoQuincenalRapido: "25", engancheMinimoQuincenalComodo: "35" };
+    let configActual = { interes: "6", horastol: "24", semanastol: "3", interesPlanComodo: "75", interesPlanRapido: "50", gananciaContado: "15", engancheSemanal: "20", engancheComodo: "30", descuentoLiquidacion: "15", telegramBotToken: "", telegramChatId: "", tasaInteresQuincenalRapido: "45", tasaInteresQuincenalComodo: "65", engancheMinimoQuincenalRapido: "25", engancheMinimoQuincenalComodo: "35", codigoDescuento: "", descuentoEnganchePct: "13" };
     if (sheetConfig) {
-      const filaConfig = sheetConfig.getRange("A2:P2").getValues()[0];
+      const filaConfig = sheetConfig.getRange("A2:R2").getValues()[0];
       configActual = {
         interes:           filaConfig[0] !== undefined ? String(filaConfig[0]) : "6",
         horastol:          filaConfig[1] !== undefined ? String(filaConfig[1]) : "24",
@@ -1501,7 +1501,9 @@ function doGet(e) {
         tasaInteresQuincenalRapido: filaConfig[12] !== undefined && filaConfig[12] !== "" ? String(filaConfig[12]) : "45",
         tasaInteresQuincenalComodo: filaConfig[13] !== undefined && filaConfig[13] !== "" ? String(filaConfig[13]) : "65",
         engancheMinimoQuincenalRapido: filaConfig[14] !== undefined && filaConfig[14] !== "" ? String(filaConfig[14]) : "25",
-        engancheMinimoQuincenalComodo: filaConfig[15] !== undefined && filaConfig[15] !== "" ? String(filaConfig[15]) : "35"
+        engancheMinimoQuincenalComodo: filaConfig[15] !== undefined && filaConfig[15] !== "" ? String(filaConfig[15]) : "35",
+        codigoDescuento:   filaConfig[16] !== undefined ? String(filaConfig[16] || '').trim() : "",
+        descuentoEnganchePct: filaConfig[17] !== undefined && filaConfig[17] !== "" ? String(filaConfig[17]) : "13"
       };
     }
 
@@ -1728,10 +1730,12 @@ function doGet(e) {
       tasaInteresQuincenalRapido: "45",
       tasaInteresQuincenalComodo: "65",
       engancheMinimoQuincenalRapido: "25",
-      engancheMinimoQuincenalComodo: "35"
+      engancheMinimoQuincenalComodo: "35",
+      codigoDescuento: "",
+      descuentoEnganchePct: "13"
     };
     if (sheetConfig) {
-      const filaConfig = sheetConfig.getRange("A2:P2").getValues()[0];
+      const filaConfig = sheetConfig.getRange("A2:R2").getValues()[0];
       configActual = {
         interes:           filaConfig[0] !== undefined ? String(filaConfig[0]) : "6",
         horastol:          filaConfig[1] !== undefined ? String(filaConfig[1]) : "24",
@@ -1748,7 +1752,9 @@ function doGet(e) {
         tasaInteresQuincenalRapido: filaConfig[12] !== undefined && filaConfig[12] !== "" ? String(filaConfig[12]) : "45",
         tasaInteresQuincenalComodo: filaConfig[13] !== undefined && filaConfig[13] !== "" ? String(filaConfig[13]) : "65",
         engancheMinimoQuincenalRapido: filaConfig[14] !== undefined && filaConfig[14] !== "" ? String(filaConfig[14]) : "25",
-        engancheMinimoQuincenalComodo: filaConfig[15] !== undefined && filaConfig[15] !== "" ? String(filaConfig[15]) : "35"
+        engancheMinimoQuincenalComodo: filaConfig[15] !== undefined && filaConfig[15] !== "" ? String(filaConfig[15]) : "35",
+        codigoDescuento:   filaConfig[16] !== undefined ? String(filaConfig[16] || '').trim() : "",
+        descuentoEnganchePct: filaConfig[17] !== undefined && filaConfig[17] !== "" ? String(filaConfig[17]) : "13"
       };
     }
 
@@ -4721,16 +4727,18 @@ function inicializarEstructuraSpreadsheet() {
     "Tasa Interés Quincenal Rápido (%)",
     "Tasa Interés Quincenal Cómodo (%)",
     "Enganche Mínimo Quincenal Rápido (%)",
-    "Enganche Mínimo Quincenal Cómodo (%)"
+    "Enganche Mínimo Quincenal Cómodo (%)",
+    "Código de Descuento (Cupón)",
+    "Porcentaje de Enganche con Cupón (%)"
   ];
   sheetConfig.getRange(1, 1, 1, headersConfig.length).setValues([headersConfig]);
   
   // Rellenar valores por defecto en Fila 2 de Configuración si está vacía
   if (sheetConfig.getLastRow() < 2) {
-    sheetConfig.getRange("A2:P2").setValues([[6, 24, 3, 50, 75, 15, 20, 33, 30, 15, "", "", 45, 65, 25, 35]]);
+    sheetConfig.getRange("A2:R2").setValues([[6, 24, 3, 50, 75, 15, 20, 33, 30, 15, "", "", 45, 65, 25, 35, "CELYA13", 13]]);
   } else {
     // Si ya existe la fila 2, asegurar que los campos tengan valores correctos o por defecto (migración a nuevos valores)
-    const rangeTodos = sheetConfig.getRange("A2:P2");
+    const rangeTodos = sheetConfig.getRange("A2:R2");
     const valoresTodos = rangeTodos.getValues()[0];
     const actualizados = [
       valoresTodos[0] !== "" && valoresTodos[0] !== undefined && valoresTodos[0] !== null ? valoresTodos[0] : 6,
@@ -4748,7 +4756,9 @@ function inicializarEstructuraSpreadsheet() {
       (valoresTodos[12] === "" || valoresTodos[12] === undefined || valoresTodos[12] === null) ? 45 : valoresTodos[12],
       (valoresTodos[13] === "" || valoresTodos[13] === undefined || valoresTodos[13] === null) ? 65 : valoresTodos[13],
       (valoresTodos[14] === "" || valoresTodos[14] === undefined || valoresTodos[14] === null) ? 25 : valoresTodos[14],
-      (valoresTodos[15] === "" || valoresTodos[15] === undefined || valoresTodos[15] === null) ? 35 : valoresTodos[15]
+      (valoresTodos[15] === "" || valoresTodos[15] === undefined || valoresTodos[15] === null) ? 35 : valoresTodos[15],
+      valoresTodos[16] !== undefined ? String(valoresTodos[16] || '').trim() : "",
+      valoresTodos[17] !== undefined && valoresTodos[17] !== "" ? parseFloat(valoresTodos[17]) : 13
     ];
     rangeTodos.setValues([actualizados]);
   }

@@ -1760,6 +1760,8 @@
                 document.getElementById('cfg-enganche-quin-comodo').value = datos.config.engancheMinimoQuincenalComodo !== undefined ? datos.config.engancheMinimoQuincenalComodo : 35;
 
                 document.getElementById('cfg-descuento-liquidacion').value = datos.config.descuentoLiquidacion !== undefined ? datos.config.descuentoLiquidacion : 15;
+                document.getElementById('cfg-codigo-descuento').value = datos.config.codigoDescuento || '';
+                document.getElementById('cfg-descuento-enganche-pct').value = datos.config.descuentoEnganchePct !== undefined ? datos.config.descuentoEnganchePct : 13;
 
                 dbClientesActivos = datos.clientesActivos || [];
                 listaClientesGlobal = dbClientesActivos;
