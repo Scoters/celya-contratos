@@ -3613,7 +3613,7 @@
                         style="margin-top: 10px; margin-bottom: 10px; text-align: left; background: var(--bg-card); padding: 14px 18px; border-radius: 8px; border: 1px solid var(--border-color);">
                         <summary
                             style="cursor: pointer; font-size: 16px; font-weight: 600; color: var(--primary); outline: none; list-style: none; display: flex; align-items: center; justify-content: space-between;">
-                            <span>🏁 Personalizar Enganche <span
+                            <span>🏁 Personalizar Enganche y Cupón <span
                                     style="font-size: 13px; font-weight: 400; color: var(--text-muted);">(Opcional)</span></span>
                             <span style="font-size: 14px; color: var(--text-muted);">▼</span>
                         </summary>
@@ -3640,28 +3640,30 @@
                                 </div>
                                 <div id="pdp-codigo-descuento-mensaje" style="display: none; margin-top: 8px; font-size: 12px; font-weight: 600; line-height: 1.4;"></div>
                             </div>
-                            <div
-                                style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">
-                                <span>Mínimo: <strong id="pdp-enganche-minimo-label"
-                                        style="color: #16a34a !important;">$0</strong></span>
-                                <span>Máximo: <strong id="pdp-enganche-maximo-label"
-                                        style="color: #16a34a !important;">$0</strong></span>
-                            </div>
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <input type="range" id="cliEnganchePersonalizadoSlider"
-                                    style="width: 100%; height: 6px; border-radius: 3px; accent-color: #16a34a; cursor: pointer;"
-                                    oninput="syncSliderToInput(this.value)">
+                            <div id="pdp-slider-control-group">
                                 <div
-                                    style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 6px;">
-                                    <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Monto
-                                        seleccionado:</span>
-                                    <span id="pdp-enganche-seleccionado-val-parent"
-                                        style="font-size: 15px; font-weight: bold; color: #16a34a !important;"><span
-                                            id="pdp-enganche-seleccionado-val">$0</span> MXN</span>
+                                    style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">
+                                    <span>Mínimo: <strong id="pdp-enganche-minimo-label"
+                                            style="color: #16a34a !important;">$0</strong></span>
+                                    <span>Máximo: <strong id="pdp-enganche-maximo-label"
+                                            style="color: #16a34a !important;">$0</strong></span>
                                 </div>
-                                <input type="hidden" id="cliEnganchePersonalizado"
-                                    oninput="actualizarPrecioCalculadoPDP()">
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <input type="range" id="cliEnganchePersonalizadoSlider"
+                                        style="width: 100%; height: 6px; border-radius: 3px; accent-color: #16a34a; cursor: pointer;"
+                                        oninput="syncSliderToInput(this.value)">
+                                    <div
+                                        style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 6px;">
+                                        <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Monto
+                                            seleccionado:</span>
+                                        <span id="pdp-enganche-seleccionado-val-parent"
+                                            style="font-size: 15px; font-weight: bold; color: #16a34a !important;"><span
+                                                id="pdp-enganche-seleccionado-val">$0</span> MXN</span>
+                                    </div>
+                                </div>
                             </div>
+                            <input type="hidden" id="cliEnganchePersonalizado"
+                                oninput="actualizarPrecioCalculadoPDP()">
                         </div>
                     </details>
 
@@ -3873,7 +3875,7 @@
                     style="margin-top: 10px; margin-bottom: 10px; text-align: left; background: var(--bg-card); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color);">
                     <summary
                         style="cursor: pointer; font-size: 13px; font-weight: 600; color: var(--primary); outline: none; list-style: none; display: flex; align-items: center; justify-content: space-between;">
-                        <span>🏁 Personalizar Enganche <span
+                        <span>🏁 Personalizar Enganche y Cupón <span
                                 style="font-size: 11px; font-weight: 400; color: var(--text-muted);">(Opcional)</span></span>
                         <span style="font-size: 12px; color: var(--text-muted);">▼</span>
                     </summary>
@@ -3900,28 +3902,30 @@
                             </div>
                             <div id="pe-codigo-descuento-mensaje" style="display: none; margin-top: 6px; font-size: 11.5px; font-weight: 600; line-height: 1.4;"></div>
                         </div>
-                        <div
-                            style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
-                            <span>Mínimo: <strong id="pe-enganche-minimo-label"
-                                    style="color: #16a34a !important;">$0</strong></span>
-                            <span>Máximo: <strong id="pe-enganche-maximo-label"
-                                    style="color: #16a34a !important;">$0</strong></span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
-                            <input type="range" id="pe-cliEnganchePersonalizadoSlider"
-                                style="width: 100%; height: 5px; border-radius: 2.5px; accent-color: #16a34a; cursor: pointer;"
-                                oninput="syncPESliderToInput(this.value)">
+                        <div id="pe-slider-control-group">
                             <div
-                                style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px;">
-                                <span style="font-size: 10px; color: var(--text-muted); font-weight: 500;">Monto
-                                    seleccionado:</span>
-                                <span id="pe-enganche-seleccionado-val-parent"
-                                    style="font-size: 13px; font-weight: bold; color: #16a34a !important;"><span
-                                        id="pe-enganche-seleccionado-val">$0</span> MXN</span>
+                                style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
+                                <span>Mínimo: <strong id="pe-enganche-minimo-label"
+                                        style="color: #16a34a !important;">$0</strong></span>
+                                <span>Máximo: <strong id="pe-enganche-maximo-label"
+                                        style="color: #16a34a !important;">$0</strong></span>
                             </div>
-                            <input type="hidden" id="pe-cliEnganchePersonalizado"
-                                oninput="actualizarPreciosPedidoEspecial()">
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                <input type="range" id="pe-cliEnganchePersonalizadoSlider"
+                                    style="width: 100%; height: 5px; border-radius: 2.5px; accent-color: #16a34a; cursor: pointer;"
+                                    oninput="syncPESliderToInput(this.value)">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px;">
+                                    <span style="font-size: 10px; color: var(--text-muted); font-weight: 500;">Monto
+                                        seleccionado:</span>
+                                    <span id="pe-enganche-seleccionado-val-parent"
+                                        style="font-size: 13px; font-weight: bold; color: #16a34a !important;"><span
+                                            id="pe-enganche-seleccionado-val">$0</span> MXN</span>
+                                </div>
+                            </div>
                         </div>
+                        <input type="hidden" id="pe-cliEnganchePersonalizado"
+                            oninput="actualizarPreciosPedidoEspecial()">
                     </div>
                 </details>
 
@@ -5755,6 +5759,11 @@
                 if (lblEnganche) lblEnganche.innerText = "Pago Inicial (Enganche)";
                 if (containerEng) containerEng.style.display = "block";
 
+                const pdpSliderGroup = document.getElementById('pdp-slider-control-group');
+                if (pdpSliderGroup) {
+                    pdpSliderGroup.style.display = window._pdpDiscountApplied ? 'none' : 'block';
+                }
+
                 let factorEnganche;
                 if (window._pdpDiscountApplied) {
                     factorEnganche = 0.13;
@@ -5792,7 +5801,10 @@
                 }
 
                 let customEnganche = parseFloat(inputEng.value) || 0;
-                if (customEnganche < engancheCalculado || customEnganche > maxEnganche) {
+                if (window._pdpDiscountApplied) {
+                    customEnganche = engancheCalculado;
+                    inputEng.value = customEnganche;
+                } else if (customEnganche < engancheCalculado || customEnganche > maxEnganche) {
                     customEnganche = engancheCalculado;
                     inputEng.value = customEnganche;
                 }
@@ -6407,6 +6419,11 @@
                 if (containerEng) containerEng.style.display = "block";
                 if (lblEnganche) lblEnganche.innerText = "Pago Inicial (Enganche):";
 
+                const peSliderGroup = document.getElementById('pe-slider-control-group');
+                if (peSliderGroup) {
+                    peSliderGroup.style.display = window._pdpDiscountApplied ? 'none' : 'block';
+                }
+
                 if (freq === "QUINCENAL") {
                     if (lblSemanal) lblSemanal.innerText = "Abono Quincenal:";
                 } else {
@@ -6453,7 +6470,10 @@
 
                 const inputEng = document.getElementById('pe-cliEnganchePersonalizado');
                 let customEnganche = parseFloat(inputEng.value) || 0;
-                if (customEnganche < engancheCalculado || customEnganche > maxEnganche) {
+                if (window._pdpDiscountApplied) {
+                    customEnganche = engancheCalculado;
+                    if (inputEng) inputEng.value = customEnganche;
+                } else if (customEnganche < engancheCalculado || customEnganche > maxEnganche) {
                     customEnganche = engancheCalculado;
                     if (inputEng) inputEng.value = customEnganche;
                 }
