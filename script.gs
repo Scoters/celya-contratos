@@ -194,7 +194,7 @@ function doGet(e) {
       const diffTime = hoy.getTime() - vencimientoDate.getTime();
       const diasAtraso = Math.max(0, Math.floor(diffTime / (24 * 60 * 60 * 1000)));
       semanasAtraso = Math.floor(diasAtraso / 7);
-      interesMoratorioAcumulado = semanasAtraso * clienteEncontrado.cuota * (interesTasa / 100);
+      interesMoratorioAcumulado = diasAtraso * clienteEncontrado.cuota * (interesTasa / 100);
       
       const diasNombresEs = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
       const diaSemanaEs = diasNombresEs[vencimientoDate.getDay()];
@@ -2091,7 +2091,7 @@ function doPost(e) {
         const diffTime = hoy.getTime() - vencimientoDate.getTime();
         const diasAtraso = Math.max(0, Math.floor(diffTime / (24 * 60 * 60 * 1000)));
         semanasAtraso = Math.floor(diasAtraso / 7);
-        interesMoratorioAcumulado = semanasAtraso * clienteEncontrado.cuota * (interesTasa / 100);
+        interesMoratorioAcumulado = diasAtraso * clienteEncontrado.cuota * (interesTasa / 100);
       }
       
       const montoEnganche = clienteEncontrado.engancheFila;
@@ -5120,10 +5120,9 @@ function enviarResumenMatutinoTelegram() {
           }
         }
         
-        let semanasAtrasoVal = Math.floor(diasAtrasoVal / 7);
         let penalidadMonto = 0;
-        if (semanasAtrasoVal > 0) {
-          penalidadMonto = semanasAtrasoVal * (cuotaNum * (interesTasa / 100));
+        if (diasAtrasoVal > 0) {
+          penalidadMonto = diasAtrasoVal * (cuotaNum * (interesTasa / 100));
         }
         const saldoPendienteReal = saldoPendienteBase + penalidadMonto;
         saldoTotalPendiente += saldoPendienteReal;
@@ -5727,8 +5726,9 @@ function obtenerAlertasClientes(ss) {
       
       // Calcular penalidad e intereses
       let penalidadMonto = 0;
-      if (semanasAtraso > 0) {
-        penalidadMonto = semanasAtraso * (cuotaNum * (tasaInteresCliente / 100));
+      const diasAtraso = Math.max(0, Math.floor(horasAtraso / 24));
+      if (diasAtraso > 0) {
+        penalidadMonto = diasAtraso * (cuotaNum * (tasaInteresCliente / 100));
       }
       const saldoPendienteReal = saldoPendienteBase + penalidadMonto;
       
