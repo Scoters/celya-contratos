@@ -1587,9 +1587,15 @@
                 </div>
 
                 <div class="form-group-config">
-                    <label for="cfg-codigo-descuento">🎟️ Código de Descuento Enganche (13%)</label>
+                    <label for="cfg-codigo-descuento">🎟️ Código de Descuento Enganche</label>
                     <input type="text" id="cfg-codigo-descuento" name="codigoDescuento"
                         placeholder="Ej. PROMO13">
+                </div>
+
+                <div class="form-group-config">
+                    <label for="cfg-descuento-enganche-pct">🎟️ % Enganche con Código de Descuento</label>
+                    <input type="number" step="0.1" id="cfg-descuento-enganche-pct" name="descuentoEnganchePct" min="0"
+                        placeholder="Ej. 13">
                 </div>
 
                 <div class="form-group-config">
@@ -2619,6 +2625,7 @@
 
                     document.getElementById('cfg-descuento-liquidacion').value = data.config.descuentoLiquidacion || 15;
                     document.getElementById('cfg-codigo-descuento').value = data.config.codigoDescuento || '';
+                    document.getElementById('cfg-descuento-enganche-pct').value = data.config.descuentoEnganchePct !== undefined ? data.config.descuentoEnganchePct : 13;
                     document.getElementById('cfg-telegram-token').value = data.config.telegramBotToken || '';
                     document.getElementById('cfg-telegram-chatid').value = data.config.telegramChatId || '';
                 }
@@ -2651,6 +2658,7 @@
 
             params.append('descuentoLiquidacion', document.getElementById('cfg-descuento-liquidacion').value);
             params.append('codigoDescuento', document.getElementById('cfg-codigo-descuento').value);
+            params.append('descuentoEnganchePct', document.getElementById('cfg-descuento-enganche-pct').value);
             params.append('telegramBotToken', document.getElementById('cfg-telegram-token').value);
             params.append('telegramChatId', document.getElementById('cfg-telegram-chatid').value);
 
@@ -2681,6 +2689,7 @@
 
                     configGlobal.descuentoLiquidacion = document.getElementById('cfg-descuento-liquidacion').value;
                     configGlobal.codigoDescuento = document.getElementById('cfg-codigo-descuento').value;
+                    configGlobal.descuentoEnganchePct = document.getElementById('cfg-descuento-enganche-pct').value;
 
                     cerrarModalConfig();
                 } else {

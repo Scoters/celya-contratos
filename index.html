@@ -5455,7 +5455,8 @@
             if (configCode && codeEntered === configCode) {
                 window._pdpDiscountApplied = true;
                 mensajeEl.style.color = '#22c55e'; // Green
-                mensajeEl.innerHTML = `🎉 ¡Código aplicado! Enganche reducido a 13% en plan rápido y cómodo.`;
+                const pctVal = CONFIG_TASAS.descuentoEnganchePct !== undefined ? CONFIG_TASAS.descuentoEnganchePct : 13;
+                mensajeEl.innerHTML = `🎉 ¡Código aplicado! Enganche reducido a ${pctVal}% en plan rápido y cómodo.`;
                 mensajeEl.style.display = 'block';
             } else {
                 window._pdpDiscountApplied = false;
@@ -5485,7 +5486,8 @@
             if (configCode && codeEntered === configCode) {
                 window._pdpDiscountApplied = true;
                 mensajeEl.style.color = '#22c55e'; // Green
-                mensajeEl.innerHTML = `🎉 ¡Código aplicado! Enganche reducido a 13% en plan rápido y cómodo.`;
+                const pctVal = CONFIG_TASAS.descuentoEnganchePct !== undefined ? CONFIG_TASAS.descuentoEnganchePct : 13;
+                mensajeEl.innerHTML = `🎉 ¡Código aplicado! Enganche reducido a ${pctVal}% en plan rápido y cómodo.`;
                 mensajeEl.style.display = 'block';
             } else {
                 window._pdpDiscountApplied = false;
@@ -5766,7 +5768,8 @@
 
                 let factorEnganche;
                 if (window._pdpDiscountApplied) {
-                    factorEnganche = 0.13;
+                    const pctVal = CONFIG_TASAS.descuentoEnganchePct !== undefined ? CONFIG_TASAS.descuentoEnganchePct : 13;
+                    factorEnganche = pctVal / 100;
                 } else if (freq === "QUINCENAL") {
                     if (plazo === "52 Semanas") {
                         factorEnganche = CONFIG_TASAS.engancheQuin52 !== undefined ? CONFIG_TASAS.engancheQuin52 : 0.35;
@@ -6433,7 +6436,8 @@
                 // Matemática
                 let factorEnganche;
                 if (window._pdpDiscountApplied) {
-                    factorEnganche = 0.13;
+                    const pctVal = CONFIG_TASAS.descuentoEnganchePct !== undefined ? CONFIG_TASAS.descuentoEnganchePct : 13;
+                    factorEnganche = pctVal / 100;
                 } else if (freq === "QUINCENAL") {
                     if (plazo === "52 Semanas") {
                         factorEnganche = CONFIG_TASAS.engancheQuin52 !== undefined ? CONFIG_TASAS.engancheQuin52 : 0.35;

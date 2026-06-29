@@ -717,7 +717,7 @@
                 const preDescEnganche = urlParams.get('pre_desc_enganche');
                 if (preDescEnganche === "1" || preDescEnganche === "true") {
                     window.formPromoDiscountActive = true;
-                    console.log("🎟️ Promoción de enganche de 13% activa vía URL");
+                    console.log("🎟️ Promoción de enganche activa vía URL");
                 }
                 const preModelo = urlParams.get('pre_modelo');
                 if (preModelo) {
@@ -1163,7 +1163,8 @@
                 } else {
                     let factorEngancheMinimo;
                     if (window.formPromoDiscountActive) {
-                        factorEngancheMinimo = 0.13;
+                        const pctVal = CONFIG_TASAS_SHEETS.descuentoEnganchePct !== undefined ? CONFIG_TASAS_SHEETS.descuentoEnganchePct : 13;
+                        factorEngancheMinimo = pctVal / 100;
                     } else {
                         factorEngancheMinimo = (frecuencia === "QUINCENAL")
                             ? ((planElegido === "52")
@@ -1240,7 +1241,8 @@
                     if (feedbackEng) {
                         if (window.formPromoDiscountActive) {
                             feedbackEng.style.display = 'block';
-                            feedbackEng.innerHTML = `🎟️ Promoción de enganche activa: <strong>13% obligatorio</strong>`;
+                            const pctVal = CONFIG_TASAS_SHEETS.descuentoEnganchePct !== undefined ? CONFIG_TASAS_SHEETS.descuentoEnganchePct : 13;
+                            feedbackEng.innerHTML = `🎟️ Promoción de enganche activa: <strong>${pctVal}% obligatorio</strong>`;
                         } else {
                             feedbackEng.style.display = 'none';
                         }
@@ -1422,7 +1424,8 @@
                 const frecuencia = partes[0] || "SEMANAL";
                 let factorEngancheMinimo;
                 if (window.formPromoDiscountActive) {
-                    factorEngancheMinimo = 0.13;
+                    const pctVal = CONFIG_TASAS_SHEETS.descuentoEnganchePct !== undefined ? CONFIG_TASAS_SHEETS.descuentoEnganchePct : 13;
+                    factorEngancheMinimo = pctVal / 100;
                 } else {
                     factorEngancheMinimo = (frecuencia === "QUINCENAL")
                         ? ((planElegido === "52")

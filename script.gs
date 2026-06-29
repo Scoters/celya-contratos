@@ -659,7 +659,7 @@ function doGet(e) {
     if (!sheetConfig) {
       return ContentService.createTextOutput(JSON.stringify({ result: "error", message: "No se encontró la pestaña Configuración" })).setMimeType(ContentService.MimeType.JSON);
     }
-    const filaConfig = sheetConfig.getRange("A2:Q2").getValues()[0];
+    const filaConfig = sheetConfig.getRange("A2:R2").getValues()[0];
     return ContentService.createTextOutput(JSON.stringify({
       result: "success",
       config: {
@@ -680,6 +680,7 @@ function doGet(e) {
         engancheMinimoQuincenalRapido: filaConfig[14] !== undefined && filaConfig[14] !== "" ? parseFloat(filaConfig[14]) : 25,
         engancheMinimoQuincenalComodo: filaConfig[15] !== undefined && filaConfig[15] !== "" ? parseFloat(filaConfig[15]) : 35,
         codigoDescuento:   filaConfig[16] !== undefined ? String(filaConfig[16] || '').trim() : "",
+        descuentoEnganchePct: filaConfig[17] !== undefined && filaConfig[17] !== "" ? parseFloat(filaConfig[17]) : 13,
         metodosPago:       PropertiesService.getScriptProperties().getProperty('METODOS_PAGO') || ""
       }
     })).setMimeType(ContentService.MimeType.JSON);
@@ -729,6 +730,7 @@ function doGet(e) {
     const engQuinRapidoVal = parseFloat(sheetConfig.getRange("O2").getValue()) || 25;
     const engQuinComodoVal = parseFloat(sheetConfig.getRange("P2").getValue()) || 35;
     const codigoDescuentoVal = String(sheetConfig.getRange("Q2").getValue() || '').trim();
+    const descuentoEnganchePctVal = parseFloat(sheetConfig.getRange("R2").getValue()) || 13;
     
     // Empaquetamos y enviamos los factores matemáticos reales
     return ContentService.createTextOutput(JSON.stringify({
@@ -746,7 +748,8 @@ function doGet(e) {
       interesQuin52: tasaQuinComodoVal / 100,
       engancheQuin26: engQuinRapidoVal / 100,
       engancheQuin52: engQuinComodoVal / 100,
-      codigoDescuento: codigoDescuentoVal
+      codigoDescuento: codigoDescuentoVal,
+      descuentoEnganchePct: descuentoEnganchePctVal
     })).setMimeType(ContentService.MimeType.JSON);
   }
 
@@ -2598,6 +2601,10 @@ function doPost(e) {
       const codigoDescuento = e.parameter.codigoDescuento;
       if (codigoDescuento !== undefined) {
         sheetConfig.getRange("Q2").setValue(codigoDescuento);
+      }
+      const descuentoEnganchePct = e.parameter.descuentoEnganchePct;
+      if (descuentoEnganchePct !== undefined) {
+        sheetConfig.getRange("R2").setValue(descuentoEnganchePct);
       }
       return ContentService.createTextOutput(JSON.stringify({result: "success", message: "Configuración actualizada"})).setMimeType(ContentService.MimeType.JSON);
     }
