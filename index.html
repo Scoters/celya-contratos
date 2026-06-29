@@ -3609,18 +3609,6 @@
                         </div>
                     </div>
 
-                    <!-- Código de Descuento para Enganche -->
-                    <div id="pdp-codigo-descuento-container" style="margin-top: 10px; margin-bottom: 10px; text-align: left; background: var(--bg-card); padding: 14px 18px; border-radius: 8px; border: 1px solid var(--border-color);">
-                        <label style="font-weight: 600; font-size: 13.5px; color: var(--text-main); display: block; margin-bottom: 8px;">
-                            🎟️ ¿Tienes un código de descuento para el enganche?
-                        </label>
-                        <div style="display: flex; gap: 8px;">
-                            <input type="text" id="cliCodigoDescuento" placeholder="Ingresa tu código" style="flex: 1; box-sizing: border-box; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 12px; color: #fff; font-size: 13px; outline: none;">
-                            <button type="button" onclick="aplicarCodigoDescuentoPDP()" style="background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.2s;">Aplicar</button>
-                        </div>
-                        <div id="pdp-codigo-descuento-mensaje" style="display: none; margin-top: 8px; font-size: 12px; font-weight: 600;"></div>
-                    </div>
-
                     <details class="enganche-personalizado-pdp" id="pdp-enganche-personalizado-container"
                         style="margin-top: 10px; margin-bottom: 10px; text-align: left; background: var(--bg-card); padding: 14px 18px; border-radius: 8px; border: 1px solid var(--border-color);">
                         <summary
@@ -3630,6 +3618,28 @@
                             <span style="font-size: 14px; color: var(--text-muted);">▼</span>
                         </summary>
                         <div style="margin-top: 12px;">
+                            <!-- Código de Descuento (Estilo Premium CelYa) -->
+                            <div style="margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px dashed var(--border-color);">
+                                <label style="font-weight: 600; font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                    🎟️ ¿Tienes un cupón de descuento?
+                                </label>
+                                <div style="display: flex; gap: 8px;">
+                                    <div style="position: relative; flex: 1;">
+                                        <input type="text" id="cliCodigoDescuento" placeholder="Ej. CELYA13" 
+                                            style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px 8px 34px; color: #fff; font-size: 13px; font-weight: 600; outline: none; transition: border-color 0.2s; text-transform: uppercase;"
+                                            onfocus="this.style.borderColor='var(--primary)'"
+                                            onblur="this.style.borderColor='var(--border-color)'">
+                                        <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; opacity: 0.7;">🏷️</span>
+                                    </div>
+                                    <button type="button" onclick="aplicarCodigoDescuentoPDP()" 
+                                        style="background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;"
+                                        onmouseover="this.style.opacity='0.9'; this.style.transform='scale(1.02)'"
+                                        onmouseout="this.style.opacity='1'; this.style.transform='scale(1)'">
+                                        Aplicar
+                                    </button>
+                                </div>
+                                <div id="pdp-codigo-descuento-mensaje" style="display: none; margin-top: 8px; font-size: 12px; font-weight: 600; line-height: 1.4;"></div>
+                            </div>
                             <div
                                 style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">
                                 <span>Mínimo: <strong id="pdp-enganche-minimo-label"
@@ -3859,18 +3869,6 @@
                     </div>
                 </div>
 
-                <!-- Código de Descuento para Enganche Pedido Especial -->
-                <div id="pe-codigo-descuento-container" style="margin-top: 10px; margin-bottom: 10px; text-align: left; background: var(--bg-card); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color);">
-                    <label style="font-weight: 600; font-size: 13px; color: var(--text-main); display: block; margin-bottom: 6px;">
-                        🎟️ ¿Tienes un código de descuento para el enganche?
-                    </label>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" id="pe-cliCodigoDescuento" placeholder="Ingresa tu código" style="flex: 1; box-sizing: border-box; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 10px; color: #fff; font-size: 12px; outline: none;">
-                        <button type="button" onclick="aplicarCodigoDescuentoPE()" style="background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s;">Aplicar</button>
-                    </div>
-                    <div id="pe-codigo-descuento-mensaje" style="display: none; margin-top: 6px; font-size: 11px; font-weight: 600;"></div>
-                </div>
-
                 <details class="enganche-personalizado-pdp" id="pe-enganche-personalizado-container"
                     style="margin-top: 10px; margin-bottom: 10px; text-align: left; background: var(--bg-card); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color);">
                     <summary
@@ -3880,6 +3878,28 @@
                         <span style="font-size: 12px; color: var(--text-muted);">▼</span>
                     </summary>
                     <div style="margin-top: 8px;">
+                        <!-- Código de Descuento Pedido Especial (Estilo Premium CelYa) -->
+                        <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--border-color);">
+                            <label style="font-weight: 600; font-size: 11.5px; color: var(--text-muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                🎟️ ¿Tienes un cupón de descuento?
+                            </label>
+                            <div style="display: flex; gap: 8px;">
+                                <div style="position: relative; flex: 1;">
+                                    <input type="text" id="pe-cliCodigoDescuento" placeholder="Ej. CELYA13" 
+                                        style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: 8px; padding: 7px 10px 7px 30px; color: #fff; font-size: 12.5px; font-weight: 600; outline: none; transition: border-color 0.2s; text-transform: uppercase;"
+                                        onfocus="this.style.borderColor='var(--primary)'"
+                                        onblur="this.style.borderColor='var(--border-color)'">
+                                    <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 13px; opacity: 0.7;">🏷️</span>
+                                </div>
+                                <button type="button" onclick="aplicarCodigoDescuentoPE()" 
+                                    style="background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 7px 14px; font-size: 11.5px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;"
+                                    onmouseover="this.style.opacity='0.9'; this.style.transform='scale(1.02)'"
+                                    onmouseout="this.style.opacity='1'; this.style.transform='scale(1)'">
+                                    Aplicar
+                                </button>
+                            </div>
+                            <div id="pe-codigo-descuento-mensaje" style="display: none; margin-top: 6px; font-size: 11.5px; font-weight: 600; line-height: 1.4;"></div>
+                        </div>
                         <div
                             style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
                             <span>Mínimo: <strong id="pe-enganche-minimo-label"
