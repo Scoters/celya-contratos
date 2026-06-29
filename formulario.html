@@ -516,16 +516,18 @@
         let fotoEvidenciaB64 = "";
 
         const DEFAULT_TASAS_SHEETS = { 
-            interes26: 0.45, 
-            interes52: 0.65, 
-            enganche26: 0.225, 
-            enganche52: 0.325, 
-            engancheSemanal: 0.13, 
-            engancheComodo: 0.15, 
-            interesQuin26: 0.25, 
-            interesQuin52: 0.45, 
-            engancheQuin26: 0.13, 
-            engancheQuin52: 0.15 
+            interes26: 0.55, 
+            interes52: 0.75, 
+            enganche26: 0.275, 
+            enganche52: 0.375, 
+            engancheSemanal: 0.20, 
+            engancheComodo: 0.18, 
+            interesQuin26: 0.32, 
+            interesQuin52: 0.55, 
+            engancheQuin26: 0.20, 
+            engancheQuin52: 0.18,
+            codigoDescuento: "vipcelya",
+            descuentoEnganchePct: 10
         };
         let CONFIG_TASAS_SHEETS = (() => {
             try {
@@ -1163,16 +1165,16 @@
                 } else {
                     let factorEngancheMinimo;
                     if (window.formPromoDiscountActive) {
-                        const pctVal = CONFIG_TASAS_SHEETS.descuentoEnganchePct !== undefined ? CONFIG_TASAS_SHEETS.descuentoEnganchePct : 13;
+                        const pctVal = CONFIG_TASAS_SHEETS.descuentoEnganchePct !== undefined ? CONFIG_TASAS_SHEETS.descuentoEnganchePct : 10;
                         factorEngancheMinimo = pctVal / 100;
                     } else {
                         factorEngancheMinimo = (frecuencia === "QUINCENAL")
                             ? ((planElegido === "52")
-                                ? (CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.15)
-                                : (CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.13))
+                                ? (CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.18)
+                                : (CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.20))
                             : ((planElegido === "52")
-                                ? (CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.15)
-                                : (CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.13));
+                                ? (CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.18)
+                                : (CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.20));
                     }
                     const engancheMinimoObligatorio = Math.ceil((precioContado * factorEngancheMinimo) / 10) * 10;
 
@@ -1217,11 +1219,11 @@
 
                     const factorInteresBase = (frecuencia === "QUINCENAL")
                         ? ((planElegido === "26")
-                            ? (CONFIG_TASAS_SHEETS.interesQuin26 !== undefined ? CONFIG_TASAS_SHEETS.interesQuin26 : 0.25)
-                            : (CONFIG_TASAS_SHEETS.interesQuin52 !== undefined ? CONFIG_TASAS_SHEETS.interesQuin52 : 0.45))
+                            ? (CONFIG_TASAS_SHEETS.interesQuin26 !== undefined ? CONFIG_TASAS_SHEETS.interesQuin26 : 0.32)
+                            : (CONFIG_TASAS_SHEETS.interesQuin52 !== undefined ? CONFIG_TASAS_SHEETS.interesQuin52 : 0.55))
                         : ((planElegido === "26")
-                            ? (CONFIG_TASAS_SHEETS.interes26 !== undefined ? CONFIG_TASAS_SHEETS.interes26 : 0.45)
-                            : (CONFIG_TASAS_SHEETS.interes52 !== undefined ? CONFIG_TASAS_SHEETS.interes52 : 0.65));
+                            ? (CONFIG_TASAS_SHEETS.interes26 !== undefined ? CONFIG_TASAS_SHEETS.interes26 : 0.55)
+                            : (CONFIG_TASAS_SHEETS.interes52 !== undefined ? CONFIG_TASAS_SHEETS.interes52 : 0.75));
                     const factorInteres = Math.max(0, factorInteresBase - descuentoInteres);
                     
                     const numPagosBase = (planElegido === "26") ? 26 : 52;
@@ -1241,7 +1243,7 @@
                     if (feedbackEng) {
                         if (window.formPromoDiscountActive) {
                             feedbackEng.style.display = 'block';
-                            const pctVal = CONFIG_TASAS_SHEETS.descuentoEnganchePct !== undefined ? CONFIG_TASAS_SHEETS.descuentoEnganchePct : 13;
+                            const pctVal = CONFIG_TASAS_SHEETS.descuentoEnganchePct !== undefined ? CONFIG_TASAS_SHEETS.descuentoEnganchePct : 10;
                             feedbackEng.innerHTML = `🎟️ Promoción de enganche activa: <strong>${pctVal}% obligatorio</strong>`;
                         } else {
                             feedbackEng.style.display = 'none';
@@ -1365,12 +1367,12 @@
             // Sincronizar plazo: elegir dinámicamente el plan con enganche menor
             const selectPlazo = document.getElementById('plazoSemanas');
             if (frecuencia === "QUINCENAL") {
-                const fQR = CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.13;
-                const fQC = CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.15;
+                const fQR = CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.20;
+                const fQC = CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.18;
                 selectPlazo.value = (fQR <= fQC) ? "26" : "52";
             } else if (frecuencia === "SEMANAL") {
-                const fSR = CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.13;
-                const fSC = CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.15;
+                const fSR = CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.20;
+                const fSC = CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.18;
                 selectPlazo.value = (fSC <= fSR) ? "52" : "26";
             }
 
@@ -1424,16 +1426,16 @@
                 const frecuencia = partes[0] || "SEMANAL";
                 let factorEngancheMinimo;
                 if (window.formPromoDiscountActive) {
-                    const pctVal = CONFIG_TASAS_SHEETS.descuentoEnganchePct !== undefined ? CONFIG_TASAS_SHEETS.descuentoEnganchePct : 13;
+                    const pctVal = CONFIG_TASAS_SHEETS.descuentoEnganchePct !== undefined ? CONFIG_TASAS_SHEETS.descuentoEnganchePct : 10;
                     factorEngancheMinimo = pctVal / 100;
                 } else {
                     factorEngancheMinimo = (frecuencia === "QUINCENAL")
                         ? ((planElegido === "52")
-                            ? (CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.15)
-                            : (CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.13))
+                            ? (CONFIG_TASAS_SHEETS.engancheQuin52 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin52 : 0.18)
+                            : (CONFIG_TASAS_SHEETS.engancheQuin26 !== undefined ? CONFIG_TASAS_SHEETS.engancheQuin26 : 0.20))
                         : ((planElegido === "52")
-                            ? (CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.15)
-                            : (CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.13));
+                            ? (CONFIG_TASAS_SHEETS.engancheComodo !== undefined ? CONFIG_TASAS_SHEETS.engancheComodo : 0.18)
+                            : (CONFIG_TASAS_SHEETS.engancheSemanal !== undefined ? CONFIG_TASAS_SHEETS.engancheSemanal : 0.20));
                 }
                 const engancheMinimoObligatorio = Math.ceil((precioContado * factorEngancheMinimo) / 10) * 10;
                 const engancheIngresado = parseFloat(document.getElementById('monto').value.replace(/[\$,]/g, "")) || 0;
