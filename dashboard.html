@@ -1081,6 +1081,10 @@
                     style="background: linear-gradient(135deg, #f97316, #ea580c); border: none;">
                     🗂️ Placeholders
                 </button>
+                <button id="btnOpenPromoCatalog" class="btn-config-trigger" onclick="abrirCatalogoPromocional()"
+                    style="background: linear-gradient(135deg, #a855f7, #6b21a8); border: none; display: flex; align-items: center; gap: 6px;">
+                    🎟️ Catálogo Promo
+                </button>
                 <button id="btn-config-global" class="btn-config-trigger" onclick="abrirModalConfig()">
                     ⚙️ Configuración Global
                 </button>
@@ -2591,6 +2595,16 @@
                     }
                 }
             });
+        }
+
+        function abrirCatalogoPromocional() {
+            const promoCode = (configGlobal.codigoDescuento || "").trim();
+            if (!promoCode) {
+                toast("No hay ningún código de descuento configurado en los parámetros globales.", "warning");
+                return;
+            }
+            const url = `index.html?promo_code=${encodeURIComponent(promoCode)}`;
+            window.open(url, '_blank');
         }
 
         // Funciones de apertura y cierre

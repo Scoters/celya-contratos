@@ -3232,6 +3232,11 @@
 
 <body>
 
+    <!-- Barra de Promoción Especial (Secreta) -->
+    <div id="promo-top-bar" style="display: none; background: linear-gradient(90deg, #7c3aed, #2563eb); color: #fff; text-align: center; padding: 10px 16px; font-size: 14px; font-weight: 700; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); align-items: center; justify-content: center; gap: 8px;">
+        <span>🎟️ ¡Promoción Especial CelYa Activa! Navegando con enganche mínimo reducido al <span id="promo-top-bar-pct">13</span>%</span>
+    </div>
+
     <!-- Overlay de Menú Lateral -->
     <div id="sidebarOverlay" class="sidebar-overlay" onclick="cerrarMenuLateral()"></div>
 
@@ -4240,6 +4245,25 @@
             }
         })();
 
+        // Lector de promoción secreta
+        const urlParams = new URLSearchParams(window.location.search);
+        const promoCodeUrl = urlParams.get('promo_code');
+        window._urlPromoCode = promoCodeUrl ? promoCodeUrl.trim().toLowerCase() : "";
+        window._pdpDiscountApplied = false;
+
+        // Verificar el cache inicial
+        if (window._urlPromoCode && CONFIG_TASAS && CONFIG_TASAS.codigoDescuento && window._urlPromoCode === CONFIG_TASAS.codigoDescuento.trim().toLowerCase()) {
+            window._pdpDiscountApplied = true;
+            document.addEventListener('DOMContentLoaded', () => {
+                const topBar = document.getElementById('promo-top-bar');
+                if (topBar) {
+                    const pctVal = CONFIG_TASAS.descuentoEnganchePct !== undefined ? CONFIG_TASAS.descuentoEnganchePct : 13;
+                    document.getElementById('promo-top-bar-pct').innerText = pctVal;
+                    topBar.style.display = 'flex';
+                }
+            });
+        }
+
         let ML_CACHE_VARIANTES = {};
         let isFetchingML = {};
         let pe_data_actual = null;
@@ -4253,6 +4277,22 @@
                     CONFIG_TASAS = data;
                     localStorage.setItem('celya_config_tasas', JSON.stringify(data));
                     console.log("Tasas sincronizadas y guardadas en caché:", CONFIG_TASAS);
+
+                    // Verificar cupón secreto en URL
+                    if (window._urlPromoCode && CONFIG_TASAS.codigoDescuento && window._urlPromoCode === CONFIG_TASAS.codigoDescuento.trim().toLowerCase()) {
+                        window._pdpDiscountApplied = true;
+                        const topBar = document.getElementById('promo-top-bar');
+                        if (topBar) {
+                            const pctVal = CONFIG_TASAS.descuentoEnganchePct !== undefined ? CONFIG_TASAS.descuentoEnganchePct : 13;
+                            document.getElementById('promo-top-bar-pct').innerText = pctVal;
+                            topBar.style.display = 'flex';
+                        }
+                    } else {
+                        window._pdpDiscountApplied = false;
+                        const topBar = document.getElementById('promo-top-bar');
+                        if (topBar) topBar.style.display = 'none';
+                    }
+
                     // Re-render cards to show the correct live rates matching the PDP
                     if (typeof aplicarFiltrosYOrden === 'function') {
                         aplicarFiltrosYOrden();
@@ -4815,6 +4855,16 @@
 
                     // Dynamically calculate weekly and quincenal payments matching PDP logic
                     const priceContadoNum = item.precioContado || 0;
+                    const getEngancheHtml = (normalVal) => {
+                        if (window._pdpDiscountApplied) {
+                            const promoFactor = (CONFIG_TASAS.descuentoEnganchePct !== undefined ? CONFIG_TASAS.descuentoEnganchePct : 13) / 100;
+                            const promoVal = Math.ceil((priceContadoNum * promoFactor) / 10) * 10;
+                            if (promoVal < normalVal) {
+                                return `Enganche: <del style="opacity: 0.6; margin-right: 4px;">$${normalVal.toLocaleString('es-MX')}</del><span style="color: #10b981; font-weight: bold;">$${promoVal.toLocaleString('es-MX')}</span>`;
+                            }
+                        }
+                        return `Enganche: $${normalVal.toLocaleString('es-MX')}`;
+                    };
                     console.log(`%c[TARJETA] === Calculando cuotas para ${item.modelo} (precio=${priceContadoNum}) ===`, 'color: #ff6b00; font-weight: bold');
                     const cuotaSem26 = calcularCuotaSemanal26(priceContadoNum);
                     const cuotaSem52 = calcularCuotaSemanal52(priceContadoNum);
@@ -4846,9 +4896,31 @@
                     if (freqPrevia === "contado") {
                         contentEnganche = `Pago Único: $${Math.round(item.precioContado || 0).toLocaleString('es-MX')} MXN`;
                     } else if (freqPrevia === "quincenal") {
-                        contentEnganche = `<span>Pago Inicial</span> Enganche desde: $${Math.min(engQuin13, engQuin26).toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
+                        const minNormal = Math.min(engQuin13, engQuin26);
+                        if (window._pdpDiscountApplied) {
+                            const promoFactor = (CONFIG_TASAS.descuentoEnganchePct !== undefined ? CONFIG_TASAS.descuentoEnganchePct : 13) / 100;
+                            const promoVal = Math.ceil((priceContadoNum * promoFactor) / 10) * 10;
+                            if (promoVal < minNormal) {
+                                contentEnganche = `<span>Pago Inicial</span> Enganche desde: <del style="opacity: 0.6; margin-right: 4px;">$${minNormal.toLocaleString('es-MX')}</del><strong style="color: #10b981;">$${promoVal.toLocaleString('es-MX')} MXN</strong> <span class="status-badge" style="background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); padding: 2px 6px; font-size: 10px; border-radius: 4px; vertical-align: middle; margin-left: 4px; font-weight: bold;">Promo</span><span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Enganche reducido con cupón secreto</span>`;
+                            } else {
+                                contentEnganche = `<span>Pago Inicial</span> Enganche desde: $${minNormal.toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
+                            }
+                        } else {
+                            contentEnganche = `<span>Pago Inicial</span> Enganche desde: $${minNormal.toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
+                        }
                     } else {
-                        contentEnganche = `<span>Pago Inicial</span> Enganche desde: $${engancheComodoCalculado.toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
+                        const minNormal = engancheComodoCalculado;
+                        if (window._pdpDiscountApplied) {
+                            const promoFactor = (CONFIG_TASAS.descuentoEnganchePct !== undefined ? CONFIG_TASAS.descuentoEnganchePct : 13) / 100;
+                            const promoVal = Math.ceil((priceContadoNum * promoFactor) / 10) * 10;
+                            if (promoVal < minNormal) {
+                                contentEnganche = `<span>Pago Inicial</span> Enganche desde: <del style="opacity: 0.6; margin-right: 4px;">$${minNormal.toLocaleString('es-MX')}</del><strong style="color: #10b981;">$${promoVal.toLocaleString('es-MX')} MXN</strong> <span class="status-badge" style="background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); padding: 2px 6px; font-size: 10px; border-radius: 4px; vertical-align: middle; margin-left: 4px; font-weight: bold;">Promo</span><span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Enganche reducido con cupón secreto</span>`;
+                            } else {
+                                contentEnganche = `<span>Pago Inicial</span> Enganche desde: $${minNormal.toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
+                            }
+                        } else {
+                            contentEnganche = `<span>Pago Inicial</span> Enganche desde: $${minNormal.toLocaleString('es-MX')} MXN<span style="font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-top: 4px; text-transform: none;">Elige tu monto de enganche para un pago menor</span>`;
+                        }
                     }
 
                     // Simple template
@@ -4891,14 +4963,14 @@
                                             <span class="plan-label">⏱️ Plan Rápido (26 semanas):</span>
                                             <div style="text-align: right;">
                                                 <span class="plan-val">$${cuotaSem26.toLocaleString('es-MX')} MXN/semana</span><br>
-                                                <span class="card-enganche-minimo">Enganche: $${engSem26.toLocaleString('es-MX')}</span>
+                                                <span class="card-enganche-minimo">${getEngancheHtml(engSem26)}</span>
                                             </div>
                                         </div>
                                         <div class="cuota-item" style="align-items: center; margin-top: 8px;">
                                             <span class="plan-label">🗓️ Plan Cómodo (52 semanas):</span>
                                             <div style="text-align: right;">
                                                 <span class="plan-val">$${cuotaSem52.toLocaleString('es-MX')} MXN/semana</span><br>
-                                                <span class="card-enganche-minimo">Enganche: $${engSem52.toLocaleString('es-MX')}</span>
+                                                <span class="card-enganche-minimo">${getEngancheHtml(engSem52)}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -4907,14 +4979,14 @@
                                             <span class="plan-label">⏱️ Plan Rápido (13 quincenas):</span>
                                             <div style="text-align: right;">
                                                 <span class="plan-val">$${cuotaQuin13.toLocaleString('es-MX')} MXN/quincena</span><br>
-                                                <span class="card-enganche-minimo">Enganche: $${engQuin13.toLocaleString('es-MX')}</span>
+                                                <span class="card-enganche-minimo">${getEngancheHtml(engQuin13)}</span>
                                             </div>
                                         </div>
                                         <div class="cuota-item" style="align-items: center; margin-top: 8px;">
                                             <span class="plan-label">🗓️ Plan Cómodo (26 quincenas):</span>
                                             <div style="text-align: right;">
                                                 <span class="plan-val">$${cuotaQuin26.toLocaleString('es-MX')} MXN/quincena</span><br>
-                                                <span class="card-enganche-minimo">Enganche: $${engQuin26.toLocaleString('es-MX')}</span>
+                                                <span class="card-enganche-minimo">${getEngancheHtml(engQuin26)}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -5257,12 +5329,25 @@
             document.getElementById('pdp-contado-chico-texto').innerHTML = `Precio de Contado: <strong>$${Math.round(precioContado || 0).toLocaleString('es-MX')} MXN</strong>`;
 
             currentMLItemLink = link || "";
-            // Resetear código de descuento
-            window._pdpDiscountApplied = false;
-            const inputCodigo = document.getElementById('cliCodigoDescuento');
-            if (inputCodigo) inputCodigo.value = "";
-            const msgCodigo = document.getElementById('pdp-codigo-descuento-mensaje');
-            if (msgCodigo) msgCodigo.style.display = 'none';
+            // Resetear o aplicar código de descuento según URL promo
+            if (window._urlPromoCode && CONFIG_TASAS && CONFIG_TASAS.codigoDescuento && window._urlPromoCode === CONFIG_TASAS.codigoDescuento.trim().toLowerCase()) {
+                window._pdpDiscountApplied = true;
+                const inputCodigo = document.getElementById('cliCodigoDescuento');
+                if (inputCodigo) inputCodigo.value = CONFIG_TASAS.codigoDescuento;
+                const msgCodigo = document.getElementById('pdp-codigo-descuento-mensaje');
+                if (msgCodigo) {
+                    msgCodigo.style.color = '#22c55e';
+                    const pctVal = CONFIG_TASAS.descuentoEnganchePct !== undefined ? CONFIG_TASAS.descuentoEnganchePct : 13;
+                    msgCodigo.innerHTML = `🎉 ¡Código aplicado! Enganche reducido a ${pctVal}% en plan rápido y cómodo.`;
+                    msgCodigo.style.display = 'block';
+                }
+            } else {
+                window._pdpDiscountApplied = false;
+                const inputCodigo = document.getElementById('cliCodigoDescuento');
+                if (inputCodigo) inputCodigo.value = "";
+                const msgCodigo = document.getElementById('pdp-codigo-descuento-mensaje');
+                if (msgCodigo) msgCodigo.style.display = 'none';
+            }
 
             let finalColor = color;
             if (!finalColor || finalColor.trim() === "" || finalColor.trim() === "-") {
@@ -6158,11 +6243,25 @@
             document.getElementById('pe-link-input').value = "";
             document.getElementById('pe-error-msg').style.display = 'none';
             document.getElementById('formPedidoEspecial').reset();
-            window._pdpDiscountApplied = false;
-            const inputCodigo = document.getElementById('pe-cliCodigoDescuento');
-            if (inputCodigo) inputCodigo.value = "";
-            const msgCodigo = document.getElementById('pe-codigo-descuento-mensaje');
-            if (msgCodigo) msgCodigo.style.display = 'none';
+            // Resetear o aplicar código de descuento según URL promo
+            if (window._urlPromoCode && CONFIG_TASAS && CONFIG_TASAS.codigoDescuento && window._urlPromoCode === CONFIG_TASAS.codigoDescuento.trim().toLowerCase()) {
+                window._pdpDiscountApplied = true;
+                const inputCodigo = document.getElementById('pe-cliCodigoDescuento');
+                if (inputCodigo) inputCodigo.value = CONFIG_TASAS.codigoDescuento;
+                const msgCodigo = document.getElementById('pe-codigo-descuento-mensaje');
+                if (msgCodigo) {
+                    msgCodigo.style.color = '#22c55e';
+                    const pctVal = CONFIG_TASAS.descuentoEnganchePct !== undefined ? CONFIG_TASAS.descuentoEnganchePct : 13;
+                    msgCodigo.innerHTML = `🎉 ¡Código aplicado! Enganche reducido a ${pctVal}% en plan rápido y cómodo.`;
+                    msgCodigo.style.display = 'block';
+                }
+            } else {
+                window._pdpDiscountApplied = false;
+                const inputCodigo = document.getElementById('pe-cliCodigoDescuento');
+                if (inputCodigo) inputCodigo.value = "";
+                const msgCodigo = document.getElementById('pe-codigo-descuento-mensaje');
+                if (msgCodigo) msgCodigo.style.display = 'none';
+            }
 
             pe_data_actual = null;
             pe_link_actual = "";
