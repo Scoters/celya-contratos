@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miguel Santiago Villalobos | Portfolio</title>
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --accent: #0d9488;
+            --accent-hover: #14b8a6;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 0 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 0;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        header p.subtitle {
+            font-size: 1.2rem;
+            color: var(--accent);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .contact-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .contact-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .contact-links a:hover {
+            color: var(--accent);
+        }
+
+        section {
+            margin-bottom: 60px;
+        }
+
+        section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: var(--text-main);
+            position: relative;
+            display: inline-block;
+        }
+
+        section h2::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -6px;
+            width: 40px;
+            height: 3px;
+            background-color: var(--accent);
+            border-radius: 2px;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .skill-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 25px;
+            border-radius: 8px;
+        }
+
+        .skill-card h3 {
+            color: var(--accent);
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+
+        .skill-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .projects-list {
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+        }
+
+        .project-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 30px;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .project-title {
+            font-size: 1.4rem;
+            color: var(--text-main);
+            font-weight: bold;
+        }
+
+        .project-link {
+            display: inline-block;
+            background-color: var(--accent);
+            color: var(--text-main);
+            padding: 6px 14px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .project-link:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .project-tagline {
+            font-style: italic;
+            color: var(--accent);
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .project-card ul {
+            list-style-type: none;
+            margin-bottom: 20px;
+        }
+
+        .project-card ul li {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 15px;
+        }
+
+        .project-card ul li::before {
+            content: "•";
+            color: var(--accent);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .badge {
+            background-color: rgba(13, 148, 136, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(13, 148, 136, 0.2);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 80px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 2rem; }
+            .project-header { flex-direction: column; align-items: flex-start; }
+            .project-link { margin-top: 5px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- HEADER / HERO -->
+        <header>
+            <h1>Miguel Santiago Villalobos</h1>
+            <p class="subtitle">Automation Engineer & Full-Stack Integration Specialist</p>
+            <div class="contact-links">
+                <a href="mailto:svillalobosmiguel@gmail.com">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555ZM0 4.697v7.104l5.803-3.558L0 4.697ZM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-.123-.131Zm5.436-.566L18 11.801V4.697l-5.803 3.567Z"/></svg>
+                    svillalobosmiguel@gmail.com
+                </a>
+                <a href="https://github.com/Scoters" target="_blank">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+                    github.com/Scoters
+                </a>
+            </div>
+        </header>
+
+        <!-- SKILLS SECTION -->
+        <section id="skills">
+            <h2>Core Expertise</h2>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <h3>Workflow Automation</h3>
+                    <p>Advanced ecosystem architecture using n8n. Expert at combining custom JavaScript nodes, webhooks, conditional routing, and secure OAuth2 Google API authentication to build bulletproof backends.</p>
+                </div>
+                <div class="skill-card">
+                    <h3>SysAdmin & Infrastructure</h3>
+                    <p>Provisioning and hardening private Linux VPS environments. Experienced with Nginx reverse proxy architecture, automated SSL/TLS deployments, and server-side optimizations.</p>
+                </div>
+                <div class="skill-card">
+                    <h3>Perimeter Security</h3>
+                    <p>Advanced edge configurations via Cloudflare. Implementation of sophisticated WAF (Web Application Firewall) policies for anti-scraping, geo-fencing, and bad-bot mitigation.</p>
+                </div>
+                <div class="skill-card">
+                    <h3>Data Engineering & Feeds</h3>
+                    <p>Designing dynamic backend processors to map operational data into structured, automated formats like XML/RSS product feeds for Google Merchant Center and real-time schema.org markups.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROJECTS SECTION -->
+        <section id="projects">
+            <h2>Featured Projects</h2>
+            <div class="projects-list">
+
+                <!-- PROJECT 1: CELYA -->
+                <div class="project-card">
+                    <div class="project-header">
+                        <div class="project-title">CelYa! — FinTech E-Commerce & Automation Core</div>
+                        <a href="https://github.com/Scoters" target="_blank" class="project-link">View Platform</a>
+                    </div>
+                    <div class="project-tagline">Headless E-Commerce Client & Autonomous Financial Engine Hosted on Private VPS</div>
+                    <ul>
+                        <li>Designed a ultra-lightweight frontend catalog deployed via GitHub Pages, incorporating custom client-side URL parameters (?modelo=id) to support unique page crawling and indexing by Googlebot.</li>
+                        <li>Built an autonomous backend core on a private Linux VPS running Nginx as a reverse proxy to isolate and host automated pipelines.</li>
+                        <li>Migrated insecure cloud script configurations into robust, authenticated machine-to-machine (M2M) pipelines using OAuth2 protocols to completely secure client transaction ledgers.</li>
+                        <li>Engineered a live data processor that translates active inventory data into an XML RSS product feed optimized with complex commercial constraints (installments, plazos, and interest rules) for Google Merchant Center.</li>
+                        <li>Deployed precise Cloudflare WAF routing layers to mitigate global scrapers using targeted geo-blocking while safeguarding crawl availability for verified search infrastructure.</li>
+                        <li>Integrated interactive localized mapping with Leaflet.js and custom vector GeoJSON structures bound to strict viewports to explicitly isolate and optimize regional logistics.</li>
+                    </ul>
+                    <div class="badges">
+                        <span class="badge">n8n Core</span>
+                        <span class="badge">Linux VPS</span>
+                        <span class="badge">Nginx Proxy</span>
+                        <span class="badge">Cloudflare WAF</span>
+                        <span class="badge">Google Merchant Feed</span>
+                        <span class="badge">Leaflet.js</span>
+                        <span class="badge">JavaScript (ES6+)</span>
+                        <span class="badge">Git / GitHub Pages</span>
+                    </div>
+                </div>
+
+                <!-- PROJECT 2: SOCCER PREDICTOR -->
+                <div class="project-card">
+                    <div class="project-header">
+                        <div class="project-title">Soccer Match Predictor Engine</div>
+                        <a href="https://github.com/Scoters/soccer-predictor" target="_blank" class="project-link">View Repository</a>
+                    </div>
+                    <div class="project-tagline">Automated Sports Analytics & Statistical Prediction Engine</div>
+                    <ul>
+                        <li>Developed a functional scripting suite designed to aggregate, parse, and evaluate historical match data and team statistics to model high-probability soccer outcomes.</li>
+                        <li>Built automated routines to handle historical sports data ingestion, sanitizing raw performance inputs into clean data matrix structures.</li>
+                        <li>Implemented statistical modeling elements to generate analytical forecasts based on structured team parameters, historic performance streaks, and goal ratios.</li>
+                        <li>Structured the script repository using systematic execution practices, ensuring a clean version-controlled environment optimized for fast execution.</li>
+                    </ul>
+                    <div class="badges">
+                        <span class="badge">Python / Scripting</span>
+                        <span class="badge">Data Analytics</span>
+                        <span class="badge">Statistical Modeling</span>
+                        <span class="badge">Automated Data Pipelines</span>
+                        <span class="badge">Git / Version Control</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2026 Miguel Santiago Villalobos. Built with high performance and zero-overhead architecture.</p>
+    </footer>
+
+</body>
+</html>
