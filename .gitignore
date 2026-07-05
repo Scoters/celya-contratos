@@ -14,3 +14,14 @@ patch_compose.py
 
 generar_feed_merchant.py
 configurar_nginx_perf.py
+
+# Prestamos files
+prestamos.html
+prestamos_admin.html
+contrato.prestamos.html
+guia_pago.prestamos.html
+constancia_no_adeudo.prestamos.html
+verificar.prestamos.html
+restablecer.prestamos.html
+estado_cuenta.prestamos.html
+oxxo-deposit-qr.png
