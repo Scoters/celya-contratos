@@ -463,8 +463,9 @@
                     if (data.created) {
                         try {
                             const d = new Date(data.created.replace(' ', 'T'));
-                            document.getElementById("contrato-fecha-hoy").innerText = d.toLocaleDateString('es-MX');
-                            document.getElementById("contrato-otp-log").innerText = `Firmado digitalmente con folio de verificación ${data.id} en fecha ${d.toLocaleDateString('es-MX')} a las ${d.toLocaleTimeString('es-MX')} horas.`;
+                            const dateOpts = { timeZone: 'America/Mexico_City' };
+                            document.getElementById("contrato-fecha-hoy").innerText = d.toLocaleDateString('es-MX', dateOpts);
+                            document.getElementById("contrato-otp-log").innerText = `Firmado digitalmente con folio de verificación ${data.id} en fecha ${d.toLocaleDateString('es-MX', dateOpts)} a las ${d.toLocaleTimeString('es-MX', { timeZone: 'America/Mexico_City', hour12: true })} horas.`;
                         } catch(e) {
                             console.error("Error al parsear fecha created:", e);
                         }
