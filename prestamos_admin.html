@@ -1562,9 +1562,9 @@
                 }
 
                 if (tipo === 'liquidacion' || nuevoTotalPagado >= totalOriginal) {
-                    detSec = `🎉 *¡Préstamo Liquidado!* Tu cuenta se encuentra al corriente y sin adeudos.\n¡Gracias por pagar! Tu límite de crédito ha aumentado.`;
+                    detSec = `🎉 ¡Préstamo Liquidado! Tu cuenta se encuentra al corriente y sin adeudos.\n¡Gracias por pagar! Tu límite de crédito ha aumentado.`;
                 } else if (tipo === 'extension') {
-                    detSec = `🔄 *Nueva Fecha Límite:* ${nuevaFechaDisplay}\n_(+7 días de prórroga calendario)_`;
+                    detSec = `🔄 Nueva Fecha Límite: ${nuevaFechaDisplay}\n(+7 días de prórroga calendario)`;
                 } else {
                     const nuevoSaldo = Math.max(0, totalOriginal - nuevoTotalPagado);
                     let limFechaDisplay = "N/A";
@@ -1576,21 +1576,21 @@
                             limFechaDisplay = activeLoanForPayment.fecha_pago;
                         }
                     }
-                    detSec = `📉 *Saldo Pendiente:* $${nuevoSaldo.toLocaleString('es-MX')} MXN\n📅 *Fecha Límite:* ${limFechaDisplay}`;
+                    detSec = `📉 Saldo Pendiente: $${nuevoSaldo.toLocaleString('es-MX')} MXN\n📅 Fecha Límite: ${limFechaDisplay}`;
                 }
 
-                const txtMsg = `📱 *Confirmación de Pago - CelYa Préstamos* 📱\n\n` +
-                    `Hola *${activeLoanForPayment.nombre}*, confirmamos el registro de tu pago:\n\n` +
-                    `🔹 *Folio:* \`${activeLoanForPayment.folio || 'N/A'}\`\n` +
-                    `🔹 *Fecha:* ${new Date(fecha + 'T00:00:00').toLocaleDateString('es-MX')}\n` +
-                    `🔹 *Monto:* $${monto.toLocaleString('es-MX')} MXN\n` +
-                    `🔹 *Tipo:* ${tipoLabel}\n` +
-                    `🔹 *Referencia:* ${comentarios}\n\n` +
+                const txtMsg = `📱 Confirmación de Pago - CelYa Préstamos 📱\n\n` +
+                    `Hola ${activeLoanForPayment.nombre}, confirmamos el registro de tu pago:\n\n` +
+                    `🔹 Folio: ${activeLoanForPayment.folio || 'N/A'}\n` +
+                    `🔹 Fecha: ${new Date(fecha + 'T00:00:00').toLocaleDateString('es-MX')}\n` +
+                    `🔹 Monto: $${monto.toLocaleString('es-MX')} MXN\n` +
+                    `🔹 Tipo: ${tipoLabel}\n` +
+                    `🔹 Referencia: ${comentarios}\n\n` +
                     `----------------------------------\n` +
                     `${detSec}\n` +
                     `----------------------------------\n\n` +
                     `Gracias por tu puntualidad.\n` +
-                    `*CelYa Préstamos*`;
+                    `CelYa Préstamos`;
 
                 document.getElementById("copy-message-text").value = txtMsg;
                 document.getElementById("copy-message-modal").classList.add("active");
