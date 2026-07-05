@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restablecer Contraseña - CelYa Préstamos</title>
+    <link rel="shortcut icon" href="logo-modified.webp?v=3" type="image/webp">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "xhjzz2fw99");
+    </script>
+    <style>
+        :root {
+            --bg-page: #18181b;
+            --bg-card: #27272a;
+            --border-color: #3f3f46;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --accent: #00E6D6;
+            --accent-gradient: linear-gradient(135deg, #00E6D6 0%, #00BFFF 100%);
+            --success: #27ae60;
+            --danger: #e74c3c;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .logo {
+            max-width: 120px;
+            margin-bottom: 25px;
+        }
+
+        .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 230, 214, 0.1);
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--accent-gradient);
+            color: #0b0f19;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 30px;
+            font-size: 15px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 230, 214, 0.2);
+            width: 100%;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 230, 214, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        p {
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 0;
+        }
+
+        .error-msg {
+            background: rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .success-msg {
+            background: rgba(39, 174, 96, 0.15);
+            color: var(--success);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .password-requirements {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img class="logo" src="logo-modified.webp?v=5" alt="CelYa Logo">
+
+        <!-- Estado: Cargando -->
+        <div id="loading-state">
+            <div class="icon">⌛</div>
+            <h2>Verificando enlace...</h2>
+            <p>Por favor espera un momento.</p>
+        </div>
+
+        <!-- Estado: Token inválido -->
+        <div id="invalid-state" style="display: none;">
+            <div class="icon">❌</div>
+            <h2>Enlace inválido</h2>
+            <p>Este enlace de restablecimiento no es válido o ha caducado. Solicita uno nuevo desde la página de préstamos.</p>
+            <a href="https://prestamos.estrenacelya.com/" class="btn" style="margin-top: 25px;">Ir a Préstamos</a>
+        </div>
+
+        <!-- Estado: Formulario de nueva contraseña -->
+        <div id="form-state" style="display: none;">
+            <div class="icon">🔐</div>
+            <h2>Nueva Contraseña</h2>
+            <p style="margin-bottom: 25px;">Ingresa tu nueva contraseña para restablecer el acceso a tu cuenta.</p>
+
+            <div class="error-msg" id="reset-error"></div>
+
+            <form id="resetForm" onsubmit="submitNewPassword(event)">
+                <div class="form-group">
+                    <label for="new-password">Nueva contraseña</label>
+                    <input type="password" id="new-password" required minlength="8" placeholder="••••••••">
+                    <div class="password-requirements">Mínimo 8 caracteres</div>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirmar contraseña</label>
+                    <input type="password" id="confirm-password" required minlength="8" placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn" id="submit-btn">Restablecer Contraseña</button>
+            </form>
+        </div>
+
+        <!-- Estado: Éxito -->
+        <div id="success-state" style="display: none;">
+            <div class="icon" style="color: var(--success);">✅</div>
+            <h2>¡Contraseña Restablecida!</h2>
+            <p>Tu contraseña ha sido actualizada con éxito. Ya puedes iniciar sesión con tu nueva contraseña.</p>
+            <a href="https://prestamos.estrenacelya.com/" class="btn" style="margin-top: 25px;">Iniciar Sesión</a>
+        </div>
+    </div>
+
+    <script>
+        let resetToken = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            resetToken = urlParams.get("token");
+
+            document.getElementById("loading-state").style.display = "none";
+
+            if (!resetToken) {
+                document.getElementById("invalid-state").style.display = "block";
+                return;
+            }
+
+            // Token present — show the form
+            document.getElementById("form-state").style.display = "block";
+        });
+
+        async function submitNewPassword(e) {
+            e.preventDefault();
+            const password = document.getElementById("new-password").value;
+            const confirm = document.getElementById("confirm-password").value;
+            const errorEl = document.getElementById("reset-error");
+            const submitBtn = document.getElementById("submit-btn");
+            errorEl.style.display = "none";
+
+            if (password.length < 8) {
+                errorEl.innerText = "La contraseña debe tener al menos 8 caracteres.";
+                errorEl.style.display = "block";
+                return;
+            }
+
+            if (password !== confirm) {
+                errorEl.innerText = "Las contraseñas no coinciden.";
+                errorEl.style.display = "block";
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Procesando...";
+
+            try {
+                const response = await fetch("https://pb.estrenacelya.com/api/collections/users/confirm-password-reset", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        token: resetToken,
+                        password: password,
+                        passwordConfirm: confirm
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById("form-state").style.display = "none";
+                    document.getElementById("success-state").style.display = "block";
+                } else {
+                    const errData = await response.json();
+                    let msg = "No se pudo restablecer la contraseña.";
+                    if (errData && errData.message) {
+                        if (errData.message.toLowerCase().includes("expired") || errData.message.toLowerCase().includes("invalid")) {
+                            msg = "El enlace de restablecimiento ha caducado o ya fue utilizado. Solicita uno nuevo.";
+                        } else {
+                            msg = errData.message;
+                        }
+                    }
+                    errorEl.innerText = msg;
+                    errorEl.style.display = "block";
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Restablecer Contraseña";
+                }
+            } catch (err) {
+                errorEl.innerText = "Error al conectar con el servidor. Por favor reintenta.";
+                errorEl.style.display = "block";
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Restablecer Contraseña";
+            }
+        }
+    </script>
+</body>
+</html>
