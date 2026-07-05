@@ -228,11 +228,60 @@
         @media print {
             body {
                 padding: 0;
+                margin: 0;
+                font-size: 10px;
+                line-height: 1.3;
             }
             .document-container {
                 border: none;
                 box-shadow: none;
-                padding: 0;
+                padding: 10px;
+            }
+            .main-promo-title {
+                font-size: 18px;
+                margin-top: 5px;
+                margin-bottom: 10px;
+            }
+            .header-logo-group {
+                margin-bottom: 2px;
+            }
+            .header-logo-group img {
+                max-width: 100px;
+            }
+            .grid-parties {
+                gap: 15px;
+                margin-bottom: 10px;
+            }
+            .grid-payment-tables {
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+            .payment-table-header {
+                padding: 4px 10px;
+                font-size: 10px;
+            }
+            .payment-table-body {
+                padding: 5px 10px;
+            }
+            .row-item {
+                padding: 3px 0;
+            }
+            .section-header-gray {
+                margin-bottom: 8px;
+                padding: 4px;
+                font-size: 10px;
+            }
+            .grid-methods {
+                gap: 15px;
+                margin-bottom: 10px;
+                padding-bottom: 10px;
+            }
+            .details-box {
+                padding: 8px 10px;
+            }
+            .footer-note {
+                margin-top: 10px;
+                font-size: 8.5px;
             }
             .btn-print {
                 display: none;
@@ -404,11 +453,11 @@
                 <div class="details-box" style="text-align: center;">
                     <p style="margin-bottom: 8px; font-weight: bold;">Deposita en efectivo directamente en caja:</p>
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
-                        <img src="oxxo-deposit-qr.png?v=2" alt="QR OXXO Spin" onclick="window.open('oxxo-deposit-qr.png?v=2', '_blank')" style="max-width: 130px; border-radius: 6px; border: 1px solid var(--border-color); padding: 4px; background: #ffffff; cursor: pointer;">
-                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Dicta este número de tarjeta Spin:</div>
-                        <div style="font-size: 18px; font-weight: 800; color: var(--accent); letter-spacing: 0.5px;">2242 1701 8237 3116</div>
-                        <div style="font-size: 11px; color: var(--text-muted);">Beneficiario: <strong>Miguel Santiago Villalobos</strong></div>
-                        <div style="font-size: 11px; color: var(--danger); font-weight: bold; margin-top: 2px;">⚠️ Depósito únicamente en EFECTIVO.</div>
+                        <img src="oxxo-deposit-qr.png?v=2" alt="QR OXXO Spin" onclick="window.open('oxxo-deposit-qr.png?v=2', '_blank')" style="max-width: 130px; border-radius: 6px; border: 1px solid #e5e7eb; padding: 4px; background: #ffffff; cursor: pointer;">
+                        <div style="font-size: 11px; color: #6b7280; margin-top: 4px;">Dicta este número de tarjeta Spin:</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #00BFFF; letter-spacing: 0.5px;">2242 1701 8237 3116</div>
+                        <div style="font-size: 11px; color: #6b7280;">Beneficiario: <strong>Miguel Santiago Villalobos</strong></div>
+                        <div style="font-size: 11px; color: #e74c3c; font-weight: bold; margin-top: 2px;">⚠️ Depósito únicamente en EFECTIVO.</div>
                     </div>
                 </div>
             </div>
