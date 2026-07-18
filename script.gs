@@ -893,9 +893,22 @@ function doGet(e) {
   if (e.parameter.action === 'testHtml') {
     const url = e.parameter.url;
     const response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    const html = response.getContentText();
+    
+    const inStockCount = (html.match(/schema\.org\/InStock/gi) || []).length;
+    const outStockCount = (html.match(/schema\.org\/OutOfStock/gi) || []).length;
+    const pausedCount = (html.match(/Publicación pausada/gi) || []).length;
+    
+    const availMatch = html.match(/"availability"\s*:\s*"([^"]+)"/i);
+    const availValue = availMatch ? availMatch[1] : null;
+    
     return ContentService.createTextOutput(JSON.stringify({
       code: response.getResponseCode(),
-      length: response.getContentText().length
+      length: html.length,
+      inStockCount: inStockCount,
+      outStockCount: outStockCount,
+      pausedCount: pausedCount,
+      availValue: availValue
     })).setMimeType(ContentService.MimeType.JSON);
   }
 
