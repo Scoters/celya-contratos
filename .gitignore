@@ -25,3 +25,6 @@ verificar.prestamos.html
 restablecer.prestamos.html
 estado_cuenta.prestamos.html
 oxxo-deposit-qr.png
+
+# Agents Local Customizations
+.agents/

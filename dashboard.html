@@ -1663,6 +1663,7 @@
         let listaPromesasGlobal = [];
         let configGlobal = {};
         let clienteSeleccionadoActual = null;
+        let alertasStockGlobal = [];
 
         function limpiarNombreModelo(modelo) {
             if (!modelo) return "";
@@ -2821,8 +2822,10 @@
         // --- Alertas de Stock ---
         function inicializarAlertasStock() {
             const btn = document.getElementById('btnOpenStockAlerts');
+            console.log("inicializarAlertasStock ejecutado. Botón encontrado:", !!btn);
             if (btn) {
                 btn.addEventListener('click', function () {
+                    console.log("Click capturado en btnOpenStockAlerts.");
                     abrirModalStockAlerts();
                 });
             }
@@ -2907,8 +2910,10 @@
         }
 
         function abrirModalStockAlerts() {
+            console.log("abrirModalStockAlerts ejecutado.");
             let panel = document.getElementById('stock-alerts-dropdown');
             if (panel) {
+                console.log("Panel ya existe. Cambiando visibilidad.");
                 // Toggle: si ya está abierto, cerrarlo
                 if (panel.style.display === 'block') {
                     panel.style.display = 'none';
@@ -2987,6 +2992,7 @@
         function renderizarStockAlerts() {
             const cont = document.getElementById('stock-alerts-list');
             const subtitle = document.getElementById('stock-alerts-subtitle');
+            console.log("renderizarStockAlerts ejecutado. Contenedor encontrado:", !!cont, "Cantidad de alertas:", alertasStockGlobal ? alertasStockGlobal.length : 'undefined');
             if (!cont) return;
 
             if (alertasStockGlobal.length === 0) {
@@ -3003,7 +3009,7 @@
 
             cont.innerHTML = '';
             alertasStockGlobal.forEach(item => {
-                const nombreLimpio = typeof limpiarNombreModelo === 'function' ? limpiarNombreModelo(item.modelo) : item.modelo;
+                const nombreLimpio = (typeof limpiarNombreModelo === 'function' ? limpiarNombreModelo(item.modelo) : item.modelo) || "";
 
                 let itemMlId = "";
                 if (item.link) {
@@ -3082,7 +3088,7 @@
             btnElement.innerHTML = "⏳ Sincronizando...";
 
             try {
-                const isProduct = id.startsWith("MLM") && id.length <= 11;
+                const isProduct = String(id).startsWith("MLM") && String(id).length <= 11;
                 const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${id}&isProduct=${isProduct}`;
                 const resML = await fetch(proxyUrl);
                 const freshData = await resML.json();
@@ -3182,7 +3188,7 @@
                 const idBusqueda = itemMlId || item.id;
                 if (!idBusqueda) return false;
 
-                let isProduct = idBusqueda.startsWith("MLM") && idBusqueda.length <= 11;
+                let isProduct = String(idBusqueda).startsWith("MLM") && String(idBusqueda).length <= 11;
                 const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${idBusqueda}&isProduct=${isProduct}`;
 
                 const resLive = await fetch(proxyUrl);
