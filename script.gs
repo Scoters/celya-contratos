@@ -6085,31 +6085,24 @@ function verificarStockGlobal() {
     
     if (link && link.indexOf("mercadolibre") !== -1) {
       let cleanId = "";
-      let pathId = "";
+      let esProducto = false;
       const urlParts = link.split('?');
-      const path = urlParts[0];
-      const pathMatch = path.match(/(MLM\-?\d+)/i);
-      if (pathMatch) {
-        pathId = pathMatch[0].replace("-", "").toUpperCase();
-      }
-
-      let queryId = "";
       const query = urlParts[1] || "";
       const widMatch = query.match(/(?:wid|product_trigger_id)=([A-Z]*\d+)/i);
+      
       if (widMatch) {
-        queryId = widMatch[1].toUpperCase();
-      }
-
-      if (pathId && pathId.length >= 13) {
-        cleanId = pathId;
-      } else if (queryId && queryId.length >= 13) {
-        cleanId = queryId;
+        cleanId = widMatch[1].toUpperCase();
+        esProducto = false;
       } else {
-        cleanId = pathId || queryId;
+        const path = urlParts[0];
+        const pathMatch = path.match(/(MLM\-?\d+)/i);
+        if (pathMatch) {
+          cleanId = pathMatch[0].replace("-", "").toUpperCase();
+        }
+        esProducto = link.includes("/p/");
       }
 
       if (cleanId) {
-        const esProducto = cleanId.startsWith("MLM") && cleanId.length <= 11;
         const targetUrl = esProducto ? `https://api.mercadolibre.com/products/${cleanId}` : `https://api.mercadolibre.com/items/${cleanId}`;
         peticiones.push({
           url: targetUrl,
