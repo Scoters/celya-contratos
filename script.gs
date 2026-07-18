@@ -6246,59 +6246,55 @@ function verificarStockGlobal() {
         });
       }
     } else {
-      if (responseCode === 403) {
-        try {
-          const cleanMlmId = info.id.replace("MLM", "");
-          const publicUrl = "https://articulo.mercadolibre.com.mx/MLM-" + cleanMlmId;
-          const htmlResponse = UrlFetchApp.fetch(publicUrl, { muteHttpExceptions: true });
-          if (htmlResponse.getResponseCode() === 200) {
-            const html = htmlResponse.getContentText();
-            
-            const isAvailable = /"availability"\s*:\s*"https?:\\\/\\\/schema\.org\\\/InStock"/i.test(html) || 
-                                /"availability"\s*:\s*"https?:\/\/schema\.org\/InStock"/i.test(html) ||
-                                html.indexOf("schema.org/InStock") !== -1 ||
-                                html.indexOf("schema.org\\/InStock") !== -1;
-                                
-            const isOutOfStock = /"availability"\s*:\s*"https?:\\\/\\\/schema\.org\\\/OutOfStock"/i.test(html) ||
-                                 /"availability"\s*:\s*"https?:\/\/schema\.org\/OutOfStock"/i.test(html) ||
-                                 html.indexOf("schema.org/OutOfStock") !== -1 ||
-                                 html.indexOf("schema.org\\/OutOfStock") !== -1;
-            
-            if (isAvailable) {
-              tieneStock = true;
-              razon = "";
-              mensaje = "";
-            } else if (isOutOfStock) {
-              tieneStock = false;
-              razon = "no_stock";
-              mensaje = "Sin unidades disponibles (detectado en HTML)";
-            } else if (html.indexOf("Publicación pausada") !== -1 || html.indexOf("pausó esta publicación") !== -1) {
-              tieneStock = false;
-              razon = "inactive";
-              mensaje = "Publicación pausada (detectado en HTML)";
-            } else {
-              tieneStock = (info.stockStatus !== "AGOTADO");
-              razon = "api_blocked_fallback";
-              mensaje = "API bloqueada, conservando estado previo (HTML ambiguo)";
-            }
+      try {
+        const cleanMlmId = info.id.replace("MLM", "");
+        const publicUrl = "https://articulo.mercadolibre.com.mx/MLM-" + cleanMlmId;
+        const htmlResponse = UrlFetchApp.fetch(publicUrl, { muteHttpExceptions: true });
+        const htmlCode = htmlResponse.getResponseCode();
+        
+        if (htmlCode === 200) {
+          const html = htmlResponse.getContentText();
+          
+          const isAvailable = /"availability"\s*:\s*"https?:\\\/\\\/schema\.org\\\/InStock"/i.test(html) || 
+                              /"availability"\s*:\s*"https?:\/\/schema\.org\/InStock"/i.test(html) ||
+                              html.indexOf("schema.org/InStock") !== -1 ||
+                              html.indexOf("schema.org\\/InStock") !== -1;
+                              
+          const isOutOfStock = /"availability"\s*:\s*"https?:\\\/\\\/schema\.org\\\/OutOfStock"/i.test(html) ||
+                               /"availability"\s*:\s*"https?:\/\/schema\.org\/OutOfStock"/i.test(html) ||
+                               html.indexOf("schema.org/OutOfStock") !== -1 ||
+                               html.indexOf("schema.org\\/OutOfStock") !== -1;
+          
+          if (isAvailable) {
+            tieneStock = true;
+            razon = "";
+            mensaje = "";
+          } else if (isOutOfStock) {
+            tieneStock = false;
+            razon = "no_stock";
+            mensaje = "Sin unidades disponibles (detectado en HTML)";
+          } else if (html.indexOf("Publicación pausada") !== -1 || html.indexOf("pausó esta publicación") !== -1) {
+            tieneStock = false;
+            razon = "inactive";
+            mensaje = "Publicación pausada (detectado en HTML)";
           } else {
             tieneStock = (info.stockStatus !== "AGOTADO");
             razon = "api_blocked_fallback";
-            mensaje = "API bloqueada y error al cargar HTML público (HTTP " + htmlResponse.getResponseCode() + ")";
+            mensaje = "API falló (HTTP " + responseCode + "), conservando estado previo (HTML ambiguo)";
           }
-        } catch (htmlErr) {
+        } else if (htmlCode === 404) {
+          tieneStock = false;
+          razon = "inactive";
+          mensaje = "Publicación no encontrada en Mercado Libre (404 real)";
+        } else {
           tieneStock = (info.stockStatus !== "AGOTADO");
           razon = "api_blocked_fallback";
-          mensaje = "API bloqueada y excepción al cargar HTML público: " + htmlErr.toString();
+          mensaje = "API falló (HTTP " + responseCode + ") y error al cargar HTML público (HTTP " + htmlCode + ")";
         }
-      } else {
-        tieneStock = false;
-        razon = "inactive";
-        if (responseCode === 404) {
-          mensaje = "Publicación pausada o sin stock en Mercado Libre (404/No Winners)";
-        } else {
-          mensaje = "Error de conexión con Mercado Libre (HTTP " + responseCode + ")";
-        }
+      } catch (htmlErr) {
+        tieneStock = (info.stockStatus !== "AGOTADO");
+        razon = "api_blocked_fallback";
+        mensaje = "API falló (HTTP " + responseCode + ") y excepción al cargar HTML público: " + htmlErr.toString();
       }
     }
     
