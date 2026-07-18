@@ -3178,27 +3178,36 @@
 
         async function evaluarStockUnicoItem(item) {
             try {
-                let itemMlId = "";
-                let isProduct = false;
+                let cleanId = "";
                 if (item.link) {
-                    const widMatch = item.link.match(/wid=([A-Z]*\d+)/i);
+                    let pathId = "";
+                    const urlParts = item.link.split('?');
+                    const path = urlParts[0];
+                    const pathMatch = path.match(/(MLM\-?\d+)/i);
+                    if (pathMatch) {
+                        pathId = pathMatch[0].replace("-", "").toUpperCase();
+                    }
+
+                    let queryId = "";
+                    const query = urlParts[1] || "";
+                    const widMatch = query.match(/(?:wid|product_trigger_id)=([A-Z]*\d+)/i);
                     if (widMatch) {
-                        itemMlId = widMatch[1].toUpperCase();
-                        isProduct = false;
+                        queryId = widMatch[1].toUpperCase();
+                    }
+
+                    if (pathId && pathId.length >= 13) {
+                        cleanId = pathId;
+                    } else if (queryId && queryId.length >= 13) {
+                        cleanId = queryId;
                     } else {
-                        const regex = /(MLM\-?\d+)/i;
-                        const match = item.link.match(regex);
-                        if (match) {
-                            itemMlId = match[0].replace("-", "").toUpperCase();
-                            isProduct = item.link.includes("/p/");
-                        }
+                        cleanId = pathId || queryId;
                     }
                 }
 
-                const idBusqueda = itemMlId || item.id;
+                const idBusqueda = cleanId || item.id;
                 if (!idBusqueda) return false;
 
-                let isProduct = String(idBusqueda).startsWith("MLM") && String(idBusqueda).length <= 11;
+                const isProduct = idBusqueda.startsWith("MLM") && idBusqueda.length <= 11;
                 const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${idBusqueda}&isProduct=${isProduct}`;
 
                 const resLive = await fetch(proxyUrl);

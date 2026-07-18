@@ -6084,23 +6084,33 @@ function verificarStockGlobal() {
     if (foto.toLowerCase() === "foto") foto = "";
     
     if (link && link.indexOf("mercadolibre") !== -1) {
-      let id = "";
-      let esProducto = false;
-      const widMatch = link.match(/wid=([A-Z]*\d+)/i);
-      if (widMatch) {
-        id = widMatch[1].toUpperCase();
-        esProducto = false;
-      } else {
-        const regex = /(MLM\-?\d+)/i;
-        const coincidencia = link.match(regex);
-        if (coincidencia) {
-          id = coincidencia[0].replace("-", "").toUpperCase();
-          esProducto = link.includes("/p/");
-        }
+      let cleanId = "";
+      let pathId = "";
+      const urlParts = link.split('?');
+      const path = urlParts[0];
+      const pathMatch = path.match(/(MLM\-?\d+)/i);
+      if (pathMatch) {
+        pathId = pathMatch[0].replace("-", "").toUpperCase();
       }
-      
-      if (id) {
-        const targetUrl = esProducto ? `https://api.mercadolibre.com/products/${id}` : `https://api.mercadolibre.com/items/${id}`;
+
+      let queryId = "";
+      const query = urlParts[1] || "";
+      const widMatch = query.match(/(?:wid|product_trigger_id)=([A-Z]*\d+)/i);
+      if (widMatch) {
+        queryId = widMatch[1].toUpperCase();
+      }
+
+      if (pathId && pathId.length >= 13) {
+        cleanId = pathId;
+      } else if (queryId && queryId.length >= 13) {
+        cleanId = queryId;
+      } else {
+        cleanId = pathId || queryId;
+      }
+
+      if (cleanId) {
+        const esProducto = cleanId.startsWith("MLM") && cleanId.length <= 11;
+        const targetUrl = esProducto ? `https://api.mercadolibre.com/products/${cleanId}` : `https://api.mercadolibre.com/items/${cleanId}`;
         peticiones.push({
           url: targetUrl,
           method: "get",
@@ -6114,7 +6124,7 @@ function verificarStockGlobal() {
           filaReal: filaReal,
           modelo: modelo,
           esProducto: esProducto,
-          id: id,
+          id: cleanId,
           link: link,
           estado: estado,
           variantesJsonActual: dataCat[j][10] ? String(dataCat[j][10]).trim() : "",
