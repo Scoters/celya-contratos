@@ -890,6 +890,15 @@ function doGet(e) {
     return ContentService.createTextOutput(JSON.stringify({ result: 'success', resultados: resultados })).setMimeType(ContentService.MimeType.JSON);
   }
 
+  if (e.parameter.action === 'testHtml') {
+    const url = e.parameter.url;
+    const response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    return ContentService.createTextOutput(JSON.stringify({
+      code: response.getResponseCode(),
+      length: response.getContentText().length
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
   if (e.parameter.action === 'testMultiget') {
     const id = e.parameter.id;
     const response = fetchConToken("https://api.mercadolibre.com/items?ids=" + id);
