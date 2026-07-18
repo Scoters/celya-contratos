@@ -6285,16 +6285,16 @@ function verificarStockGlobal() {
         } else if (htmlCode === 404) {
           tieneStock = false;
           razon = "inactive";
-          mensaje = "Publicación no encontrada en Mercado Libre (404 real)";
+          mensaje = "Publicación no encontrada (404 real) en URL: " + publicUrl;
         } else {
           tieneStock = (info.stockStatus !== "AGOTADO");
           razon = "api_blocked_fallback";
-          mensaje = "API falló (HTTP " + responseCode + ") y error al cargar HTML público (HTTP " + htmlCode + ")";
+          mensaje = "API falló (HTTP " + responseCode + ") y error al cargar HTML público (HTTP " + htmlCode + ") en URL: " + publicUrl;
         }
       } catch (htmlErr) {
         tieneStock = (info.stockStatus !== "AGOTADO");
         razon = "api_blocked_fallback";
-        mensaje = "API falló (HTTP " + responseCode + ") y excepción al cargar HTML público: " + htmlErr.toString();
+        mensaje = "API falló (HTTP " + responseCode + ") y excepción al cargar HTML en " + publicUrl + ": " + htmlErr.toString();
       }
     }
     
