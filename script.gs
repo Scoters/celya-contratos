@@ -890,6 +890,15 @@ function doGet(e) {
     return ContentService.createTextOutput(JSON.stringify({ result: 'success', resultados: resultados })).setMimeType(ContentService.MimeType.JSON);
   }
 
+  if (e.parameter.action === 'testMultiget') {
+    const id = e.parameter.id;
+    const response = fetchConToken("https://api.mercadolibre.com/items?ids=" + id);
+    return ContentService.createTextOutput(JSON.stringify({
+      code: response.getResponseCode(),
+      body: response.getContentText()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
   // --- ACCIÓN: PROXY PARA OBTENER DATOS DE MERCADO LIBRE DESDE GOOGLE SERVERS ---
   if (e.parameter.action === 'obtenerVariantesML') {
     const cleanId = e.parameter.id || "";
