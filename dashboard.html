@@ -3179,10 +3179,20 @@
         async function evaluarStockUnicoItem(item) {
             try {
                 let itemMlId = "";
+                let isProduct = false;
                 if (item.link) {
-                    const regex = /(MLM\-?\d+)/i;
-                    const match = item.link.match(regex);
-                    if (match) itemMlId = match[0].replace("-", "").toUpperCase();
+                    const widMatch = item.link.match(/wid=([A-Z]*\d+)/i);
+                    if (widMatch) {
+                        itemMlId = widMatch[1].toUpperCase();
+                        isProduct = false;
+                    } else {
+                        const regex = /(MLM\-?\d+)/i;
+                        const match = item.link.match(regex);
+                        if (match) {
+                            itemMlId = match[0].replace("-", "").toUpperCase();
+                            isProduct = item.link.includes("/p/");
+                        }
+                    }
                 }
 
                 const idBusqueda = itemMlId || item.id;
@@ -3235,7 +3245,13 @@
                 let tieneStock = false;
                 let detalle = { razon: '', coloresAgotados: [], memoriasAgotadas: [], ramsAgotadas: [], totalVariantes: 0, activasVariantes: 0 };
 
-                if (liveData.pickers && liveData.pickers.length > 0) {
+                const status = (liveData.status || "").toLowerCase();
+                if (status && status !== "active") {
+                    tieneStock = false;
+                    detalle.razon = 'inactive';
+                    detalle.mensaje = `Estado: ${liveData.status || 'inactivo'}`;
+                }
+                else if (liveData.pickers && liveData.pickers.length > 0) {
                     const productMap = {};
                     liveData.pickers.forEach(picker => {
                         if (!picker.products) return;

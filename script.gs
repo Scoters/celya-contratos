@@ -6084,18 +6084,23 @@ function verificarStockGlobal() {
     if (foto.toLowerCase() === "foto") foto = "";
     
     if (link && link.indexOf("mercadolibre") !== -1) {
-      const regex = /(MLM\-?\d+)/i;
-      const coincidencia = link.match(regex);
-      if (coincidencia) {
-        const id = coincidencia[0].replace("-", "").toUpperCase();
-        let targetUrl = `https://api.mercadolibre.com/items/${id}`;
-        let esProducto = false;
-        
-        if (link.includes("/p/")) {
-          targetUrl = `https://api.mercadolibre.com/products/${id}`;
-          esProducto = true;
+      let id = "";
+      let esProducto = false;
+      const widMatch = link.match(/wid=([A-Z]*\d+)/i);
+      if (widMatch) {
+        id = widMatch[1].toUpperCase();
+        esProducto = false;
+      } else {
+        const regex = /(MLM\-?\d+)/i;
+        const coincidencia = link.match(regex);
+        if (coincidencia) {
+          id = coincidencia[0].replace("-", "").toUpperCase();
+          esProducto = link.includes("/p/");
         }
-        
+      }
+      
+      if (id) {
+        const targetUrl = esProducto ? `https://api.mercadolibre.com/products/${id}` : `https://api.mercadolibre.com/items/${id}`;
         peticiones.push({
           url: targetUrl,
           method: "get",
@@ -6182,7 +6187,12 @@ function verificarStockGlobal() {
       } else {
         fotoApi = liveData.thumbnail || (liveData.pictures && liveData.pictures.length > 0 ? liveData.pictures[0].url : "");
         
-        if (liveData.variations && liveData.variations.length > 0) {
+        const status = (liveData.status || "").toLowerCase();
+        if (status && status !== "active") {
+          tieneStock = false;
+          razon = "inactive";
+          mensaje = `Estado: ${liveData.status || 'inactivo'}`;
+        } else if (liveData.variations && liveData.variations.length > 0) {
           const activeVariations = liveData.variations.filter(v => parseInt(v.available_quantity, 10) > 0);
           if (activeVariations.length > 0) {
             tieneStock = true;
@@ -6192,13 +6202,8 @@ function verificarStockGlobal() {
             mensaje = `${liveData.variations.length} variaciones, todas sin stock`;
           }
         } else {
-          const status = (liveData.status || "").toLowerCase();
           const qty = parseInt(liveData.available_quantity, 10);
-          if (status && status !== "active") {
-            tieneStock = false;
-            razon = "inactive";
-            mensaje = `Estado: ${liveData.status || 'inactivo'}`;
-          } else if (!isNaN(qty) && qty > 0) {
+          if (!isNaN(qty) && qty > 0) {
             tieneStock = true;
           } else {
             tieneStock = false;
