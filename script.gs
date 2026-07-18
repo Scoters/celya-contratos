@@ -4946,6 +4946,7 @@ function limpiarNombreModelo(modelo) {
     "dark", "sky", "navy", "rose", "violet", "violeta", "lavender", "lavanda", "carbon", "carbono",
     "claro", "oscuro", "space", "estelar", "celeste", "brillante", "mate",
     "phantom", "cream", "crema", "beige", "coral", "titanium", "titanio",
+    "opalo", "ópalo",
     "graphite", "grafito", "burgundy", "borgoña", "midnight", "medianoche",
     "starlight", "ice", "hielo", "bronze", "bronce", "sand", "arena",
     "indigo", "teal", "mint", "menta", "lime", "lima", "ivory", "marfil",
@@ -6085,24 +6086,22 @@ function verificarStockGlobal() {
     
     if (link && link.indexOf("mercadolibre") !== -1) {
       let cleanId = "";
-      let esProducto = false;
       const urlParts = link.split('?');
       const query = urlParts[1] || "";
       const widMatch = query.match(/(?:wid|product_trigger_id)=([A-Z]*\d+)/i);
       
       if (widMatch) {
         cleanId = widMatch[1].toUpperCase();
-        esProducto = false;
       } else {
         const path = urlParts[0];
         const pathMatch = path.match(/(MLM\-?\d+)/i);
         if (pathMatch) {
           cleanId = pathMatch[0].replace("-", "").toUpperCase();
         }
-        esProducto = link.includes("/p/");
       }
 
       if (cleanId) {
+        const esProducto = cleanId.startsWith("MLM") && cleanId.length <= 11;
         const targetUrl = esProducto ? `https://api.mercadolibre.com/products/${cleanId}` : `https://api.mercadolibre.com/items/${cleanId}`;
         peticiones.push({
           url: targetUrl,
