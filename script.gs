@@ -890,37 +890,6 @@ function doGet(e) {
     return ContentService.createTextOutput(JSON.stringify({ result: 'success', resultados: resultados })).setMimeType(ContentService.MimeType.JSON);
   }
 
-  if (e.parameter.action === 'testHtml') {
-    const url = e.parameter.url;
-    const response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
-    const html = response.getContentText();
-    
-    const inStockCount = (html.match(/schema\.org\/InStock/gi) || []).length;
-    const outStockCount = (html.match(/schema\.org\/OutOfStock/gi) || []).length;
-    const pausedCount = (html.match(/Publicación pausada/gi) || []).length;
-    
-    const availMatch = html.match(/"availability"\s*:\s*"([^"]+)"/i);
-    const availValue = availMatch ? availMatch[1] : null;
-    
-    return ContentService.createTextOutput(JSON.stringify({
-      code: response.getResponseCode(),
-      length: html.length,
-      inStockCount: inStockCount,
-      outStockCount: outStockCount,
-      pausedCount: pausedCount,
-      availValue: availValue
-    })).setMimeType(ContentService.MimeType.JSON);
-  }
-
-  if (e.parameter.action === 'testMultiget') {
-    const id = e.parameter.id;
-    const response = fetchConToken("https://api.mercadolibre.com/items?ids=" + id);
-    return ContentService.createTextOutput(JSON.stringify({
-      code: response.getResponseCode(),
-      body: response.getContentText()
-    })).setMimeType(ContentService.MimeType.JSON);
-  }
-
   // --- ACCIÓN: PROXY PARA OBTENER DATOS DE MERCADO LIBRE DESDE GOOGLE SERVERS ---
   if (e.parameter.action === 'obtenerVariantesML') {
     const cleanId = e.parameter.id || "";
@@ -6276,12 +6245,48 @@ function verificarStockGlobal() {
         });
       }
     } else {
-      tieneStock = false;
-      razon = "inactive";
-      if (responseCode === 404) {
-        mensaje = "Publicación pausada o sin stock en Mercado Libre (404/No Winners)";
+      if (responseCode === 403) {
+        try {
+          const publicUrl = "https://articulo.mercadolibre.com.mx/MLM-" + info.id;
+          const htmlResponse = UrlFetchApp.fetch(publicUrl, { muteHttpExceptions: true });
+          if (htmlResponse.getResponseCode() === 200) {
+            const html = htmlResponse.getContentText();
+            
+            if (html.indexOf("schema.org/InStock") !== -1 || html.indexOf("schema.org\\/InStock") !== -1) {
+              tieneStock = true;
+              razon = "";
+              mensaje = "";
+            } else if (html.indexOf("schema.org/OutOfStock") !== -1 || html.indexOf("schema.org\\/OutOfStock") !== -1) {
+              tieneStock = false;
+              razon = "no_stock";
+              mensaje = "Sin unidades disponibles (detectado en HTML)";
+            } else if (html.indexOf("Publicación pausada") !== -1 || html.indexOf("pausó esta publicación") !== -1) {
+              tieneStock = false;
+              razon = "inactive";
+              mensaje = "Publicación pausada (detectado en HTML)";
+            } else {
+              tieneStock = (info.estado === "DISPONIBLE");
+              razon = "api_blocked_fallback";
+              mensaje = "API bloqueada, conservando estado previo (HTML ambiguo)";
+            }
+          } else {
+            tieneStock = (info.estado === "DISPONIBLE");
+            razon = "api_blocked_fallback";
+            mensaje = "API bloqueada y error al cargar HTML público (HTTP " + htmlResponse.getResponseCode() + ")";
+          }
+        } catch (htmlErr) {
+          tieneStock = (info.estado === "DISPONIBLE");
+          razon = "api_blocked_fallback";
+          mensaje = "API bloqueada y excepción al cargar HTML público: " + htmlErr.toString();
+        }
       } else {
-        mensaje = "Error de conexión con Mercado Libre (HTTP " + responseCode + ")";
+        tieneStock = false;
+        razon = "inactive";
+        if (responseCode === 404) {
+          mensaje = "Publicación pausada o sin stock en Mercado Libre (404/No Winners)";
+        } else {
+          mensaje = "Error de conexión con Mercado Libre (HTTP " + responseCode + ")";
+        }
       }
     }
     

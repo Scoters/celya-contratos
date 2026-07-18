@@ -3208,14 +3208,31 @@
                 if (!idBusqueda) return false;
 
                 const isProduct = idBusqueda.startsWith("MLM") && idBusqueda.length <= 11;
-                const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${idBusqueda}&isProduct=${isProduct}`;
+                let liveData = null;
 
-                const resLive = await fetch(proxyUrl);
-                const contentType = resLive.headers.get('content-type') || '';
-                if (!resLive.ok || !contentType.includes('application/json')) {
-                    return false;
+                // 1. Intentar fetch directo desde el navegador (evita bloqueo del proxy en Cloud)
+                try {
+                    const endpoint = isProduct ? 'products' : 'items';
+                    const resDirect = await fetch(`https://api.mercadolibre.com/${endpoint}/${idBusqueda}`);
+                    if (resDirect.ok) {
+                        liveData = await resDirect.json();
+                    }
+                } catch (directErr) {
+                    console.warn(`Direct fetch failed for ${idBusqueda}:`, directErr);
                 }
-                let liveData = await resLive.json();
+
+                // 2. Fallback al proxy si el directo falló
+                if (!liveData) {
+                    const proxyUrl = `${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${idBusqueda}&isProduct=${isProduct}`;
+                    const resLive = await fetch(proxyUrl);
+                    if (resLive.ok) {
+                        const contentType = resLive.headers.get('content-type') || '';
+                        if (contentType.includes('application/json')) {
+                            liveData = await resLive.json();
+                        }
+                    }
+                }
+
                 if (!liveData || typeof liveData !== 'object' || liveData.error || Object.keys(liveData).length === 0) {
                     return false;
                 }
