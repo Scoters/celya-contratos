@@ -6127,6 +6127,7 @@ function verificarStockGlobal() {
           id: cleanId,
           link: link,
           estado: estado,
+          stockStatus: String(dataCat[j][9] || '').toUpperCase().trim(),
           variantesJsonActual: dataCat[j][10] ? String(dataCat[j][10]).trim() : "",
           foto: foto
         });
@@ -6247,16 +6248,27 @@ function verificarStockGlobal() {
     } else {
       if (responseCode === 403) {
         try {
-          const publicUrl = "https://articulo.mercadolibre.com.mx/MLM-" + info.id;
+          const cleanMlmId = info.id.replace("MLM", "");
+          const publicUrl = "https://articulo.mercadolibre.com.mx/MLM-" + cleanMlmId;
           const htmlResponse = UrlFetchApp.fetch(publicUrl, { muteHttpExceptions: true });
           if (htmlResponse.getResponseCode() === 200) {
             const html = htmlResponse.getContentText();
             
-            if (html.indexOf("schema.org/InStock") !== -1 || html.indexOf("schema.org\\/InStock") !== -1) {
+            const isAvailable = /"availability"\s*:\s*"https?:\\\/\\\/schema\.org\\\/InStock"/i.test(html) || 
+                                /"availability"\s*:\s*"https?:\/\/schema\.org\/InStock"/i.test(html) ||
+                                html.indexOf("schema.org/InStock") !== -1 ||
+                                html.indexOf("schema.org\\/InStock") !== -1;
+                                
+            const isOutOfStock = /"availability"\s*:\s*"https?:\\\/\\\/schema\.org\\\/OutOfStock"/i.test(html) ||
+                                 /"availability"\s*:\s*"https?:\/\/schema\.org\/OutOfStock"/i.test(html) ||
+                                 html.indexOf("schema.org/OutOfStock") !== -1 ||
+                                 html.indexOf("schema.org\\/OutOfStock") !== -1;
+            
+            if (isAvailable) {
               tieneStock = true;
               razon = "";
               mensaje = "";
-            } else if (html.indexOf("schema.org/OutOfStock") !== -1 || html.indexOf("schema.org\\/OutOfStock") !== -1) {
+            } else if (isOutOfStock) {
               tieneStock = false;
               razon = "no_stock";
               mensaje = "Sin unidades disponibles (detectado en HTML)";
@@ -6265,17 +6277,17 @@ function verificarStockGlobal() {
               razon = "inactive";
               mensaje = "Publicación pausada (detectado en HTML)";
             } else {
-              tieneStock = (info.estado === "DISPONIBLE");
+              tieneStock = (info.stockStatus !== "AGOTADO");
               razon = "api_blocked_fallback";
               mensaje = "API bloqueada, conservando estado previo (HTML ambiguo)";
             }
           } else {
-            tieneStock = (info.estado === "DISPONIBLE");
+            tieneStock = (info.stockStatus !== "AGOTADO");
             razon = "api_blocked_fallback";
             mensaje = "API bloqueada y error al cargar HTML público (HTTP " + htmlResponse.getResponseCode() + ")";
           }
         } catch (htmlErr) {
-          tieneStock = (info.estado === "DISPONIBLE");
+          tieneStock = (info.stockStatus !== "AGOTADO");
           razon = "api_blocked_fallback";
           mensaje = "API bloqueada y excepción al cargar HTML público: " + htmlErr.toString();
         }
