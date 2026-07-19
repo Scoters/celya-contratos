@@ -9294,18 +9294,12 @@
 
                             colorPicker.products.forEach(p => {
                                 if (!p.picker_label) return;
+                                // Filtrar colores agotados: no renderizarlos en absoluto
+                                if (p.tags && isProductTagOutOfStock(p.tags)) return;
+
                                 // Normalizar usando el grupo de color para agrupar colores físicos iguales (ej: Negro y Black)
                                 const normColor = obtenerGrupoColor(p.picker_label);
                                 const isSel = p.tags && p.tags.includes("selected");
-
-                                // Only skip if the color has absolutely no stock in the family AND it is not an official color in Google Sheets
-                                const esColorOficial = window.equiposCargados && window.equiposCargados.some(eq => {
-                                    if (!eq.modelo || !baseModelsMatch(eq.modelo, window.currentBaseModelName)) return false;
-                                    const cols = (eq.coloresDisponibles || eq.color || "").split(",").map(c => c.trim());
-                                    return cols.some(c => colorsMatch(c, p.picker_label));
-                                });
-
-                                if (!esColorOficial && !isOptionInFamily("color", p.picker_label) && !isSel) return;
 
                                 const specItem = productMapGlobal[p.product_id];
                                 const isOutOfStock = specItem ? specItem.isOutOfStock : false;
