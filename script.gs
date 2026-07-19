@@ -5877,6 +5877,7 @@ function sincronizarPreciosCatalogoCompletoML() {
           modelo: modelo,
           esProducto: esProducto,
           id: id,
+          link: link,
           colorOriginal: String(dataCat[j][9] || '').trim()
         });
       }
@@ -5910,6 +5911,82 @@ function sincronizarPreciosCatalogoCompletoML() {
           }
         } else {
           precio = parseFloat(resJson.price) || 0;
+        }
+        
+        if (precio === 0 && info.esProducto) {
+          try {
+            const productDetailsRes = fetchConToken("https://api.mercadolibre.com/products/" + info.id);
+            if (productDetailsRes && productDetailsRes.getResponseCode() === 200) {
+              const productDetails = JSON.parse(productDetailsRes.getContentText());
+              if (productDetails.pickers && productDetails.pickers.length > 0) {
+                let otherVariants = [];
+                productDetails.pickers.forEach(picker => {
+                  if (picker.products) {
+                    picker.products.forEach(p => {
+                      if (p.product_id && p.product_id !== info.id) {
+                        otherVariants.push({
+                          id: p.product_id,
+                          color: p.picker_label || ""
+                        });
+                      }
+                    });
+                  }
+                });
+                
+                for (let vIdx = 0; vIdx < otherVariants.length; vIdx++) {
+                  const candidate = otherVariants[vIdx];
+                  const candidateRes = fetchConToken("https://api.mercadolibre.com/products/" + candidate.id + "/items");
+                  if (candidateRes && candidateRes.getResponseCode() === 200) {
+                    const candidateJson = JSON.parse(candidateRes.getContentText());
+                    const candidateResults = candidateJson.results || [];
+                    if (candidateResults.length > 0) {
+                      candidateResults.sort(function(a, b) { return (a.price || 0) - (b.price || 0); });
+                      const nuevoPrecio = parseFloat(candidateResults[0].price) || 0;
+                      if (nuevoPrecio > 0) {
+                        const nuevoId = candidate.id;
+                        const nuevoColor = candidate.color;
+                        const nuevoLink = info.link.replace(info.id, nuevoId);
+                        
+                        let nuevoModelo = info.modelo;
+                        if (info.colorOriginal && info.colorOriginal.trim() !== "") {
+                          const regexColor = new RegExp(info.colorOriginal.trim(), "gi");
+                          nuevoModelo = info.modelo.replace(regexColor, nuevoColor);
+                        } else {
+                          nuevoModelo = info.modelo + " " + nuevoColor;
+                        }
+                        
+                        sheetCat.getRange(info.filaReal, 2).setValue(nuevoModelo); // Modelo (Columna B)
+                        sheetCat.getRange(info.filaReal, 7).setValue(nuevoLink);   // Link (Columna G)
+                        sheetCat.getRange(info.filaReal, 10).setValue(nuevoColor); // Color (Columna J)
+                        
+                        precio = nuevoPrecio;
+                        resJson.results = candidateResults;
+                        info.id = nuevoId;
+                        info.link = nuevoLink;
+                        info.modelo = nuevoModelo;
+                        info.colorOriginal = nuevoColor;
+                        
+                        const firstItem = candidateResults[0];
+                        let fotoApi = firstItem.thumbnail || "";
+                        if (fotoApi) {
+                          if (fotoApi.startsWith("http:")) {
+                            fotoApi = fotoApi.replace("http:", "https:");
+                          }
+                          fotoApi = fotoApi.replace("-I.jpg", "-O.jpg");
+                          sheetCat.getRange(info.filaReal, 8).setValue("=HYPERLINK(\"" + fotoApi + "\", \"FOTO\")");
+                        }
+                        
+                        Logger.log("🔄 Autopivoteado exitoso en fila " + info.filaReal + ": se cambió variante sin stock " + info.id + " por variante con stock " + nuevoId + " (" + nuevoColor + ")");
+                        break;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          } catch (pivotErr) {
+            Logger.log("Error al intentar autopivotar variantes en fila " + info.filaReal + ": " + pivotErr.toString());
+          }
         }
         
         if (precio > 0) {
