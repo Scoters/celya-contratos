@@ -5830,26 +5830,53 @@ function ejecutarPivotVarianteSheet(sheetCat, filaReal, info, tokenML) {
     if (!prodData.pickers || prodData.pickers.length === 0) return null;
     
     let candidates = [];
-    prodData.pickers.forEach(picker => {
-      if (picker.products) {
-        picker.products.forEach(p => {
-          if (p.product_id && p.product_id !== info.id) {
-            const tags = p.tags || [];
-            const isOut = tags.includes("out-of-stock") || tags.includes("disabled") || tags.includes("no-bids") || tags.includes("no-winner");
-            if (!isOut) {
-              candidates.push({ id: p.product_id, color: p.picker_label || "" });
-            }
-          }
-        });
-      }
+    const seen = new Set();
+    
+    // 1. Intentar obtener candidatos únicamente del picker de COLOR
+    const colorPicker = prodData.pickers.find(p => {
+      if (!p.picker_id) return false;
+      const idUpper = p.picker_id.toUpperCase();
+      return idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO";
     });
     
-    // Si no hay candidatos limpios, incluir todas las demás variantes como fallback
+    if (colorPicker && colorPicker.products) {
+      colorPicker.products.forEach(p => {
+        if (p.product_id && p.product_id !== info.id && !seen.has(p.product_id)) {
+          const tags = p.tags || [];
+          const isOut = tags.includes("out-of-stock") || tags.includes("disabled") || tags.includes("no-bids") || tags.includes("no-winner");
+          if (!isOut) {
+            seen.add(p.product_id);
+            candidates.push({ id: p.product_id, color: p.picker_label || "" });
+          }
+        }
+      });
+    }
+    
+    // 2. Si no hay candidatos con stock en COLOR, buscar en los demás pickers
     if (candidates.length === 0) {
       prodData.pickers.forEach(picker => {
         if (picker.products) {
           picker.products.forEach(p => {
-            if (p.product_id && p.product_id !== info.id) {
+            if (p.product_id && p.product_id !== info.id && !seen.has(p.product_id)) {
+              const tags = p.tags || [];
+              const isOut = tags.includes("out-of-stock") || tags.includes("disabled") || tags.includes("no-bids") || tags.includes("no-winner");
+              if (!isOut) {
+                seen.add(p.product_id);
+                candidates.push({ id: p.product_id, color: p.picker_label || "" });
+              }
+            }
+          });
+        }
+      });
+    }
+    
+    // 3. Fallback total: si no hay candidatos limpios en absoluto, agregar todos los demás
+    if (candidates.length === 0) {
+      prodData.pickers.forEach(picker => {
+        if (picker.products) {
+          picker.products.forEach(p => {
+            if (p.product_id && p.product_id !== info.id && !seen.has(p.product_id)) {
+              seen.add(p.product_id);
               candidates.push({ id: p.product_id, color: p.picker_label || "" });
             }
           });
@@ -5857,16 +5884,29 @@ function ejecutarPivotVarianteSheet(sheetCat, filaReal, info, tokenML) {
       });
     }
     
+    if (candidates.length === 0) return null;
+    
+    // 4. Consultar todos los candidatos en paralelo para optimizar velocidad
+    const requests = candidates.map(cand => ({
+      url: "https://api.mercadolibre.com/products/" + cand.id + "/items",
+      method: "get",
+      headers: headers,
+      muteHttpExceptions: true
+    }));
+    
+    const responses = UrlFetchApp.fetchAll(requests);
+    let validCandidates = [];
+    
     for (let i = 0; i < candidates.length; i++) {
       const cand = candidates[i];
+      const res = responses[i];
       let candPrice = 0;
       let candResults = [];
       let candJson = {};
       
-      const itemsRes = UrlFetchApp.fetch("https://api.mercadolibre.com/products/" + cand.id + "/items", { headers: headers, muteHttpExceptions: true });
-      if (itemsRes && itemsRes.getResponseCode() === 200) {
+      if (res && res.getResponseCode() === 200) {
         try {
-          candJson = JSON.parse(itemsRes.getContentText());
+          candJson = JSON.parse(res.getContentText());
           candResults = candJson.results || [];
           if (candResults.length > 0) {
             candResults.sort((a, b) => (a.price || 0) - (b.price || 0));
@@ -5875,6 +5915,7 @@ function ejecutarPivotVarianteSheet(sheetCat, filaReal, info, tokenML) {
         } catch (e) {}
       }
       
+      // Fallback individual si no devolvió ofertas a nivel producto
       if (candPrice === 0) {
         const itemRes = UrlFetchApp.fetch("https://api.mercadolibre.com/items/" + cand.id, { headers: headers, muteHttpExceptions: true });
         if (itemRes && itemRes.getResponseCode() === 200) {
@@ -5890,61 +5931,109 @@ function ejecutarPivotVarianteSheet(sheetCat, filaReal, info, tokenML) {
       }
       
       if (candPrice > 0) {
-        const nuevoId = cand.id;
-        const nuevoColor = cand.color;
-        let nuevoLink = info.link.replace(info.id, nuevoId);
-        if (nuevoLink.includes("product_trigger_id=")) {
-          nuevoLink = nuevoLink.replace(/product_trigger_id=[A-Z0-9]+/gi, "product_trigger_id=" + nuevoId);
-        }
-        
-        let nuevoModelo = info.modelo;
-        if (info.colorOriginal && info.colorOriginal.trim() !== "") {
-          const regexColor = new RegExp(info.colorOriginal.trim(), "gi");
-          nuevoModelo = info.modelo.replace(regexColor, nuevoColor);
-        } else {
-          nuevoModelo = info.modelo + " " + nuevoColor;
-        }
-        
-        let fotoApi = "";
-        if (candResults.length > 0) {
-          const firstItem = candResults[0];
-          fotoApi = (firstItem.pictures && firstItem.pictures.length > 0) ? (firstItem.pictures[0].secure_url || firstItem.pictures[0].url) : (firstItem.thumbnail || "");
-          if (fotoApi) {
-            if (fotoApi.startsWith("http:")) fotoApi = fotoApi.replace("http:", "https:");
-            fotoApi = fotoApi.replace("-I.jpg", "-O.jpg");
-          }
-        }
-        
-        sheetCat.getRange(filaReal, 2).setValue(nuevoModelo);
-        sheetCat.getRange(filaReal, 4).setValue(Math.round(candPrice));
-        sheetCat.getRange(filaReal, 6).setValue("DISPONIBLE");
-        sheetCat.getRange(filaReal, 7).setValue(nuevoLink);
-        if (fotoApi) {
-          sheetCat.getRange(filaReal, 8).setValue(`=HYPERLINK("${fotoApi}", "FOTO")`);
-        }
-        sheetCat.getRange(filaReal, 10).setValue(nuevoColor);
-        
-        let jsonStr = JSON.stringify(candJson);
-        if (jsonStr.length > 48000 && candResults.length > 0) {
-          jsonStr = JSON.stringify({ results: candResults.slice(0, 3) });
-        }
-        sheetCat.getRange(filaReal, 11).setValue(jsonStr);
-        
-        const colDisponibles = extraerColoresDeDatosML(candJson);
-        sheetCat.getRange(filaReal, 13).setValue(colDisponibles || "");
-        
-        escribirLogDebug(`🔄 Autopivoteado exitoso en fila ${filaReal}: Se cambió variante sin stock ${info.id} por variante activa ${nuevoId} (${nuevoColor}) a $${candPrice}`);
-        
-        return {
-          nuevoId: nuevoId,
-          nuevoColor: nuevoColor,
-          nuevoLink: nuevoLink,
-          nuevoModelo: nuevoModelo,
-          nuevoPrecio: candPrice,
-          candJson: candJson
-        };
+        validCandidates.push({
+          cand: cand,
+          price: candPrice,
+          results: candResults,
+          json: candJson
+        });
       }
     }
+    
+    if (validCandidates.length === 0) return null;
+    
+    // Elegir el candidato más económico activo
+    validCandidates.sort((a, b) => a.price - b.price);
+    const best = validCandidates[0];
+    
+    const nuevoId = best.cand.id;
+    const nuevoColor = best.cand.color;
+    const candPrice = best.price;
+    const candResults = best.results;
+    const candJson = best.json;
+    
+    // 5. Consultar los detalles del producto de Mercado Libre para obtener los pickers (Columna K / variantesJson)
+    let fullProdJson = null;
+    const detailRes = UrlFetchApp.fetch("https://api.mercadolibre.com/products/" + nuevoId, { headers: headers, muteHttpExceptions: true });
+    if (detailRes && detailRes.getResponseCode() === 200) {
+      try {
+        fullProdJson = JSON.parse(detailRes.getContentText());
+      } catch (e) {}
+    }
+    
+    const jsonParaGuardar = fullProdJson || candJson;
+    
+    // 6. Generar link canónico limpio (color-agnóstico para evitar slugs obsoletos)
+    let nuevoLink = "https://www.mercadolibre.com.mx/p/" + nuevoId + "?product_trigger_id=" + nuevoId + "&picker=true&quantity=1";
+    
+    let nuevoModelo = info.modelo;
+    if (info.colorOriginal && info.colorOriginal.trim() !== "") {
+      const regexColor = new RegExp(info.colorOriginal.trim(), "gi");
+      nuevoModelo = info.modelo.replace(regexColor, nuevoColor);
+    } else {
+      nuevoModelo = info.modelo + " " + nuevoColor;
+    }
+    
+    // 7. Extraer foto preferentemente desde los metadatos del producto o desde el item en su defecto
+    let fotoApi = "";
+    if (fullProdJson) {
+      fotoApi = (fullProdJson.pictures && fullProdJson.pictures.length > 0) ? (fullProdJson.pictures[0].secure_url || fullProdJson.pictures[0].url) : (fullProdJson.thumbnail || "");
+    }
+    if (!fotoApi && candResults.length > 0) {
+      const firstItem = candResults[0];
+      fotoApi = (firstItem.pictures && firstItem.pictures.length > 0) ? (firstItem.pictures[0].secure_url || firstItem.pictures[0].url) : (firstItem.thumbnail || "");
+    }
+    if (fotoApi) {
+      if (fotoApi.startsWith("http:")) fotoApi = fotoApi.replace("http:", "https:");
+      fotoApi = fotoApi.replace("-I.jpg", "-O.jpg");
+    }
+    
+    // 8. Escribir los datos en Google Sheets
+    sheetCat.getRange(filaReal, 2).setValue(nuevoModelo);
+    sheetCat.getRange(filaReal, 4).setValue(Math.round(candPrice));
+    sheetCat.getRange(filaReal, 6).setValue("DISPONIBLE");
+    sheetCat.getRange(filaReal, 7).setValue(nuevoLink);
+    if (fotoApi) {
+      sheetCat.getRange(filaReal, 8).setValue(`=HYPERLINK("${fotoApi}", "FOTO")`);
+    }
+    sheetCat.getRange(filaReal, 10).setValue(nuevoColor);
+    
+    let jsonStr = JSON.stringify(jsonParaGuardar);
+    if (jsonStr.length > 48000 && candResults.length > 0) {
+      jsonStr = JSON.stringify({ results: candResults.slice(0, 3) });
+    }
+    sheetCat.getRange(filaReal, 11).setValue(jsonStr);
+    
+    const colDisponibles = extraerColoresDeDatosML(jsonParaGuardar);
+    sheetCat.getRange(filaReal, 13).setValue(colDisponibles || "");
+    
+    // Enviar notificación de autopivoteo a Telegram
+    try {
+      const creds = obtenerPropiedadesEcosistema();
+      if (creds && creds.TELEGRAM_TOKEN && creds.CHAT_ID) {
+        const msg = `🔄 <b>¡AUTO-PIVOTEO DE PRODUCTO!</b> 🔄\n\n` +
+                    `📝 <b>Modelo:</b> ${nuevoModelo}\n` +
+                    `❌ <b>ID Original (Agotado):</b> ${info.id}\n` +
+                    `✅ <b>ID Nuevo (Activo):</b> ${nuevoId}\n` +
+                    `🎨 <b>Color:</b> ${nuevoColor}\n` +
+                    `💰 <b>Precio:</b> $${Math.round(candPrice).toLocaleString('es-MX')} MXN\n` +
+                    `📊 <b>Fila en Catálogo:</b> ${filaReal}`;
+        enviarMensajeTelegram(creds.TELEGRAM_TOKEN, creds.CHAT_ID, msg);
+      }
+    } catch (teleErr) {
+      escribirLogDebug("Error al enviar notificación de autopivoteo a Telegram: " + teleErr.toString());
+    }
+    
+    escribirLogDebug(`🔄 Autopivoteado mejorado exitoso en fila ${filaReal}: Variante ${info.id} cambiada por variant activa ${nuevoId} (${nuevoColor}) a $${candPrice}`);
+    
+    return {
+      nuevoId: nuevoId,
+      nuevoColor: nuevoColor,
+      nuevoLink: nuevoLink,
+      nuevoModelo: nuevoModelo,
+      nuevoPrecio: candPrice,
+      candJson: jsonParaGuardar
+    };
   } catch (err) {
     escribirLogDebug(`Error en ejecutarPivotVarianteSheet (Fila ${filaReal}): ` + err.toString());
   }
