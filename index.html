@@ -5464,27 +5464,14 @@
                             parsed.isFresh = true;
                             let cleanId = "";
                             if (link) {
-                                let pathId = "";
-                                const urlParts = link.split('?');
-                                const path = urlParts[0];
-                                const pathMatch = path.match(/(MLM\-?\d+)/i);
-                                if (pathMatch) {
-                                    pathId = pathMatch[0].replace("-", "").toUpperCase();
-                                }
-
-                                let queryId = "";
-                                const query = urlParts[1] || "";
-                                const widMatch = query.match(/(?:wid|product_trigger_id)=([A-Z]*\d+)/i);
+                                const widMatch = link.match(/(?:wid|product_trigger_id)=([A-Z]*\d+)/i);
                                 if (widMatch) {
-                                    queryId = widMatch[1].toUpperCase();
-                                }
-
-                                if (pathId && pathId.length >= 13) {
-                                    cleanId = pathId;
-                                } else if (queryId && queryId.length >= 13) {
-                                    cleanId = queryId;
+                                    cleanId = widMatch[1].toUpperCase();
                                 } else {
-                                    cleanId = pathId || queryId;
+                                    const pathMatch = link.match(/(MLM\-?\d+)/i);
+                                    if (pathMatch) {
+                                        cleanId = pathMatch[0].replace("-", "").toUpperCase();
+                                    }
                                 }
                             }
                             if (!cleanId) {
@@ -7855,27 +7842,14 @@
             let cleanId = "";
 
             if (currentMLItemLink) {
-                let pathId = "";
-                const urlParts = currentMLItemLink.split('?');
-                const path = urlParts[0];
-                const pathMatch = path.match(/(MLM\-?\d+)/i);
-                if (pathMatch) {
-                    pathId = pathMatch[0].replace("-", "").toUpperCase();
-                }
-
-                let queryId = "";
-                const query = urlParts[1] || "";
-                const widMatch = query.match(/(?:wid|product_trigger_id)=([A-Z]*\d+)/i);
+                const widMatch = currentMLItemLink.match(/(?:wid|product_trigger_id)=([A-Z]*\d+)/i);
                 if (widMatch) {
-                    queryId = widMatch[1].toUpperCase();
-                }
-
-                if (pathId && pathId.length >= 13) {
-                    cleanId = pathId;
-                } else if (queryId && queryId.length >= 13) {
-                    cleanId = queryId;
+                    cleanId = widMatch[1].toUpperCase();
                 } else {
-                    cleanId = pathId || queryId;
+                    const pathMatch = currentMLItemLink.match(/(MLM\-?\d+)/i);
+                    if (pathMatch) {
+                        cleanId = pathMatch[0].replace("-", "").toUpperCase();
+                    }
                 }
             }
 
