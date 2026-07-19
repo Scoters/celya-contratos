@@ -5478,6 +5478,13 @@
                                 cleanId = id;
                             }
                             ML_CACHE_VARIANTES[cleanId] = parsed;
+                            ML_CACHE_VARIANTES[id] = parsed;
+                            if (parsed.catalog_product_id) {
+                                ML_CACHE_VARIANTES[parsed.catalog_product_id] = parsed;
+                            }
+                            if (parsed.id) {
+                                ML_CACHE_VARIANTES[parsed.id] = parsed;
+                            }
                         }
                     } catch (e) {
                         console.warn("Error seeding variants cache:", e);
@@ -7908,6 +7915,13 @@
                             if (parsed && !parsed.error) {
                                 parsed.isFresh = true;
                                 ML_CACHE_VARIANTES[cleanId] = parsed;
+                                ML_CACHE_VARIANTES[idProducto] = parsed;
+                                if (parsed.catalog_product_id) {
+                                    ML_CACHE_VARIANTES[parsed.catalog_product_id] = parsed;
+                                }
+                                if (parsed.id) {
+                                    ML_CACHE_VARIANTES[parsed.id] = parsed;
+                                }
                                 cache = parsed;
                             }
                         } catch (e) {
