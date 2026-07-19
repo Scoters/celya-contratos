@@ -6036,6 +6036,13 @@ function sincronizarPreciosCatalogoCompletoML() {
   
   SpreadsheetApp.flush();
   
+  try {
+    CacheService.getScriptCache().remove("celya_public_catalog");
+    escribirLogDebug("🧹 Caché pública 'celya_public_catalog' limpiada.");
+  } catch (eCache) {
+    Logger.log("Error al limpiar la caché pública: " + eCache.toString());
+  }
+  
   const logMsg = "🔄 Sincronización Catálogo Completo: " + contadorActualizados + " precios de Mercado Libre actualizados con éxito.";
   escribirLogDebug(logMsg);
   if (errores.length > 0) {
@@ -6382,6 +6389,10 @@ function verificarStockGlobal() {
       sheetCat.getRange(upd.fila, 11).setValue(upd.variantes);
     });
     SpreadsheetApp.flush();
+    try {
+      CacheService.getScriptCache().remove("celya_public_catalog");
+      escribirLogDebug("🧹 Caché pública 'celya_public_catalog' limpiada por actualización de variantes.");
+    } catch (eCache) {}
   }
   
   return resultadosStock;
