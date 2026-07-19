@@ -5897,13 +5897,15 @@ function sincronizarPreciosCatalogoCompletoML() {
     const res = respuestas[k];
     const info = mapeoItems[k];
     
-    if (res.getResponseCode() === 200) {
+    const responseCode = res.getResponseCode();
+    let resJson = {};
+    let precio = 0;
+    let parseError = false;
+    
+    if (responseCode === 200) {
       try {
-        const resJson = JSON.parse(res.getContentText());
-        let precio = 0;
-        
+        resJson = JSON.parse(res.getContentText());
         if (info.esProducto) {
-          // resJson contiene {"results": [...]} de la API de items de catálogo
           const results = resJson.results || [];
           if (results.length > 0) {
             results.sort(function(a, b) { return (a.price || 0) - (b.price || 0); });
@@ -5912,129 +5914,128 @@ function sincronizarPreciosCatalogoCompletoML() {
         } else {
           precio = parseFloat(resJson.price) || 0;
         }
-        
-        if (precio === 0 && info.esProducto) {
-          try {
-            const productDetailsRes = fetchConToken("https://api.mercadolibre.com/products/" + info.id);
-            if (productDetailsRes && productDetailsRes.getResponseCode() === 200) {
-              const productDetails = JSON.parse(productDetailsRes.getContentText());
-              if (productDetails.pickers && productDetails.pickers.length > 0) {
-                let otherVariants = [];
-                productDetails.pickers.forEach(picker => {
-                  if (picker.products) {
-                    picker.products.forEach(p => {
-                      if (p.product_id && p.product_id !== info.id) {
-                        otherVariants.push({
-                          id: p.product_id,
-                          color: p.picker_label || ""
-                        });
-                      }
+      } catch (e) {
+        parseError = true;
+      }
+    }
+    
+    if (info.esProducto && (responseCode === 404 || (responseCode === 200 && precio === 0))) {
+      try {
+        const productDetailsRes = fetchConToken("https://api.mercadolibre.com/products/" + info.id);
+        if (productDetailsRes && productDetailsRes.getResponseCode() === 200) {
+          const productDetails = JSON.parse(productDetailsRes.getContentText());
+          if (productDetails.pickers && productDetails.pickers.length > 0) {
+            let otherVariants = [];
+            productDetails.pickers.forEach(picker => {
+              if (picker.products) {
+                picker.products.forEach(p => {
+                  if (p.product_id && p.product_id !== info.id) {
+                    otherVariants.push({
+                      id: p.product_id,
+                      color: p.picker_label || ""
                     });
                   }
                 });
-                
-                for (let vIdx = 0; vIdx < otherVariants.length; vIdx++) {
-                  const candidate = otherVariants[vIdx];
-                  const candidateRes = fetchConToken("https://api.mercadolibre.com/products/" + candidate.id + "/items");
-                  if (candidateRes && candidateRes.getResponseCode() === 200) {
-                    const candidateJson = JSON.parse(candidateRes.getContentText());
-                    const candidateResults = candidateJson.results || [];
-                    if (candidateResults.length > 0) {
-                      candidateResults.sort(function(a, b) { return (a.price || 0) - (b.price || 0); });
-                      const nuevoPrecio = parseFloat(candidateResults[0].price) || 0;
-                      if (nuevoPrecio > 0) {
-                        const nuevoId = candidate.id;
-                        const nuevoColor = candidate.color;
-                        const nuevoLink = info.link.replace(info.id, nuevoId);
-                        
-                        let nuevoModelo = info.modelo;
-                        if (info.colorOriginal && info.colorOriginal.trim() !== "") {
-                          const regexColor = new RegExp(info.colorOriginal.trim(), "gi");
-                          nuevoModelo = info.modelo.replace(regexColor, nuevoColor);
-                        } else {
-                          nuevoModelo = info.modelo + " " + nuevoColor;
-                        }
-                        
-                        sheetCat.getRange(info.filaReal, 2).setValue(nuevoModelo); // Modelo (Columna B)
-                        sheetCat.getRange(info.filaReal, 7).setValue(nuevoLink);   // Link (Columna G)
-                        sheetCat.getRange(info.filaReal, 10).setValue(nuevoColor); // Color (Columna J)
-                        
-                        precio = nuevoPrecio;
-                        resJson.results = candidateResults;
-                        info.id = nuevoId;
-                        info.link = nuevoLink;
-                        info.modelo = nuevoModelo;
-                        info.colorOriginal = nuevoColor;
-                        
-                        const firstItem = candidateResults[0];
-                        let fotoApi = firstItem.thumbnail || "";
-                        if (fotoApi) {
-                          if (fotoApi.startsWith("http:")) {
-                            fotoApi = fotoApi.replace("http:", "https:");
-                          }
-                          fotoApi = fotoApi.replace("-I.jpg", "-O.jpg");
-                          sheetCat.getRange(info.filaReal, 8).setValue("=HYPERLINK(\"" + fotoApi + "\", \"FOTO\")");
-                        }
-                        
-                        Logger.log("🔄 Autopivoteado exitoso en fila " + info.filaReal + ": se cambió variante sin stock " + info.id + " por variante con stock " + nuevoId + " (" + nuevoColor + ")");
-                        break;
-                      }
+              }
+            });
+            
+            for (let vIdx = 0; vIdx < otherVariants.length; vIdx++) {
+              const candidate = otherVariants[vIdx];
+              const candidateRes = fetchConToken("https://api.mercadolibre.com/products/" + candidate.id + "/items");
+              if (candidateRes && candidateRes.getResponseCode() === 200) {
+                const candidateJson = JSON.parse(candidateRes.getContentText());
+                const candidateResults = candidateJson.results || [];
+                if (candidateResults.length > 0) {
+                  candidateResults.sort(function(a, b) { return (a.price || 0) - (b.price || 0); });
+                  const nuevoPrecio = parseFloat(candidateResults[0].price) || 0;
+                  if (nuevoPrecio > 0) {
+                    const nuevoId = candidate.id;
+                    const nuevoColor = candidate.color;
+                    const nuevoLink = info.link.replace(info.id, nuevoId);
+                    
+                    let nuevoModelo = info.modelo;
+                    if (info.colorOriginal && info.colorOriginal.trim() !== "") {
+                      const regexColor = new RegExp(info.colorOriginal.trim(), "gi");
+                      nuevoModelo = info.modelo.replace(regexColor, nuevoColor);
+                    } else {
+                      nuevoModelo = info.modelo + " " + nuevoColor;
                     }
+                    
+                    sheetCat.getRange(info.filaReal, 2).setValue(nuevoModelo); // Modelo (Columna B)
+                    sheetCat.getRange(info.filaReal, 7).setValue(nuevoLink);   // Link (Columna G)
+                    sheetCat.getRange(info.filaReal, 10).setValue(nuevoColor); // Color (Columna J)
+                    
+                    precio = nuevoPrecio;
+                    resJson = candidateJson;
+                    info.id = nuevoId;
+                    info.link = nuevoLink;
+                    info.modelo = nuevoModelo;
+                    info.colorOriginal = nuevoColor;
+                    
+                    const firstItem = candidateResults[0];
+                    let fotoApi = firstItem.thumbnail || "";
+                    if (fotoApi) {
+                      if (fotoApi.startsWith("http:")) {
+                        fotoApi = fotoApi.replace("http:", "https:");
+                      }
+                      fotoApi = fotoApi.replace("-I.jpg", "-O.jpg");
+                      sheetCat.getRange(info.filaReal, 8).setValue("=HYPERLINK(\"" + fotoApi + "\", \"FOTO\")");
+                    }
+                    
+                    Logger.log("🔄 Autopivoteado exitoso en fila " + info.filaReal + ": se cambió variante sin stock " + info.id + " por variante con stock " + nuevoId + " (" + nuevoColor + ")");
+                    break;
                   }
                 }
               }
             }
-          } catch (pivotErr) {
-            Logger.log("Error al intentar autopivotar variantes en fila " + info.filaReal + ": " + pivotErr.toString());
+          }
+        }
+      } catch (pivotErr) {
+        Logger.log("Error al intentar autopivotar variantes en fila " + info.filaReal + ": " + pivotErr.toString());
+      }
+    }
+    
+    if (precio > 0) {
+      try {
+        sheetCat.getRange(info.filaReal, 4).setValue(Math.round(precio));
+        
+        let jsonString = "";
+        if (info.esProducto && resJson.results && Array.isArray(resJson.results)) {
+          const depurado = {
+            results: resJson.results.slice(0, 10)
+          };
+          jsonString = JSON.stringify(depurado);
+        } else {
+          jsonString = JSON.stringify(resJson);
+        }
+        
+        if (jsonString.length > 48000) {
+          if (info.esProducto && resJson.results && Array.isArray(resJson.results)) {
+            const depurado = {
+              results: resJson.results.slice(0, 3)
+            };
+            jsonString = JSON.stringify(depurado);
           }
         }
         
-        if (precio > 0) {
-          sheetCat.getRange(info.filaReal, 4).setValue(Math.round(precio));
-          
-          // Guardar variantes JSON en la columna 11 (K) y colores en la columna 13 (M) de forma automática
-          try {
-            let jsonString = "";
-            if (info.esProducto && resJson.results && Array.isArray(resJson.results)) {
-              // Quedarse solo con los primeros 10 items (las mejores ofertas)
-              const depurado = {
-                results: resJson.results.slice(0, 10)
-              };
-              jsonString = JSON.stringify(depurado);
-            } else {
-              jsonString = JSON.stringify(resJson);
-            }
-            
-            // Si por alguna razón sigue siendo demasiado largo, recortar el array
-            if (jsonString.length > 48000) {
-              if (info.esProducto && resJson.results && Array.isArray(resJson.results)) {
-                const depurado = {
-                  results: resJson.results.slice(0, 3)
-                };
-                jsonString = JSON.stringify(depurado);
-              }
-            }
-            
-            sheetCat.getRange(info.filaReal, 11).setValue(jsonString);
-            const colDisponibles = extraerColoresDeDatosML(resJson);
-            sheetCat.getRange(info.filaReal, 13).setValue(colDisponibles || "");
-          } catch(eVar) {
-            Logger.log("Error guardando JSON o colores en sincronización horaria: " + eVar.toString());
-          }
-          
-          contadorActualizados++;
-        } else {
-          errores.push("Fila " + info.filaReal + " (" + info.modelo + "): Precio no encontrado en resultados");
-          try {
-            sheetCat.getRange(info.filaReal, 11).setValue(""); // Limpiar variantesJson (Columna K)
-            sheetCat.getRange(info.filaReal, 13).setValue(""); // Limpiar coloresDisponibles (Columna M)
-          } catch (eClean) {}
-        }
-      } catch (parseErr) {
-        errores.push("Fila " + info.filaReal + " (" + info.modelo + "): Error de parsing de JSON");
+        sheetCat.getRange(info.filaReal, 11).setValue(jsonString);
+        const colDisponibles = extraerColoresDeDatosML(resJson);
+        sheetCat.getRange(info.filaReal, 13).setValue(colDisponibles || "");
+        
+        contadorActualizados++;
+      } catch (eVar) {
+        Logger.log("Error guardando JSON o colores en sincronización horaria: " + eVar.toString());
+        errores.push("Fila " + info.filaReal + " (" + info.modelo + "): Error de guardado");
       }
     } else {
-      errores.push("Fila " + info.filaReal + " (" + info.modelo + "): HTTP " + res.getResponseCode() + " - " + res.getContentText().substring(0, 100));
+      if (parseError) {
+        errores.push("Fila " + info.filaReal + " (" + info.modelo + "): Error de parsing de JSON");
+      } else if (responseCode !== 200 && responseCode !== 404) {
+        errores.push("Fila " + info.filaReal + " (" + info.modelo + "): HTTP " + responseCode + " - " + res.getContentText().substring(0, 100));
+      } else {
+        errores.push("Fila " + info.filaReal + " (" + info.modelo + "): No disponible y sin stock en toda la familia");
+      }
+      
       try {
         sheetCat.getRange(info.filaReal, 11).setValue(""); // Limpiar variantesJson (Columna K)
         sheetCat.getRange(info.filaReal, 13).setValue(""); // Limpiar coloresDisponibles (Columna M)
