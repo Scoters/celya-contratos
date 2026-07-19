@@ -4562,7 +4562,9 @@
                 }
             }
 
-            const urlLocal = "https://portal.estrenacelya.com/catalogo.json";
+            // Usar cache-buster horario para evitar que el disco cachee catalogo.json permanentemente
+            const cacheBuster = Math.floor(Date.now() / (1000 * 60 * 60));
+            const urlLocal = "https://portal.estrenacelya.com/catalogo.json?cb=" + cacheBuster;
             const urlGoogle = `${CONFIG.GOOGLE_SCRIPT_URL}?action=buscarModelosCatalogo&q=${encodeURIComponent(busqueda)}`;
 
             // --- ESCENARIO 1: ACTUALIZACIÓN SILENCIOSA EN SEGUNDO PLANO (Si ya hay caché en pantalla) ---
