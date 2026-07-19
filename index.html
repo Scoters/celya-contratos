@@ -7124,20 +7124,6 @@
             if (!optionValue) return false;
             const valClean = optionValue.toLowerCase().replace(/\s+/g, "");
 
-            // Always show the currently selected option to avoid disappearing states
-            if (optionType === "color" && colorSeleccionadoGlobal && colorsMatch(colorSeleccionadoGlobal, optionValue)) {
-                return true;
-            }
-            if (optionType === "memory" && memoriaSeleccionadaGlobal && memoriesMatch(memoriaSeleccionadaGlobal, optionValue)) {
-                return true;
-            }
-            if (optionType === "ram" && ramSeleccionadaGlobal && ramsMatch(ramSeleccionadaGlobal, optionValue)) {
-                return true;
-            }
-            if (optionType === "grading" && gradingSeleccionadoGlobal && gradingSeleccionadoGlobal.toLowerCase().replace(/\s+/g, "") === valClean) {
-                return true;
-            }
-
             return Object.values(productMapGlobal).some(prod => {
                 if (prod.isOutOfStock) return false;
 
@@ -7826,20 +7812,8 @@
                 itemVariationsData = [];
                 variantesVivasGlobal = [];
 
-                // Registro persistente de variantes confirmadas con stock
-                // Evita que la API de una variante marque erróneamente a otra como agotada
+                // Registro de variantes confirmadas con stock por API
                 window._confirmedStockIds = new Set();
-                // Pre-poblar desde catálogo local (todas las filas del mismo modelo base)
-                if (window.equiposCargados && window.currentBaseModelName) {
-                    window.equiposCargados.forEach(eq => {
-                        if (eq.modelo && baseModelsMatch(eq.modelo, window.currentBaseModelName)) {
-                            if (eq.link) {
-                                const lm = eq.link.match(/(MLM\-?\d+)/i);
-                                if (lm) window._confirmedStockIds.add(lm[0].replace("-", "").toUpperCase());
-                            }
-                        }
-                    });
-                }
 
                 // Cargar variantes locales por defecto
                 mostrarVariantesFallback();
@@ -9363,35 +9337,40 @@
 
                             // Priority 1: Match exactly the cleanId (currently selected variant ID)
                             for (const [normColor, colorInfo] of coloresOrdenados) {
-                                if (colorInfo.id === cleanId) {
+                                if (colorInfo.id === cleanId && isOptionAvailable("color", colorInfo.name)) {
                                     targetColorNorm = normColor;
                                     break;
                                 }
                             }
-                            // Priority 2: Match the normalized active color name
+                            // Priority 2: Match the normalized active color name if available
                             if (!targetColorNorm && defaultColorNorm) {
                                 for (const [normColor, colorInfo] of coloresOrdenados) {
-                                    if (normColor === defaultColorNorm) {
+                                    if (normColor === defaultColorNorm && isOptionAvailable("color", colorInfo.name)) {
                                         targetColorNorm = normColor;
                                         break;
                                     }
                                 }
                             }
-                            // Priority 3: Match the data.id or data.catalog_product_id
+                            // Priority 3: Match the data.id or data.catalog_product_id if available
                             if (!targetColorNorm) {
                                 for (const [normColor, colorInfo] of coloresOrdenados) {
                                     if (
-                                        colorInfo.id === data.id ||
-                                        (data.catalog_product_id && colorInfo.id === data.catalog_product_id)
+                                        (colorInfo.id === data.id || (data.catalog_product_id && colorInfo.id === data.catalog_product_id)) &&
+                                        isOptionAvailable("color", colorInfo.name)
                                     ) {
                                         targetColorNorm = normColor;
                                         break;
                                     }
                                 }
                             }
-                            // Priority 4: Fallback to the first color in list
-                            if (!targetColorNorm && coloresOrdenados.length > 0) {
-                                targetColorNorm = coloresOrdenados[0][0];
+                            // Priority 4: Fallback to the first AVAILABLE color in list
+                            if (!targetColorNorm) {
+                                const avail = coloresOrdenados.find(([_, info]) => isOptionAvailable("color", info.name));
+                                if (avail) {
+                                    targetColorNorm = avail[0];
+                                } else if (coloresOrdenados.length > 0) {
+                                    targetColorNorm = coloresOrdenados[0][0];
+                                }
                             }
 
                             coloresOrdenados.forEach(([normColor, colorInfo]) => {
