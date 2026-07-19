@@ -7943,7 +7943,9 @@
                 return (cacheIs256 && cleanIdIs256) || (cacheIs512 && cleanIdIs512);
             })();
 
+            const isExplicitlyCached = ML_CACHE_VARIANTES[cleanId] === cache;
             const isSpecificCache = cache && cache.isFresh && (
+                isExplicitlyCached ||
                 cache.id === cleanId ||
                 cache.catalog_product_id === cleanId
             );
