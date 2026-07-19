@@ -5464,7 +5464,7 @@
                             parsed.isFresh = true;
                             let cleanId = "";
                             if (link) {
-                                const widMatch = link.match(/(?:wid|product_trigger_id)=([A-Z]*\d+)/i);
+                                const widMatch = link.match(/wid=([A-Z]*\d+)/i);
                                 if (widMatch) {
                                     cleanId = widMatch[1].toUpperCase();
                                 } else {
@@ -7849,7 +7849,7 @@
             let cleanId = "";
 
             if (currentMLItemLink) {
-                const widMatch = currentMLItemLink.match(/(?:wid|product_trigger_id)=([A-Z]*\d+)/i);
+                const widMatch = currentMLItemLink.match(/wid=([A-Z]*\d+)/i);
                 if (widMatch) {
                     cleanId = widMatch[1].toUpperCase();
                 } else {

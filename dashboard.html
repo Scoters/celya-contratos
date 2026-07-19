@@ -3181,7 +3181,7 @@
             try {
                 let cleanId = "";
                 if (item.link) {
-                    const widMatch = item.link.match(/(?:wid|product_trigger_id)=([A-Z]*\d+)/i);
+                    const widMatch = item.link.match(/wid=([A-Z]*\d+)/i);
                     if (widMatch) {
                         cleanId = widMatch[1].toUpperCase();
                     } else {

@@ -6086,7 +6086,7 @@ function verificarStockGlobal() {
     
     if (link && link.indexOf("mercadolibre") !== -1) {
       let cleanId = "";
-      const widMatch = link.match(/(?:wid|product_trigger_id)=([A-Z]*\d+)/i);
+      const widMatch = link.match(/wid=([A-Z]*\d+)/i);
       if (widMatch) {
         cleanId = widMatch[1].toUpperCase();
       } else {
