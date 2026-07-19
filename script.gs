@@ -6025,12 +6025,20 @@ function sincronizarPreciosCatalogoCompletoML() {
           contadorActualizados++;
         } else {
           errores.push("Fila " + info.filaReal + " (" + info.modelo + "): Precio no encontrado en resultados");
+          try {
+            sheetCat.getRange(info.filaReal, 11).setValue(""); // Limpiar variantesJson (Columna K)
+            sheetCat.getRange(info.filaReal, 13).setValue(""); // Limpiar coloresDisponibles (Columna M)
+          } catch (eClean) {}
         }
       } catch (parseErr) {
         errores.push("Fila " + info.filaReal + " (" + info.modelo + "): Error de parsing de JSON");
       }
     } else {
       errores.push("Fila " + info.filaReal + " (" + info.modelo + "): HTTP " + res.getResponseCode() + " - " + res.getContentText().substring(0, 100));
+      try {
+        sheetCat.getRange(info.filaReal, 11).setValue(""); // Limpiar variantesJson (Columna K)
+        sheetCat.getRange(info.filaReal, 13).setValue(""); // Limpiar coloresDisponibles (Columna M)
+      } catch (eClean) {}
     }
   }
   
