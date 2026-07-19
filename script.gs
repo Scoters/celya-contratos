@@ -5951,7 +5951,10 @@ function sincronizarPreciosCatalogoCompletoML() {
                   if (nuevoPrecio > 0) {
                     const nuevoId = candidate.id;
                     const nuevoColor = candidate.color;
-                    const nuevoLink = info.link.replace(info.id, nuevoId);
+                    let nuevoLink = info.link.replace(info.id, nuevoId);
+                    if (nuevoLink.includes("product_trigger_id=")) {
+                      nuevoLink = nuevoLink.replace(/product_trigger_id=[A-Z0-9]+/gi, "product_trigger_id=" + nuevoId);
+                    }
                     
                     let nuevoModelo = info.modelo;
                     if (info.colorOriginal && info.colorOriginal.trim() !== "") {
