@@ -4501,8 +4501,8 @@
 
             // Clave de caché única según la URL del script para evitar datos stale si cambia de URL
             const urlHash = btoa(CONFIG.GOOGLE_SCRIPT_URL).substring(0, 15);
-            const cacheKey = "celya_catalogo_cache_" + urlHash;
-            const cacheTimeKey = "celya_catalogo_timestamp_" + urlHash;
+            const cacheKey = "celya_catalogo_cache_v3_" + urlHash;
+            const cacheTimeKey = "celya_catalogo_timestamp_v3_" + urlHash;
 
             let cachePintada = false;
 
