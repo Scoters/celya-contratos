@@ -4822,8 +4822,12 @@ function extraerColoresDeDatosML(data) {
     });
     if (colorPicker && colorPicker.products && Array.isArray(colorPicker.products)) {
       colorPicker.products.forEach(prod => {
-        // Filtrar si la variante de color está agotada (tags: out-of-stock o disabled)
-        const isOutOfStock = prod.tags && (prod.tags.indexOf("out-of-stock") !== -1 || prod.tags.indexOf("disabled") !== -1);
+        // Filtrar si la variante de color está agotada (tags: out-of-stock, disabled, no-bids, no-winner)
+        const tags = prod.tags || [];
+        const isOutOfStock = tags.indexOf("out-of-stock") !== -1 || 
+                             tags.indexOf("disabled") !== -1 ||
+                             tags.indexOf("no-bids") !== -1 ||
+                             tags.indexOf("no-winner") !== -1;
         if (!isOutOfStock && prod.picker_label) {
           const c = prod.picker_label.trim();
           if (c && colores.indexOf(c) === -1) {
