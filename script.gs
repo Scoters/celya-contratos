@@ -6086,15 +6086,11 @@ function verificarStockGlobal() {
     
     if (link && link.indexOf("mercadolibre") !== -1) {
       let cleanId = "";
-      const urlParts = link.split('?');
-      const query = urlParts[1] || "";
-      const widMatch = query.match(/(?:wid|product_trigger_id)=([A-Z]*\d+)/i);
-      
+      const widMatch = link.match(/(?:wid|product_trigger_id)=([A-Z]*\d+)/i);
       if (widMatch) {
         cleanId = widMatch[1].toUpperCase();
       } else {
-        const path = urlParts[0];
-        const pathMatch = path.match(/(MLM\-?\d+)/i);
+        const pathMatch = link.match(/(MLM\-?\d+)/i);
         if (pathMatch) {
           cleanId = pathMatch[0].replace("-", "").toUpperCase();
         }
