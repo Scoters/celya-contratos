@@ -5086,9 +5086,17 @@
                 };
 
                 const targetModelClean = normalizarParaUrl(modeloUrl);
-                const equipoEncontrado = window.equiposCargados.find(eq => {
+                let equipoEncontrado = window.equiposCargados.find(eq => {
                     return normalizarParaUrl(eq.modelo) === targetModelClean;
                 });
+
+                if (!equipoEncontrado) {
+                    equipoEncontrado = window.equiposCargados.find(eq => {
+                        if (!eq.modelo) return false;
+                        const norm = normalizarParaUrl(eq.modelo);
+                        return norm.includes(targetModelClean) || targetModelClean.includes(norm) || (typeof baseModelsMatch === 'function' && baseModelsMatch(eq.modelo, modeloUrl));
+                    });
+                }
 
                 if (equipoEncontrado) {
                     // Precalcular las cuotas dinámicas y el enganche para el modal
