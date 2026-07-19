@@ -6034,6 +6034,11 @@ function sincronizarPreciosCatalogoCompletoML() {
         errores.push("Fila " + info.filaReal + " (" + info.modelo + "): HTTP " + responseCode + " - " + res.getContentText().substring(0, 100));
       } else {
         errores.push("Fila " + info.filaReal + " (" + info.modelo + "): No disponible y sin stock en toda la familia");
+        try {
+          sheetCat.getRange(info.filaReal, 6).setValue("INACTIVO"); // Desactivar fila en catálogo (Columna F)
+        } catch (eDeact) {
+          Logger.log("Error al desactivar fila " + info.filaReal + ": " + eDeact.toString());
+        }
       }
       
       try {
