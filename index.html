@@ -7203,9 +7203,7 @@
         function isProductTagOutOfStock(tags) {
             if (!tags) return false;
             return tags.includes("out-of-stock") ||
-                tags.includes("disabled") ||
-                tags.includes("no-bids") ||
-                tags.includes("no-winner");
+                tags.includes("disabled");
         }
 
         // Obtiene el grupo o familia principal de un color para homologar traducciones
@@ -7857,6 +7855,7 @@
 
             // Determinar si tenemos datos frescos específicos para este ID (o un fallback de familia)
             let cache = ML_CACHE_VARIANTES[cleanId];
+            console.log(`[DEBUG-FLOW] cleanId=${cleanId}, cache=${!!cache}, cache.isFresh=${cache?.isFresh}, cache.id=${cache?.id}, cache.pickers=${cache?.pickers?.length}, cache.variations=${cache?.variations?.length}`);
             if (!cache) {
                 // Buscar en el caché si hay alguna otra variante de la misma familia cargada
                 const familyCache = Object.values(ML_CACHE_VARIANTES).find(c =>
@@ -7866,6 +7865,7 @@
                 );
                 if (familyCache) {
                     cache = familyCache;
+                    console.log(`[DEBUG-FLOW] Found familyCache for ${cleanId}`);
                 }
             }
 
@@ -7938,6 +7938,7 @@
                     picker.products && picker.products.some(p => p.product_id === cleanId)
                 )
             ));
+            console.log(`[DEBUG-FLOW] isSameMockFamily=${isSameMockFamily}, isSpecificCache=${isSpecificCache}, hasSpecificFreshData=${hasSpecificFreshData}, isExplicitlyCached=${isExplicitlyCached}`);
 
             if (esCambioVariante && !isAfterTimeout && !hasSpecificFreshData) {
                 mostrarCargandoVariantes();
@@ -7992,6 +7993,7 @@
                 if (cache) {
                     data = cache;
                 }
+                console.log(`[DEBUG-FLOW] data=${!!data}, data.pickers=${data?.pickers?.length}, data.variations=${data?.variations?.length}, shouldRestoreUI=${shouldRestoreUI}`);
                 // NOTE: We do NOT normalize cleanId to data.id even when isSameMockFamily=true.
                 // Normalizing causes color reversion because the mock's 'selected' tag overrides
                 // the user's actual color choice (e.g., Green → loads 512GB mock → normalized to
@@ -8027,7 +8029,8 @@
                                 }
 
                                 // Race direct ML API vs Google Apps Script proxy in parallel
-                                const endpoint = isProd ? 'products' : 'items';
+                                console.log(`[DEBUG-FETCH-ML] Starting fetch for ID: ${id}, isProduct: ${isProd}`);
+                       const endpoint = isProd ? 'products' : 'items';
                                 const directPromise = fetchWithTimeout(`https://api.mercadolibre.com/${endpoint}/${id}`, {}, 3500)
                                     .then(res => {
                                         if (!res.ok) throw new Error(`ML API error: ${res.status}`);
@@ -8035,16 +8038,18 @@
                                     })
                                     .then(data => {
                                         if (isProd && data && (!data.price || !data.buy_box_winner)) throw new Error("Product missing price/winner");
+                                         console.log(`[DEBUG-FETCH-ML] Direct ML API resolved for ID ${id}`);
                                         return data;
                                     });
 
-                                const proxyPromise = fetchWithTimeout(`${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${id}&isProduct=${isProd}`, {}, 5000)
+                                const proxyPromise = fetchWithTimeout(`${CONFIG.GOOGLE_SCRIPT_URL}?action=obtenerVariantesML&id=${id}&isProduct=${isProd}`, {}, 15000)
                                     .then(res => {
                                         if (!res.ok) throw new Error(`Proxy error: ${res.status}`);
                                         return res.json();
                                     })
                                     .then(data => {
                                         if (!data || data.error) throw new Error("Proxy returned error or empty");
+                                         console.log(`[DEBUG-FETCH-ML] Proxy resolved for ID ${id}`);
                                         return data;
                                     });
 
@@ -8184,7 +8189,8 @@
                     wrapperStorage.style.pointerEvents = "";
                 }
 
-                if (!data) return;
+                if (!data) { console.log(`[DEBUG-FLOW] EARLY RETURN: data is null/undefined!`); return; }
+                console.log(`[DEBUG-FLOW] Past data null check. data.pickers=${data?.pickers?.length}, data.variations=${data?.variations?.length}`);
 
                 // Populate productMapGlobal by merging pickers from the active response, 
                 // all matching local catalog rows, and all matching cache entries to ensure we have full stock status.
@@ -9010,9 +9016,11 @@
                     }
                 }
 
+                console.log(`[DEBUG-FLOW] Entering render branch. data.variations=${data?.variations?.length}, data.pickers=${data?.pickers?.length}`);
                 if (data.variations && data.variations.length > 0) {
                     variantesVivasGlobal = data.variations.filter(v => parseInt(v.available_quantity, 10) > 0);
                     itemVariationsData = variantesVivasGlobal;
+                    console.log(`[DEBUG-FLOW] VARIATIONS branch: variantesVivasGlobal=${variantesVivasGlobal.length}`);
 
                     if (variantesVivasGlobal.length > 0) {
                         contenedor.style.display = "block";
@@ -9125,6 +9133,7 @@
                         actualizarPreciosYFotoPorVarianteActual();
                     }
                 } else if (data.pickers && data.pickers.length > 0) {
+                    console.log(`[DEBUG-FLOW] PICKERS branch: ${data.pickers.length} pickers. Picker IDs: ${data.pickers.map(p => p.picker_id).join(', ')}`);
                     contenedor.style.display = "block";
                     seccionStorage.style.display = "none";
 
@@ -9288,6 +9297,7 @@
                     });
 
                     // 🎨 Pintamos los círculos de colores reales obtenidos (Deduplicados)
+                    console.log(`[DEBUG-PICKER-RENDER] colorPicker found with ${colorPicker ? colorPicker.products.length : 0} products`);
                     if (colorPicker && colorPicker.products && colorPicker.products.length > 0) {
                         try {
                             wrapperColores.innerHTML = "";
@@ -9295,8 +9305,7 @@
 
                             colorPicker.products.forEach(p => {
                                 if (!p.picker_label) return;
-                                // Filtrar colores agotados: no renderizarlos en absoluto
-                                if (p.tags && isProductTagOutOfStock(p.tags)) return;
+                                // Renderizar todos los colores de la familia (los sin stock se marcan como unavailable)
 
                                 // Normalizar usando el grupo de color para agrupar colores físicos iguales (ej: Negro y Black)
                                 const normColor = obtenerGrupoColor(p.picker_label);
@@ -9491,6 +9500,7 @@
                         const idUpper = p.picker_id.toUpperCase();
                         return !(idUpper.includes("COLOR") || idUpper === "FINISH" || idUpper === "ACABADO");
                     });
+                    console.log(`[DEBUG-PICKER-RENDER] nonColorPickers count: ${nonColorPickers.length}, pickers total: ${data.pickers.length}`);
 
                     const extraContainer = document.getElementById('ml-extra-pickers-container');
                     if (extraContainer) {
@@ -10003,14 +10013,16 @@
                 }
             }
             // --- SALVAVIDAS FINAL SI NO SE PINTARON BOTONES (Bug Moto G24) ---
-            const colorPills = wrapperColores ? wrapperColores.querySelectorAll('.color-pill') : [];
+            const extraContainer = document.getElementById('ml-extra-pickers-container');
+            const colorPills = wrapperColores ? wrapperColores.querySelectorAll('.color-pill, .color-circle') : [];
             if (colorPills.length === 0) {
                 console.log("[PDP-FALLBACK] No se detectaron botones de color reales. Aplicando variantes fallback.");
                 mostrarVariantesFallback();
             } else {
-                // Si se pintaron colores reales pero no memorias
+                // Si se pintaron colores reales pero no memorias (ni en wrapperStorage ni en extraContainer)
                 const storagePills = wrapperStorage ? wrapperStorage.querySelectorAll('.storage-pill') : [];
-                if (storagePills.length === 0 && defaultMemoria && defaultMemoria.trim() !== "" && defaultMemoria.trim() !== "-") {
+                const extraPills = extraContainer ? extraContainer.querySelectorAll('.storage-pill, .color-pill, .color-circle') : [];
+                if (storagePills.length === 0 && extraPills.length === 0 && defaultMemoria && defaultMemoria.trim() !== "" && defaultMemoria.trim() !== "-") {
                     console.log("[PDP-FALLBACK] No se detectaron botones de almacenamiento reales. Aplicando fallback de almacenamiento.");
                     seccionStorage.style.display = "block";
                     wrapperStorage.innerHTML = "";
