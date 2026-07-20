@@ -3203,7 +3203,13 @@
                     const endpoint = isProduct ? 'products' : 'items';
                     const resDirect = await fetch(`https://api.mercadolibre.com/${endpoint}/${idBusqueda}`);
                     if (resDirect.ok) {
-                        liveData = await resDirect.json();
+                        const directData = await resDirect.json();
+                        if (isProduct && (!directData.price || !directData.buy_box_winner || !directData.pickers || directData.pickers.length === 0)) {
+                            // Direct catalog fetch missing price/buy_box/pickers -> invalidate so proxy fetches complete data
+                            liveData = null;
+                        } else {
+                            liveData = directData;
+                        }
                     }
                 } catch (directErr) {
                     console.warn(`Direct fetch failed for ${idBusqueda}:`, directErr);
@@ -3397,7 +3403,7 @@
 
                 const cacheStr = JSON.stringify(liveData);
                 const cacheActualStr = JSON.stringify(item.variantesJson);
-                if (cacheStr !== cacheActualStr) {
+                if (cacheStr !== cacheActualStr && liveData && (liveData.pickers || liveData.variations || liveData.buy_box_winner)) {
                     item.variantesJson = liveData;
                     const formData = new URLSearchParams();
                     formData.append('token', CONFIG.API_TOKEN);

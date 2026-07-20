@@ -6589,25 +6589,37 @@ function limpiarJsonVariantesML(data) {
   if (!data) return {};
   
   // 1. Si es respuesta de /products/{id} (producto de catálogo con pickers)
-  if (data.pickers && Array.isArray(data.pickers)) {
+  if (data.pickers && Array.isArray(data.pickers) && data.pickers.length > 0) {
     return {
       id: data.id,
+      catalog_product_id: data.catalog_product_id || data.id,
       name: data.name,
       price: data.price,
       buy_box_winner: data.buy_box_winner ? {
         item_id: data.buy_box_winner.item_id || data.buy_box_winner.id,
         price: data.buy_box_winner.price,
-        condition: data.buy_box_winner.condition
+        condition: data.buy_box_winner.condition,
+        shipping: data.buy_box_winner.shipping,
+        seller_id: data.buy_box_winner.seller_id
       } : null,
-      pictures: (data.pictures || []).slice(0, 1).map(p => { return { url: p.url || p.secure_url }; }),
+      pictures: (data.pictures || []).slice(0, 5).map(p => {
+        return {
+          id: p.id || "",
+          url: p.url || p.secure_url || "",
+          secure_url: p.secure_url || p.url || ""
+        };
+      }),
       pickers: data.pickers.map(p => {
         return {
           picker_id: p.picker_id,
+          picker_name: p.picker_name || "",
           products: (p.products || []).map(prod => {
             return {
               product_id: prod.product_id,
               picker_label: prod.picker_label,
               product_name: prod.product_name || prod.product_title || "",
+              picture_id: prod.picture_id || "",
+              thumbnail: prod.thumbnail || "",
               tags: prod.tags || []
             };
           })
