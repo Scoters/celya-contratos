@@ -6039,7 +6039,6 @@ function ejecutarPivotVarianteSheet(sheetCat, filaReal, info, tokenML) {
   }
   return null;
 }
-
 // 🔄 Sincroniza todos los precios del catálogo con Mercado Libre utilizando el token oficial (en paralelo)
 function sincronizarPreciosCatalogoCompletoML() {
   const credenciales = obtenerPropiedadesEcosistema();
@@ -6081,10 +6080,14 @@ function sincronizarPreciosCatalogoCompletoML() {
         const id = coincidencia[0].replace("-", "").toUpperCase();
         let targetUrl = `https://api.mercadolibre.com/items/${id}`;
         let esProducto = false;
+        let wid = "";
+        const widMatch = link.match(/wid=(MLM\-?\d+)/i);
+        if (widMatch) {
+          wid = widMatch[1].replace("-", "").toUpperCase();
+        }
         
         if (link.includes("/p/")) {
-          // Para catálogo (/p/), consultamos la lista de publicaciones activas para obtener precios y variantes con stock real
-          targetUrl = `https://api.mercadolibre.com/products/${id}/items`;
+          targetUrl = `https://api.mercadolibre.com/products/${id}`;
           esProducto = true;
         }
         
@@ -6103,6 +6106,7 @@ function sincronizarPreciosCatalogoCompletoML() {
           esProducto: esProducto,
           id: id,
           link: link,
+          wid: wid,
           colorOriginal: String(dataCat[j][9] || '').trim()
         });
       }
@@ -6113,16 +6117,47 @@ function sincronizarPreciosCatalogoCompletoML() {
     return { result: "success", actualizados: 0, mensaje: "No hay links de Mercado Libre que procesar" };
   }
   
-  // ⚡ EJECUCIÓN CONCURRENTE EN LA RED DE GOOGLE (Tarda ~1-2 segundos en total)
+  // ⚡ EJECUCIÓN CONCURRENTE PASO 1 (Catálogos e Items Base)
   const respuestas = UrlFetchApp.fetchAll(peticiones);
-  let contadorActualizados = 0;
-  let errores = [];
+  
+  // Preparar Paso 2 (Items de catálogo para precios y filtrado)
+  let peticionesItems = [];
+  let mapeoItemsPaso2 = [];
   
   for (let k = 0; k < respuestas.length; k++) {
     const res = respuestas[k];
     const info = mapeoItems[k];
+    info.res1 = res;
     
+    if (res.getResponseCode() === 200 && info.esProducto) {
+      peticionesItems.push({
+        url: `https://api.mercadolibre.com/products/${info.id}/items`,
+        method: "get",
+        headers: { "Authorization": "Bearer " + tokenML },
+        muteHttpExceptions: true
+      });
+      mapeoItemsPaso2.push(info);
+    }
+  }
+  
+  let respuestasItems = [];
+  if (peticionesItems.length > 0) {
+    respuestasItems = UrlFetchApp.fetchAll(peticionesItems);
+  }
+  
+  // Asignar respuestas del paso 2
+  for (let k = 0; k < respuestasItems.length; k++) {
+    mapeoItemsPaso2[k].res2 = respuestasItems[k];
+  }
+  
+  let contadorActualizados = 0;
+  let errores = [];
+  
+  for (let k = 0; k < mapeoItems.length; k++) {
+    const info = mapeoItems[k];
+    const res = info.res1;
     const responseCode = res.getResponseCode();
+    
     let resJson = {};
     let precio = 0;
     let parseError = false;
@@ -6130,11 +6165,49 @@ function sincronizarPreciosCatalogoCompletoML() {
     if (responseCode === 200) {
       try {
         resJson = JSON.parse(res.getContentText());
+        
         if (info.esProducto) {
-          const results = resJson.results || [];
-          if (results.length > 0) {
-            results.sort(function(a, b) { return (a.price || 0) - (b.price || 0); });
-            precio = parseFloat(results[0].price) || 0;
+          // Procesar items del catálogo (Paso 2)
+          if (info.res2 && info.res2.getResponseCode() === 200) {
+            const itemsData = JSON.parse(info.res2.getContentText());
+            const results = itemsData.results || [];
+            if (results.length > 0) {
+              // Si tenemos un WID, buscar el seller_id de ese WID
+              let targetSellerId = null;
+              if (info.wid) {
+                const targetItem = results.find(r => r.item_id === info.wid);
+                if (targetItem) targetSellerId = targetItem.seller_id;
+              }
+              
+              // Si encontramos el seller_id, filtramos los resultados a solo los de ese seller
+              let filteredResults = results;
+              if (targetSellerId) {
+                filteredResults = results.filter(r => r.seller_id === targetSellerId);
+              }
+              
+              // Ordenar por precio para el buy box del seller (o global si no hay WID)
+              filteredResults.sort(function(a, b) { return (a.price || 0) - (b.price || 0); });
+              if (filteredResults.length > 0) {
+                const bestItem = filteredResults[0];
+                precio = parseFloat(bestItem.price) || 0;
+                resJson.price = precio;
+                resJson.buy_box_winner = {
+                  item_id: bestItem.item_id,
+                  price: bestItem.price,
+                  seller_id: bestItem.seller_id
+                };
+                
+                // 🔥 Filtrar los PICKERS del catálogo para que solo muestren las opciones disponibles en filteredResults
+                if (targetSellerId && resJson.pickers && resJson.pickers.length > 0) {
+                  const validProductIds = new Set(filteredResults.map(r => r.product_id || r.catalog_product_id));
+                  resJson.pickers.forEach(picker => {
+                    if (picker.products) {
+                      picker.products = picker.products.filter(p => validProductIds.has(p.product_id));
+                    }
+                  });
+                }
+              }
+            }
           }
         } else {
           precio = parseFloat(resJson.price) || 0;
@@ -6159,23 +6232,15 @@ function sincronizarPreciosCatalogoCompletoML() {
       try {
         sheetCat.getRange(info.filaReal, 4).setValue(Math.round(precio));
         
-        let jsonString = "";
-        if (info.esProducto && resJson.results && Array.isArray(resJson.results)) {
-          const depurado = {
-            results: resJson.results.slice(0, 10)
-          };
-          jsonString = JSON.stringify(depurado);
-        } else {
-          jsonString = JSON.stringify(resJson);
-        }
-        
+        let jsonString = JSON.stringify(resJson);
         if (jsonString.length > 48000) {
-          if (info.esProducto && resJson.results && Array.isArray(resJson.results)) {
-            const depurado = {
-              results: resJson.results.slice(0, 3)
-            };
-            jsonString = JSON.stringify(depurado);
-          }
+           if (resJson.pictures && resJson.pictures.length > 5) {
+               resJson.pictures = resJson.pictures.slice(0, 5);
+           }
+           if (resJson.results && resJson.results.length > 5) {
+               resJson.results = resJson.results.slice(0, 5);
+           }
+           jsonString = JSON.stringify(resJson);
         }
         
         sheetCat.getRange(info.filaReal, 11).setValue(jsonString);

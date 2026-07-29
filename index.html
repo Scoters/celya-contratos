@@ -8004,7 +8004,7 @@
                 }
 
                 // Si no hay datos frescos específicos de este ID y no se está realizando un fetch en segundo plano, iniciarlo
-                const needsFetch = !isSameMockFamily && !isSpecificCache;
+                const needsFetch = (!isSameMockFamily && !isSpecificCache) && !(data && (data.pickers || data.results));
                 if (needsFetch && !isFetchingML[cleanId]) {
                     isFetchingML[cleanId] = true;
 
