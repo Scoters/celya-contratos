@@ -3553,7 +3553,7 @@
                                                 <div style="font-weight:bold; color:var(--text-primary);">${limpiarNombreModelo(it.modelo)} (${it.cliente})</div>
                                                 <div style="font-size:13px; color:var(--text-secondary);">Precio Financiado: $${Number(it.precioPlaceholder).toLocaleString('es-MX')}</div>
                                                 <div style="font-size:13px; color:var(--text-secondary);">Color: ${it.color || '—'} • Capacidad: ${it.memoria || '—'}</div>
-                                                <div style="font-size:13px; color:var(--text-secondary);">Plan: ${it.planElegido || '—'} sem • Frecuencia: ${it.frecuencia || '—'}</div>
+                                                <div style="font-size:13px; color:var(--text-secondary);">Plan: ${it.planElegido || '—'} ${String(it.frecuencia).toUpperCase() === 'QUINCENAL' ? 'quin' : 'sem'} • Frecuencia: ${it.frecuencia || '—'}</div>
                                                 <div style="font-size:13px; color:var(--text-secondary);">Crédito: ${it.estadoCredito || '—'} • Fecha: ${it.fecha || '—'}</div>
                                                 <div style="margin-top:8px;">
                                                     <button class="btn-convertir-trigger btn-pago" style="padding:8px 14px; margin-right:6px; font-size:13px; width:auto; display:inline-flex; margin-top:0;">✏️ Editar y Convertir</button>
@@ -3646,7 +3646,7 @@
                                 <label>Precio de Contado (Precio en Inventario):</label>
                                 <input id="conv-precio" type="text" value="${precioContado || ''}" placeholder="Ej. 4800" />
                                 <div style="font-size:12px; color:var(--text-secondary); margin-top:-8px; margin-bottom:12px;" id="conv-precio-financiado-preview">
-                                    Precio Financiado Estimado: $${Number(precioPlaceholder).toLocaleString('es-MX')} (Plan ${planElegido || '—'} sem)
+                                    Precio Financiado Estimado: $${Number(precioPlaceholder).toLocaleString('es-MX')} (${planElegido || '—'} ${isQuincenal ? 'quin' : 'sem'})
                                 </div>
 
                                 <div style="margin-top: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
