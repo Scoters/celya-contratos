@@ -4366,7 +4366,7 @@
             }
             const factorIntFinal = Math.max(0, factorInt - descuentoInteres);
 
-            const totalFinanciado = (precioContado * (1 + factorIntFinal)) - eng;
+            const totalFinanciado = (precioContado - eng) * (1 + factorIntFinal);
             const cuotaSinRedondear = totalFinanciado / numPagos;
             const cuotaRedondeada = Math.max(0, Math.round(cuotaSinRedondear));
             
@@ -5935,7 +5935,7 @@
 
                 console.log(`%c[PDP] === actualizarPrecioCalculadoPDP === freq=${freq}, plazo=${plazo}, precio=${precioContado}, fEng=${factorEnganche}, fInt=${factorInteres}, numPagos=${numPagos}, engCalc=${engancheCalculado}, engFinal=${engancheFinal}`, 'color: #00bcd4; font-weight: bold');
 
-                const totalFinanciadoCalc = (precioContado * (1 + factorInteres)) - engancheFinal;
+                const totalFinanciadoCalc = (precioContado - engancheFinal) * (1 + factorInteres);
                 const cuotaFinal = Math.max(0, Math.round(totalFinanciadoCalc / numPagos));
 
                 console.log(`%c[PDP] RESULTADO FINAL: cuotaMostrada=$${cuotaFinal}`, 'color: #00bcd4; font-weight: bold');
@@ -6617,7 +6617,7 @@
                         : (CONFIG_TASAS.interes52 !== undefined ? CONFIG_TASAS.interes52 : 0.75));
                 const factorInteres = Math.max(0, factorInteresBase - descuentoInteres);
 
-                const totalFinanciadoCalc = (precioContado * (1 + factorInteres)) - engancheFinal;
+                const totalFinanciadoCalc = (precioContado - engancheFinal) * (1 + factorInteres);
                 const cuotaFinal = Math.max(0, Math.round(totalFinanciadoCalc / numPagos));
 
                 let labelFrecuencia = (freq === "QUINCENAL") ? "/quin" : "/sem";
@@ -6737,7 +6737,7 @@
                 }
                 const factorInteres = Math.max(0, factorInteresBase - descuentoInteres);
 
-                const totalFinanciadoCalc = (precioContado * (1 + factorInteres)) - engancheFinal;
+                const totalFinanciadoCalc = (precioContado - engancheFinal) * (1 + factorInteres);
                 cuota = Math.max(0, Math.round(totalFinanciadoCalc / numPagos));
             } else {
                 engancheFinal = precioContado;
@@ -6906,7 +6906,7 @@
                     }
                     const factorInteres = Math.max(0, factorInteresBase - descuentoInteres);
 
-                    const totalFinanciadoCalc = (precioContado * (1 + factorInteres)) - finalEnganche;
+                    const totalFinanciadoCalc = (precioContado - finalEnganche) * (1 + factorInteres);
                     cuotaBase = Math.max(0, Math.round(totalFinanciadoCalc / numPagos));
                 } else {
                     finalEnganche = Math.round(precioContado);

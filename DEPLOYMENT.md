@@ -8,15 +8,15 @@ Este documento registra de forma permanente la configuración de infraestructura
 * **Dominio:** [estrenacelya.com](https://estrenacelya.com) gestionado mediante Cloudflare.
 * **🚨 Regla de Despliegue:** **NUNCA** hacer despliegues por SCP o SSH de estos archivos al VPS. Para publicar cambios, únicamente se debe realizar un `git push` a la rama `main` de este repositorio en GitHub. Pages se actualiza en automático tras 1-2 minutos.
 
-## 🖥️ 2. Portal de Administración y Clientes en el VPS (Subdominio Portal)
+## 🖥️ 2. Portal de Administración y Clientes en el VPS (Subdominio Portal y Préstamos)
 * **Hosting:** VPS de Racknerd (`107.175.122.33`).
-* **Archivos:** `portal.html` (y recursos relacionados).
-* **Dominio:** [portal.estrenacelya.com](https://portal.estrenacelya.com)
-* **🚨 Regla de Despliegue:** Los cambios en `portal.html` **SÍ** requieren deploy al VPS a través de SCP/SSH para actualizar la web de producción, además de guardarse en GitHub. Las rutas de destino en el VPS son:
+* **Archivos:** `portal.html`, `prestamos.html`, `prestamos_admin.html`, `*.prestamos.html` (y recursos relacionados).
+* **Dominio:** [portal.estrenacelya.com](https://portal.estrenacelya.com) y páginas de préstamos.
+* **🚨 Regla de Despliegue:** Los cambios en `portal.html` y los archivos de la sección de préstamos **SÍ** requieren deploy al VPS a través de SCP/SSH para actualizar la web de producción, además de guardarse en GitHub. Las rutas de destino en el VPS son:
   * Respaldos en `/root/`
   * Nginx Proxy en `/root/nginx-proxy/data/html/`
   * Volumen Docker en `/var/lib/docker/volumes/nginx-proxy_data/_data/html/`
-  * Copia activa al contenedor: `docker cp /root/portal.html nginx-proxy_app_1:/var/www/html/portal.html`
+  * Copia activa al contenedor: `docker cp /root/portal.html nginx-proxy_app_1:/var/www/html/portal.html` (y similar para los archivos de préstamos)
 
 ## ⚙️ 3. Servidor de Backend y Automatizaciones
 * **Hosting:** VPS de Racknerd (`107.175.122.33`).

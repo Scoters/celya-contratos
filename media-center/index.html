@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Media Center Dashboard para acceso rápido a servicios de media.">
+    <title>Media Center</title>
+    <!-- Google Fonts: Outfit para un look moderno -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome para los íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Animación de fondo dinámico -->
+    <div class="background-animation">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="circle circle-3"></div>
+    </div>
+    
+    <div class="container">
+        <header>
+            <h1>Media Center</h1>
+            <p>Tu portal personal de entretenimiento</p>
+        </header>
+
+        <main class="grid-container">
+            <a href="http://192.168.4.115:32400/web" class="card" target="_blank" rel="noopener noreferrer">
+                <div class="card-content">
+                    <i class="fa-solid fa-play card-icon plex-color"></i>
+                    <h2>Plex</h2>
+                    <p>Streaming & Media Player</p>
+                </div>
+            </a>
+            
+            <a href="http://192.168.4.115:5055" class="card" target="_blank" rel="noopener noreferrer">
+                <div class="card-content">
+                    <i class="fa-solid fa-eye card-icon overseerr-color"></i>
+                    <h2>Overseerr</h2>
+                    <p>Request Management</p>
+                </div>
+            </a>
+
+            <a href="http://192.168.4.115:8989" class="card" target="_blank" rel="noopener noreferrer">
+                <div class="card-content">
+                    <i class="fa-solid fa-tv card-icon sonarr-color"></i>
+                    <h2>Sonarr</h2>
+                    <p>TV Show Tracker</p>
+                </div>
+            </a>
+
+            <a href="http://192.168.4.115:7878" class="card" target="_blank" rel="noopener noreferrer">
+                <div class="card-content">
+                    <i class="fa-solid fa-film card-icon radarr-color"></i>
+                    <h2>Radarr</h2>
+                    <p>Movie Tracker</p>
+                </div>
+            </a>
+
+            <a href="http://192.168.4.115:9696" class="card" target="_blank" rel="noopener noreferrer">
+                <div class="card-content">
+                    <i class="fa-solid fa-magnifying-glass card-icon prowlarr-color"></i>
+                    <h2>Prowlarr</h2>
+                    <p>Indexer Manager</p>
+                </div>
+            </a>
+
+            <a href="http://192.168.4.115:9091" class="card" target="_blank" rel="noopener noreferrer">
+                <div class="card-content">
+                    <i class="fa-solid fa-download card-icon transmission-color"></i>
+                    <h2>Transmission</h2>
+                    <p>Torrent Client</p>
+                </div>
+            </a>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

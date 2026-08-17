@@ -1229,7 +1229,7 @@
                     const numPagosBase = (planElegido === "26") ? 26 : 52;
                     const numPagos = (frecuencia === "QUINCENAL") ? (numPagosBase / 2) : numPagosBase;
 
-                    const totalFinanciadoCalc = (precioContado * (1 + factorInteres)) - engancheEfectivo;
+                    const totalFinanciadoCalc = (precioContado - engancheEfectivo) * (1 + factorInteres);
                     const cuotaFinal = Math.max(0, Math.round(totalFinanciadoCalc / numPagos));
 
                     document.getElementById('cuota').value = "$" + cuotaFinal.toLocaleString('es-MX');
@@ -1617,8 +1617,9 @@
                         sessionStorage.setItem('celya_authenticated', 'true');
                         sessionStorage.setItem('celya_api_token', data.token);
                         CONFIG.API_TOKEN = data.token;
-                        // Desvanecer pantalla de bloqueo
+                        // Desvanecer pantalla de bloqueo y recargar para inicializar la página
                         document.getElementById('lockscreen-celya').style.display = 'none';
+                        location.reload();
                     } else {
                         errorTxt.innerText = "❌ Contraseña incorrecta";
                         errorTxt.style.display = 'block';
