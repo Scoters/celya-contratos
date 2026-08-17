@@ -349,6 +349,8 @@
 
 
             <h3>Estructura del Crédito</h3>
+            <label style="margin-top: 10px; display: block; font-weight: bold;">📅 Fecha de Creación del Contrato:</label>
+            <input type="date" id="fechaContrato" name="fechaContrato" required style="width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; color: #1e293b; outline: none; transition: border-color 0.2s ease;">
 
             <label style="margin-top: 10px; display: block; font-weight: bold;">📆 Frecuencia de Pago Obligatoria:</label>
             <select id="agendaCobro" required class="hidden-select">
@@ -1751,6 +1753,14 @@
             const tid = setTimeout(remove, dur);
             el.addEventListener('click', () => { clearTimeout(tid); remove(); });
         }
+        
+        // Inicializar fecha de contrato por defecto
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateInput = document.getElementById('fechaContrato');
+            if (dateInput) {
+                dateInput.valueAsDate = new Date();
+            }
+        });
     </script>
 </body>
 
