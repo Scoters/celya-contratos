@@ -2490,32 +2490,18 @@
                 mostrarPromesaActiva(clienteSeleccionadoActual.imei);
 
                 // C. 📑 Historial Rápido de Abonos (Pintar Tabla)
-                const cuerpoTabla = document.getElementById('tablaHistorialCuerpo');
-                cuerpoTabla.innerHTML = ""; // Limpiamos tabla vieja
-
-                if (clienteSeleccionadoActual.historialAbonos && clienteSeleccionadoActual.historialAbonos.length > 0) {
-                    clienteSeleccionadoActual.historialAbonos.forEach(abono => {
-                        cuerpoTabla.innerHTML += `
-                            <tr style="border-bottom: 1px solid #ddd;">
-                                <td style="padding: 6px;">${abono.fecha}</td>
-                                <td style="padding: 6px; font-weight:bold; color:#27ae60;">$${abono.monto}</td>
-                                <td style="padding: 6px;">${abono.chofer}</td>
-                            </tr>
-                        `;
-                    });
-                    document.getElementById('moduloHistorialAbonos').style.display = 'block';
-                } else {
-                    cuerpoTabla.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:10px; color:#aaa;">Sin abonos registrados aún</td></tr>`;
-                    document.getElementById('moduloHistorialAbonos').style.display = 'block';
-                }
+                pintarTablaHistorialAbonos(clienteSeleccionadoActual);
 
                 // Mostramos los contenedores escondidos
                 document.getElementById('cardDetalleCobro').style.display = 'block';
                 document.getElementById('formMontoCobro').style.display = 'block';
 
-                // Inicializar fecha de abono a hoy y actualizar mini-calendario si existe
-                if (typeof setFechaAbonoRapida === 'function') {
-                    setFechaAbonoRapida(0);
+                // Inicializar fecha de abono a hoy solo si no se ha elegido una fecha previamente
+                const inputFechaAct = document.getElementById('fechaAbono');
+                if (!inputFechaAct || !inputFechaAct.value) {
+                    if (typeof setFechaAbonoRapida === 'function') {
+                        setFechaAbonoRapida(0);
+                    }
                 }
                 if (typeof renderizarMiniCalendarioCliente === 'function') {
                     renderizarMiniCalendarioCliente();
@@ -2535,6 +2521,28 @@
                 document.getElementById('promesaFecha').value = "";
                 document.getElementById('promesaMonto').value = "";
                 document.getElementById('promesaNotas').value = "";
+            }
+        }
+
+        // Pintar o refrescar tabla de últimos abonos registrados
+        function pintarTablaHistorialAbonos(cliente) {
+            const cuerpoTabla = document.getElementById('tablaHistorialCuerpo');
+            if (!cuerpoTabla) return;
+            cuerpoTabla.innerHTML = "";
+            if (cliente && cliente.historialAbonos && cliente.historialAbonos.length > 0) {
+                cliente.historialAbonos.forEach(abono => {
+                    cuerpoTabla.innerHTML += `
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <td style="padding: 6px;">${abono.fecha}</td>
+                            <td style="padding: 6px; font-weight:bold; color:#27ae60;">$${abono.monto}</td>
+                            <td style="padding: 6px;">${abono.chofer}</td>
+                        </tr>
+                    `;
+                });
+                document.getElementById('moduloHistorialAbonos').style.display = 'block';
+            } else {
+                cuerpoTabla.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:10px; color:#aaa;">Sin abonos registrados aún</td></tr>`;
+                document.getElementById('moduloHistorialAbonos').style.display = 'block';
             }
         }
 
@@ -2769,7 +2777,8 @@
                         });
                         clienteSeleccionadoActual.saldoPendiente = nuevoSaldo;
 
-                        // Actualizar mini-calendario y calendario general
+                        // Actualizar mini-calendario, tabla rápida y calendario general
+                        pintarTablaHistorialAbonos(clienteSeleccionadoActual);
                         if (typeof renderizarMiniCalendarioCliente === 'function') {
                             renderizarMiniCalendarioCliente();
                         }
@@ -3974,8 +3983,10 @@
                     // Si coincide con el cliente actualmente cargado en el módulo de cobranza dinámico
                     if (clienteSeleccionadoActual && clienteSeleccionadoActual.imei === calClienteSeleccionadoParaAbono.imei) {
                         clienteSeleccionadoActual.saldoPendiente = calClienteSeleccionadoParaAbono.saldoPendiente;
+                        clienteSeleccionadoActual.historialAbonos = calClienteSeleccionadoParaAbono.historialAbonos;
                         const inputSaldo = document.getElementById('infoSaldoPendiente');
                         if (inputSaldo) inputSaldo.value = `$${Math.round(clienteSeleccionadoActual.saldoPendiente).toLocaleString('es-MX')}`;
+                        pintarTablaHistorialAbonos(clienteSeleccionadoActual);
                     }
 
                     // Re-renderizar calendario e inspector
