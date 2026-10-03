@@ -436,6 +436,215 @@
             z-index: 10000;
         }
 
+        /* ═══════════════════════ 📅 CALENDARIO DE COBRANZA Y PAGOS ═══════════════════════ */
+        .modal-calendario-fullscreen {
+            background-color: #0b0f19;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(2, 132, 199, 0.14) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(155, 89, 182, 0.1) 0px, transparent 50%);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 30px 40px;
+            width: 100%;
+            height: 100%;
+            min-height: 100vh;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            z-index: 10000;
+        }
+
+        .cal-layout-grid {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 25px;
+            align-items: start;
+        }
+
+        @media (max-width: 1100px) {
+            .cal-layout-grid {
+                grid-template-columns: 1fr;
+            }
+            .modal-calendario-fullscreen {
+                padding: 20px 15px;
+            }
+        }
+
+        .cal-grid-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+
+        .cal-day-name {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #94a3b8;
+            padding: 8px 0;
+            background: rgba(30, 41, 59, 0.4);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .cal-month-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+
+        .cal-day-cell {
+            min-height: 105px;
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            position: relative;
+            user-select: none;
+        }
+
+        .cal-day-cell:hover {
+            border-color: #38bdf8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(2, 132, 199, 0.2);
+            background: rgba(30, 41, 59, 0.85);
+            z-index: 2;
+        }
+
+        .cal-day-cell.selected {
+            border-color: #a855f7 !important;
+            box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.4), 0 8px 24px rgba(168, 85, 247, 0.25) !important;
+            background: rgba(88, 28, 135, 0.25) !important;
+        }
+
+        .cal-day-cell.today {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.07);
+        }
+
+        .cal-day-cell.other-month {
+            opacity: 0.35;
+            background: rgba(15, 23, 42, 0.3);
+            pointer-events: none;
+        }
+
+        .cal-day-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+
+        .cal-day-number {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+
+        .cal-badge-today {
+            background: linear-gradient(135deg, #a855f7, #7e22ce);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 2px 5px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .cal-badge-pago {
+            background: rgba(16, 185, 129, 0.18);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #34d399;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 6px;
+            border-radius: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .cal-badge-raya {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: #38bdf8;
+            font-size: 10.5px;
+            font-weight: 600;
+            padding: 2px 5px;
+            border-radius: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .cal-badge-promesa {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            color: #fbbf24;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 5px;
+            border-radius: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .mini-cal-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #cbd5e1;
+            font-size: 11px;
+            padding: 6px 2px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+        }
+        .mini-cal-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+        .mini-cal-btn.selected {
+            background: #a855f7 !important;
+            color: #fff !important;
+            font-weight: 700;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+            border-color: #c084fc !important;
+        }
+        .mini-cal-btn.has-pago {
+            border-color: #10b981;
+            color: #34d399;
+            font-weight: 700;
+        }
+        .mini-cal-btn.is-raya {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: #38bdf8;
+            color: #38bdf8;
+        }
+        .mini-cal-btn.is-today {
+            border-color: #f59e0b;
+        }
+        .mini-cal-btn.other-month {
+            opacity: 0.3;
+        }
+
         .close-config-btn {
             color: var(--text-secondary);
             position: absolute;
@@ -1073,6 +1282,10 @@
                     <span id="badgeStockAlerts"
                         style="background: #ffffff; color: #ef4444; border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: bold; min-width: 15px; text-align: center; display: none;">0</span>
                 </button>
+                <button id="btnOpenCalendarioCobranza" class="btn-config-trigger" onclick="abrirModalCalendarioCobranza()"
+                    style="background: linear-gradient(135deg, #0284c7, #0369a1); border: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);">
+                    📅 Calendario de Pagos
+                </button>
                 <button id="btnOpenFondoRevolvente" class="btn-config-trigger" onclick="abrirModalFondoRevolvente()"
                     style="background: linear-gradient(135deg, #0d9488, #0f766e); border: none; display: flex; align-items: center; gap: 6px;">
                     📈 Fondo Revolvente
@@ -1094,7 +1307,15 @@
         <main class="dashboard-grid">
             <div class="column-left">
                 <div class="container" id="card-cobranza">
-                    <h3>💵 Módulo de Cobranza Dinámica</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                        <h3 style="margin: 0;">💵 Módulo de Cobranza Dinámica</h3>
+                        <button type="button" onclick="abrirModalCalendarioCobranza()"
+                            style="background: rgba(2, 132, 199, 0.15); border: 1px solid #0284c7; color: #38bdf8; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;"
+                            onmouseover="this.style.background='rgba(2, 132, 199, 0.3)'"
+                            onmouseout="this.style.background='rgba(2, 132, 199, 0.15)'">
+                            📅 Ver Calendario Global
+                        </button>
+                    </div>
                     <label for="buscarClienteAbonoInput">Buscar Cliente (Nombre, ID o IMEI):</label>
                     <div style="position: relative; width: 100%;">
                         <input type="text" id="buscarClienteAbonoInput" placeholder="🔍 Escribe para buscar cliente..."
@@ -1172,6 +1393,49 @@
                                 Monto a Recibir ($):</label>
                             <input type="number" id="montoAbono" placeholder="Mete la cantidad que te va a pagar"
                                 style="font-size: 18px; padding: 12px; font-weight: bold; color: #fff; background: rgba(15, 23, 42, 0.6); border: 2px solid #34d399; border-radius: 8px; box-sizing: border-box; width: 100%; margin-bottom: 12px;">
+
+                            <!-- Selector de Fecha del Pago -->
+                            <div style="margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+                                    <label for="fechaAbono" style="font-size: 14px; font-weight: bold; color: #fff; margin: 0;">📅 Fecha del Pago:</label>
+                                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                        <button type="button" onclick="setFechaAbonoRapida(0)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; border-radius: 4px; padding: 2px 7px; font-size: 11px; cursor: pointer;">Hoy</button>
+                                        <button type="button" onclick="setFechaAbonoRapida(-1)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; border-radius: 4px; padding: 2px 7px; font-size: 11px; cursor: pointer;">Ayer</button>
+                                        <button type="button" onclick="setFechaAbonoRapida(-7)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; border-radius: 4px; padding: 2px 7px; font-size: 11px; cursor: pointer;">-1 sem</button>
+                                        <button type="button" onclick="setFechaAbonoRapida(-21)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; border-radius: 4px; padding: 2px 7px; font-size: 11px; cursor: pointer;">-3 sem</button>
+                                        <button type="button" id="btnToggleMiniCal" onclick="toggleMiniCalendarioCliente()" style="background: rgba(155, 89, 182, 0.2); border: 1px solid #9b59b6; color: #e9d5ff; border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 600; cursor: pointer;">🗓️ Calendario</button>
+                                    </div>
+                                </div>
+                                <input type="date" id="fechaAbono"
+                                    style="font-size: 15px; padding: 10px; font-weight: 600; color: #fff; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; box-sizing: border-box; width: 100%; margin-bottom: 4px; font-family: inherit; outline: none; transition: border 0.2s;"
+                                    onfocus="this.style.borderColor='var(--primary-color)'"
+                                    onblur="this.style.borderColor='rgba(255,255,255,0.15)'"
+                                    onchange="alCambiarFechaAbonoManual()">
+                                <small style="display: block; font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
+                                    ℹ️ Puedes elegir libremente cualquier fecha en el calendario para registrar pagos atrasados o de días específicos.
+                                </small>
+
+                                <!-- Mini Calendario interactivo embebido para el cliente seleccionado -->
+                                <div id="miniCalendarioClienteContainer" style="display: none; margin-top: 8px; margin-bottom: 12px; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(155, 89, 182, 0.35); border-radius: 10px; padding: 12px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <div style="font-size: 12px; font-weight: 700; color: #e2e8f0; display: flex; align-items: center; gap: 6px;">
+                                            <span>🗓️</span> <span id="miniCalTituloMes">Mes Año</span>
+                                        </div>
+                                        <div style="display: flex; gap: 4px;">
+                                            <button type="button" onclick="navegarMiniCalendario(-1)" style="background: rgba(255,255,255,0.08); border: none; color: #fff; border-radius: 4px; padding: 2px 7px; font-size: 11px; cursor: pointer;">◀</button>
+                                            <button type="button" onclick="irHoyMiniCalendario()" style="background: rgba(255,255,255,0.08); border: none; color: #fff; border-radius: 4px; padding: 2px 7px; font-size: 11px; cursor: pointer;">Hoy</button>
+                                            <button type="button" onclick="navegarMiniCalendario(1)" style="background: rgba(255,255,255,0.08); border: none; color: #fff; border-radius: 4px; padding: 2px 7px; font-size: 11px; cursor: pointer;">▶</button>
+                                        </div>
+                                    </div>
+                                    <div id="miniCalGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center;">
+                                    </div>
+                                    <div style="display: flex; gap: 10px; justify-content: center; font-size: 10px; color: var(--text-secondary); margin-top: 8px; flex-wrap: wrap;">
+                                        <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span> Pagado</span>
+                                        <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #38bdf8;"></span> Día Raya</span>
+                                        <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #a855f7;"></span> Seleccionado</span>
+                                    </div>
+                                </div>
+                            </div>
 
                             <label for="metodoAbono"
                                 style="font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 8px; display: block;">💳
@@ -1655,6 +1919,215 @@
         </div>
     </div>
 
+    <!-- ═══════════════════════ 📅 MODAL CALENDARIO DE PAGOS Y COBRANZAS ═══════════════════════ -->
+    <div id="modal-calendario-cobranza" class="modal-celya-config" style="display: none;">
+        <div class="modal-calendario-fullscreen">
+            <!-- Header Superior del Calendario -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 18px; margin-bottom: 18px; flex-wrap: wrap; gap: 15px;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <span style="font-size: 32px; background: rgba(2, 132, 199, 0.2); border: 1px solid #0284c7; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px;">📅</span>
+                    <div>
+                        <h2 style="margin: 0; color: #38bdf8; font-size: 22px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                            Calendario de Cobranzas y Registro de Pagos
+                        </h2>
+                        <p style="margin: 4px 0 0 0; color: var(--text-secondary); font-size: 13px;">
+                            Visualiza abonos realizados, días de corte de clientes (Día Raya), promesas de pago y registra pagos en cualquier fecha.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Selector de Mes y Año Central -->
+                <div style="display: flex; align-items: center; gap: 10px; background: rgba(30, 41, 59, 0.6); padding: 6px 14px; border-radius: 10px; border: 1px solid var(--border-color);">
+                    <button type="button" onclick="navegarMesCalendario(-1)" class="btn-config-trigger" style="background: rgba(255,255,255,0.06); padding: 6px 12px; font-size: 14px; border-radius: 6px; cursor: pointer; color:#fff;" title="Mes Anterior">◀</button>
+                    <span id="calMesAnioLabel" style="font-size: 17px; font-weight: 800; min-width: 170px; text-align: center; color: #fff; letter-spacing: 0.5px;">Mes Año</span>
+                    <button type="button" onclick="navegarMesCalendario(1)" class="btn-config-trigger" style="background: rgba(255,255,255,0.06); padding: 6px 12px; font-size: 14px; border-radius: 6px; cursor: pointer; color:#fff;" title="Mes Siguiente">▶</button>
+                    <button type="button" onclick="irHoyCalendario()" style="background: rgba(2, 132, 199, 0.25); border: 1px solid #0284c7; color: #38bdf8; font-weight: 700; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(2, 132, 199, 0.4)'" onmouseout="this.style.background='rgba(2, 132, 199, 0.25)'">📍 Hoy</button>
+                </div>
+
+                <button onclick="cerrarModalCalendarioCobranza()" class="btn-config-trigger" style="background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); font-weight: 700; padding: 9px 18px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'">
+                    ✕ Cerrar Calendario
+                </button>
+            </div>
+
+            <!-- Barra de Filtros y KPIs del Mes -->
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 15px; background: rgba(30, 41, 59, 0.4); padding: 12px 18px; border-radius: 12px; border: 1px solid var(--border-color);">
+                <!-- Filtros rápidos -->
+                <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                    <span style="font-size: 12px; color: var(--text-secondary); margin-right: 4px; font-weight: 600;">Ver:</span>
+                    <button type="button" class="btn-cal-filter active" data-filtro="TODOS" onclick="setFiltroCalendario('TODOS')" style="background: linear-gradient(135deg, #0284c7, #0369a1); border: 1px solid #38bdf8; color: #fff; padding: 5px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer;">Todos los Eventos</button>
+                    <button type="button" class="btn-cal-filter" data-filtro="PAGOS" onclick="setFiltroCalendario('PAGOS')" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 5px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer;">💵 Solo Pagos Recibidos</button>
+                    <button type="button" class="btn-cal-filter" data-filtro="RAYA" onclick="setFiltroCalendario('RAYA')" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 5px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer;">📆 Solo Clientes Día Raya</button>
+                    <button type="button" class="btn-cal-filter" data-filtro="PROMESAS" onclick="setFiltroCalendario('PROMESAS')" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #cbd5e1; padding: 5px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer;">⭐ Solo Promesas</button>
+                </div>
+
+                <!-- Buscador de cliente para filtrar -->
+                <div style="flex: 1; max-width: 320px; min-width: 200px;">
+                    <input type="text" id="calBuscadorClienteInput" oninput="filtrarCalendarioPorTexto(this.value)" placeholder="🔍 Filtrar por cliente, ID o IMEI..." style="width: 100%; box-sizing: border-box; padding: 7px 12px; font-size: 12px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(15, 23, 42, 0.6); color: #fff; outline: none;">
+                </div>
+
+                <!-- KPIs del mes -->
+                <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                    <div style="text-align: right;">
+                        <span style="display: block; font-size: 11px; color: #94a3b8;">Cobrado en el Mes:</span>
+                        <strong id="calKpiTotalMes" style="font-size: 15px; color: #10b981;">$0 MXN</strong>
+                    </div>
+                    <div style="text-align: right; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 12px;">
+                        <span style="display: block; font-size: 11px; color: #94a3b8;">Abonos:</span>
+                        <strong id="calKpiAbonosMes" style="font-size: 15px; color: #38bdf8;">0</strong>
+                    </div>
+                    <div style="text-align: right; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 12px;">
+                        <span style="display: block; font-size: 11px; color: #94a3b8;">Clientes Activos:</span>
+                        <strong id="calKpiClientesActivos" style="font-size: 15px; color: #e2e8f0;">0</strong>
+                    </div>
+                    <div style="text-align: right; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 12px;">
+                        <span style="display: block; font-size: 11px; color: #94a3b8;">Promesas Mes:</span>
+                        <strong id="calKpiPromesasMes" style="font-size: 15px; color: #f59e0b;">0</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenido Principal: Grid Calendario + Inspector Lateral -->
+            <div class="cal-layout-grid">
+                <!-- Columna Izquierda: Grid de Días -->
+                <div>
+                    <!-- Encabezados de días -->
+                    <div class="cal-grid-header">
+                        <div class="cal-day-name">LUN</div>
+                        <div class="cal-day-name">MAR</div>
+                        <div class="cal-day-name">MIÉ</div>
+                        <div class="cal-day-name">JUE</div>
+                        <div class="cal-day-name">VIE</div>
+                        <div class="cal-day-name">SÁB</div>
+                        <div class="cal-day-name">DOM</div>
+                    </div>
+
+                    <!-- Grid de Celdas del Mes -->
+                    <div id="calMonthGrid" class="cal-month-grid">
+                        <!-- Generado dinámicamente con JS -->
+                    </div>
+
+                    <!-- Leyenda descriptiva -->
+                    <div style="display: flex; gap: 18px; margin-top: 15px; font-size: 11.5px; color: var(--text-secondary); align-items: center; flex-wrap: wrap;">
+                        <span style="display: inline-flex; align-items: center; gap: 6px;">
+                            <span style="width: 10px; height: 10px; border-radius: 3px; background: rgba(16, 185, 129, 0.4); border: 1px solid #10b981;"></span>
+                            Abonos recibidos ($)
+                        </span>
+                        <span style="display: inline-flex; align-items: center; gap: 6px;">
+                            <span style="width: 10px; height: 10px; border-radius: 3px; background: rgba(56, 189, 248, 0.3); border: 1px solid #38bdf8;"></span>
+                            Clientes con Día Raya (Corte semanal)
+                        </span>
+                        <span style="display: inline-flex; align-items: center; gap: 6px;">
+                            <span style="width: 10px; height: 10px; border-radius: 3px; background: rgba(245, 158, 11, 0.3); border: 1px solid #f59e0b;"></span>
+                            Promesas de Pago
+                        </span>
+                        <span style="display: inline-flex; align-items: center; gap: 6px;">
+                            <span style="width: 10px; height: 10px; border-radius: 3px; background: rgba(168, 85, 247, 0.4); border: 1px solid #a855f7;"></span>
+                            Día Seleccionado
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Inspector del Día y Registro de Pago -->
+                <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 15px;">
+                    <!-- Cabecera del Inspector -->
+                    <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                        <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #a855f7; font-weight: 700;">Detalles de la Fecha</span>
+                        <h3 id="calInspectorTituloFecha" style="margin: 4px 0 0 0; color: #fff; font-size: 16px; font-weight: 700;">
+                            Selecciona un día
+                        </h3>
+                    </div>
+
+                    <!-- Formulario Rápido: Registrar Pago en esta Fecha -->
+                    <div style="background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 10px; padding: 14px;">
+                        <h4 style="margin: 0 0 10px 0; color: #34d399; font-size: 13.5px; display: flex; align-items: center; gap: 6px;">
+                            <span>⚡</span> Registrar Pago en este Día
+                        </h4>
+
+                        <!-- Buscador de cliente para el pago -->
+                        <label style="font-size: 11.5px; color: #cbd5e1; display: block; margin-bottom: 4px; font-weight: 600;">Cliente a cobrar:</label>
+                        <div style="position: relative; margin-bottom: 10px;">
+                            <input type="text" id="calRegClienteSearch" placeholder="🔍 Buscar cliente, ID o IMEI..." style="width: 100%; box-sizing: border-box; padding: 8px 10px; font-size: 12.5px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); background: rgba(15, 23, 42, 0.9); color: #fff; outline: none; font-family: inherit;">
+                            <div id="calRegClienteResultados" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; max-height: 180px; overflow-y: auto; z-index: 100; box-shadow: 0 6px 18px rgba(0,0,0,0.6);"></div>
+                        </div>
+
+                        <!-- Info del cliente seleccionado para pago -->
+                        <div id="calRegClienteInfoBox" style="display: none; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px 10px; margin-bottom: 10px; font-size: 11.5px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                                <strong id="calRegNombreTxt" style="color: #fff;">Nombre</strong>
+                                <span id="calRegModeloTxt" style="color: #94a3b8;">Modelo</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                                <span style="color: #94a3b8;">Cuota regular:</span>
+                                <strong id="calRegCuotaTxt" style="color: #38bdf8;">$0</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: #94a3b8;">Saldo pendiente:</span>
+                                <strong id="calRegSaldoTxt" style="color: #f87171;">$0</strong>
+                            </div>
+                        </div>
+
+                        <!-- Monto -->
+                        <label style="font-size: 11.5px; color: #34d399; font-weight: bold; display: block; margin-bottom: 4px;">Monto a Recibir ($):</label>
+                        <input type="number" id="calRegMonto" placeholder="Ej. 500" style="width: 100%; box-sizing: border-box; padding: 8px 10px; font-size: 14px; font-weight: bold; border-radius: 6px; border: 1.5px solid #10b981; background: rgba(15, 23, 42, 0.9); color: #fff; margin-bottom: 8px; outline: none;">
+
+                        <!-- Fecha -->
+                        <label style="font-size: 11.5px; color: #cbd5e1; display: block; margin-bottom: 4px; font-weight: 600;">Fecha de Cobro:</label>
+                        <input type="date" id="calRegFecha" style="width: 100%; box-sizing: border-box; padding: 7px 10px; font-size: 12.5px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); background: rgba(15, 23, 42, 0.9); color: #fff; margin-bottom: 8px; outline: none; font-family: inherit;">
+
+                        <!-- Método -->
+                        <label style="font-size: 11.5px; color: #cbd5e1; display: block; margin-bottom: 4px; font-weight: 600;">Método de Pago:</label>
+                        <select id="calRegMetodo" style="width: 100%; box-sizing: border-box; padding: 7px 10px; font-size: 12.5px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); background: rgba(15, 23, 42, 0.9); color: #fff; margin-bottom: 8px; outline: none; font-family: inherit;">
+                            <option value="Transferencia" selected>🏦 Transferencia Bancaria</option>
+                            <option value="Efectivo">💵 Efectivo</option>
+                            <option value="Spin OXXO">🏪 Spin by OXXO</option>
+                            <option value="Tarjeta">💳 Tarjeta (Clip/Débito/Crédito)</option>
+                        </select>
+
+                        <!-- Folio -->
+                        <label style="font-size: 11.5px; color: #cbd5e1; display: block; margin-bottom: 4px;">Folio / Referencia (Opcional):</label>
+                        <input type="text" id="calRegFolio" placeholder="Ej. 123456" style="width: 100%; box-sizing: border-box; padding: 7px 10px; font-size: 12.5px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); background: rgba(15, 23, 42, 0.9); color: #fff; margin-bottom: 10px; outline: none; font-family: inherit;">
+
+                        <button type="button" id="btnCalConfirmarPago" onclick="ejecutarRegistroAbonoDesdeCalendario()" style="width: 100%; background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.2s;">
+                            📲 Guardar Abono en Google Sheets
+                        </button>
+                    </div>
+
+                    <!-- Sección: Pagos Registrados en esta fecha -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <h4 style="margin: 0; color: #10b981; font-size: 13px; display: flex; align-items: center; gap: 5px;">
+                                <span>💵</span> Abonos Recibidos
+                            </h4>
+                        </div>
+                        <div id="calListaPagosDelDia">
+                            <!-- Lista dinámica -->
+                        </div>
+                    </div>
+
+                    <!-- Sección: Clientes con Corte (Día Raya) este día -->
+                    <div style="border-top: 1px solid var(--border-color); padding-top: 12px;">
+                        <h4 style="margin: 0 0 8px 0; color: #38bdf8; font-size: 13px; display: flex; align-items: center; gap: 5px;">
+                            <span>📆</span> Clientes con Corte (Día Raya)
+                        </h4>
+                        <div id="calListaClientesCorte">
+                            <!-- Lista dinámica -->
+                        </div>
+                    </div>
+
+                    <!-- Sección: Promesas de Pago este día -->
+                    <div style="border-top: 1px solid var(--border-color); padding-top: 12px;">
+                        <h4 style="margin: 0 0 8px 0; color: #f59e0b; font-size: 13px; display: flex; align-items: center; gap: 5px;">
+                            <span>⭐</span> Promesas de Pago
+                        </h4>
+                        <div id="calListaPromesasDia">
+                            <!-- Lista dinámica -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let dbClientesActivos = [];
         let listaClientesGlobal = [];
@@ -1867,6 +2340,61 @@
                     resultados.style.display = 'none';
                 }
             });
+
+            // 🔍 Autocomplete para el buscador de cliente en el modal de calendario
+            const calInput = document.getElementById('calRegClienteSearch');
+            const calResultados = document.getElementById('calRegClienteResultados');
+            if (calInput && calResultados) {
+                calInput.addEventListener('input', function (e) {
+                    const query = e.target.value.toLowerCase().trim();
+                    if (!query) {
+                        calResultados.style.display = 'none';
+                        calResultados.innerHTML = '';
+                        return;
+                    }
+                    const lista = (typeof dbClientesActivos !== 'undefined' && dbClientesActivos.length > 0)
+                        ? dbClientesActivos
+                        : (typeof listaClientesGlobal !== 'undefined' ? listaClientesGlobal : []);
+
+                    const matches = lista.filter(c =>
+                        (c.cliente && c.cliente.toLowerCase().includes(query)) ||
+                        (c.id && c.id.toLowerCase().includes(query)) ||
+                        (c.imei && c.imei.toLowerCase().includes(query)) ||
+                        (c.modelo && c.modelo.toLowerCase().includes(query))
+                    );
+
+                    calResultados.innerHTML = '';
+                    if (matches.length === 0) {
+                        calResultados.innerHTML = '<div style="padding: 10px; color: #a0aec0; font-size: 12px;">Sin resultados</div>';
+                    } else {
+                        matches.forEach(c => {
+                            const item = document.createElement('div');
+                            item.style.padding = '8px 12px';
+                            item.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                            item.style.cursor = 'pointer';
+                            item.style.transition = 'background 0.2s';
+                            item.onmouseover = () => item.style.backgroundColor = 'rgba(255,255,255,0.08)';
+                            item.onmouseout = () => item.style.backgroundColor = 'transparent';
+
+                            item.innerHTML = `
+                                <div style="font-weight: 600; color: #fff; font-size: 13px;">${c.cliente}</div>
+                                <div style="font-size: 11px; color: #94a3b8;">${c.id || 'S/ID'} | ${c.modelo || 'Equipo'} (IMEI: ${c.imei})</div>
+                            `;
+                            item.addEventListener('click', function () {
+                                cargarClienteParaAbonoEnCalendario(c.imei);
+                            });
+                            calResultados.appendChild(item);
+                        });
+                    }
+                    calResultados.style.display = 'block';
+                });
+
+                document.addEventListener('click', function (e) {
+                    if (calInput && calResultados && e.target !== calInput && !calResultados.contains(e.target)) {
+                        calResultados.style.display = 'none';
+                    }
+                });
+            }
         });
 
         function seleccionarClienteAbono(imei, clienteNombre, idCliente) {
@@ -1984,6 +2512,14 @@
                 // Mostramos los contenedores escondidos
                 document.getElementById('cardDetalleCobro').style.display = 'block';
                 document.getElementById('formMontoCobro').style.display = 'block';
+
+                // Inicializar fecha de abono a hoy y actualizar mini-calendario si existe
+                if (typeof setFechaAbonoRapida === 'function') {
+                    setFechaAbonoRapida(0);
+                }
+                if (typeof renderizarMiniCalendarioCliente === 'function') {
+                    renderizarMiniCalendarioCliente();
+                }
 
                 // Reseteamos el botón y el panel de liquidación/promesa por si acaso
                 const detailsLiq = document.getElementById('detallesLiquidacion');
@@ -2169,6 +2705,7 @@
                 btn.disabled = true;
 
                 try {
+                    const fechaAbonoVal = document.getElementById('fechaAbono')?.value || '';
                     const formData = new URLSearchParams();
                     formData.append('action', 'registrarPago');
                     formData.append('token', CONFIG.API_TOKEN);
@@ -2179,6 +2716,9 @@
                     formData.append('semana', 'Abono');
                     formData.append('folio', folio);
                     formData.append('notas', 'Registrado desde Módulo de Cobranza Dinámica');
+                    if (fechaAbonoVal) {
+                        formData.append('fechaPago', fechaAbonoVal);
+                    }
 
                     const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
                         method: 'POST',
@@ -2217,6 +2757,25 @@
 
                         document.getElementById('txt-recibo-mensaje').value = mensaje;
                         document.getElementById('modal-recibo-pago').style.display = 'block';
+
+                        // Actualizar abonos del cliente en memoria
+                        const fechaFormateada = fechaAbonoVal ? fechaAbonoVal.split('-').reverse().join('/') : new Date().toLocaleDateString('es-MX');
+                        clienteSeleccionadoActual.historialAbonos = clienteSeleccionadoActual.historialAbonos || [];
+                        clienteSeleccionadoActual.historialAbonos.unshift({
+                            fecha: fechaFormateada,
+                            fechaIso: fechaAbonoVal || new Date().toISOString().split('T')[0],
+                            monto: abonoMonto,
+                            chofer: metodo + (folioVal ? ' (' + folioVal + ')' : '')
+                        });
+                        clienteSeleccionadoActual.saldoPendiente = nuevoSaldo;
+
+                        // Actualizar mini-calendario y calendario general
+                        if (typeof renderizarMiniCalendarioCliente === 'function') {
+                            renderizarMiniCalendarioCliente();
+                        }
+                        if (typeof renderizarCalendarioCobranza === 'function') {
+                            renderizarCalendarioCobranza();
+                        }
 
                         // Limpiar campos
                         document.getElementById('folioAbono').value = '';
@@ -2820,6 +3379,783 @@
                 }
             }
         }
+
+        /* ═══════════════════════════════════════════════════════════════════
+           📅 FUNCIONES DE CALENDARIO DE PAGOS Y COBRANZAS
+           ═══════════════════════════════════════════════════════════════════ */
+        let calFechaActual = {
+            anio: new Date().getFullYear(),
+            mes: new Date().getMonth() // 0-11
+        };
+        let calDiaSeleccionadoIso = null;
+        let calFiltroActual = 'TODOS';
+        let calTextoFiltro = '';
+        let calClienteSeleccionadoParaAbono = null;
+        let miniCalMesActual = {
+            anio: new Date().getFullYear(),
+            mes: new Date().getMonth()
+        };
+
+        const MESES_ES = [
+            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+        ];
+        const DIAS_SEMANA_MAP = {
+            0: "DOMINGO",
+            1: "LUNES",
+            2: "MARTES",
+            3: "MIERCOLES",
+            4: "JUEVES",
+            5: "VIERNES",
+            6: "SABADO"
+        };
+
+        // Formatea fecha en español "Viernes 3 de Octubre de 2026"
+        function formatearFechaTextoCompleto(isoStr) {
+            if (!isoStr) return "";
+            const parts = isoStr.split('-');
+            if (parts.length !== 3) return isoStr;
+            const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            const diaSem = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"][d.getDay()];
+            const diaNum = d.getDate();
+            const mesNom = MESES_ES[d.getMonth()];
+            const anio = d.getFullYear();
+            return `${diaSem} ${diaNum} de ${mesNom} de ${anio}`;
+        }
+
+        // Abre el modal de calendario y enfoca el mes y día de hoy
+        function abrirModalCalendarioCobranza() {
+            const modal = document.getElementById('modal-calendario-cobranza');
+            if (!modal) return;
+            modal.style.display = 'block';
+
+            // Si no hay día seleccionado, seleccionar hoy
+            const hoy = new Date();
+            calFechaActual.anio = hoy.getFullYear();
+            calFechaActual.mes = hoy.getMonth();
+            const yyyy = hoy.getFullYear();
+            const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+            const dd = String(hoy.getDate()).padStart(2, '0');
+            calDiaSeleccionadoIso = `${yyyy}-${mm}-${dd}`;
+
+            renderizarCalendarioCobranza();
+            inspeccionarDiaCalendario(calDiaSeleccionadoIso);
+        }
+
+        function cerrarModalCalendarioCobranza() {
+            const modal = document.getElementById('modal-calendario-cobranza');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function navegarMesCalendario(delta) {
+            calFechaActual.mes += delta;
+            if (calFechaActual.mes < 0) {
+                calFechaActual.mes = 11;
+                calFechaActual.anio -= 1;
+            } else if (calFechaActual.mes > 11) {
+                calFechaActual.mes = 0;
+                calFechaActual.anio += 1;
+            }
+            renderizarCalendarioCobranza();
+        }
+
+        function irHoyCalendario() {
+            const hoy = new Date();
+            calFechaActual.anio = hoy.getFullYear();
+            calFechaActual.mes = hoy.getMonth();
+            const yyyy = hoy.getFullYear();
+            const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+            const dd = String(hoy.getDate()).padStart(2, '0');
+            calDiaSeleccionadoIso = `${yyyy}-${mm}-${dd}`;
+            renderizarCalendarioCobranza();
+            inspeccionarDiaCalendario(calDiaSeleccionadoIso);
+        }
+
+        function setFiltroCalendario(filtro) {
+            calFiltroActual = filtro;
+            document.querySelectorAll('.btn-cal-filter').forEach(btn => {
+                if (btn.getAttribute('data-filtro') === filtro) {
+                    btn.classList.add('active');
+                    btn.style.background = 'linear-gradient(135deg, #0284c7, #0369a1)';
+                    btn.style.borderColor = '#38bdf8';
+                    btn.style.color = '#fff';
+                } else {
+                    btn.classList.remove('active');
+                    btn.style.background = 'rgba(255, 255, 255, 0.05)';
+                    btn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                    btn.style.color = '#cbd5e1';
+                }
+            });
+            renderizarCalendarioCobranza();
+        }
+
+        function filtrarCalendarioPorTexto(val) {
+            calTextoFiltro = (val || '').toLowerCase().trim();
+            renderizarCalendarioCobranza();
+        }
+
+        // Obtiene todos los abonos normalizados con fecha ISO
+        function obtenerTodosLosAbonosNormalizados() {
+            const clientes = (typeof dbClientesActivos !== 'undefined' && dbClientesActivos.length > 0)
+                ? dbClientesActivos
+                : (typeof listaClientesGlobal !== 'undefined' ? listaClientesGlobal : []);
+            const todos = [];
+
+            clientes.forEach(c => {
+                if (c.historialAbonos && Array.isArray(c.historialAbonos)) {
+                    c.historialAbonos.forEach(ab => {
+                        let iso = ab.fechaIso || "";
+                        if (!iso && ab.fecha) {
+                            const str = String(ab.fecha).trim();
+                            if (str.includes('-')) {
+                                const p = str.split('-');
+                                if (p.length === 3) iso = `${p[0]}-${p[1].padStart(2, '0')}-${p[2].padStart(2, '0')}`;
+                            } else if (str.includes('/')) {
+                                const p = str.split('/');
+                                if (p.length === 3) iso = `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
+                            }
+                        }
+                        todos.push({
+                            clienteNombre: c.cliente,
+                            imei: c.imei,
+                            idCliente: c.id,
+                            modelo: c.modelo,
+                            monto: parseFloat(ab.monto) || 0,
+                            chofer: ab.chofer || 'Abono',
+                            fechaStr: ab.fecha,
+                            fechaIso: iso
+                        });
+                    });
+                }
+            });
+            return todos;
+        }
+
+        // Renderiza el grid mensual del calendario
+        function renderizarCalendarioCobranza() {
+            const mesLabel = document.getElementById('calMesAnioLabel');
+            if (mesLabel) {
+                mesLabel.innerText = `${MESES_ES[calFechaActual.mes].toUpperCase()} ${calFechaActual.anio}`;
+            }
+
+            const grid = document.getElementById('calMonthGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const hoy = new Date();
+            const hoyIso = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+
+            const anio = calFechaActual.anio;
+            const mes = calFechaActual.mes;
+
+            // Primer día del mes y total de días
+            const primerDia = new Date(anio, mes, 1);
+            const ultimoDia = new Date(anio, mes + 1, 0);
+            const totalDias = ultimoDia.getDate();
+
+            // Día de semana (0=Dom, 1=Lun, ..., 6=Sab). Lo convertimos a Lunes=0, ..., Domingo=6
+            let primerDiaSemana = primerDia.getDay(); // 0 Dom, 1 Lun...
+            let offsetDias = (primerDiaSemana === 0) ? 6 : primerDiaSemana - 1;
+
+            // Clientes activos
+            const clientes = (typeof dbClientesActivos !== 'undefined' && dbClientesActivos.length > 0)
+                ? dbClientesActivos
+                : (typeof listaClientesGlobal !== 'undefined' ? listaClientesGlobal : []);
+
+            // Abonos
+            const todosAbonos = obtenerTodosLosAbonosNormalizados();
+
+            // Promesas
+            const promesas = (typeof listaPromesasGlobal !== 'undefined' && Array.isArray(listaPromesasGlobal))
+                ? listaPromesasGlobal
+                : [];
+
+            // KPIs acumulados del mes
+            let totalCobradoMes = 0;
+            let cantidadAbonosMes = 0;
+            let promesasMes = 0;
+
+            // Días previos de relleno (mes anterior)
+            const ultimoDiaMesAnterior = new Date(anio, mes, 0).getDate();
+            for (let i = offsetDias - 1; i >= 0; i--) {
+                const diaNum = ultimoDiaMesAnterior - i;
+                const cell = document.createElement('div');
+                cell.className = 'cal-day-cell other-month';
+                cell.innerHTML = `
+                    <div class="cal-day-top">
+                        <span class="cal-day-number" style="opacity: 0.5;">${diaNum}</span>
+                    </div>
+                `;
+                grid.appendChild(cell);
+            }
+
+            // Días del mes actual
+            for (let d = 1; d <= totalDias; d++) {
+                const isoFecha = `${anio}-${String(mes + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const fechaObj = new Date(anio, mes, d);
+                const diaSemanaNombre = DIAS_SEMANA_MAP[fechaObj.getDay()];
+
+                // Filtrar abonos del día
+                let abonosDia = todosAbonos.filter(a => a.fechaIso === isoFecha);
+                if (calTextoFiltro) {
+                    abonosDia = abonosDia.filter(a =>
+                        (a.clienteNombre && a.clienteNombre.toLowerCase().includes(calTextoFiltro)) ||
+                        (a.imei && a.imei.toLowerCase().includes(calTextoFiltro)) ||
+                        (a.idCliente && a.idCliente.toLowerCase().includes(calTextoFiltro))
+                    );
+                }
+
+                const totalMontoDia = abonosDia.reduce((sum, a) => sum + a.monto, 0);
+                totalCobradoMes += totalMontoDia;
+                cantidadAbonosMes += abonosDia.length;
+
+                // Filtrar clientes con Día Raya hoy
+                let clientesRaya = clientes.filter(c => {
+                    const diaNorm = (c.diaRaya || '').toUpperCase().trim();
+                    if (!diaNorm) return false;
+                    const coincide = diaNorm.includes(diaSemanaNombre) ||
+                        (diaSemanaNombre === "MIERCOLES" && diaNorm.includes("MIÉRCOLES"));
+                    return coincide && (parseFloat(c.saldoPendiente) > 0);
+                });
+                if (calTextoFiltro) {
+                    clientesRaya = clientesRaya.filter(c =>
+                        (c.cliente && c.cliente.toLowerCase().includes(calTextoFiltro)) ||
+                        (c.imei && c.imei.toLowerCase().includes(calTextoFiltro))
+                    );
+                }
+
+                // Filtrar promesas del día
+                let promesasDia = promesas.filter(p => {
+                    let pIso = p.fechaIso || '';
+                    if (!pIso && p.fecha) {
+                        const s = String(p.fecha).trim();
+                        if (s.includes('-')) pIso = s;
+                        else if (s.includes('/')) {
+                            const parts = s.split('/');
+                            if (parts.length === 3) pIso = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                        }
+                    }
+                    return pIso === isoFecha;
+                });
+                if (calTextoFiltro) {
+                    promesasDia = promesasDia.filter(p => {
+                        const cl = clientes.find(c => c.imei === p.imei);
+                        return cl && cl.cliente.toLowerCase().includes(calTextoFiltro);
+                    });
+                }
+                promesasMes += promesasDia.length;
+
+                // Crear celda
+                const cell = document.createElement('div');
+                cell.className = 'cal-day-cell';
+                if (isoFecha === hoyIso) cell.classList.add('today');
+                if (isoFecha === calDiaSeleccionadoIso) cell.classList.add('selected');
+
+                let html = `
+                    <div class="cal-day-top">
+                        <span class="cal-day-number">${d}</span>
+                        ${isoFecha === hoyIso ? '<span class="cal-badge-today">HOY</span>' : ''}
+                    </div>
+                `;
+
+                // Insignias según filtro
+                const mostrarPagos = (calFiltroActual === 'TODOS' || calFiltroActual === 'PAGOS') && totalMontoDia > 0;
+                const mostrarRaya = (calFiltroActual === 'TODOS' || calFiltroActual === 'RAYA') && clientesRaya.length > 0;
+                const mostrarPromesas = (calFiltroActual === 'TODOS' || calFiltroActual === 'PROMESAS') && promesasDia.length > 0;
+
+                if (mostrarPagos) {
+                    html += `
+                        <div class="cal-badge-pago" title="${abonosDia.length} abono(s) recibidos: $${Math.round(totalMontoDia).toLocaleString('es-MX')}">
+                            <span>💵</span> $${Math.round(totalMontoDia).toLocaleString('es-MX')} (${abonosDia.length})
+                        </div>
+                    `;
+                }
+
+                if (mostrarRaya) {
+                    html += `
+                        <div class="cal-badge-raya" title="${clientesRaya.length} cliente(s) con día raya">
+                            <span>📆</span> ${clientesRaya.length} cortes
+                        </div>
+                    `;
+                }
+
+                if (mostrarPromesas) {
+                    html += `
+                        <div class="cal-badge-promesa" title="${promesasDia.length} promesa(s) de pago">
+                            <span>⭐</span> ${promesasDia.length} promesa(s)
+                        </div>
+                    `;
+                }
+
+                cell.innerHTML = html;
+                cell.addEventListener('click', () => {
+                    document.querySelectorAll('.cal-day-cell').forEach(c => c.classList.remove('selected'));
+                    cell.classList.add('selected');
+                    inspeccionarDiaCalendario(isoFecha);
+                });
+
+                grid.appendChild(cell);
+            }
+
+            // Días de relleno final
+            const celdasUsadas = offsetDias + totalDias;
+            const celdasFaltantes = (7 - (celdasUsadas % 7)) % 7;
+            for (let i = 1; i <= celdasFaltantes; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cal-day-cell other-month';
+                cell.innerHTML = `
+                    <div class="cal-day-top">
+                        <span class="cal-day-number" style="opacity: 0.5;">${i}</span>
+                    </div>
+                `;
+                grid.appendChild(cell);
+            }
+
+            // Actualizar KPIs
+            const kpiTotal = document.getElementById('calKpiTotalMes');
+            const kpiAbonos = document.getElementById('calKpiAbonosMes');
+            const kpiClientes = document.getElementById('calKpiClientesActivos');
+            const kpiPromesas = document.getElementById('calKpiPromesasMes');
+
+            if (kpiTotal) kpiTotal.innerText = `$${Math.round(totalCobradoMes).toLocaleString('es-MX')} MXN`;
+            if (kpiAbonos) kpiAbonos.innerText = cantidadAbonosMes;
+            if (kpiClientes) kpiClientes.innerText = clientes.length;
+            if (kpiPromesas) kpiPromesas.innerText = promesasMes;
+        }
+
+        // Inspecciona el día clickeado en la columna lateral
+        function inspeccionarDiaCalendario(isoFecha) {
+            calDiaSeleccionadoIso = isoFecha;
+
+            const titulo = document.getElementById('calInspectorTituloFecha');
+            if (titulo) titulo.innerText = formatearFechaTextoCompleto(isoFecha);
+
+            // Pre-configurar el campo fecha de registro rápido al día inspeccionado
+            const inputFecha = document.getElementById('calRegFecha');
+            if (inputFecha) inputFecha.value = isoFecha;
+
+            // Clientes activos y abonos
+            const clientes = (typeof dbClientesActivos !== 'undefined' && dbClientesActivos.length > 0)
+                ? dbClientesActivos
+                : (typeof listaClientesGlobal !== 'undefined' ? listaClientesGlobal : []);
+
+            const todosAbonos = obtenerTodosLosAbonosNormalizados();
+            const abonosDelDia = todosAbonos.filter(a => a.fechaIso === isoFecha);
+
+            // 1. Renderizar Abonos Recibidos
+            const listaPagos = document.getElementById('calListaPagosDelDia');
+            if (listaPagos) {
+                if (abonosDelDia.length === 0) {
+                    listaPagos.innerHTML = `
+                        <div style="font-size: 11.5px; color: #94a3b8; font-style: italic; padding: 6px 0;">
+                            No hay abonos registrados en esta fecha.
+                        </div>
+                    `;
+                } else {
+                    let htmlPagos = '<div style="display: flex; flex-direction: column; gap: 6px;">';
+                    abonosDelDia.forEach(ab => {
+                        htmlPagos += `
+                            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 6px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-size: 12.5px; font-weight: 700; color: #fff;">${ab.clienteNombre}</div>
+                                    <div style="font-size: 11px; color: #94a3b8;">${ab.chofer || 'Abono'} • ${ab.modelo || 'Equipo'}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 14px; font-weight: 800; color: #34d399;">+$${Math.round(ab.monto).toLocaleString('es-MX')}</div>
+                                    <button type="button" onclick="cargarClienteParaAbonoEnCalendario('${ab.imei}')" style="background: transparent; border: none; color: #38bdf8; font-size: 10px; cursor: pointer; text-decoration: underline; padding: 0;">Ver cliente</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    htmlPagos += '</div>';
+                    listaPagos.innerHTML = htmlPagos;
+                }
+            }
+
+            // 2. Renderizar Clientes con Día Raya (Corte semanal)
+            const parts = isoFecha.split('-');
+            const dObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            const diaSemanaNombre = DIAS_SEMANA_MAP[dObj.getDay()];
+
+            const clientesRaya = clientes.filter(c => {
+                const diaNorm = (c.diaRaya || '').toUpperCase().trim();
+                if (!diaNorm) return false;
+                const coincide = diaNorm.includes(diaSemanaNombre) ||
+                    (diaSemanaNombre === "MIERCOLES" && diaNorm.includes("MIÉRCOLES"));
+                return coincide && (parseFloat(c.saldoPendiente) > 0);
+            });
+
+            const listaCortes = document.getElementById('calListaClientesCorte');
+            if (listaCortes) {
+                if (clientesRaya.length === 0) {
+                    listaCortes.innerHTML = `
+                        <div style="font-size: 11.5px; color: #94a3b8; font-style: italic; padding: 6px 0;">
+                            Ningún cliente activo tiene corte fijado los ${diaSemanaNombre.toLowerCase()}s.
+                        </div>
+                    `;
+                } else {
+                    let htmlCortes = '<div style="display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto;">';
+                    clientesRaya.forEach(c => {
+                        const cuota = parseFloat(c.cuota) || 0;
+                        const saldo = parseFloat(c.saldoPendiente) || 0;
+                        htmlCortes += `
+                            <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 6px; padding: 7px 10px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="flex: 1; min-width: 0; padding-right: 8px;">
+                                    <div style="font-size: 12px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.cliente}</div>
+                                    <div style="font-size: 10.5px; color: #94a3b8;">Cuota: <strong style="color:#38bdf8;">$${Math.round(cuota)}</strong> | Saldo: <strong style="color:#f87171;">$${Math.round(saldo)}</strong></div>
+                                </div>
+                                <button type="button" onclick="cargarClienteParaAbonoEnCalendario('${c.imei}')" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; padding: 4px 8px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap;">
+                                    💵 Cobrar
+                                </button>
+                            </div>
+                        `;
+                    });
+                    htmlCortes += '</div>';
+                    listaCortes.innerHTML = htmlCortes;
+                }
+            }
+
+            // 3. Renderizar Promesas de Pago
+            const promesas = (typeof listaPromesasGlobal !== 'undefined' && Array.isArray(listaPromesasGlobal))
+                ? listaPromesasGlobal
+                : [];
+            const promesasDia = promesas.filter(p => {
+                let pIso = p.fechaIso || '';
+                if (!pIso && p.fecha) {
+                    const s = String(p.fecha).trim();
+                    if (s.includes('-')) pIso = s;
+                    else if (s.includes('/')) {
+                        const partsP = s.split('/');
+                        if (partsP.length === 3) pIso = `${partsP[2]}-${partsP[1].padStart(2, '0')}-${partsP[0].padStart(2, '0')}`;
+                    }
+                }
+                return pIso === isoFecha;
+            });
+
+            const listaPromesas = document.getElementById('calListaPromesasDia');
+            if (listaPromesas) {
+                if (promesasDia.length === 0) {
+                    listaPromesas.innerHTML = `
+                        <div style="font-size: 11.5px; color: #94a3b8; font-style: italic; padding: 6px 0;">
+                            Sin promesas de pago para esta fecha.
+                        </div>
+                    `;
+                } else {
+                    let htmlProm = '<div style="display: flex; flex-direction: column; gap: 6px;">';
+                    promesasDia.forEach(p => {
+                        const cl = clientes.find(c => c.imei === p.imei);
+                        const nombre = cl ? cl.cliente : (p.imei || 'Cliente');
+                        htmlProm += `
+                            <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px; padding: 7px 10px; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-size: 12px; font-weight: 700; color: #fbbf24;">${nombre}</div>
+                                    <div style="font-size: 10.5px; color: #94a3b8;">${p.notas || 'Promesa agendada'}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 12px; font-weight: 700; color: #fff;">$${p.monto || '0'}</div>
+                                    <button type="button" onclick="cargarClienteParaAbonoEnCalendario('${p.imei}')" style="background: #f59e0b; color: #000; border: none; padding: 3px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; margin-top: 2px;">Cobrar</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    htmlProm += '</div>';
+                    listaPromesas.innerHTML = htmlProm;
+                }
+            }
+        }
+
+        // Carga un cliente en el formulario de pago del calendario
+        function cargarClienteParaAbonoEnCalendario(imei) {
+            const clientes = (typeof dbClientesActivos !== 'undefined' && dbClientesActivos.length > 0)
+                ? dbClientesActivos
+                : (typeof listaClientesGlobal !== 'undefined' ? listaClientesGlobal : []);
+            const cliente = clientes.find(c => c.imei === imei);
+            if (!cliente) return;
+
+            calClienteSeleccionadoParaAbono = cliente;
+
+            const inputSearch = document.getElementById('calRegClienteSearch');
+            if (inputSearch) inputSearch.value = `${cliente.cliente} (${cliente.imei})`;
+
+            const resultados = document.getElementById('calRegClienteResultados');
+            if (resultados) resultados.style.display = 'none';
+
+            const infoBox = document.getElementById('calRegClienteInfoBox');
+            if (infoBox) {
+                infoBox.style.display = 'block';
+                document.getElementById('calRegNombreTxt').innerText = cliente.cliente;
+                document.getElementById('calRegModeloTxt').innerText = cliente.modelo || 'Equipo';
+                document.getElementById('calRegCuotaTxt').innerText = `$${Math.round(cliente.cuota || 0).toLocaleString('es-MX')}`;
+                document.getElementById('calRegSaldoTxt').innerText = `$${Math.round(cliente.saldoPendiente || 0).toLocaleString('es-MX')}`;
+            }
+
+            // Autollenar monto sugerido con la cuota regular
+            const inputMonto = document.getElementById('calRegMonto');
+            if (inputMonto && (!inputMonto.value || parseFloat(inputMonto.value) <= 0)) {
+                inputMonto.value = Math.round(cliente.cuota || 0);
+            }
+
+            // Asegurar que la fecha sea la fecha inspeccionada actual
+            const inputFecha = document.getElementById('calRegFecha');
+            if (inputFecha && calDiaSeleccionadoIso) {
+                inputFecha.value = calDiaSeleccionadoIso;
+            }
+        }
+
+        // Registra el abono directamente desde el calendario
+        async function ejecutarRegistroAbonoDesdeCalendario() {
+            if (!calClienteSeleccionadoParaAbono) {
+                toast('Por favor selecciona un cliente a cobrar.', 'warning');
+                return;
+            }
+
+            const monto = document.getElementById('calRegMonto').value;
+            const fecha = document.getElementById('calRegFecha').value;
+            const metodo = document.getElementById('calRegMetodo').value;
+            const folio = document.getElementById('calRegFolio').value.trim() || 'Abono Calendario';
+
+            if (!monto || parseFloat(monto) <= 0) {
+                toast('Por favor ingresa un monto válido mayor a 0.', 'warning');
+                return;
+            }
+            if (!fecha) {
+                toast('Por favor selecciona una fecha de cobro.', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('btnCalConfirmarPago');
+            const origTxt = btn.innerText;
+            btn.innerText = "⏳ Guardando en Sheets...";
+            btn.disabled = true;
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('action', 'registrarPago');
+                formData.append('token', CONFIG.API_TOKEN);
+                formData.append('imei', calClienteSeleccionadoParaAbono.imei);
+                formData.append('nombreCliente', calClienteSeleccionadoParaAbono.cliente);
+                formData.append('monto', monto);
+                formData.append('metodo', metodo);
+                formData.append('semana', 'Abono');
+                formData.append('folio', folio);
+                formData.append('fechaPago', fecha);
+                formData.append('notas', 'Registrado desde Calendario de Cobranzas CelYa');
+
+                const res = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData.toString(),
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                const data = await res.json();
+
+                if (data.result === 'success') {
+                    toast(`Abono de $${monto} registrado para ${calClienteSeleccionadoParaAbono.cliente}`, 'success', 'Abono Exitoso');
+
+                    // Actualizar memoria local
+                    const abonoMonto = parseFloat(monto) || 0;
+                    const partesF = fecha.split('-');
+                    const fechaFormateada = `${partesF[2]}/${partesF[1]}/${partesF[0]}`;
+
+                    calClienteSeleccionadoParaAbono.historialAbonos = calClienteSeleccionadoParaAbono.historialAbonos || [];
+                    calClienteSeleccionadoParaAbono.historialAbonos.unshift({
+                        fecha: fechaFormateada,
+                        fechaIso: fecha,
+                        monto: abonoMonto,
+                        chofer: metodo + (folio ? ` (${folio})` : '')
+                    });
+
+                    const saldoAnt = parseFloat(calClienteSeleccionadoParaAbono.saldoPendiente) || 0;
+                    calClienteSeleccionadoParaAbono.saldoPendiente = Math.max(0, Math.round(saldoAnt - abonoMonto));
+
+                    // Limpiar campos del form de calendario
+                    document.getElementById('calRegMonto').value = '';
+                    document.getElementById('calRegFolio').value = '';
+
+                    // Si coincide con el cliente actualmente cargado en el módulo de cobranza dinámico
+                    if (clienteSeleccionadoActual && clienteSeleccionadoActual.imei === calClienteSeleccionadoParaAbono.imei) {
+                        clienteSeleccionadoActual.saldoPendiente = calClienteSeleccionadoParaAbono.saldoPendiente;
+                        const inputSaldo = document.getElementById('infoSaldoPendiente');
+                        if (inputSaldo) inputSaldo.value = `$${Math.round(clienteSeleccionadoActual.saldoPendiente).toLocaleString('es-MX')}`;
+                    }
+
+                    // Re-renderizar calendario e inspector
+                    renderizarCalendarioCobranza();
+                    inspeccionarDiaCalendario(fecha);
+
+                    // Re-renderizar mini-calendario si está en pantalla
+                    if (typeof renderizarMiniCalendarioCliente === 'function') {
+                        renderizarMiniCalendarioCliente();
+                    }
+
+                    btn.innerText = origTxt;
+                    btn.disabled = false;
+                } else {
+                    toast('Error: ' + (data.message || 'No se pudo guardar el abono'), 'error');
+                    btn.innerText = origTxt;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error(err);
+                toast('Error de red al guardar abono desde calendario', 'error');
+                btn.innerText = origTxt;
+                btn.disabled = false;
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════
+           🗓️ MINI-CALENDARIO INTERACTIVO EMBEBIDO EN MÓDULO DE COBRANZA
+           ═══════════════════════════════════════════════════════════════════ */
+        function toggleMiniCalendarioCliente() {
+            const container = document.getElementById('miniCalendarioClienteContainer');
+            if (!container) return;
+            const isVisible = container.style.display !== 'none';
+            container.style.display = isVisible ? 'none' : 'block';
+            if (!isVisible) {
+                renderizarMiniCalendarioCliente();
+            }
+        }
+
+        function navegarMiniCalendario(delta) {
+            miniCalMesActual.mes += delta;
+            if (miniCalMesActual.mes < 0) {
+                miniCalMesActual.mes = 11;
+                miniCalMesActual.anio -= 1;
+            } else if (miniCalMesActual.mes > 11) {
+                miniCalMesActual.mes = 0;
+                miniCalMesActual.anio += 1;
+            }
+            renderizarMiniCalendarioCliente();
+        }
+
+        function irHoyMiniCalendario() {
+            const hoy = new Date();
+            miniCalMesActual.anio = hoy.getFullYear();
+            miniCalMesActual.mes = hoy.getMonth();
+            setFechaAbonoRapida(0);
+        }
+
+        function alCambiarFechaAbonoManual() {
+            const val = document.getElementById('fechaAbono')?.value;
+            if (val) {
+                const parts = val.split('-');
+                if (parts.length === 3) {
+                    miniCalMesActual.anio = parseInt(parts[0], 10);
+                    miniCalMesActual.mes = parseInt(parts[1], 10) - 1;
+                }
+            }
+            renderizarMiniCalendarioCliente();
+        }
+
+        // 📅 Establecer fecha rápida en el formulario de cobro
+        function setFechaAbonoRapida(offsetDias) {
+            const input = document.getElementById('fechaAbono');
+            if (!input) return;
+            const d = new Date();
+            d.setDate(d.getDate() + offsetDias);
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            input.value = `${yyyy}-${mm}-${dd}`;
+
+            miniCalMesActual.anio = d.getFullYear();
+            miniCalMesActual.mes = d.getMonth();
+
+            renderizarMiniCalendarioCliente();
+        }
+
+        function renderizarMiniCalendarioCliente() {
+            const grid = document.getElementById('miniCalGrid');
+            const titulo = document.getElementById('miniCalTituloMes');
+            if (!grid) return;
+
+            const anio = miniCalMesActual.anio;
+            const mes = miniCalMesActual.mes;
+            if (titulo) titulo.innerText = `${MESES_ES[mes]} ${anio}`;
+
+            grid.innerHTML = '';
+
+            // Encabezados
+            const diasHeaders = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+            diasHeaders.forEach(dh => {
+                const h = document.createElement('div');
+                h.style.fontSize = '10px';
+                h.style.fontWeight = 'bold';
+                h.style.color = '#94a3b8';
+                h.style.padding = '3px 0';
+                h.innerText = dh;
+                grid.appendChild(h);
+            });
+
+            const hoy = new Date();
+            const hoyIso = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+            const fechaAbonoSeleccionada = document.getElementById('fechaAbono')?.value || '';
+
+            const primerDia = new Date(anio, mes, 1);
+            const totalDias = new Date(anio, mes + 1, 0).getDate();
+            let primerDiaSemana = primerDia.getDay();
+            let offsetDias = (primerDiaSemana === 0) ? 6 : primerDiaSemana - 1;
+
+            // Fechas en que este cliente pagó
+            const fechasPagadas = new Set();
+            if (clienteSeleccionadoActual && clienteSeleccionadoActual.historialAbonos) {
+                clienteSeleccionadoActual.historialAbonos.forEach(ab => {
+                    let iso = ab.fechaIso;
+                    if (!iso && ab.fecha) {
+                        const s = String(ab.fecha).trim();
+                        if (s.includes('-')) {
+                            const p = s.split('-');
+                            if (p.length === 3) iso = `${p[0]}-${p[1].padStart(2, '0')}-${p[2].padStart(2, '0')}`;
+                        } else if (s.includes('/')) {
+                            const p = s.split('/');
+                            if (p.length === 3) iso = `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
+                        }
+                    }
+                    if (iso) fechasPagadas.add(iso);
+                });
+            }
+
+            // Día raya del cliente
+            let diaRayaNombre = '';
+            if (clienteSeleccionadoActual && clienteSeleccionadoActual.diaRaya) {
+                diaRayaNombre = String(clienteSeleccionadoActual.diaRaya).toUpperCase();
+            }
+
+            // Días previos
+            for (let i = 0; i < offsetDias; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'mini-cal-btn other-month';
+                empty.innerText = '';
+                grid.appendChild(empty);
+            }
+
+            // Días del mes
+            for (let d = 1; d <= totalDias; d++) {
+                const iso = `${anio}-${String(mes + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'mini-cal-btn';
+                btn.innerText = d;
+
+                const fechaObj = new Date(anio, mes, d);
+                const diaSem = DIAS_SEMANA_MAP[fechaObj.getDay()];
+
+                if (iso === hoyIso) btn.classList.add('is-today');
+                if (iso === fechaAbonoSeleccionada) btn.classList.add('selected');
+                if (fechasPagadas.has(iso)) btn.classList.add('has-pago');
+                if (diaRayaNombre && (diaRayaNombre.includes(diaSem) || (diaSem === 'MIERCOLES' && diaRayaNombre.includes('MIÉRCOLES')))) {
+                    btn.classList.add('is-raya');
+                }
+
+                btn.addEventListener('click', () => {
+                    const input = document.getElementById('fechaAbono');
+                    if (input) input.value = iso;
+                    renderizarMiniCalendarioCliente();
+                });
+
+                grid.appendChild(btn);
+            }
+        }
+
         // --- Alertas de Stock ---
         function inicializarAlertasStock() {
             const btn = document.getElementById('btnOpenStockAlerts');
